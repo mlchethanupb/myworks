@@ -7,17 +7,22 @@ End: 16:38
 
 Check [X] people who were in the meeting.
 
-- [ ] Abdul Ahad
-- [ ] Anush
-- [ ] Arjun
-- [ ] Avi
-- [ ] Bhuvan
-- [ ] Deepak Bhardwaj
-- [ ] Harshita
-- [ ] Haydar
-- [ ] Ishwariya
-- [ ] Md Arif
-- [ ] Suganthi
+- [ ] Lameya
+- [ ] Jagan Mohini
+- [ ] Prajwal
+- [ ] Tejas Ravindra
+- [ ] Asmaa
+- [ ] Indranil
+- [ ] Priyanka
+- [ ] Pavitra
+- [ ] Al Rahat
+- [ ] Nayela Tasnim
+- [ ] Anirudh
+- [ ] Chethan Lokesh
+- [ ] Abdul
+- [ ] Nils Luca
+- [ ] Kunal
+- [ ] Stefan
 
 ## ToC
 
