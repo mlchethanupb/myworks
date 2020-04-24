@@ -43,7 +43,7 @@ Updating Time Sheet (Google spreadsheet)
 - Participants can add figures or diagrams but please mention its source.
 - Provide the main idea behind and skip some content which are not that useful.
 - Reading the outline the advisors should be able to get the whole idea about your paper.
-- 4 - 5 pages maximum.
+- 4 pages strictly.
 - Use the latex formate given or participants can use the IEEE standard paper.
 
 ## Action points
