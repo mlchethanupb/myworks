@@ -7,6 +7,7 @@
 
 Communication:
 
+* BBB Room for weekly advisor meeting: https://bbb1.uni-paderborn.de/b/ste-3h3-ju3
 * Gitter chat room: https://gitter.im/pg-aicon-chat/community
 * Mailing list: pg-aicon@lists.uni-paderborn.de
 
