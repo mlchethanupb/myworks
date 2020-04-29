@@ -23,6 +23,8 @@ Check [X] people who were in the meeting.
 - [X] Nils Luca
 - [X] Kunal
 - [X] Stefan
+- [X] Asmaa
+- [X] Shraddha Pawar
 
 ## ToC
 
