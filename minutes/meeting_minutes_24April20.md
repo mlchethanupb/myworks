@@ -8,7 +8,7 @@ End: 13:42
 Check [X] people who were in the meeting.
 
 - [X] Lameya
-- [X] Jagan Mohini
+- [X] Aluri Jagan Mohini
 - [ ] Prajwal
 - [X] Tejas Ravindra
 - [X] Asmaa
