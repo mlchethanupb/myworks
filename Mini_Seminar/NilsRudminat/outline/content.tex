@@ -1,0 +1,67 @@
+\begin{abstract}
+Abstract.
+
+(The report has the same structure as the original paper~\cite {Gu}. 
+I will write more or less every section from the original paper in my own words).
+\end{abstract}
+
+\section{Introduction}%with abstract 1 page
+\label{sec:introduction}
+(with abstract 1 page)
+\begin{enumerate}
+\item Introductory example: customized hardware for network functions (firewalls etc.) are not flexible, not scalable and costly -> virtualize them and i.e. rent computing resources.  \\
+Lots of new problems: On which server should the VNF be. How mush VNF should be installed.
+In the case of service function chains: To which of multiple VNFs should you route the a upcoming flow.
+%Consider the following scenario... consider you provide network services
+
+\item Explaining the problem that has been solved in my reference paper~\cite{Gu}: \\
+What is orchestration and flow scheduling.\\
+Why is it novel: Heuristic solutions have simplified models
+ (e.g. they take the end-to-end delay not into consideration), rely on knowledge and are not online.\\
+How do they approach it: DRL (problem: large running time, if there is a huge amount of actions) -> DRL with guidance.\\
+\end{enumerate}
+
+\section{Model} %1 page
+\label{sec:model}
+(1 page)
+I will NOT write a formal description of the model here (or at least I try it). 
+Short overview about the costs that can occur. 
+I will try to make some good pictures to explain the costs on example graphs.
+
+\section{Model-Assisted DRL Framework}%1 page
+\label{sec:drl}
+(1 page)
+Also no formal description here. just a explanation/summary.
+\begin{enumerate}
+\item  Explain the state, action and reward of the DRL.
+\item Not making random actions to learn, guide the DRL.
+\item Describe their 6 steps of training.
+\item Explain the action generation algorithm shortly (just the idea) and how to schedule the algorithms.
+\end{enumerate}
+
+\section{Evaluation}% 1/2 page
+\label{sec:evaluation}
+(1/2 page)
+I think I will not use pictures here.
+\begin{enumerate}
+\item  The setup (but without exact values for the variables -  only what they have done roughly).
+\item How good the algorithm performs compared to other algorithms.
+\item How to tune the variables to get the best result.
+\end{enumerate}
+
+
+
+\section{Discussion} %with references 1/2 page, maybe less
+\label{sec:relwork}
+(with references 1/2 page, maybe less)
+\begin {enumerate}
+\item This method can be applied to other DRL algorithms.
+\end{enumerate}
+
+
+
+
+%\input{petpeeves}
+
+
+ 
