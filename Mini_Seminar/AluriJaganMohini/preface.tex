@@ -1,0 +1,89 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% No changes in preface: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% if you want additional space in your document, e.g., to allow handwritten markup: 
+% (but then, also switch to a single-column format in the documentclass command) 
+% \usepackage[onehalfspacing]{setspace}
+% \usepackage[doublespacing]{setspace}
+
+\usepackage[english]{babel}
+
+% for nice typesetting: 
+\usepackage[activate={true,nocompatibility},final,
+                       tracking=true,kerning=true,spacing=true,
+                       factor=1100,stretch=10,shrink=10]{microtype}
+
+
+% for better handling of references, use biblatex with biber backend: 
+\usepackage[sorting=ydnt,maxbibnames=99,firstinits=true,doi=false,isbn=false,url=true,defernumbers=true]{biblatex}
+\addbibresource{bib.bib}
+
+% properly dealing with URLs: 
+\usepackage{url}
+
+% VASTLY better typesetting for tables: 
+\usepackage{booktabs}
+
+% if you want to put notes in your document: 
+\usepackage[final]{todonotes}
+
+
+% for decent math typesetting: 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm} 
+
+
+% to use space on page more aggressively: 
+% \usepackage[margins=1cm]{geometry}
+\usepackage{geometry}
+
+
+% pick a nicer font, also deals with math fonts: 
+\usepackage[upint]{stix}
+
+% deadling with graphics
+\usepackage{graphicx}
+% figures should go into subdirectory figures 
+\graphicspath{{figures/}}
+
+% Page Headers:
+\usepackage{fancyhdr}
+% \pagestyle{fancy}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[LE]{ \slshape \studentname}
+\fancyhead[LO]{}
+\fancyhead[RE]{}
+\fancyhead[RO]{ \slshape \seminartitle}
+\fancyfoot[LO]{Computer Networks at Paderborn University Seminar series}
+\fancyfoot[RE]{Computer Networks at Paderborn University Seminar series}
+\fancyfoot[LE]{\thepage}
+\fancyfoot[RO]{\thepage}
+\fancyfoot[C]{}
+
+% other  packages that are often useful, but commented out here. In general, 
+% texdoc PACKAGENAME 
+% on the command line is your friend. 
+
+% better alignment, width of columns: 
+% \usepackage{tabularx} 
+
+% if you need to move, stretch, rotate, ... anything:  
+% \usepackage{adjustbox} 
+
+% even more column formats: 
+% \usepackage{array} 
+
+% for nice code listings; 
+% \usepackage{listings}
+% alternative, if you prefer real code; very powerful
+% \usepackage{minted}
+
+
+% make sure cross-references show up in PDF file: 
+\usepackage{hyperref}
+
