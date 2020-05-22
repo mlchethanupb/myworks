@@ -1,4 +1,4 @@
-# Minutes from 2019-04-01	
+# Minutes from 2019-05-15	
 
 Start: 13:00	
 End: 13:45	
@@ -31,7 +31,7 @@ Weekly Meeting addressing questions related to intermediate draft submission. Th
 
 ### Development	
 
-- Form a group to solve problems mentioned in the git repository (pracical implemention in groups).	
+- Form a group to solve problems mentioned in the git repository (practical implemention in groups).	
 - Select a topic which your group will be working on.	
 - Each group should select a different topic, and should implement the problem solution on at least one enviornment.	
 - Intermediate report limit is 4 pages including references.	
