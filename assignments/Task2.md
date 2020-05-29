@@ -4,7 +4,7 @@
 
 **Assignment**: We have a network that consists of nodes, which are connected with links. You are asked to do the following:
 
- - Create an RL environment for routing in wired networks with the follwoing proprties:
+ - Create an RL environment for routing in wired networks with the following properties:
   	* The network has at least 5 nodes
   	* source and destination can be any of these nodes
  - At the end you should have four different enviroments with
