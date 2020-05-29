@@ -14,6 +14,8 @@
 
  - Use a learning algorithm to find a routing solution
 
+ - As a bonus task, you may compare your trained algorithm for network routing with an existing routing heuristic. 
+
 **Submission**: At the end you will show a Demo of your RL agent (after training/learning). Codes should be submitted on Git.
 
 **Deadline**: 
