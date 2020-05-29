@@ -7,6 +7,7 @@
  - Create an RL environment for routing in wired networks with the following properties:
   	* The network has at least 5 nodes
   	* source and destination can be any of these nodes
+	* packets have a fixed size and constant arrival rate
  - At the end you should have four different enviroments with
 	* two different network topologies (of your own)
  	* metric is hop count, where all links have the same bandwidth
