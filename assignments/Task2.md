@@ -10,7 +10,7 @@
  - At the end you should have four different enviroments with
 	* two different network topologies (of your own)
  	* metric is hop count, where all links have the same bandwidth
-	* metric network delay, where links have different bandwidth
+	* metric is network delay, where links have different bandwidth
 
  - Use a learning algorithm to find a routing solution
 
