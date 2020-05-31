@@ -1,0 +1,9 @@
+In git bash(Command line):
+-"git init" command(First cmd which needs to be called in git bash to initialise git operations).
+-"git remote add origin Repopath.git" command(So next time when u do a push or pull operation u can just use the reference name origin instead of full path.)
+-Always pull the latest code from repo before making changes using "git pull origin master".If there are other brances like xyz then use "git pull origin xyz".
+-our local repository will always be master by default. If we want to change our local branch(not remote) then we
+ can do that using "git checkout -b branchname" command.
+-After making changes we can add all your changes for commiting using "git add ." command.
+-We can type a commit message using (git commit -m "Commit message") command.
+-Finally for pushing we can use "git push origin master" command.
