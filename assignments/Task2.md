@@ -13,7 +13,7 @@
  	* metric is hop count, where all links have the same bandwidth
 	* metric is network delay, where links have different bandwidth
 
- - Use a central learning algorithm (with global knoweledge) to find a routing solution. Using a multi-agent solution is a bonus
+ - Use a central learning algorithm (a central agent with global knoweledge) to find a routing solution. Using a multi-agent solution is a bonus
 
  - As a bonus task, you may compare your trained algorithm for network routing with an existing routing heuristic. 
 
