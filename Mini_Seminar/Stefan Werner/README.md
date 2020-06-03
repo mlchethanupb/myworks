@@ -1,2 +1,2 @@
-Name - Stefan Werner
-Student ID - 7038334
+- Name: Stefan Werner
+- Student ID: 7038334
