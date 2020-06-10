@@ -1,5 +1,6 @@
 import argparse
 from flowsim.environment.network import Network
+from flowsim.environment.hopcount_env import HopCountEnv
 
 
 if __name__ == '__main__':
@@ -7,22 +8,27 @@ if __name__ == '__main__':
     #parser.add_argument('')
 
     config = {}
-    config['arrival_time'] = 2
-    config['episode_length'] = 15
-    config['packet_size'] = 4.0
+    config['ARRIVAL_TIME'] = 5
+    config['MAX_ARRIVAL_STEPS'] = 15
+    config['PACKET_SIZE'] = 1.0
 
-    # execute flowsim experiment
-    network = Network(config)
-    # TODO: create agent
-    # TODO: training loop
-    # TODO: write results to file
 
-    network.reset()
-    network.step([2, 0, 0, 0, 0])
-    network.step([3, 0, 0, 0, 0])
-    network.step([3, 3, 0, 0, 0])
-    network.step([2, 0, 5, 0, 0])
-    network.step([4, 0, 5, 0, 0])
-    network.step([3, 3, 5, 0, 0])
+    hopcount = HopCountEnv(config)
+    obs = hopcount.reset()
+    hopcount.render()
+    print(obs)
+    print()
+    obs,rew,_,_ = hopcount.step([1, 0, 0, 0])
+    hopcount.render()
+    print(obs)
+    print()
+    obs,rew,_,_ = hopcount.step([0, 0, 0, 0])
+    hopcount.render()
+    print(obs)
+    print()
+    obs,rew,_,_ = hopcount.step([2, 0, 0, 0])
+    hopcount.render()
+    print(obs)
+    print()
 
     
