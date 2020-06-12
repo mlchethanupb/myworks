@@ -5,20 +5,19 @@ import gym
 import networkx as nx
 import numpy as np
 from contextlib import closing
-from gym.spaces import Tuple, Discrete, Box
+from gym.spaces import Tuple, Discrete, Box, MultiDiscrete
 from io import StringIO
 from simpy import Resource
 from ..environment.packet import Packet
 
 """
-
-Network of nodes that serves as the agent's environment.
-
+Network of nodes that simulate packet forwarding from some source node to a sink. The environment implements
+the OpenAI Gym interface and is usable as a RL testbed.
 """
 
 
 class Network(gym.Env):
-    def __init__(self, config: dict, DG: nx.DiGraph = None):
+    def __init__(self, config: dict, DG='default'):
         super(Network, self).__init__()
 
         # define experiment's parameters
@@ -27,18 +26,26 @@ class Network(gym.Env):
         self.packet_size = config['PACKET_SIZE']
 
         # define environment's parameters
-        self.DG = nx.read_gpickle(r'./flowsim/environment/default.gpickle') if DG is None else DG
-        self.source = next(node_id for node_id, data in self.DG.nodes(data=True) if data['source'])
-        self.sink = next(node_id for node_id, data in self.DG.nodes(data=True) if data['sink'])
+        print("DG: ", DG)
+        self.DG = nx.read_gpickle(
+            r'./flowsim/environment/default.gpickle') if DG == 'default' else nx.read_gpickle(DG)
+        self.check_graph()
+        self.source = next(node_id for node_id, data in self.DG.nodes(
+            data=True) if data['source'])
+        self.sink = next(node_id for node_id,
+                         data in self.DG.nodes(data=True) if data['sink'])
         self.num_nodes = len(self.DG.nodes())
         self.num_links = len(self.DG.edges())
-        self.max_bandwidth = max(data['bandwidth'] for i, j, data in self.DG.edges(data=True))
+        self.max_bandwidth = max(data['bandwidth']
+                                 for i, j, data in self.DG.edges(data=True))
         self.max_packet_inputs = self.max_arrival_steps / self.arrival_time
 
         # define gym environment's parameters
-        self.action_space = Tuple(Discrete(self.DG.out_degree(node))
-                                  for node in range(1, self.num_nodes + 1) if node != self.sink)
-        self.observation_space = Box(low=0.0, high=1.0, shape=(self.num_nodes + self.num_links,), dtype=np.float16)
+        # forbit 'do nothing' action & do not define an action for the sink (last node by assumption)
+        self.action_space = MultiDiscrete(
+            [self.DG.out_degree(node) for node in range(1, self.num_nodes)])
+        self.observation_space = Box(low=0.0, high=1.0, shape=(
+            self.num_nodes + self.num_links,), dtype=np.float16)
 
         # FOR DEVELOPMENT:
         logging.basicConfig(
@@ -50,19 +57,23 @@ class Network(gym.Env):
         )
 
     def step(self, actions):
+        """ Process forwarding actions for each node until an event is invoked. Here, events correspond to 
+        an incoming packet at some node. """
         # process actions in the networking environment
         actions = self.map_actions(actions)
         for node, action in enumerate(actions):
-            self.env.process(self.__transmit(node + 1, action)) 
-        
+            self.env.process(self.__transmit(node + 1, action))
+
         # run environment until the next packet arrives at some node
         self.env.run(self.timestep_event)
         self.timestep_event = self.env.event()
 
-        # TODO: compute observations and collect rewards
+        # compute observations, collect rewards and decide whether the episode should be terminated
         return self.__compute_observation(), self.__compute_reward(), self.__compute_isdone(), self.__compute_info()
 
     def reset(self):
+        """ Reset the environment, i.e. reset the network along with the input process and execute
+        the environment until the first packet was generated at the source node. """
         self.env = simpy.Environment()
         self.links = {(i, j): simpy.Container(
             self.env, data['bandwidth'], init=data['bandwidth']) for i, j, data in self.DG.edges(data=True)}
@@ -81,13 +92,15 @@ class Network(gym.Env):
         return self.__compute_observation()
 
     def __compute_observation(self):
+        """ Compute the environment's state representation at the current timestep. """
         # represent states by the number of queued packages (fixed size)
         # normalize by the total number of packages (for NNs)
-        node_repr = [len(self.queues[i]) / self.max_packet_inputs for i in range(1, self.num_nodes)]
-        
+        node_repr = [len(
+            self.queues[i]) / self.max_packet_inputs for i in range(1, self.num_nodes + 1)]
+
         # represent links by their current load
-        link_repr = [l.level / self.max_bandwidth for _, l in self.links.items()]
-        
+        link_repr = [l.level / self.max_bandwidth for _,
+                     l in self.links.items()]
         node_repr.extend(link_repr)
         return np.asarray(node_repr, dtype=np.float16)
 
@@ -95,13 +108,15 @@ class Network(gym.Env):
         raise NotImplementedError()
 
     def __compute_isdone(self):
-        # check if all packets are at source
-        return len(self.active) <= 0
+        """ Terminate the episode if all packets are processed and the arrival process 
+        will generate no more packets at the source node. """
+        return len(self.active) <= 0 and self.arrival_steps >= self.max_arrival_steps
 
     def __compute_info(self):
-        return None
+        return {}
 
     def __arrival_process(self):
+        """ Generate incoming packets at the source node while adhering to the arrival process's configuration. """
         while True:
             # terminate arrival process if self.max_arrival_steps packets were generated at source
             if self.arrival_steps < self.max_arrival_steps:
@@ -114,13 +129,13 @@ class Network(gym.Env):
             packet = Packet(self.env.now)
             self.queues[self.source].insert(0, packet)
             self.active.append(packet)
-            
+
             if not self.timestep_event.triggered:
                 self.timestep_event.succeed()
             yield self.env.timeout(self.arrival_time)
 
     def __transmit(self, i, j):
-
+        """ Transmit the first packet from node i's queue to node j via the link (i,j). """
         # do nothing if the selected link does not exist or the queue is empty
         if (i, j) not in self.links or not self.queues[i]:
             return
@@ -163,7 +178,8 @@ class Network(gym.Env):
         env_repr = [[float(sum(self.packet_size for p in self.queues[i])) if i == j else (self.links[(i, j)].level if (i, j) in self.links else '---')
                      for j in range(1, self.num_nodes + 1)] for i in range(1, self.num_nodes + 1)]
 
-        outfile.write('\t' + '\t'.join(list(map(lambda x: str(x) + ':', range(1, self.num_nodes + 1)))) + '\n')
+        outfile.write('\t' + '\t'.join(list(map(lambda x: str(x) +
+                                                ':', range(1, self.num_nodes + 1)))) + '\n')
         for num, row in enumerate(env_repr):
             outfile.write(str(num + 1) + ': \t')
             outfile.write('\t'.join(list(map(lambda x: str(x), row))) + '\n')
@@ -172,12 +188,14 @@ class Network(gym.Env):
         closing(outfile)
 
     def map_actions(self, actions):
+        """ Map actions from the agent's input format to node ids used for the networking environment. """
         # forbit action 'do nothing', each action forwards a packet to some node (except if the link is fully used)
-        actions = list(map(lambda n, a: list(self.DG.successors(n+1))[a], range(len(actions)), actions))
+        actions = list(map(lambda n, a: list(
+            self.DG.successors(n+1))[a], range(len(actions)), actions))
         return actions
 
-    def check_graph(self, DG):
-        # TODO: check that nodes start with IDs > 0 !
-        # TODO: sink is first node !
-        # TODO: sink is last node !
-        pass
+    def check_graph(self):
+        """ Check if the provided graph adheres to the environment's assumptions. """
+        assert(self.DG.nodes(data=True)[1]['source'])
+        num_nodes = len(self.DG.nodes)
+        assert(self.DG.nodes(data=True)[num_nodes]['sink'])
