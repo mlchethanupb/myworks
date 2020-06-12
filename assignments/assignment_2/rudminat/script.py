@@ -2,6 +2,7 @@ import argparse
 from networkx import nx
 import gym
 import numpy as np
+from stable_baselines import PPO2
 from stable_baselines.deepq.policies import MlpPolicy
 from stable_baselines import A2C
 from stable_baselines.common.env_checker import check_env
@@ -57,7 +58,7 @@ class Network(gym.Env):
         self.sending = [0 for _ in range(len(self.graph.nodes()))]
 
         #handle packets that were routet successfully to the sink
-        reward += self.packet_count_per_node[self.sink]*len(self.graph.nodes())
+        # reward += self.packet_count_per_node[self.sink]*len(self.graph.nodes())
         self.packet_count_per_node[self.sink]=0
 
         self.current_timestep+=1
@@ -100,8 +101,11 @@ class Network(gym.Env):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='FlowSim experiment specification.')
-    #parser.add_argument('')
-
+    parser.add_argument('--modelstr', default='netw')
+    parser.add_argument('--load', default=False, action="store_true")
+    args = parser.parse_args()
+    print(args.modelstr)
+    print(args.load)
     config = {}
     config['maxsteps'] = 200000
     config['arrival_time'] = 2
@@ -114,31 +118,32 @@ if __name__ == '__main__':
     G.add_node(0, sink=False, source=True)
     G.add_node(4, sink=True, source=False)
     G.add_edges_from([(0,1),(1,2),(1,3),(2,4)])
-    # execute flowsim experiment
-    network = Network(config,graph=G)
 
-    print(network.reset())
-    print(network.step([1, 2, 4, 0, 0]))
-    print(network.step([1, 2, 4, 0, 0]))
-    print(network.step([1, 2, 4, 0, 0]))
-    print(network.step([1, 2, 4, 0, 0]))
-    print(network.step([1, 2, 4, 0, 0]))
-    network.step([3, 3, 5, 0, 0])
+    # Example of stepts and actions:
+    #network = Network(config,graph=G)
+
+    #print(network.reset())
+    #print(network.step([1, 2, 4, 0, 0]))
+    #print(network.step([1, 2, 4, 0, 0]))
+    #print(network.step([1, 2, 4, 0, 0]))
+    #print(network.step([1, 2, 4, 0, 0]))
+    #print(network.step([1, 2, 4, 0, 0]))
+    #network.step([3, 3, 5, 0, 0])
+
 
     env = Network(config,graph=G)
     print(check_env(env))
 
-    model = A2C("MlpPolicy", env, verbose=1)
-    model.learn(total_timesteps=25000)
-    print('TESTTEST')
-    #model.save("netw")
+    if args.load is False:
+        model = PPO2("MlpPolicy", env, verbose=1, tensorboard_log='./logs/{}_tensorboard/'.format(args.modelstr))
+        model.learn(total_timesteps=25000)
+        model.save(args.modelstr)
 
-    #del model # remove to demonstrate saving and loading
-
-    #model = DQN.load("netw")
+    else:
+        model = PPO2.load(args.modelstr)
 
     obs = env.reset()
-    #print('Fist Observation = '+obs)
+    print(obs)
     for i in range(20):
         action, _states = model.predict(obs, deterministic=True)
         obs, rewards, dones, info = env.step(action)
