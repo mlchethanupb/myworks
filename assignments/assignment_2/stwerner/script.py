@@ -18,7 +18,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_arrival', type=int, nargs='?', const=1, default=20, help='Maximum timestep considered to generate packets')
     parser.add_argument('--packet_size', type=float, nargs='?', const=1, default=2.0, help='(Constant) size of generated packages')
     parser.add_argument('--model', type=str, nargs='?', const=1, default='A2C', help='Whether to train A2C or use hotpotato routing')
-    parser.add_argument('--logs', type=str,  nargs='?', const=1, default=None, help='Whether to train A2C or use hotpotato routing')
+    parser.add_argument('--logs', type=str,  nargs='?', const=1, default=None, help='Path of tensorboard logs')
     args = parser.parse_args()
 
 
@@ -35,12 +35,11 @@ if __name__ == '__main__':
     check_env(env)
     
     if args.model == 'A2C':
-        tensorboard_logpath = args.logs
-        model = A2C("MlpPolicy", env, verbose=1, tensorboard_log=tensorboard_logpath)
+        model = A2C("MlpPolicy", env, verbose=1, tensorboard_log=args.logs)
         model.learn(total_timesteps=total_train_timesteps)
     
     elif args.model == 'PPO1':
-        model = PPO1("MlpPolicy", env, verbose=1, tensorboard_log=tensorboard_logpath)
+        model = PPO1("MlpPolicy", env, verbose=1, tensorboard_log=args.logs)
         model.learn(total_timesteps=total_train_timesteps)
     
     elif args.model == 'hot-potato':
