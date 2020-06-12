@@ -1,7 +1,7 @@
 Team Members:  
 Asmaa Elhadad  
 Pavitra Gudimani  
-Lameya Afoze
+Lameya Afroze
 
 What we have done so far:  
 1.Randomly generated source and destination.  
