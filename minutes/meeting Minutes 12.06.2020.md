@@ -7,22 +7,22 @@ End: 14.00
 
 Check [X] people who were in the meeting.
 
-- [X ] Lameya
-- [X ] Jagan Mohini
-- [X ] Tejas Ravindra
+- [X] Lameya
+- [X] Jagan Mohini
+- [X] Tejas Ravindra
 - [X] Asmaa
-- [X ] Indranil
-- [X ] Priyanka
-- [X ] Pavitra
-- [X ] Al Rahat
-- [X ] Nayela Tasnim
-- [X ] Anirudh
-- [X ] Chethan Lokesh
-- [X ] Abdul
-- [X ] Nils Luca
-- [X ] Kunal
+- [X] Indranil
+- [X] Priyanka
+- [X] Pavitra
+- [X] Al Rahat
+- [X] Nayela Tasnim
+- [X] Anirudh
+- [X] Chethan Lokesh
+- [X] Abdul
+- [X] Nils Luca
+- [X] Kunal
 - [X] Stefan
-- [X ] Shraddha
+- [X] Shraddha
 
 
 ## ToC
