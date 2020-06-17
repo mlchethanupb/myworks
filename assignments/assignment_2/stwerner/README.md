@@ -9,12 +9,13 @@ python script.py --setting delay --model PPO1
 ## Results
 The network's topology is given by the following graph, where the task is to forward packets that are generated at the source (node 1) to the sink (node 7).
 
-![Network's topology](figures/graph.svg)
+<img src="figures/graph.svg" alt="drawing" width="300"/>
 
-Here, we show the results for PPO1 for the hopcount environment. Performance is recorded over the training period for 50,000 timesteps with tensorboard.
+Here, we show the results for the PPO1 and A2C agents in comparison to the hot-potato and shortest-path routing baselines for the network delay environment. Performance is recorded over the training period for 50,000 timesteps with tensorboard. The PPO1 agent (orange) clearly outperforms the competing approaches including hot-potato (light blue) and shortest-path (blue) routing. The A2C agent (red) fails to converge successfully, but nevertheless improves upon the hot-potato baseline. 
 
-![PPO1 optimizing wrt. hop counts](figures/PPO1_hopcount.svg)
+<img src="figures/delay.PNG" alt="drawing" width="300"/>
 
-Here, we show the results for PPO1 for the network delay environment. Performance is recorded over the training period for 50,000 timesteps with tensorboard.
+Here, we show the results for the PPO1 and A2C agents in comparison to the hot-potato and shortest-path routing baselines for the hopcount environment. Performance is recorded over the training period for 50,000 timesteps with tensorboard. The shortest-path baseline (blue) denotes the optimal solution. While PPO1 (red) quickly matches former optimal approach, A2C (light blue) requires more iterations to converge. Hot-potato routing (orange), in comparison, performs worse than all former routing approaches. 
 
-![PPO1 optimizing wrt. network delay](figures/PPO1_delay.svg)
+<img src="figures/hopcount.PNG" alt="drawing" width="300"/>
+
