@@ -26,7 +26,6 @@ class Network(gym.Env):
         self.packet_size = config['PACKET_SIZE']
 
         # define environment's parameters
-        print("DG: ", DG)
         self.DG = nx.read_gpickle(
             r'./flowsim/environment/default.gpickle') if DG == 'default' else nx.read_gpickle(DG)
         self.check_graph()
@@ -190,8 +189,13 @@ class Network(gym.Env):
     def map_actions(self, actions):
         """ Map actions from the agent's input format to node ids used for the networking environment. """
         # forbit action 'do nothing', each action forwards a packet to some node (except if the link is fully used)
-        actions = list(map(lambda n, a: list(
-            self.DG.successors(n+1))[a], range(len(actions)), actions))
+        actions = list(map(lambda n, a: sorted(list(
+            self.DG.successors(n+1)))[a], range(len(actions)), actions))
+        return actions
+
+    def inv_map_actions(self, actions):
+        """ Map actions from the network's format to their corresponding action in the action space. """
+        actions = list(map(lambda n, a: sorted(list(self.DG.successors(n+1))).index(a), range(len(actions)), actions))
         return actions
 
     def check_graph(self):
