@@ -85,7 +85,7 @@ class Routing(gym.Env):
                     new_state = self.encode(next_node, dest_node)
                     self.P[state][action].append((new_state,reward,done,1))
 
-        #print("p = ",self.P)
+        print("p = ",self.P)
 
     def encode(self, current_node, destination):
         # (8), 8
