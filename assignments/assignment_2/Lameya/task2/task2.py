@@ -1,156 +1,188 @@
-import argparse
-from random import sample
-import os
-from networkx import nx
-import gym
-import math
+import os 
+import sys
+import matplotlib.pyplot as plt
 import numpy as np
-from stable_baselines.deepq.policies import MlpPolicy
-from stable_baselines import A2C
-from stable_baselines.common.env_checker import check_env
-from gym import spaces
-
-# network_delay = {10,12,11
-class Network(gym.Env):
-
-    def __init__(self, configuration: dict, graph: nx.Graph):
-
-        super(Network, self).__init__()
-        action_space = [len(graph.nodes()) for i in range(len(graph.nodes()))]
-        observe_space = [100 for i in range(len(graph.nodes()))]
-
-        self.action_space = spaces.MultiDiscrete(action_space)
-        self.observation_space = spaces.MultiDiscrete(observe_space)
-        self.arrival_time = config['arrival_time']
-        self.maxsteps = config['maxsteps']
-        self.packet_size = config['packet_size'] 
-        self.graph = graph
-        self.current_timestep = 0
-        self.sink,self.source = None,None
-        self.packet_per_node=[0 for i in range(len(self.graph.nodes()))]
-        self.packet_pass = [0 for i in range(len(self.graph.nodes()))]
-
-        #randomly choose sink and source 
-
-        nodes = list(self.graph.nodes())
-        node1 = np.random.choice(self.graph.nodes)
-        node2= np.random.choice(self.graph.nodes)
-        self.sink=node1
-        self.source=node2
-
-        print(node1,node2,"source and sink")
 
 
-    def step(self, action):
+#read the input files
+def read_data(fl):
+    a=[]
+    arr=open(fl,"r").readlines()
+    for line in arr:
+        a.append(line.strip().split(','))
+    a=np.array(a).reshape(500,500)
+    a=np.char.replace(a,'"','')
+    a = a.astype('double')
+    return a
 
-        reward = 0
-        delay=0
-        edge_bandwidth=0
-        rew=0
-        previous_timestep=0
+#change the coordinates of (500*500) dataset 
+def modify_data(ar):
+    p=0
+    i=499
+    m=500
+    rf_d=[[0 for x in range(m)] for y in range(m)]
+    while i>=0 :
+        q=0
+        for j in range(0,500):
+            rf_d[p][q]=ar[i][j]
+            q=q+1
+        p=p+1
+        i=i-1
+    return rf_d
 
-        for i,j in enumerate(action):
+#Histogram equalization calculation
+def eqa(ar_1):
+    #ar_1 = np.log(ar_1) 
+    eqa_plt=[]
+    x1,y1 = np.unique(ar_1,return_counts=True)
+    size_ar1=len(ar_1)
+    plt_val=y1/size_ar1
+    for k in range(0,plt_val.size):
+        if(k == 0 ):
+            eqa_plt.append(plt_val[k])
+        else:
+            eqa_plt.append(plt_val[k] + eqa_plt[k - 1])
+    i=0
+    for i in range(0,len(eqa_plt)):
+        eqa_plt[i] = eqa_plt[i] * 255
+        i=i+1
+    j=0
+    for j in range(0,len(plt_val)):
+        ar_1 = np.where(ar_1 == x1[j], eqa_plt[j], ar_1)
+        j=j+1
+    
+    return ar_1
+
+#Combination of histo-equalized data to create RGB image
+def produce_rgb(arr_4,arr_3,arr_1):
+    print("color:",arr_4[0][0],arr_3[0][0])
+    rgb = []
+    for i in  range(0,500):
+        for j in range(0,500):
+            for k in range(0,3):
+                if k == 0:
+                    rgb.append((arr_4[i][j]))
+                elif k == 1:
+                    rgb.append((arr_3[i][j]))
+                elif k == 2:
+                    rgb.append((arr_1[i][j]))
+    rgb = (np.asarray(rgb))
+    rgb = rgb.reshape(500,500,3)
+    rgb =(rgb/255)
+    
+    return rgb
+
+ar=[]
+ar=read_data("i170b2h0_t0.txt")
+
+# max, min, mean and variance value of this 2D data set
+max_v=np.max(ar)
+min_v=np.min(ar)
+mean_v=np.mean(ar)
+var_v=np.var(ar)
+var_v=np.var(ar)
+print("max",max_v," min",min_v, " mean",mean_v, "var",var_v)
+
+###lt
+n=500
+rf=[[0 for x in range(n)] for y in range(n)]
+rf=modify_data(ar)
+
+    
+#Plotting profile line
+st=0
+dif_mn=max_v - min_v
+lr = [[0 for x in range(n)] for y in range(n)] 
+for i in range(0,500):
+    for j in range(0,500):
+        if(max_v==ar[i][j]):
+            #find the maximum value for profile line
+            st=i
+        #rescale the data set between 0 to 255
+        lr[i][j]=((rf[i][j]-min_v)/dif_mn)*255 
         
-            count = self.packet_per_node[i]
-            limit_val= count * self.packet_size  
+plt.title('Profile line')
+plt.yscale('log')
+plt.xlabel('X axis')
+plt.ylabel('Y axis')
+plt.plot(ar[st])
+plt.savefig('Profile.png')
+plt.show()
 
-            #check if there is an edge between two nodes & calculate reward based on bandwidth and delay
-
-            if (i,j) in self.graph.edges():
-                edge_bandwidth = self.graph[i][j]['weight']
-                if  self.packet_per_node[i] > 0:
-                    if limit_val<=edge_bandwidth:
-                        delay = delay + (1/edge_bandwidth)
-                    elif limit_val>edge_bandwidth:
-                        #previous_timestep=self.current_timestep
-                        increase_val= math.ceil(limit_val/edge_bandwidth)
-                        self.current_timestep = self.current_timestep + increase_val - 1
-                        delay = delay + (.01*limit_val)
-                        
-                    reward += count+delay 
-            
-                self.packet_pass[j] += self.packet_per_node[i]
-                self.packet_per_node[i] = 0
-
-            #setting negative reward  if edge doesn't exist
-            else:
-                reward = -99999   
-                
-        for i in range(len(self.packet_per_node)):
-            self.packet_per_node[i] += self.packet_pass[i]
-            #negative reward if observation limits is over
-            if self.packet_per_node[i] >=100:
-                self.packet_per_node[i]=100
-                reward -=99999
-
-        self.packet_pass = [0 for i in range(len(self.graph.nodes()))]
-        self.packet_per_node[self.sink]=0
-        self.current_timestep+=1
-        if(self.current_timestep % self.arrival_time==0):
-            #arrival of new packet 
-            self.packet_per_node[self.source]+=1
-
-        info=dict()
-        state = self.packet_per_node 
-        done = False
-        if self.current_timestep >= self.maxsteps: done=True
-        return np.array(state), reward, done, info
-
-   
-    def reset(self):
-
-        self.packet_per_node = [0 for i in range(len(self.graph.nodes()))]
-        self.packet_pass = [0 for i in range(len(self.graph.nodes()))]
-        self.packet_per_node[self.source]=1
-        return np.array(self.packet_per_node)
+#Histogram
+pd=np.log(ar)+1
+hist,be=np.histogram(pd,bins=100)
+bc = 0.5*(be[1:]+be[:-1])
+plt.plot(bc,hist)
+plt.title('Histogram')
+plt.yscale('log')
+plt.xscale('log')
+plt.xlabel('X axis')
+plt.ylabel('Y axis')
+plt.savefig('Histogram.png')
+plt.show()
 
 
-    def render(self, mode='human', close=False):
-        pass
+###Histogram equalization subtask e
+arr_1=read_data("i170b1h0_t0.txt")
+arr_2=read_data("i170b2h0_t0.txt")
+arr_3=read_data("i170b3h0_t0.txt")
+arr_4=read_data("i170b4h0_t0.txt")
+arr_1=modify_data(arr_1)
+arr_2=modify_data(arr_2)
+arr_3=modify_data(arr_3)
+arr_4=modify_data(arr_4)
+
+arr_1=eqa(arr_1)
+arr_2=eqa(arr_2)
+arr_3=eqa(arr_3)
+arr_4=eqa(arr_4)
 
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='FlowSim experiment specification.')
+fig, axy = plt.subplots(nrows=2, ncols=3,figsize=(80, 40))
+plt.subplots_adjust(hspace=.2)
+ax = plt.gca()
+p1=axy[0][1].imshow(arr_1 ,cmap="gray",extent=[0, 255, 0, 255])
+axy[0][1].set_title('i170b1h0_t0.txt')
+axy[0][1].set_xlabel('x axis')
+axy[0][1].set_ylabel('y axis')
+plt.colorbar(p1,ax=axy[0][1])
 
-    config = {}
-    config['maxsteps'] = 20000
-    config['arrival_time'] = 2
-    config['packet_size'] = 4.0
+p2=axy[0][2].imshow(arr_2 ,cmap="gray",extent=[0, 255, 0, 255])
+axy[0][2].set_title('i170b2h0_t0.txt')
+axy[0][2].set_xlabel('x axis')
+axy[0][2].set_ylabel('y axis')
+plt.colorbar(p2,ax=axy[0][2])
 
-    G = nx.Graph()
-    G.add_node(0, sink=False, source=True)
-    G.add_node(1, sink=False, source=False)
-    G.add_node(2, sink=False, source=False)
-    G.add_node(3, sink=False, source=False)
-    G.add_node(4, sink=True, source=False)
-    G.add_node(5, sink=False, source=False)
+p3=axy[1][1].imshow(arr_3 ,cmap="gray",extent=[0, 255, 0, 255])
+axy[1][1].set_title('i170b3h0_t0.txt',y=-0.25)
+axy[1][1].set_xlabel('x axis')
+axy[1][1].set_ylabel('y axis')
+plt.colorbar(p3,ax=axy[1][1])
 
-    #declaring bandwidth as weight
+p4=axy[1][2].imshow(arr_4 ,cmap="gray",extent=[0, 255, 0, 255])
+axy[1][2].set_title('i170b4h0_t0.txt',y=-0.25)
+axy[1][2].set_xlabel('x axis')
+axy[1][2].set_ylabel('y axis')
+plt.colorbar(p4,ax=axy[1][2])
 
-    G.add_edge(0,1, weight=10)
-    G.add_edge(0,2,weight=8)
-    G.add_edge(1,5,weight=9)
-    G.add_edge(4,5,weight=5)
-    G.add_edge(3,4,weight=6)
-    G.add_edge(2,3,weight=7)
-    G.add_edge(0,3,weight=5)
-    G.add_edge(0,5,weight=17)
-    G.add_edge(2,1,weight=20)
-    G.add_edge(2,5,weight=15)
-    G.add_edge(2,4,weight=18)
-    
-    env = Network(config,graph=G)
-    model = A2C("MlpPolicy", env, verbose=1)
-    model.learn(total_timesteps=2500)
+#rescaling image subtask d
+#plt.imshow(lr)
+p6=axy[0][0].imshow(lr,extent=[0, 255, 0, 255])
+axy[0][0].set_title('rescale Image')
+axy[0][0].set_xlabel('x axis')
+axy[0][0].set_ylabel('y axis')
+plt.colorbar(p6,ax=axy[0][0])
 
-    obs = env.reset()
-    for i in range(50):
-        action, _states = model.predict(obs, deterministic=True)
-        obs, reward, dones, info = env.step(action)
-        print("Reward : ", reward, "Observation : ",obs)
+##Generate RGB Image subtask f
 
-   
-
-  
-    
+rgb_arr=produce_rgb(arr_4/1000,arr_3/1000,arr_1/1000)
+p5=axy[1][0].imshow(rgb_arr)
+axy[1][0].set_title('RGB Image',y=-0.25)
+axy[1][0].set_xlabel('x axis')
+axy[1][0].set_ylabel('y axis')
+plt.colorbar(p5,ax=axy[1][0])
+plt.suptitle('Images for subtask d to e')
+plt.savefig('Images.png')
+plt.show()
