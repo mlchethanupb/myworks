@@ -8,6 +8,7 @@
 Communication:
 
 * BBB Room for weekly advisor meeting: https://bbb1.uni-paderborn.de/b/ste-3h3-ju3
+  - For scheduling sub-group: https://bbb.imt.uni-paderborn.de/b/asi-nrc-egt
 * Gitter chat room: https://gitter.im/pg-aicon-chat/community
 * Mailing list: pg-aicon@lists.uni-paderborn.de
 
