@@ -2,7 +2,7 @@
 
 **Advisor**: Marvin Illian
 
-**Members**:
+**Members**
 * Indranil Ghosh
 * Lameya Afroze
 * Nayela Labonno
