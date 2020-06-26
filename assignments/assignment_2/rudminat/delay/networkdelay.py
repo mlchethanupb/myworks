@@ -58,9 +58,10 @@ class Network(gym.Env):
                     self.nodeTravarsal[j]+=count
                     self.nodeTravarsal[i]-=count
                 elif limit_val> edge_bandwidth:
+                    tempNodeCount=edge_bandwidth/self.packet_size
                     reward-=self.nodeTravarsal.get(action)
-                    self.nodeTravarsal[j]+=count
-                    self.nodeTravarsal[i]-=count
+                    self.nodeTravarsal[j]+=tempNodeCount
+                    self.nodeTravarsal[i]-=tempNodeCount
                 self.action=j
                 if j==self.sink :
                     self.nodeTravarsal[j]=0
