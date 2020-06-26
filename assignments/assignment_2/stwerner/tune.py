@@ -5,15 +5,18 @@ import dill
 import networkx as nx
 from copy import deepcopy
 from ax.service.ax_client import AxClient
+import ray
 from ray import tune
-from ray.tune import track
+from ray.tune import report
 from ray.tune.suggest.ax import AxSearch
 from flowsim.environment.network import Network
 from flowsim.environment.hopcount_env import HopCountEnv
 from flowsim.environment.delay_env import NetworkDelayEnv
+from flowsim.tuning.monitor import OptimizationCallback
 from stable_baselines3 import A2C, PPO
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.callbacks import EveryNTimesteps
 
 
 if __name__ == '__main__':
@@ -25,9 +28,11 @@ if __name__ == '__main__':
     parser.add_argument('--max_arrival', type=int, nargs='?', const=1, default=30, help='Maximum timestep considered to generate packets')
     parser.add_argument('--packet_size', type=float, nargs='?', const=1, default=2.0, help='(Constant) size of generated packages')
     parser.add_argument('--agent', type=str, nargs='?', const=1, default='PPO', help='Whether to use A2C, PPO, hot potato or shortest path routing')
-    parser.add_argument('--total_train_timesteps', type=int,  nargs='?', const=1, default=250000, help='Number of training steps for the agent')
-    parser.add_argument('--eval_episodes', type=int, nargs='?', const=1, default=1000, help='Maximum number of episodes for final (deterministic) evaluation')
-    parser.add_argument('--ray_tune_samples', type=int, nargs='?', const=1, default=16, help='Number of trials for hyperparameter optimization')
+    parser.add_argument('--total_train_timesteps', type=int,  nargs='?', const=1, default=100000, help='Number of training steps for the agent')
+    parser.add_argument('--report_interval', type=int, nargs='?', const=1, default=1000, help='Interval between reportings from callback (in timesteps)')
+    parser.add_argument('--ray_eval_episodes', type=int, nargs='?', const=1, default=5, help='Maximum number of episodes for final (deterministic) evaluation')
+    parser.add_argument('--ray_tune_samples', type=int, nargs='?', const=1, default=48, help='Number of trials for hyperparameter optimization')
+    parser.add_argument('--ray_cpus', type=int, nargs='?', const=1, default=12, help='Number of cpus ray tune will use for the optimization')
     parser.add_argument('--search_space', type=str, nargs='?', const=1, default=r'./search_spaces/ppo.json', help='Path to search spaces for hyperparameter optimization')
     parser.add_argument('--logs', type=str, nargs='?', const=1, default=None, help='Path of tensorboard logs for best model after optimization')
     args = parser.parse_args()
@@ -36,7 +41,7 @@ if __name__ == '__main__':
     logger = logging.getLogger(tune.__name__)  
     logger.setLevel(level=logging.CRITICAL)
 
-    EVAL_EPISODES = args.eval_episodes
+    EVAL_EPISODES = args.ray_eval_episodes
     TOTAL_TIMESTEPS = args.total_train_timesteps
     RAY_TUNE_SAMPLES = args.ray_tune_samples
 
@@ -55,29 +60,13 @@ if __name__ == '__main__':
     ### Define objective function for hyperparameter tuning
     def evaluate_objective(config):
         tune_env = deepcopy(base_env)
-        #tune_agent = PPO if args.agent == 'PPO' else A2C
-        tune_agent = PPO 
+        tune_monitor = OptimizationCallback(tune_env, EVAL_EPISODES, True)
+        monitor_callback = EveryNTimesteps(n_steps=args.report_interval, callback=tune_monitor)
+
+        tune_agent = PPO if args.agent == 'PPO' else A2C 
         tune_agent = tune_agent("MlpPolicy", tune_env, **config)
-        tune_agent.learn(total_timesteps=TOTAL_TIMESTEPS)
+        tune_agent.learn(total_timesteps=TOTAL_TIMESTEPS, callback=monitor_callback)
 
-        # evaluate trained policy and render last episode
-        avg_cumulated_reward = 0
-        for _ in range(EVAL_EPISODES):
-            cumulated_episode_reward = 0
-            obs = tune_env.reset()
-            
-            isdone = False
-            while not isdone:
-                actions, _ = tune_agent.predict(obs, deterministic=True)
-                obs, rew, isdone, _ = tune_env.step(actions)
-                cumulated_episode_reward += rew
-
-            avg_cumulated_reward += cumulated_episode_reward / EVAL_EPISODES
-
-        track.log(
-            rew_objective=avg_cumulated_reward
-        )
-    
     ax_client = AxClient(enforce_sequential_optimization=False)
 
     parameters=[
@@ -90,10 +79,11 @@ if __name__ == '__main__':
     ax_client.create_experiment(
         name="tune_RL",
         parameters=parameters,
-        objective_name='rew_objective',
+        objective_name='mean_reward',
         minimize=False
     )
 
+    ray.init(num_cpus=args.ray_cpus)
     tune.run(
         evaluate_objective, 
         num_samples=RAY_TUNE_SAMPLES, 

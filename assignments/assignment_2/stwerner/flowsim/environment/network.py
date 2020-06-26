@@ -8,7 +8,7 @@ from contextlib import closing
 from gym.spaces import Tuple, Discrete, Box, MultiDiscrete
 from io import StringIO
 from simpy import Resource
-from ..environment.packet import Packet
+from flowsim.environment.packet import Packet
 
 """
 Network of nodes that simulate packet forwarding from some source node to a sink. The environment implements
