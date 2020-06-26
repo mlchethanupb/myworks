@@ -38,6 +38,8 @@ class Network(gym.Env):
     def step(self, action):
         reward = 0
         edge_bandwidth=0
+        if self.current_timestep % self.arrival_time==0:
+            self.nodeTravarsal[self.source]+=1
         self.nodeTravarsal[self.source]+=1
         done=False
         i= self.source
