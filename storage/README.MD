@@ -5,7 +5,7 @@
 **Members**
 * Indranil Ghosh
 * Lameya Afroze
-* Nayela Labonno
+* Nayela Tasnim Labonno
 * Shraddha Pawar
 
 **[Weekly Meeting](https://bbb.imt.uni-paderborn.de/b/mar-cze-jjj)**
