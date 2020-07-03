@@ -13,10 +13,16 @@
 
 ## Useful
 
-* [VM Dashboard](https://vsc.cs.uni-paderborn.de/ui/)
-    * Login username: ``user``
-    * ~~Password:~~ Use SSH!
-* [SSH Keys (generation \& usage)](https://www.ssh.com/ssh/copy-id)
+* VMs
+    * [VM Dashboard](https://vsc.cs.uni-paderborn.de/ui/) (Use IMT Login)
+    * 4 CPU Cores
+    * 8GB RAM
+    * 50GB Disk
+    * Hostnames: *pg-aicon-storage-1*, *pg-aicon-storage-2*, *pg-aicon-storage-3*
+    * SSH Access ``ssh user@<hostname>.cs.upb.de``
+        * Login username: ``user``
+        * ~~Password:~~ Use SSH Key Authentication!
+        * [SSH Keys (generation \& usage)](https://www.ssh.com/ssh/copy-id)
 * [cheat.sh](https://cheat.sh/)
     * Run ``curl cheat.sh/docker`` or visit [https://cheat.sh/docker](https://cheat.sh/docker) 
 * [Kubernetes Concepts Explained in 9 minutes \[Video\]](https://youtu.be/QJ4fODH6DXI)
