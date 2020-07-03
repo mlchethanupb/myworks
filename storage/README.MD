@@ -3,12 +3,25 @@
 **Advisor**: Marvin Illian
 
 **Members**
+
 * Indranil Ghosh
 * Lameya Afroze
 * Nayela Tasnim Labonno
 * Shraddha Pawar
 
 **[Weekly Meeting](https://bbb.imt.uni-paderborn.de/b/mar-cze-jjj)**
+
+## Useful
+
+* [VM Dashboard](https://vsc.cs.uni-paderborn.de/ui/)
+    * Login username: ``user``
+    * ~~Password:~~ Use SSH!
+* [SSH Keys (generation \& usage)](https://www.ssh.com/ssh/copy-id)
+* [cheat.sh](https://cheat.sh/)
+    * Run ``curl cheat.sh/docker`` or visit [https://cheat.sh/docker](https://cheat.sh/docker) 
+* [Kubernetes Concepts Explained in 9 minutes \[Video\]](https://youtu.be/QJ4fODH6DXI)
+
+## Overview
 
 * CPU allocation in NFV is being actively researched and is more and more well understood
 * However, storage as another type of resource did not receive much attention, yet
@@ -20,6 +33,7 @@
 * Which parameters are suited to use ML to determine long-term required storage resources?
 
 ## Phase 1 -- Supervised Learning
+
 * Long-term storage demands of different application types might differ substantially
     - Cache -- upper bound for total storage resources?
     - Database -- steadily growing demand?
@@ -40,6 +54,7 @@
 * Train ML models and verify accuracy
 
 ## Phase 2 -- Resource Allocation
+
 * Decide on VNF service chain
 * Build self-managing system
     * Adjust storage allocation
@@ -49,6 +64,7 @@
     * Use RL to manage allocation decisions
 
 ## Further Research Questions
+
 * Investigate Tradeoffs
     * Compression (lossy/lossless; during transmission/on disk)
     * Impact on
@@ -59,6 +75,7 @@
 
 
 ## Input for Mini-Seminar
+
 * [S. Baig, W. Iqbal, J. L. Berral, A. Erradi and D. Carrera, "Adaptive Prediction Models for Data Center Resources Utilization Estimation," in IEEE Transactions on Network and Service Management, vol. 16, no. 4, pp. 1681-1693, Dec. 2019.](https://ieeexplore.ieee.org/document/8786216)
 * [H. Kim, S. Jeong, D. Lee, H. Choi, J. Yoo and J. W. Hong, "A Deep Learning Approach to VNF Resource Prediction using Correlation between VNFs," 2019 IEEE Conference on Network Softwarization (NetSoft), Paris, France, 2019, pp. 444-449.](https://ieeexplore.ieee.org/document/8806620)
 * [L. Nobach, I. Rimac, V. Hilt and D. Hausheer, "Statelet-Based Efficient and Seamless NFV State Transfer," in IEEE Transactions on Network and Service Management, vol. 14, no. 4, pp. 964-977, Dec. 2017.](https://ieeexplore.ieee.org/document/8058500)
