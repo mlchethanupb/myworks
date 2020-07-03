@@ -26,6 +26,9 @@
 * [cheat.sh](https://cheat.sh/)
     * Run ``curl cheat.sh/docker`` or visit [https://cheat.sh/docker](https://cheat.sh/docker) 
 * [Kubernetes Concepts Explained in 9 minutes \[Video\]](https://youtu.be/QJ4fODH6DXI)
+* [Mosh](https://mosh.org/)
+    * SSH alternative with automatic reconnection for high-latency or interrupted connections (VPN, cellular, ...)
+    * Usage: ``mosh -a user@<hostname>.cs.upb.de``
 
 ## Overview
 
