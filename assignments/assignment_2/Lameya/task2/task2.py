@@ -10,16 +10,25 @@ from stable_baselines import A2C
 from stable_baselines.common.env_checker import check_env
 from gym import spaces
 
-# network_delay = {10,12,11
 class Network(gym.Env):
 
     def __init__(self, configuration: dict, graph: nx.Graph):
 
         super(Network, self).__init__()
-        action_space = [len(graph.nodes()) for i in range(len(graph.nodes()))]
+        #action_space = [len(graph.nodes()) for i in range(len(graph.nodes()))]
         observe_space = [100 for i in range(len(graph.nodes()))]
-
+        
+        action_space=[]
+        action_space.append(max([n for n in graph.neighbors(0)]) )
+        action_space.append(max([n for n in graph.neighbors(1)]) )
+        action_space.append(max([n for n in graph.neighbors(2)]) )
+        action_space.append(max([n for n in graph.neighbors(3)]) )
+        action_space.append(max([n for n in graph.neighbors(4)]) )
+        action_space.append(max([n for n in graph.neighbors(5)]) )
+       
+        
         self.action_space = spaces.MultiDiscrete(action_space)
+        print(self.action_space,"sP")
         self.observation_space = spaces.MultiDiscrete(observe_space)
         self.arrival_time = config['arrival_time']
         self.maxsteps = config['maxsteps']
@@ -30,52 +39,66 @@ class Network(gym.Env):
         self.packet_per_node=[0 for i in range(len(self.graph.nodes()))]
         self.packet_pass = [0 for i in range(len(self.graph.nodes()))]
 
-        #randomly choose sink and source 
+        #randomly choose sink and ssource 
 
         nodes = list(self.graph.nodes())
         node1 = np.random.choice(self.graph.nodes)
         node2= np.random.choice(self.graph.nodes)
+        while (node1==node2):
+            node2= np.random.choice(self.graph.nodes)
         self.sink=node1
         self.source=node2
+        # if self.sink == self.source :
+        #     print("source and destination are same")
+        #     #reset()
 
-        print(node1,node2,"source and sink")
+        #     return
+
+        print("src =",node1, "and destination =",node2)
+
 
 
     def step(self, action):
 
         reward = 0
-        delay=0
+        
         edge_bandwidth=0
         rew=0
         previous_timestep=0
-
+        check=-11
         for i,j in enumerate(action):
-        
+            delay=1
             count = self.packet_per_node[i]
-            limit_val= count * self.packet_size  
+            limit_val= count * self.packet_size 
 
             #check if there is an edge between two nodes & calculate reward based on bandwidth and delay
 
             if (i,j) in self.graph.edges():
                 edge_bandwidth = self.graph[i][j]['weight']
+                
                 if  self.packet_per_node[i] > 0:
                     if limit_val<=edge_bandwidth:
-                        delay = delay + (1/edge_bandwidth)
+                        delay = 1/(edge_bandwidth)
+                        increase_val=1
+                        
                     elif limit_val>edge_bandwidth:
-                        #previous_timestep=self.current_timestep
                         increase_val= math.ceil(limit_val/edge_bandwidth)
                         self.current_timestep = self.current_timestep + increase_val - 1
-                        delay = delay + (.01*limit_val)
+                        delay = 0.5*limit_val
                         
-                    reward += count+delay 
+                    reward -= (increase_val+delay )
+                   
+                   
             
                 self.packet_pass[j] += self.packet_per_node[i]
                 self.packet_per_node[i] = 0
+                
 
             #setting negative reward  if edge doesn't exist
             else:
                 reward = -99999   
                 
+            
         for i in range(len(self.packet_per_node)):
             self.packet_per_node[i] += self.packet_pass[i]
             #negative reward if observation limits is over
@@ -86,14 +109,18 @@ class Network(gym.Env):
         self.packet_pass = [0 for i in range(len(self.graph.nodes()))]
         self.packet_per_node[self.sink]=0
         self.current_timestep+=1
-        if(self.current_timestep % self.arrival_time==0):
+        #if(self.current_timestep % self.arrival_time==0 ):
+
             #arrival of new packet 
-            self.packet_per_node[self.source]+=1
+        self.packet_per_node[self.source]+=1
+        #print(reward)
 
         info=dict()
         state = self.packet_per_node 
         done = False
-        if self.current_timestep >= self.maxsteps: done=True
+
+        if self.current_timestep >= self.maxsteps : done=True
+        #print(np.array(state))
         return np.array(state), reward, done, info
 
    
@@ -119,12 +146,12 @@ if __name__ == '__main__':
     config['packet_size'] = 4.0
 
     G = nx.Graph()
-    G.add_node(0, sink=False, source=True)
-    G.add_node(1, sink=False, source=False)
-    G.add_node(2, sink=False, source=False)
-    G.add_node(3, sink=False, source=False)
-    G.add_node(4, sink=True, source=False)
-    G.add_node(5, sink=False, source=False)
+    G.add_node(0)
+    G.add_node(1)
+    G.add_node(2)
+    G.add_node(3)
+    G.add_node(4)
+    G.add_node(5)
 
     #declaring bandwidth as weight
 
@@ -135,20 +162,24 @@ if __name__ == '__main__':
     G.add_edge(3,4,weight=6)
     G.add_edge(2,3,weight=7)
     G.add_edge(0,3,weight=5)
-    G.add_edge(0,5,weight=17)
+    G.add_edge(5,0,weight=17)
     G.add_edge(2,1,weight=20)
     G.add_edge(2,5,weight=15)
     G.add_edge(2,4,weight=18)
     
     env = Network(config,graph=G)
     model = A2C("MlpPolicy", env, verbose=1)
-    model.learn(total_timesteps=2500)
+    model.learn(total_timesteps=25000)
 
     obs = env.reset()
-    for i in range(50):
+    print(obs)
+    rew=[]
+    for i in range(10):
         action, _states = model.predict(obs, deterministic=True)
         obs, reward, dones, info = env.step(action)
+    
         print("Reward : ", reward, "Observation : ",obs)
+    
 
    
 

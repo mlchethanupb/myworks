@@ -8,7 +8,7 @@ from contextlib import closing
 from gym.spaces import Tuple, Discrete, Box, MultiDiscrete
 from io import StringIO
 from simpy import Resource
-from ..environment.packet import Packet
+from flowsim.environment.packet import Packet
 
 """
 Network of nodes that simulate packet forwarding from some source node to a sink. The environment implements
@@ -28,23 +28,31 @@ class Network(gym.Env):
         # define environment's parameters
         self.DG = nx.read_gpickle(
             r'./flowsim/environment/default.gpickle') if DG == 'default' else nx.read_gpickle(DG)
+        
         self.check_graph()
-        self.source = next(node_id for node_id, data in self.DG.nodes(
-            data=True) if data['source'])
-        self.sink = next(node_id for node_id,
-                         data in self.DG.nodes(data=True) if data['sink'])
+
+        # avoid using iterators for cloudpickle
+        self.source = [node_id for node_id, data in self.DG.nodes(
+            data=True) if data['source']][0]
+        self.sink = [node_id for node_id,
+                         data in self.DG.nodes(data=True) if data['sink']][0]
+        
         self.num_nodes = len(self.DG.nodes())
         self.num_links = len(self.DG.edges())
-        self.max_bandwidth = max(data['bandwidth']
-                                 for i, j, data in self.DG.edges(data=True))
+        self.max_bandwidth = max([data['bandwidth']
+                                 for i, j, data in self.DG.edges(data=True)])
         self.max_packet_inputs = self.max_arrival_steps / self.arrival_time
 
+        ### DEBUG: this sometimes causes an error with pickle??
         # define gym environment's parameters
         # forbit 'do nothing' action & do not define an action for the sink (last node by assumption)
         self.action_space = MultiDiscrete(
             [self.DG.out_degree(node) for node in range(1, self.num_nodes)])
         self.observation_space = Box(low=0.0, high=1.0, shape=(
             self.num_nodes + self.num_links,), dtype=np.float16)
+
+        #import dill
+        #print(dill.pickles(self.observation_space))
 
         # FOR DEVELOPMENT:
         logging.basicConfig(
@@ -167,7 +175,7 @@ class Network(gym.Env):
             if not self.timestep_event.triggered:
                 self.timestep_event.succeed()
 
-    def render(self):
+    def render(self, mode, **kwargs):
         """ Write environment's representation to standard output such that diagonal elements 
         denote the overall queued packet load whereas the remaining elements correspond 
         to each respective link's remaining bandwidth."""
