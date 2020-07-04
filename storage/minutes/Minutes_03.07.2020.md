@@ -27,4 +27,10 @@ End: 13:35
 ## Action Points
 
 •	Check ssh login .
-•	Multi node Kubernetes setup. (Master no
+•	Multi node Kubernetes setup. (Master node only)
+•	From different categories (Message broker, Cache, Database) select one or more category by your choice.
+•	Propose scenarios for categories.
+•	Which components, parameters are going to use.
+•	Why and how metrics are going to be measure.
+•	Present the approach for given task on 10th July.
+
