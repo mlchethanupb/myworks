@@ -1,20 +1,22 @@
-Scheduling
+#Scheduling
 
-Advisor: Asif Hasnain
+**Advisor: Asif Hasnain**
 
-Members
+**Members**
 
-Aluri Mohini
-Tejas Ravindra Dhanwale
-Kunal Sisodia
+*Aluri Mohini*
 
-Problem Statement :
+*Tejas Ravindra Dhanwale*
+
+*Kunal Sisodia*
+
+##Problem Statement :
 
   It is all about making the system to learn resource management by its own.
   To overcome the drawbacks associated with  heuristic based solutions, Reinforcement learning approach is considered (Thanks to machine learning).
   Our team is currently working to reproduce the results.
 	
-Proposal :
+##Proposal :
 
 We are currently assuming that, the mind of job is known once it is arrived.
 
