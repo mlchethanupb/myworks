@@ -4,11 +4,11 @@
 
 **Members**
 
-*Aluri Mohini*
+* Aluri Mohini
 
-*Tejas Ravindra Dhanwale*
+* Tejas Ravindra Dhawale
 
-*Kunal Sisodia*
+* Kunal Sisodia
 
 ## Problem Statement :
 
