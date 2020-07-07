@@ -10,6 +10,8 @@
 
 * Tejas Ravindra Dhawale
 
+**[Discussion Room](https://bbb.imt.uni-paderborn.de/b/asi-nrc-egt)**
+
 
 ## Problem Statement :
 
