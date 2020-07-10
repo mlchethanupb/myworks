@@ -1,4 +1,4 @@
-# Minutes from YYYY-MM-DD
+# Minutes from 2020-07-10
 
 Start: 13:00
 
