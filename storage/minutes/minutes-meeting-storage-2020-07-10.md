@@ -16,7 +16,7 @@ End: 14:15
 ## Status of Last Action Points
 
 * Each member can login to VMs using ssh
-* Erroneous taste beds of Kubernetes and GlusterFS
+* Erroneous testbeds of Kubernetes and GlusterFS
 * Scenario for one category (message broker) with general understanding
 
 
