@@ -1,4 +1,3 @@
-/etc/fstab
 
 # Minutes from 2020-07-015
 
