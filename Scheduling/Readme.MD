@@ -44,15 +44,15 @@ This is our current proposal for the problem we have choosen.
 MileStones
 
 1) Designing the Job scheduling Enviroment
-2) Finalize all the input parameters like - output freq, job length, timespan, new job rate, etc
-3) Designing Job Distribution - Defining work distribution, resources required, Job sequence.
-3) Agent Design and Training
-4) Designing Network - containing state, actions reward, neural network design for training
-5) Finalizing the factors Discounts, learning curves, baselines methods DRL, Tensor flow, theano, entropy, input samples.
-6) Slow down calculations.
-7) Designing inputs or getting it from a source
-8) Familiarise with libraries - theano, numpy, cPickle,lasagne, Tensorflow,DRL Techniques.
-9) Comparing the obtained results with the original paper
+2) Finalizing the factors Discounts, learning curves, baselines methods DRL, Tensor flow, theano, entropy, input samples.
+3) Finalize all the input parameters like - output freq, job length, timespan, new job rate, etc
+4) Designing Job Distribution - Defining work distribution, resources required, Job sequence.
+5) Agent Design and Training
+6) Designing Network - containing state, actions reward, neural network design for training
+7) Slow down calculations.
+8) Designing inputs or getting it from a source
+9) Familiarise with libraries - theano, numpy, cPickle,lasagne, Tensorflow,DRL Techniques.
+10) Comparing the obtained results with the original paper
 
 ## Input :
 
