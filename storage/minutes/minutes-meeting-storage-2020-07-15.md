@@ -1,5 +1,5 @@
 
-# Minutes from 2020-07-015
+# Minutes from 2020-07-15
 
 Start: 13:00
 
