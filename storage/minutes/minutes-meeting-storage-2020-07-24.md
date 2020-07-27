@@ -21,7 +21,7 @@ End: 13:36
 
 ## Discussed Issues
 
-*In place of 'latest' in image tag keep a different tag for image
+* In place of *latest* in image tag keep a different tag for image
 * zookeeper image name will be same as kafka image
 * Preparing for the next week bigger meeting(On what we are working currently, What all issues we are facing and how are we solving those)
 
