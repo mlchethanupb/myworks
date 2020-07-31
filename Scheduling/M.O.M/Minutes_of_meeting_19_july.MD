@@ -12,9 +12,12 @@
 
 
 ## Meeting Action Points :
-  * Environment creation (version 1.0)
-  * Discussion of functions to be incorporated in the environment
-  * Parameters to be considered
-  * Parsing logic of the data trace
+  * Upon completion of creating Environment, we will be having a short demo
+  on coming friday in the presence of advisor.
+  * Discussed regarding the RL agent and the choices we had.
+  * Our advisor clarrified some doubts we had in our paper as well as data
+  sets.
+  * Finally our meeting was concluded with the requirements needed for next
+  week.
 
 
