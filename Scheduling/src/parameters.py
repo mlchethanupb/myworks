@@ -32,8 +32,6 @@ class Parameters:
         # maximum number of distinct colors in current work graph . not required
         self.new_job_rate = 0.7
         assert self.backlog_size % self.time_horizon == 0
-        self.delay_penalty = -1       # penalty for delaying things in the current work screen
-        self.hold_penalty = -1        # penalty for holding things in the new work screen
-        self.dismiss_penalty = -1     # penalty for missing a job because the queue is full
+        self.penalty = -1       # penalty for delaying things in the current work screen
         # supervised learning mimic policy
         self.batch_size = 10

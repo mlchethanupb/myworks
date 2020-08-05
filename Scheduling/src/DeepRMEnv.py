@@ -109,6 +109,23 @@ class Env :
 	
 	def observe(self) :
 		ob = [[] , [] , []]
+
+		# Current allocation of cluster resources
+		ob[0] = list(self.machine.available_res_slot)
+		
+		# The resource profile of jobs in the job slot queue/waiting queue/M
+		for i in self.job_slot.slot :
+			#                  [[length],[Resource requirement]]
+			if i is not None :
+				resource_profile = [i.len , i.resorce_requirement]
+				ob[1].append(resource_profile)
+		
+		# The resource profile of the jobs in the backlog
+		for i in self.job_backlog.backlog :
+			if i is not None :
+				resource_profile = [i.len , i.resorce_requirement]
+				ob[2].append(resource_profile)
+		
 		return ob
 	
 	def reset(self) :
@@ -124,15 +141,15 @@ class Env :
 		reward = 0
 		# Reward based on jobs currently running
 		for j in self.machine.running_job :
-			reward += self.pa.delay_penalty / float(j.len)
+			reward += self.pa.penalty / float(j.len)
 		# Reward based on job in the waiting queue
 		for j in self.job_slot.slot :
 			if j is not None :
-				reward += self.pa.hold_penalty / float(j.len)
+				reward += self.pa.penalty / float(j.len)
 		# Reward based on job in the backlog
 		for j in self.job_backlog.backlog :
 			if j is not None :
-				reward += self.pa.dismiss_penalty / float(j.len)
+				reward += self.pa.penalty / float(j.len)
 		return reward
 
 
