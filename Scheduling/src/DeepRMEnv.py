@@ -145,13 +145,15 @@ class Env(gym.Env):
 	    return ob
 	
     def reset(self) :
-	    self.seq_idx = 0
-	    self.curr_time = 0
-		# initialize system
-	    self.machine = Machine(self.pa)
-	    self.job_slot = JobSlot(self.pa)
-	    self.job_backlog = JobBacklog(self.pa)
-	    self.job_record = JobRecord()
+        self.seq_idx = 0
+        self.curr_time = 0
+        # initialize system
+        self.machine = Machine(self.pa)
+        self.job_slot = JobSlot(self.pa)
+        self.job_backlog = JobBacklog(self.pa)
+        self.job_record = JobRecord()
+        obs = self.observe()
+        return obs
 	
     def get_reward(self) :
 	    reward = 0
