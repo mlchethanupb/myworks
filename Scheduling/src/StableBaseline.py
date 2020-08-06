@@ -37,8 +37,7 @@ if __name__ == '__main__' :
     env = Env(pa , job_sequence_len, job_sequence_size)
     model = PPO2("MlpPolicy", env, verbose=1)
     model.learn(total_timesteps=100)
-    env.reset()
-    obs = env.observe()
+    obs = env.reset()
     for i in range(100):
         action, _states = model.predict(obs[0], deterministic=True)
         obs , reward , done , info = env.step(action)
