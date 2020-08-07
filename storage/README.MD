@@ -52,7 +52,7 @@
     * [Kubernetes](https://github.com/OrangeOnBlack/auto-kubernetes-setup)
     * [GlusterFS](https://github.com/OrangeOnBlack/stateful-kubernetes)
     * [Kafka](https://github.com/OrangeOnBlack/kafka)
-    * [Digital Twin (Machine Data Generator)](https://github.com/sonata-nfv/tng-industrial-pilot/tree/f3a992871c8d5ef3272baf18c3fa12a65894be75/vnfs/dt-digitaltwin-docker/containers)
+    * [Digital Twin (Machine Data Generator)](https://github.com/OrangeOnBlack/tng-industrial-pilot/tree/master/vnfs/dt-digitaltwin-docker/containers)
     * [OPC UA&rarr;Kafka Connector](https://github.com/OrangeOnBlack/opc_ua_kafka_connector)
     * Also required: OPC UA&rarr;Database/Cache Connectors
 * Decide on storage applications
