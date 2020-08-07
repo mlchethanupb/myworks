@@ -13,11 +13,11 @@ pa.new_job_rate = 1
 job_sequence_len = []
 job_sequence_size = []
 
-#Creatingjoblengthforjobs
+#Creating job length for jobs
 for i in range(100):
 	job_sequence_len.append(np.random.randint(1,pa.time_horizon))
 
-#Creatingtheresourcerequirementforjobs
+#Creating the resource requirement for jobs
 for i in range(100):
 	cpu_req=np.random.randint(1,pa.max_job_size)
 	mem_req=np.random.randint(1,pa.max_job_size)
