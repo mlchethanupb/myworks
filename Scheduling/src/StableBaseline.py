@@ -7,7 +7,6 @@ import parameters
 import argparse
 from random import sample
 import os
-from networkx import nx
 import gym
 from stable_baselines.deepq.policies import MlpPolicy
 from stable_baselines import A2C
