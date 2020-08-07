@@ -1,13 +1,13 @@
 # Storage
 
-**Advisor**: Marvin Illian
+**Advisor**: [Marvin Illian](https://github.com/OrangeOnBlack)
 
 **Members**
 
-* Indranil Ghosh
-* Lameya Afroze
-* Nayela Tasnim Labonno
-* Shraddha Pawar
+* [Indranil Ghosh](https://github.com/indra-dxprt)
+* [Lameya Afroze](https://github.com/lameya116)
+* [Nayela Tasnim Labonno](https://github.com/NayelaTasnimLabonno)
+* [Shraddha Pawar](https://github.com/shraddha291996)
 
 **[Weekly Meeting](https://bbb.imt.uni-paderborn.de/b/mar-cze-jjj)**
 
