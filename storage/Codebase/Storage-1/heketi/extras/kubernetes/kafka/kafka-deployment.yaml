@@ -1,0 +1,30 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: kafka-broker0
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kafka
+        id: "0"
+    spec:
+      nodeName: pg-aicon-storage-3
+      containers:
+      - name: kafka
+        image: kafka:01
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 9092
+        env:
+        - name: KAFKA_ADVERTISED_PORT
+          value: "9092"
+        - name: KAFKA_ADVERTISED_HOST_NAME
+          value: 10.0.0.80
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: zoo1:2181
+        - name: KAFKA_BROKER_ID
+          value: "0"
+        - name: KAFKA_CREATE_TOPICS
+          value: sample.topic:1:1

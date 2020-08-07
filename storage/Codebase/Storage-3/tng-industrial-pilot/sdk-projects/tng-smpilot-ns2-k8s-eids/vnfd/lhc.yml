@@ -1,0 +1,78 @@
+descriptor_schema: https://raw.githubusercontent.com/sonata-nfv/tng-schema/master/function-descriptor/vnfd-schema.yml
+vendor: eu.5gtango
+name: lhc-vnf2
+version: '0.9'
+author: sm-pilot@5gtango.eu
+description: 'a CNF based on three CDUs: an official Logstash image from Elastic, a Flask based lightweight HTTP server and a monitory Collector'
+
+cloudnative_deployment_units:
+- id: cdu01
+  image: sonatanfv/vnf-ids-logstash:latest
+  connection_points:
+  - id: logstash5044
+    port: 5044
+  monitoring_parameters:
+  - name: "container_cpu_usage_seconds_total"
+    unit: "Percentage"
+  - name: "container_memory_usage_bytes"
+    unit: "MB"
+  - name: "container_network_receive_bytes_total"
+    unit: "MB"
+  - name: "container_network_transmit_bytes_total"
+    unit: "MB"
+  parameters:
+    env:
+      VERSION: "0.9"
+    volume_mounts:
+    - id: logs
+      location: '/usr/share/logstash/logs'
+- id: cdu02
+  image: sonatanfv/vnf-ids-http:latest
+  connection_points:
+  - id: flask5000
+    port: 5000
+  monitoring_parameters:
+  - name: "container_cpu_usage_seconds_total"
+    unit: "Percentage"
+  - name: "container_memory_usage_bytes"
+    unit: "MB"
+  - name: "container_network_receive_bytes_total"
+    unit: "MB"
+  - name: "container_network_transmit_bytes_total"
+    unit: "MB"
+  # this ip0 metric changes from 0 to a positive number for ~20s when an alarm is triggered
+  - name: "ip0"
+    unit: "Other"
+  parameters:
+    volume_mounts:
+    - id: logs
+      location: '/var/log/logstash'
+- id: cdu03
+  image: pkarkazis/tng-stats-collector:latest
+  parameters:
+    env:
+      VNF_STATS_URL: http://localhost:5000/stats
+      PW_URL: pushgateway.sonata.svc.cluster.local:9091
+      INTERVAL: 2
+
+connection_points:
+- id: logstash5044
+  interface: ipv4
+  type: serviceendpoint
+  port: 5044
+- id: flask5000
+  interface: ipv4
+  type: serviceendpoint
+  port: 5000
+
+virtual_links:
+- id: flask5000link
+  connectivity_type: E-Tree
+  connection_points_reference:
+  - flask5000
+  - cdu02:flask5000
+- id: logstash5044link
+  connectivity_type: E-Tree
+  connection_points_reference:
+  - logstash5044
+  - cdu01:logstash5044
