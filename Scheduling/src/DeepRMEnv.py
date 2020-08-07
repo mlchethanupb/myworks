@@ -21,6 +21,12 @@ class Env :
 		self.job_slot = JobSlot(pa)
 		self.job_backlog = JobBacklog(pa)
 		self.job_record = JobRecord()
+		
+		state_space = self.observe()
+		action_space = [i for i in range(pa.job_wait_queue)]
+		action_space.append('')
+		self.state_space = state_space
+		self.action_space = action_space
 	
 	def step(self , a) :
 		status = None
@@ -54,8 +60,9 @@ class Env :
 						all(s is None for s in self.job_backlog.backlog) :
 					done = True
 				# Deadlock handling
-				elif self.curr_time > self.pa.episode_max_length :  # run too long, force termination
-					done = True
+				# elif self.curr_time > self.pa.episode_max_length :  # run too long, force termination
+			# 				# 	done = True
+			# 				# 	print("Due to 3")
 			
 			if not done :
 				if self.seq_idx < self.pa.simu_len :  # otherwise, end of new job sequence, i.e. no new jobs
@@ -136,6 +143,8 @@ class Env :
 		self.job_slot = JobSlot(self.pa)
 		self.job_backlog = JobBacklog(self.pa)
 		self.job_record = JobRecord()
+		
+		return self.observe()
 	
 	def get_reward(self) :
 		reward = 0
