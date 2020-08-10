@@ -1,9 +1,9 @@
-## Master Node : Storage-1
+## Master Node (pg-aicon-storage-1):
 * zookeeper service and deployment (Path:/home/user/heketi/extras/kubernetes/kafka/)
 * kafka service and deployment (Path:/home/user/heketi/extras/kubernetes/kafka/)
 * digitaltwin service and deployment (Path:/home/user/heketi/extras/kubernetes/digitaltwin/)
 
-## Worker Node : Storage-3
+## Worker Node (pg-aicon-storage-3):
 #### kafka (Path:/home/user/kafka)
 docker build -t kafka .
 
