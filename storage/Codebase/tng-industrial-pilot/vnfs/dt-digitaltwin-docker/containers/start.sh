@@ -31,5 +31,5 @@ sleep 3  # ok, lets give the MDC some time to start Samba ... (ugly but works)
 
 echo "DT: Starting DigitalTwin generator ..."
 cd IMMS_APP
-python3 IMMS_APP.py --autostart --enableOPCUA
+python3 IMMS_APP.py --autostart 
 cd /
