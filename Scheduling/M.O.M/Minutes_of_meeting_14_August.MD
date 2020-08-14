@@ -18,8 +18,6 @@
   * Order in which jobs are processed? Process multiple jobs selection in one iteration?.
   * Fix the void action ?.
   * Action was same . Why is it same ?
-  * Order in which jobs are processed?
-  * Process multiple jobs selection in one iteration?
   * Fix the void action ?
   * Wiki Page for state space, action space.
 
