@@ -5,7 +5,9 @@ from gym.spaces import MultiDiscrete, Tuple, Box
 import networkx as nx
 import numpy as np
 import random
+import w_mac
 from w_mac.envs.packet import Packet
+
 
 
 class W_MAC_Env(gym.Env):
@@ -151,28 +153,39 @@ class W_MAC_Env(gym.Env):
       n1_queue = self.queues[1]
       if len(n1_queue):
         packet = n1_queue.pop()
-        if ((actions[1] == 1) or (actions[2] == 1) or htp_exists):
-          print('n1 collision')
-          self.packet_lost += 1
-          reward =  reward - 100
+        if not packet :
+          reward-=200
+          print('NO PACKETS')
+           
         else:
-          reward = reward + 100
-          self.packet_delivered += 1
-          print('one transmit success')
+          if ((actions[1] == 1) or (actions[2] == 1) or htp_exists):
+            print('n1 collision')
+            self.packet_lost += 1
+            reward =  reward - 100
+          else:
+            reward = reward + 100
+            self.packet_delivered += 1
+            print('one transmit success')
+
+             
     
     if (actions[1] == 1):
       #print('two sending')
       n2_queue = self.queues[2]
       if len(n2_queue):
         packet = n2_queue.pop()
-        if ((actions[0] == 1) or (actions[2] == 1) or htp_exists):
-          print('n2 collision')
-          self.packet_lost += 1
-          reward = reward - 100
+        if not packet :
+          reward-=200
+          print('NO PACKETS')
         else:
-          reward = reward + 100
-          self.packet_delivered += 1
-          print('two transmit success')
+          if ((actions[0] == 1) or (actions[2] == 1) or htp_exists):
+            print('n2 collision')
+            self.packet_lost += 1
+            reward = reward - 100
+          else:
+            reward = reward + 100
+            self.packet_delivered += 1
+            print('two transmit success')
 
     if (actions[2] == 1):
       #print('three sending')
@@ -185,25 +198,29 @@ class W_MAC_Env(gym.Env):
         n3_first_packet = n3_queue[len(n3_queue)-1]"""
         n3_nxt_hop =  nxt_hop_list[2]
         print('n3_nxt_hop', n3_nxt_hop)
-
-        if (n3_nxt_hop == 1) or (n3_nxt_hop == 2): 
-          if (actions[0] == 1) or (actions[1] == 1):
-            print('n3 collision')
-            self.packet_lost += 1
-            reward = reward - 100
-          else:
-            reward = reward + 100
-            self.packet_delivered += 1
-            print('three transmit success')
-        elif (n3_nxt_hop == 4) or (n3_nxt_hop == 5):
-          if (actions[3] == 1) or (actions[4] == 1):
-            print('n3 collision')
-            self.packet_lost += 1
-            reward = reward - 100
-          else:
-            reward = reward + 100
-            self.packet_delivered += 1
-            print('three transmit success')
+        if not packet :
+          reward-=200
+          print('NO PACKETS')
+           
+        else:
+          if (n3_nxt_hop == 1) or (n3_nxt_hop == 2): 
+            if (actions[0] == 1) or (actions[1] == 1):
+              print('n3 collision')
+              self.packet_lost += 1
+              reward = reward - 100
+            else:
+              reward = reward + 100
+              self.packet_delivered += 1
+              print('three transmit success')
+          elif (n3_nxt_hop == 4) or (n3_nxt_hop == 5):
+            if (actions[3] == 1) or (actions[4] == 1):
+              print('n3 collision')
+              self.packet_lost += 1
+              reward = reward - 100
+            else:
+              reward = reward + 100
+              self.packet_delivered += 1
+              print('three transmit success')
 
     if (actions[3] == 1):
       #print('four sending')
@@ -211,28 +228,36 @@ class W_MAC_Env(gym.Env):
       n4_queue = self.queues[4]
       if len(n4_queue):
         packet = n4_queue.pop()
-        if ((actions[2] == 1) or (actions[4] == 1) or htp_exists):
-          print('n4 collision')
-          self.packet_lost += 1
-          reward = reward - 100
+        if not packet :
+          reward-=200
+          print('NO PACKETS')   
         else:
-          reward = reward + 100
-          self.packet_delivered += 1
-          print('four transmit success')
+          if ((actions[2] == 1) or (actions[4] == 1) or htp_exists):
+            print('n4 collision')
+            self.packet_lost += 1
+            reward = reward - 100
+          else:
+            reward = reward + 100
+            self.packet_delivered += 1
+            print('four transmit success')
 
     if (actions[4] == 1):
       #print('five sending')
       n5_queue = self.queues[5]
       if len(n5_queue):
         packet = n5_queue.pop()
-        if ((actions[2] == 1) or (actions[3] == 1) or htp_exists) :
-          print('n5 collision')
-          self.packet_lost += 1
-          reward = reward - 100
+        if not packet :
+          reward-=200
+          print('NO PACKETS')
         else:
-          print('five transmit success')
-          self.packet_delivered += 1
-          reward = reward + 100
+          if ((actions[2] == 1) or (actions[3] == 1) or htp_exists) :
+            print('n5 collision')
+            self.packet_lost += 1
+            reward = reward - 100
+          else:
+            print('five transmit success')
+            self.packet_delivered += 1
+            reward = reward + 100
     
     print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
