@@ -22,13 +22,21 @@ class W_MAC_Env(gym.Env):
     self.packet_delivered = 0
     self.packet_lost = 0
     #Each node can do 2 actions {Transmit, Wait}
-    self.action_space  = MultiDiscrete([2,2,2,2,2]) 
-    #print(self.action_space.sample())
+    action_space = [2 for i in range(len(self.graph.nodes()))]
+    # print(action_space)
+    self.action_space = spaces.MultiDiscrete(action_space)
+    #creating the collision domains
+    self.collision_domain  = {0:[0,1,2],1:[2,3,4]}  
+    self.common_domain = [2] #nodes common in both range trying to work on this still
 
-    #todo - next hop : only if it has a direct connection | Queue size
-    self.state_space = MultiDiscrete([5,5,5,5,5])#Tuple([MultiDiscrete([5,5,5,5,5]),MultiDiscrete([3,3,3,3,3])])
-    self.observation_space = MultiDiscrete([5,5,5,5,5])
-    #print(self.state_space.sample())
+    observation_space = [5 for i in range(len(self.graph.nodes()))] #next hops are the observation space
+    self.observation_space = spaces.MultiDiscrete(observation_space)
+    self.__reset_queue()
+
+    # #todo - next hop : only if it has a direct connection | Queue size #doubt why giving 5 as a next hop options, when 1 has only 2 options, 3 has 4 options to select net nodes
+    # self.state_space = MultiDiscrete([5,5,5,5,5])#Tuple([MultiDiscrete([5,5,5,5,5]),MultiDiscrete([3,3,3,3,3])])
+    # self.observation_space = MultiDiscrete([5,5,5,5,5])
+    # #print(self.state_space.sample())
 
     """self.num_nodes = len(self.graph.nodes())
     self.num_links = len(self.graph.edges())
@@ -39,34 +47,86 @@ class W_MAC_Env(gym.Env):
     print(self.observation_space)"""
 
     self.__reset_queue()
+    
+#commented entire old reset queue function
+  # def __reset_queue(self):
+  #   self.queues = {i: [] for i in self.graph.nodes(data=False)}  #{1: [], 2: [], 3: [], 4: [], 5: []} create a empty list for all nodes
+  #   print(self.queues)
 
+  #   for i in self.graph.nodes(data=False):
+      
+  #     #Assumption : same destination for all the queued packets in the node
+  #     """src = i
+  #     dest = random.randrange(1,5)
+  #     while (False == (self.graph.has_edge(src,dest))):
+  #       dest = random.randrange(1,5)
+  #     print(src,dest)"""
+
+  #     for count in range(8):
+  #       src = i
+  #       dest = random.randrange(1,5)
+  #       while (False == (self.graph.has_edge(src,dest))):
+  #         dest = random.randrange(1,5)
+  #       #print(src,dest)
+  #       # create packet and register process
+  #       packet = Packet(src,dest,dest) #for now consider single hop. Hence dest = nxt_hop
+  #       self.queues[src].insert(0, packet)
+
+  #   # Print the number of elements in queue.
+  #   # print(len(self.queues[1]))
+
+  #   #Frame the state - Next hop of all first packets in queue.
+
+
+
+  #new reset queue function
   def __reset_queue(self):
-    self.queues = {i: [] for i in self.graph.nodes(data=False)}
+    self.queues = {i: [] for i in self.graph.nodes(data=False)}  #{1: [], 2: [], 3: [], 4: [], 5: []} create a empty list for all nodes
     print(self.queues)
 
     for i in self.graph.nodes(data=False):
-      
-      #Assumption : same destination for all the queued packets in the node
-      """src = i
-      dest = random.randrange(1,5)
-      while (False == (self.graph.has_edge(src,dest))):
-        dest = random.randrange(1,5)
-      print(src,dest)"""
-
-      for count in range(8):
-        src = i
-        dest = random.randrange(1,5)
-        while (False == (self.graph.has_edge(src,dest))):
-          dest = random.randrange(1,5)
-        #print(src,dest)
-        # create packet and register process
-        packet = Packet(src,dest,dest) #for now consider single hop. Hence dest = nxt_hop
-        self.queues[src].insert(0, packet)
-
-    # Print the number of elements in queue.
-    # print(len(self.queues[1]))
-
-    #Frame the state - Next hop of all first packets in queue.
+    
+        for q_len in range(1):
+            hop_count =0
+            src = i
+            dest = random.randrange(0,4)
+            print("Source",src,"destination",dest)
+            #source and destination should not be same, if same generate new destination
+            while src == dest:
+                dest = random.randrange(0,4)
+                print('when src and dest were same select random dest again', dest)
+            
+            #To fetch the domain of source and destination node
+            for key,values in self.collision_domain.items():
+                if (src in values):  #doubt -- while selecting the range for common node what should i do?
+                    source_key = key
+                    print('source_key',source_key)
+                if dest in values:
+                    
+                    dest_key = key
+                    print('dest_key',dest_key)
+            #when source and destination belong to same domain, compared with key value of source and destination
+            #then next hop = destination      
+            if source_key == dest_key:
+                print('same domain')
+                next_hop = dest
+                packet = Packet(src,dest,next_hop)
+                self.queues[src].insert(0, packet)
+                print("Packet Q",self.queues)
+            #when source and destination are in different range
+            #then find the common node of both range and assign as a next hop    
+            else:
+                print('diff domain')
+                source_nodes = self.collision_domain[source_key]
+                dest_nodes = self.collision_domain[dest_key]
+                for node in source_nodes:
+                    if node in dest_nodes:
+                        print('Common Node', node)
+                        next_hop = node
+                print(next_hop)
+                packet= Packet(src,dest,next_hop)
+                self.queues[src].insert(0, packet)
+                print("Packet Q",self.queues)
 
   def reset(self):
     #reset the queue
