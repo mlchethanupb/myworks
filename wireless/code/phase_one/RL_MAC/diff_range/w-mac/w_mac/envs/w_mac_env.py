@@ -5,7 +5,9 @@ from gym.spaces import MultiDiscrete, Tuple, Box
 import networkx as nx
 import numpy as np
 import random
+import w_mac
 from w_mac.envs.packet import Packet
+
 
 
 class W_MAC_Env(gym.Env):
@@ -189,6 +191,8 @@ class W_MAC_Env(gym.Env):
     return isdone
 
 
+
+
   def find_reward(self, actions):
 
     reward = 0
@@ -206,94 +210,133 @@ class W_MAC_Env(gym.Env):
     htp_exists = self.hidden_terminal_problem(actions, nxt_hop_list)
 
 
-    if (actions[0] == 1):
-      #print('one sending')
-      n1_queue = self.queues[1]
-      if len(n1_queue):
-        packet = n1_queue.pop()
-        if ((actions[1] == 1) or (actions[2] == 1) or htp_exists):
-          print('n1 collision')
-          self.packet_lost += 1
-          reward =  reward - 100
-        else:
-          reward = reward + 100
-          self.packet_delivered += 1
-          print('one transmit success')
-    
-    if (actions[1] == 1):
-      #print('two sending')
-      n2_queue = self.queues[2]
-      if len(n2_queue):
-        packet = n2_queue.pop()
-        if ((actions[0] == 1) or (actions[2] == 1) or htp_exists):
-          print('n2 collision')
-          self.packet_lost += 1
-          reward = reward - 100
-        else:
-          reward = reward + 100
-          self.packet_delivered += 1
-          print('two transmit success')
+    # if (actions[0] == 1):
+    #   #print('one sending')
+    #   n1_queue = self.queues[1]
+    #   if len(n1_queue):
+    #     packet = n1_queue.pop()
+    #     if not packet :
+    #       reward-=200
+    #       print('NO PACKETS')
+           
+    #     else:
+    #       if ((actions[1] == 1) or (actions[2] == 1) or htp_exists):
+    #         print('n1 collision')
+    #         self.packet_lost += 1
+    #         reward =  reward - 100
+    #       else:
+    #         reward = reward + 100
+    #         self.packet_delivered += 1
+    #         print('one transmit success')
 
-    if (actions[2] == 1):
-      #print('three sending')
-      n3_queue = self.queues[3]
-      if len(n3_queue):
-        packet = n3_queue.pop()
+             
+    
+    # if (actions[1] == 1):
+    #   #print('two sending')
+    #   n2_queue = self.queues[2]
+    #   if len(n2_queue):
+    #     packet = n2_queue.pop()
+    #     if not packet :
+    #       reward-=200
+    #       print('NO PACKETS')
+    #     else:
+    #       if ((actions[0] == 1) or (actions[2] == 1) or htp_exists):
+    #         print('n2 collision')
+    #         self.packet_lost += 1
+    #         reward = reward - 100
+    #       else:
+    #         reward = reward + 100
+    #         self.packet_delivered += 1
+    #         print('two transmit success')
+
+    # if (actions[2] == 1):
+    #   #print('three sending')
+    #   n3_queue = self.queues[3]
+    #   if len(n3_queue):
+    #     packet = n3_queue.pop()
       
-        #check for next hop
-        """n3_queue = self.queues[3]
-        n3_first_packet = n3_queue[len(n3_queue)-1]"""
-        n3_nxt_hop =  nxt_hop_list[2]
-        print('n3_nxt_hop', n3_nxt_hop)
+    #     #check for next hop
+    #     """n3_queue = self.queues[3]
+    #     n3_first_packet = n3_queue[len(n3_queue)-1]"""
+    #     n3_nxt_hop =  nxt_hop_list[2]
+    #     print('n3_nxt_hop', n3_nxt_hop)
+    #     if not packet :
+    #       reward-=200
+    #       print('NO PACKETS')
+           
+    #     else:
+    #       if (n3_nxt_hop == 1) or (n3_nxt_hop == 2): 
+    #         if (actions[0] == 1) or (actions[1] == 1):
+    #           print('n3 collision')
+    #           self.packet_lost += 1
+    #           reward = reward - 100
+    #         else:
+    #           reward = reward + 100
+    #           self.packet_delivered += 1
+    #           print('three transmit success')
+    #       elif (n3_nxt_hop == 4) or (n3_nxt_hop == 5):
+    #         if (actions[3] == 1) or (actions[4] == 1):
+    #           print('n3 collision')
+    #           self.packet_lost += 1
+    #           reward = reward - 100
+    #         else:
+    #           reward = reward + 100
+    #           self.packet_delivered += 1
+    #           print('three transmit success')
 
-        if (n3_nxt_hop == 1) or (n3_nxt_hop == 2): 
-          if (actions[0] == 1) or (actions[1] == 1):
-            print('n3 collision')
-            self.packet_lost += 1
-            reward = reward - 100
-          else:
-            reward = reward + 100
-            self.packet_delivered += 1
-            print('three transmit success')
-        elif (n3_nxt_hop == 4) or (n3_nxt_hop == 5):
-          if (actions[3] == 1) or (actions[4] == 1):
-            print('n3 collision')
-            self.packet_lost += 1
-            reward = reward - 100
-          else:
-            reward = reward + 100
-            self.packet_delivered += 1
-            print('three transmit success')
+    # if (actions[3] == 1):
+    #   #print('four sending')
 
-    if (actions[3] == 1):
-      #print('four sending')
+    #   n4_queue = self.queues[4]
+    #   if len(n4_queue):
+    #     packet = n4_queue.pop()
+    #     if not packet :
+    #       reward-=200
+    #       print('NO PACKETS')   
+    #     else:
+    #       if ((actions[2] == 1) or (actions[4] == 1) or htp_exists):
+    #         print('n4 collision')
+    #         self.packet_lost += 1
+    #         reward = reward - 100
+    #       else:
+    #         reward = reward + 100
+    #         self.packet_delivered += 1
+    #         print('four transmit success')
 
-      n4_queue = self.queues[4]
-      if len(n4_queue):
-        packet = n4_queue.pop()
-        if ((actions[2] == 1) or (actions[4] == 1) or htp_exists):
-          print('n4 collision')
-          self.packet_lost += 1
-          reward = reward - 100
+    # if (actions[4] == 1):
+    #   #print('five sending')
+    #   n5_queue = self.queues[5]
+    #   if len(n5_queue):
+    #     packet = n5_queue.pop()
+    #     if not packet :
+    #       reward-=200
+    #       print('NO PACKETS')
+    #     else:
+    #       if ((actions[2] == 1) or (actions[3] == 1) or htp_exists) :
+    #         print('n5 collision')
+    #         self.packet_lost += 1
+    #         reward = reward - 100
+    #       else:
+    #         print('five transmit success')
+    #         self.packet_delivered += 1
+    #         reward = reward + 100
+    collision_domain={
+      0:[0,1,2],
+      1:[2,3,4]
+    }
+
+    for action,nodes in collision_domain.items():
+      for node in nodes:
+        temp_list=[action,node]
+        d_list.append(temp_list)
+        print(temp_list)
+
+        if(action==0 or node==nodes):
+          reward-=200
         else:
-          reward = reward + 100
-          self.packet_delivered += 1
-          print('four transmit success')
-
-    if (actions[4] == 1):
-      #print('five sending')
-      n5_queue = self.queues[5]
-      if len(n5_queue):
-        packet = n5_queue.pop()
-        if ((actions[2] == 1) or (actions[3] == 1) or htp_exists) :
-          print('n5 collision')
-          self.packet_lost += 1
-          reward = reward - 100
-        else:
-          print('five transmit success')
-          self.packet_delivered += 1
-          reward = reward + 100
-    
+          reward=+100
+        
+    print(reward)
     print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
     print('packet_lost ', self.packet_lost)
