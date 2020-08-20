@@ -1,21 +1,14 @@
 import numpy as np
-import math
-import matplotlib.pyplot as plt
 import parameters
-import argparse
 from random import sample
 import os
-import gym
-from stable_baselines.deepq.policies import MlpPolicy
-from stable_baselines import A2C
-from stable_baselines import PPO2
-from stable_baselines.common.env_checker import check_env		
+import gym	
 from gym import spaces	
 
 
 
 class Env(gym.Env):
-	def __init__(self , pa , job_sequence_len = None , job_sequence_size = None , end = 'no_new_job') :
+	def __init__(self , pa , job_sequence_len , job_sequence_size  , end = 'all_done') :
 		super(Env, self).__init__()
 		self.pa = pa
 		self.end = end  # termination type, 'no_new_job' or 'all_done'
@@ -31,19 +24,18 @@ class Env(gym.Env):
 		self.job_backlog = JobBacklog(pa)
 		self.job_record = JobRecord()
 		state_space = self.observe()
-		low_state_space = [[],[]]
-		high_state_space = [[],[]]
-		low_state_space[0] = state_space[1]
-		low_state_space[1] = state_space[1]
-		high_state_space[0] = state_space[0]
-		high_state_space[1] = [element * 2 for element in state_space[0]]
+		low_state_space = []
+		high_state_space = []
+		for i in range(len(state_space)):
+			high_state_space.append(state_space[0])
+			low_state_space.append(state_space[1])
 		self.low_state = np.array(low_state_space)
 		self.high_state = np.array(high_state_space)
-		print("self.high_state",self.high_state)
 
 		action_space = 6
 		self.state_space = state_space
 		self.action_space = spaces.Discrete(action_space)
+		#self.action_space = spaces.Box(low=0,high=5,shape=(1,),dtype=np.int64)
 		self.observation_space = spaces.Box(low = self.low_state, high = self.high_state, dtype=np.int64)
 	
 	def step(self , a) :
@@ -77,11 +69,11 @@ class Env(gym.Env):
 						all(s is None for s in self.job_backlog.backlog) :
 					done = True
 				# Deadlock handling
-				elif self.curr_time > self.pa.episode_max_length :  # run too long, force termination
-					done = True
+				# elif self.curr_time > self.pa.episode_max_length :  # run too long, force termination
+				# 	done = True
 			
 			if not done :
-				if self.seq_idx < self.pa.simu_len :  # otherwise, end of new job sequence, i.e. no new jobs
+				if self.seq_idx < self.pa.simu_len:  # otherwise, end of new job sequence, i.e. no new jobs
 					new_job = self.get_new_job_from_seq(self.seq_no , self.seq_idx)
 					self.seq_idx += 1
 					if new_job.len > 0 :
@@ -128,30 +120,24 @@ class Env(gym.Env):
 		return new_job
 	
 	def observe(self) :
-		ob = [[],[]]
+		ob = []
+		ob_0 = self.machine.available_res_slot
+		ob.append(ob_0)
 
-		# Current allocation of cluster resources
-		ob[0] = list(self.machine.available_res_slot)
-		
-		#The resource profile of jobs in the job slot queue/waiting queue/M
+		# The resource profile of jobs in the job slot queue/waiting queue/M
 		for i in self.job_slot.slot :
-			#[[length],[Resource requirement]]
+			#                  [[length],[Resource requirement]]
 			if i is not None :
-				#resource_profile = [i.len , i.resorce_requirement]
-				res_slot = self.machine.available_res_slot[i.len] + i.resorce_requirement 
-				ob[1].append(res_slot)
+				# ob[2].append([i.len , i.resorce_requirement])
+				resource_profile = np.zeros((self.pa.time_horizon , self.pa.num_resources))
+				for len in range(i.len) :
+					resource_profile[len] = i.resorce_requirement
+				ob.append(resource_profile)
+			else :
+				resource_profile = np.zeros((self.pa.time_horizon , self.pa.num_resources))
+				ob.append(resource_profile)
 		
-		for i in range(20 - len(ob[1])):
-			res_slot = np.ones([1, 1]) * [0,0]
-			ob[1].append(res_slot[0])
-		
-		# The resource profile of the jobs in the backlog
-		# for i in self.job_backlog.backlog :
-		# 	if i is not None :
-		# 		resource_profile = [i.len , i.resorce_requirement]
-		# 		ob[2].append(resource_profile)
-				
-		return ob
+		return np.array(ob)
 	
 	def reset(self) :
 		self.seq_idx = 0
@@ -242,7 +228,7 @@ if __name__ == '__main__' :
 	print("Unit Test Environment")
 	pa = parameters.Parameters()
 	pa.job_wait_queue = 5
-	pa.simu_len = 50
+	pa.simu_len = 10
 	pa.num_ex = 10
 	pa.new_job_rate = 1
 	
@@ -263,14 +249,14 @@ if __name__ == '__main__' :
 	print("Jobs are now in job slot and job backlog")
 	
 	ob , reward , done , info = env.step(0)
-	print("Jobs in waiting queue (M): " , ob[1] , "\n Reward: " , reward , "\n Done: " , done)
+	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
 	ob , reward , done , info = env.step(1)
-	print("Jobs in waiting queue (M): " , ob[1] , "\n Reward: " , reward , "\n Done: " , done)
+	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
 	ob , reward , done , info = env.step(2)
-	print("Jobs in waiting queue (M): " , ob[1] , "\n Reward: " , reward , "\n Done: " , done)
+	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
 	ob , reward , done , info = env.step(3)
-	print("Jobs in waiting queue (M): " , ob[1] , "\n Reward: " , reward , "\n Done: " , done)
+	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
 	ob , reward , done , info = env.step(4)
-	print("Jobs in waiting queue (M): " , ob[1] , "\n Reward: " , reward , "\n Done: " , done)
+	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
 	ob , reward , done , info = env.step(4)
-	print("Jobs in waiting queue (M): " , ob[1] , "\n Reward: " , reward , "\n Done: " , done)
+	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
