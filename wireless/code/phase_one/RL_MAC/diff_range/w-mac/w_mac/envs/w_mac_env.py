@@ -18,8 +18,8 @@ class W_MAC_Env(gym.Env):
 
     #Create the graph
     self.graph = nx.Graph()
-    self.graph.add_nodes_from([1, 2, 3, 4, 5])
-    self.graph.add_edges_from([(1, 2), (1, 3), (2, 3), (3, 4), (3, 5), (4, 5)])
+    self.graph.add_nodes_from([0, 1, 2, 3, 4])
+    self.graph.add_edges_from([(0, 1), (0, 2), (1, 2), (2, 3), (2, 4), (3, 4)])
     nx.draw(self.graph, with_labels=True, font_weight='bold')
     self.packet_delivered = 0
     self.packet_lost = 0
@@ -28,11 +28,25 @@ class W_MAC_Env(gym.Env):
     # print(action_space)
     self.action_space = spaces.MultiDiscrete(action_space)
     #creating the collision domains
-    self.collision_domain  = {0:[0,1,2],1:[2,3,4]}  
+    self.collision_domain = {0:[0,1,2],1:[2,3,4]}  
     self.common_domain = [2] #nodes common in both range trying to work on this still
 
+    self.node_in_domains = {}
+
+    for key, value in self.collision_domain.items():
+      for i in range(len(value)):
+        if value[i] not in self.node_in_domains: 
+          self.node_in_domains[value[i]] = [key]
+        else:
+          self.node_in_domains[value[i]].append(key)
+    print("self.node_in_domains : ",self.node_in_domains)
+    
     observation_space = [5 for i in range(len(self.graph.nodes()))] #next hops are the observation space
+    for i in range(5):
+      observation_space.append(10)
     self.observation_space = spaces.MultiDiscrete(observation_space)
+    print(self.observation_space)
+    print(self.observation_space.sample())
     self.__reset_queue()
 
     # #todo - next hop : only if it has a direct connection | Queue size #doubt why giving 5 as a next hop options, when 1 has only 2 options, 3 has 4 options to select net nodes
@@ -87,48 +101,46 @@ class W_MAC_Env(gym.Env):
     print(self.queues)
 
     for i in self.graph.nodes(data=False):
-    
-        for q_len in range(1):
-            hop_count =0
-            src = i
-            dest = random.randrange(0,4)
-            print("Source",src,"destination",dest)
-            #source and destination should not be same, if same generate new destination
-            while src == dest:
-                dest = random.randrange(0,4)
-                print('when src and dest were same select random dest again', dest)
+      print("-----------------------------")
+      print("Adding packets for node : ",i)  
+      #Add 8 packets for each node
+      for count in range(8):
+        src = i
+        dest = random.randrange(0,5)
+        while src == dest:
+          dest = random.randrange(0,5)
             
-            #To fetch the domain of source and destination node
-            for key,values in self.collision_domain.items():
-                if (src in values):  #doubt -- while selecting the range for common node what should i do?
-                    source_key = key
-                    print('source_key',source_key)
-                if dest in values:
-                    
-                    dest_key = key
-                    print('dest_key',dest_key)
-            #when source and destination belong to same domain, compared with key value of source and destination
-            #then next hop = destination      
-            if source_key == dest_key:
-                print('same domain')
-                next_hop = dest
-                packet = Packet(src,dest,next_hop)
-                self.queues[src].insert(0, packet)
-                print("Packet Q",self.queues)
-            #when source and destination are in different range
-            #then find the common node of both range and assign as a next hop    
-            else:
-                print('diff domain')
-                source_nodes = self.collision_domain[source_key]
-                dest_nodes = self.collision_domain[dest_key]
-                for node in source_nodes:
-                    if node in dest_nodes:
-                        print('Common Node', node)
-                        next_hop = node
-                print(next_hop)
-                packet= Packet(src,dest,next_hop)
-                self.queues[src].insert(0, packet)
-                print("Packet Q",self.queues)
+        #To fetch the domain of source and destination node
+        for key,values in self.collision_domain.items():
+          #print("key, values, src, dest", key, values, src, dest)
+          if (src in values):  
+            source_key = key
+          if (dest in values):
+            dest_key = key
+            break #destination key not present in the same collision domain
+        
+        #print("src_key, dest_key",source_key,dest_key)
+          #w  hen source and destination belong to same domain, compared with key value of source and destination then next hop = destination      
+        if source_key == dest_key:
+          next_hop = dest
+          print("1. src,dest,next_hop",src,dest,next_hop)
+          packet = Packet(src,dest,next_hop)
+          self.queues[src].insert(0, packet)
+          #break #break and add next packet
+          
+        else:
+          """
+              when source and destination are in different range then find the common node of both range 
+              and assign as a next hop    
+          """
+          source_nodes = self.collision_domain[source_key]
+          dest_nodes = self.collision_domain[dest_key]
+          for node in source_nodes:
+              if node in dest_nodes:
+                next_hop = node
+          print("2. src,dest,next_hop",src,dest,next_hop)
+          packet= Packet(src,dest,next_hop)
+          self.queues[src].insert(0, packet)
 
   def reset(self):
     #reset the queue
@@ -142,6 +154,9 @@ class W_MAC_Env(gym.Env):
     for node in self.queues.values():
       if len(node):
         state.append(node[len(node)-1].nxt_hop)
+    
+    for node in self.queues.values():
+      state.append(len(node))
 
       """
       #for packet in node:
@@ -173,10 +188,19 @@ class W_MAC_Env(gym.Env):
         next_state.append(node[len(node)-1].nxt_hop)
       else:
         next_state.append(0)
+    
+    for node in self.queues.values():
+      next_state.append(len(node))
+    
     nxt_state_arr = np.array(next_state)
     isdone = self.isdone()
     info = {}
 
+    actions_list = list(actions)
+    if isdone == False and actions_list.count(1) == 0 :
+      reward -= 500
+
+    print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
 
 
@@ -196,164 +220,104 @@ class W_MAC_Env(gym.Env):
   def find_reward(self, actions):
 
     reward = 0
-    #next hop list
-    nxt_hop_list = [] #empty list for state
-    for node in self.queues.values():
-      if len(node):
-        nxt_hop_list.append(node[len(node)-1].nxt_hop)
-      else:
-         nxt_hop_list.append(0)
-         
-    print('next hop',nxt_hop_list)
-    
-    #Check for Hidden terminal problem
-    htp_exists = self.hidden_terminal_problem(actions, nxt_hop_list)
 
-
-    # if (actions[0] == 1):
-    #   #print('one sending')
-    #   n1_queue = self.queues[1]
-    #   if len(n1_queue):
-    #     packet = n1_queue.pop()
-    #     if not packet :
-    #       reward-=200
-    #       print('NO PACKETS')
-           
-    #     else:
-    #       if ((actions[1] == 1) or (actions[2] == 1) or htp_exists):
-    #         print('n1 collision')
-    #         self.packet_lost += 1
-    #         reward =  reward - 100
-    #       else:
-    #         reward = reward + 100
-    #         self.packet_delivered += 1
-    #         print('one transmit success')
-
-             
-    
-    # if (actions[1] == 1):
-    #   #print('two sending')
-    #   n2_queue = self.queues[2]
-    #   if len(n2_queue):
-    #     packet = n2_queue.pop()
-    #     if not packet :
-    #       reward-=200
-    #       print('NO PACKETS')
-    #     else:
-    #       if ((actions[0] == 1) or (actions[2] == 1) or htp_exists):
-    #         print('n2 collision')
-    #         self.packet_lost += 1
-    #         reward = reward - 100
-    #       else:
-    #         reward = reward + 100
-    #         self.packet_delivered += 1
-    #         print('two transmit success')
-
-    # if (actions[2] == 1):
-    #   #print('three sending')
-    #   n3_queue = self.queues[3]
-    #   if len(n3_queue):
-    #     packet = n3_queue.pop()
-      
-    #     #check for next hop
-    #     """n3_queue = self.queues[3]
-    #     n3_first_packet = n3_queue[len(n3_queue)-1]"""
-    #     n3_nxt_hop =  nxt_hop_list[2]
-    #     print('n3_nxt_hop', n3_nxt_hop)
-    #     if not packet :
-    #       reward-=200
-    #       print('NO PACKETS')
-           
-    #     else:
-    #       if (n3_nxt_hop == 1) or (n3_nxt_hop == 2): 
-    #         if (actions[0] == 1) or (actions[1] == 1):
-    #           print('n3 collision')
-    #           self.packet_lost += 1
-    #           reward = reward - 100
-    #         else:
-    #           reward = reward + 100
-    #           self.packet_delivered += 1
-    #           print('three transmit success')
-    #       elif (n3_nxt_hop == 4) or (n3_nxt_hop == 5):
-    #         if (actions[3] == 1) or (actions[4] == 1):
-    #           print('n3 collision')
-    #           self.packet_lost += 1
-    #           reward = reward - 100
-    #         else:
-    #           reward = reward + 100
-    #           self.packet_delivered += 1
-    #           print('three transmit success')
-
-    # if (actions[3] == 1):
-    #   #print('four sending')
-
-    #   n4_queue = self.queues[4]
-    #   if len(n4_queue):
-    #     packet = n4_queue.pop()
-    #     if not packet :
-    #       reward-=200
-    #       print('NO PACKETS')   
-    #     else:
-    #       if ((actions[2] == 1) or (actions[4] == 1) or htp_exists):
-    #         print('n4 collision')
-    #         self.packet_lost += 1
-    #         reward = reward - 100
-    #       else:
-    #         reward = reward + 100
-    #         self.packet_delivered += 1
-    #         print('four transmit success')
-
-    # if (actions[4] == 1):
-    #   #print('five sending')
-    #   n5_queue = self.queues[5]
-    #   if len(n5_queue):
-    #     packet = n5_queue.pop()
-    #     if not packet :
-    #       reward-=200
-    #       print('NO PACKETS')
-    #     else:
-    #       if ((actions[2] == 1) or (actions[3] == 1) or htp_exists) :
-    #         print('n5 collision')
-    #         self.packet_lost += 1
-    #         reward = reward - 100
-    #       else:
-    #         print('five transmit success')
-    #         self.packet_delivered += 1
-    #         reward = reward + 100
-    collision_domain={
-      0:[0,1,2],
-      1:[2,3,4]
-    }
-
-    for action,nodes in collision_domain.items():
-      for node in nodes:
-        temp_list=[action,node]
-        d_list.append(temp_list)
-        print(temp_list)
-
-        if(action==0 or node==nodes):
-          reward-=200
-        else:
-          reward=+100
+    for id, action in enumerate(actions):
+      """
+      1. Get the list of domains the node is associated with.
+      2. If it belongs to only one domain (else part)
+          - Check all the actions of that node and decide accordingly
+      3. If node belongs to multiple domains
+          - find the value of packet next_hop and check for colloiion with that nodes  
+      """
+      if (actions[id] == 1):
+        queue = self.queues[id]
         
-    print(reward)
+        if len(queue):
+
+          packet_2_send = queue.pop()
+          domain_list = self.node_in_domains[id]
+          len_domain_list = len(domain_list) 
+          if  len_domain_list > 1 :
+            
+            nxt_hop = packet_2_send.nxt_hop
+            for itr in range(len_domain_list):
+              if nxt_hop in self.collision_domain[domain_list[itr]]:
+                node_list = self.collision_domain[domain_list[itr]]
+                break
+            print("nxt_hop, node_list",nxt_hop, node_list)
+            
+            action_sublist = [actions[i] for i in node_list]
+            #print("a_sublist", action_sublist)
+            
+            if(action_sublist.count(1) > 1):
+              print("node ", id," transmission collision")
+              self.packet_lost += 1
+              reward -= 500
+            #elif (self.hidden_terminal_problem(actions, id, domain_list[0] )):
+              #print("node ", id," transmission collision because of hidden terminal problem")
+            else:
+              print("node ", id," transmission SUCCESS")
+              reward += 500
+              self.packet_delivered += 1 
+          else:
+            node_list = self.collision_domain[domain_list[0]]
+            action_sublist = [actions[i] for i in node_list]
+            #print("a_sublist", action_sublist)
+            if (actions[id] == 1):
+              if(action_sublist.count(1) > 1):
+                print("node ", id," transmission collision")
+                reward -= 500
+                self.packet_lost += 1
+              elif (self.hidden_terminal_problem(actions, id, domain_list[0], packet_2_send )):
+                print("node ", id," transmission collision because of hidden terminal problem")
+                reward -= 500
+                self.packet_lost += 1
+              else:
+                print("node ", id," transmission SUCCESS")
+                self.packet_delivered += 1
+                reward += 500
+        else:
+          print("Action taken on empty queue")
+          reward -= 500
+      else:
+            print("node", id , "waiting to send")
+
     print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
     print('packet_lost ', self.packet_lost)
+
     return reward
 
 
 
-  def hidden_terminal_problem(self, actions, nxt_hop_list):
+  def hidden_terminal_problem(self, actions, id, domain_key, packet_2_send):
     #special case - Hidden terminal problem
     ret_val = False
+    """
     if (((nxt_hop_list[0] == 3 ) and (actions[0] == 1 ) or 
         (nxt_hop_list[1] == 3 ) and (actions[1] == 1 )) and 
        ((nxt_hop_list[3] == 3 ) and (actions[3] == 1 ) or 
         (nxt_hop_list[4] == 3 ) and (actions[4] == 1 ))):
         print('hidden terminal problem exists')
         ret_val = True
-    
+    """
+
+    #print("id : ", id )
+    src_nxt_hop = packet_2_send.nxt_hop
+    #print("src_nxt_hop", src_nxt_hop)
+    for h_key,h_values in self.collision_domain.items():
+      if( src_nxt_hop in h_values):
+        if(domain_key != h_key):
+          h_action = [actions[i] for i in h_values]
+          #print("h_values : ",h_values)
+          #print("h_action : ",h_action)
+          for itr in range(len(h_action)):
+            if(h_action[itr] == 1):
+              other_queue = self.queues[h_values[itr]]
+              if len(other_queue):
+                if(id != h_values[itr] and other_queue[len(other_queue)-1].nxt_hop == src_nxt_hop):
+                  ret_val = True
+
     return ret_val
 
 
