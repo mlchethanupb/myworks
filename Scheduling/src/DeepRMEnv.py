@@ -5,9 +5,9 @@ import os
 import gym	
 from gym import spaces	
 
-
-
 class Env(gym.Env):
+	# We pass a dictionary of parameters along with job requirements and also we set
+	# the end type to 'all_done'
 	def __init__(self , pa , job_sequence_len , job_sequence_size  , end = 'all_done') :
 		super(Env, self).__init__()
 		self.pa = pa
@@ -26,16 +26,16 @@ class Env(gym.Env):
 		state_space = self.observe()
 		low_state_space = []
 		high_state_space = []
+		# define the lowest and highest possible state values from default state space
 		for i in range(len(state_space)):
 			high_state_space.append(state_space[0])
 			low_state_space.append(state_space[1])
 		self.low_state = np.array(low_state_space)
 		self.high_state = np.array(high_state_space)
 
-		action_space = 6
+		action_space = len(self.job_slot.slot) + 1 # may schedule a job from job_slot or may take null acction
 		self.state_space = state_space
 		self.action_space = spaces.Discrete(action_space)
-		#self.action_space = spaces.Box(low=0,high=5,shape=(1,),dtype=np.int64)
 		self.observation_space = spaces.Box(low = self.low_state, high = self.high_state, dtype=np.int64)
 	
 	def step(self , a) :
@@ -43,9 +43,7 @@ class Env(gym.Env):
 		done = False
 		reward = 0
 		info = {}
-		if a == self.pa.job_wait_queue :  # explicit void action
-			status = 'MoveOn'
-		elif self.job_slot.slot[a] is None :  # implicit void action
+		if a == self.pa.job_wait_queue or self.job_slot.slot[a] is None:  # void action
 			status = 'MoveOn'
 		else :
 			allocated = self.machine.allocate_job(self.job_slot.slot[a] , self.curr_time)
@@ -69,8 +67,8 @@ class Env(gym.Env):
 						all(s is None for s in self.job_backlog.backlog) :
 					done = True
 				# Deadlock handling
-				# elif self.curr_time > self.pa.episode_max_length :  # run too long, force termination
-				# 	done = True
+				elif self.curr_time > self.pa.episode_max_length :  # run too long, force termination
+					done = True
 			
 			if not done :
 				if self.seq_idx < self.pa.simu_len:  # otherwise, end of new job sequence, i.e. no new jobs
@@ -121,21 +119,16 @@ class Env(gym.Env):
 	
 	def observe(self) :
 		ob = []
-		ob_0 = self.machine.available_res_slot
-		ob.append(ob_0)
+		ob.append(self.machine.available_res_slot)
 
 		# The resource profile of jobs in the job slot queue/waiting queue/M
 		for i in self.job_slot.slot :
-			#                  [[length],[Resource requirement]]
+			resource_profile = np.zeros((self.pa.time_horizon , self.pa.num_resources))
 			if i is not None :
-				# ob[2].append([i.len , i.resorce_requirement])
-				resource_profile = np.zeros((self.pa.time_horizon , self.pa.num_resources))
 				for len in range(i.len) :
 					resource_profile[len] = i.resorce_requirement
-				ob.append(resource_profile)
-			else :
-				resource_profile = np.zeros((self.pa.time_horizon , self.pa.num_resources))
-				ob.append(resource_profile)
+
+			ob.append(resource_profile)
 		
 		return np.array(ob)
 	
