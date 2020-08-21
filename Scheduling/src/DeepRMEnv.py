@@ -144,19 +144,20 @@ class Env(gym.Env):
 		return obs
 	
 	def get_reward(self) :
-	    reward = 0
+		reward = 0
 		# Reward based on jobs currently running
-	    for j in self.machine.running_job :
+		for j in self.machine.running_job : 
 		    reward += self.pa.penalty / float(j.len)
 		# Reward based on job in the waiting queue
-	    for j in self.job_slot.slot :
+		for j in self.job_slot.slot :
 		    if j is not None :
 			    reward += self.pa.penalty / float(j.len)
 		# Reward based on job in the backlog
-	    for j in self.job_backlog.backlog :
+		for j in self.job_backlog.backlog :
 		    if j is not None :
 			    reward += self.pa.penalty / float(j.len)
-	    return reward
+		
+		return reward
 
 
 class Job :
