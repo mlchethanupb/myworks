@@ -37,7 +37,7 @@ if __name__ == '__main__' :
     model.learn(total_timesteps=25000)
     model.save("job_scheduling")
     del model # remove to demonstrate saving and loading
-    model = DQN.load("job_scheduling")
+    model = DQN.load("job_scheduling",env)
     obs = env.reset()
     Rew = 0
     iterations = 0
