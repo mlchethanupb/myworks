@@ -45,8 +45,10 @@ class W_MAC_Env(gym.Env):
     for i in range(5):
       observation_space.append(10)
     self.observation_space = spaces.MultiDiscrete(observation_space)
-    print(self.observation_space)
-    print(self.observation_space.sample())
+    #print(self.observation_space)
+    #print(self.observation_space.sample())
+
+    self.wait_counter = [0 for i in range(len(self.graph.nodes()))]
     self.__reset_queue()
 
     # #todo - next hop : only if it has a direct connection | Queue size #doubt why giving 5 as a next hop options, when 1 has only 2 options, 3 has 4 options to select net nodes
@@ -63,37 +65,6 @@ class W_MAC_Env(gym.Env):
     print(self.observation_space)"""
 
     self.__reset_queue()
-    
-#commented entire old reset queue function
-  # def __reset_queue(self):
-  #   self.queues = {i: [] for i in self.graph.nodes(data=False)}  #{1: [], 2: [], 3: [], 4: [], 5: []} create a empty list for all nodes
-  #   print(self.queues)
-
-  #   for i in self.graph.nodes(data=False):
-      
-  #     #Assumption : same destination for all the queued packets in the node
-  #     """src = i
-  #     dest = random.randrange(1,5)
-  #     while (False == (self.graph.has_edge(src,dest))):
-  #       dest = random.randrange(1,5)
-  #     print(src,dest)"""
-
-  #     for count in range(8):
-  #       src = i
-  #       dest = random.randrange(1,5)
-  #       while (False == (self.graph.has_edge(src,dest))):
-  #         dest = random.randrange(1,5)
-  #       #print(src,dest)
-  #       # create packet and register process
-  #       packet = Packet(src,dest,dest) #for now consider single hop. Hence dest = nxt_hop
-  #       self.queues[src].insert(0, packet)
-
-  #   # Print the number of elements in queue.
-  #   # print(len(self.queues[1]))
-
-  #   #Frame the state - Next hop of all first packets in queue.
-
-
 
   #new reset queue function
   def __reset_queue(self):
@@ -141,6 +112,11 @@ class W_MAC_Env(gym.Env):
           print("2. src,dest,next_hop",src,dest,next_hop)
           packet= Packet(src,dest,next_hop)
           self.queues[src].insert(0, packet)
+    
+    self.queue_length_list = []
+    for i in self.graph.nodes(data=False):
+      self.queue_length_list.append(len(self.queues[i]))
+    #print("self.queue_length_list",self.queue_length_list)
 
   def reset(self):
     #reset the queue
@@ -180,7 +156,7 @@ class W_MAC_Env(gym.Env):
     #for node, action in enumerate(actions):
       #print(node, action)
 
-    reward = self.find_reward(actions)
+    reward = self.perform_actions(actions)
     
     next_state = [] #empty list for next_state
     for node in self.queues.values():
@@ -200,6 +176,7 @@ class W_MAC_Env(gym.Env):
     if isdone == False and actions_list.count(1) == 0 :
       reward -= 500
 
+
     print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
 
@@ -217,7 +194,7 @@ class W_MAC_Env(gym.Env):
 
 
 
-  def find_reward(self, actions):
+  def perform_actions(self, actions):
 
     reward = 0
 
@@ -226,7 +203,7 @@ class W_MAC_Env(gym.Env):
       1. Get the list of domains the node is associated with.
       2. If it belongs to only one domain (else part)
           - Check all the actions of that node and decide accordingly
-      3. If node belongs to multiple domains
+      3. If node belongs to multiple domains (if part)
           - find the value of packet next_hop and check for colloiion with that nodes  
       """
       if (actions[id] == 1):
@@ -244,7 +221,7 @@ class W_MAC_Env(gym.Env):
               if nxt_hop in self.collision_domain[domain_list[itr]]:
                 node_list = self.collision_domain[domain_list[itr]]
                 break
-            print("nxt_hop, node_list",nxt_hop, node_list)
+            #print("nxt_hop, node_list",nxt_hop, node_list)
             
             action_sublist = [actions[i] for i in node_list]
             #print("a_sublist", action_sublist)
@@ -258,7 +235,17 @@ class W_MAC_Env(gym.Env):
             else:
               print("node ", id," transmission SUCCESS")
               reward += 500
-              self.packet_delivered += 1 
+              self.packet_delivered += 1
+
+              packet_2_send.update_hop_count()
+              if (packet_2_send.nxt_hop == packet_2_send.dest):
+                print("Packet reached destination")
+              else:
+                rcvd_node = packet_2_send.nxt_hop
+                packet_2_send.update_nxt_hop(packet_2_send.dest)
+                print("Adding packet to the queue of ", rcvd_node)
+                self.queues[rcvd_node].insert(0, packet_2_send)
+
           else:
             node_list = self.collision_domain[domain_list[0]]
             action_sublist = [actions[i] for i in node_list]
@@ -276,12 +263,45 @@ class W_MAC_Env(gym.Env):
                 print("node ", id," transmission SUCCESS")
                 self.packet_delivered += 1
                 reward += 500
+
+                packet_2_send.update_hop_count()
+                if (packet_2_send.nxt_hop == packet_2_send.dest):
+                  print("Packet reached destination")
+                else:
+                  rcvd_node = packet_2_send.nxt_hop
+                  packet_2_send.update_nxt_hop(packet_2_send.dest)
+                  print("Adding packet to the queue of ", rcvd_node)
+                  self.queues[rcvd_node].insert(0, packet_2_send)
+
         else:
           print("Action taken on empty queue")
           reward -= 500
       else:
-            print("node", id , "waiting to send")
+            #print("node", id , "waiting to send")
+            ...
+    """
+    for id, count_val in enumerate(self.wait_counter):
+      if count_val > 4 and actions[id] != 1 :
+        reward -= 300
+    
+    for id, act_val in enumerate(actions):
+      if act_val == 1:
+        self.wait_counter[id] = 0
+      else:
+        self.wait_counter[id] += 1
+    """
+    """
+    for id, item in enumerate(self.queue_length_list):
+      if item > len(self.queues[id]):
+        reward += 100
+        item = len(self.queues[id])
+      elif self.wait_counter[id] > 4 and item == len(self.queues[id]):
+        reward -= 100
 
+    """
+
+
+    #print("self.wait_counter",self.wait_counter) 
     print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
     print('packet_lost ', self.packet_lost)
@@ -293,14 +313,6 @@ class W_MAC_Env(gym.Env):
   def hidden_terminal_problem(self, actions, id, domain_key, packet_2_send):
     #special case - Hidden terminal problem
     ret_val = False
-    """
-    if (((nxt_hop_list[0] == 3 ) and (actions[0] == 1 ) or 
-        (nxt_hop_list[1] == 3 ) and (actions[1] == 1 )) and 
-       ((nxt_hop_list[3] == 3 ) and (actions[3] == 1 ) or 
-        (nxt_hop_list[4] == 3 ) and (actions[4] == 1 ))):
-        print('hidden terminal problem exists')
-        ret_val = True
-    """
 
     #print("id : ", id )
     src_nxt_hop = packet_2_send.nxt_hop
@@ -323,3 +335,5 @@ class W_MAC_Env(gym.Env):
 
   def render(self, mode='human', close=False):
     print('render')
+
+
