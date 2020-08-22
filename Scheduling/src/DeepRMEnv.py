@@ -66,9 +66,6 @@ class Env(gym.Env):
 						all(s is None for s in self.job_slot.slot) and \
 						all(s is None for s in self.job_backlog.backlog) :
 					done = True
-				# Deadlock handling
-				elif self.curr_time > self.pa.episode_max_length :  # run too long, force termination
-					done = True
 			
 			if not done :
 				if self.seq_idx < self.pa.simu_len:  # otherwise, end of new job sequence, i.e. no new jobs
@@ -216,41 +213,3 @@ class Machine :
 		for job in self.running_job :
 			if job.finish_time <= curr_time :
 				self.running_job.remove(job)
-
-
-if __name__ == '__main__' :
-	print("Unit Test Environment")
-	pa = parameters.Parameters()
-	pa.job_wait_queue = 5
-	pa.simu_len = 10
-	pa.num_ex = 10
-	pa.new_job_rate = 1
-	
-	env = Env(pa , job_sequence_len = [3 , 1 , 1 , 1 , 3 , 1 , 2 , 3 , 4 , 5] ,
-	          job_sequence_size = [[9 , 2] , [9 , 1] , [2 , 8] , [8 , 2] , [7 , 1] , [2 , 10] , [1 , 10] , [2 , 7] ,
-	                               [4 , 8] , [2 , 9]])
-	
-	env.step(5)
-	env.step(5)
-	env.step(5)
-	env.step(5)
-	env.step(5)
-	env.step(5)
-	env.step(5)
-	env.step(5)
-	env.step(5)
-	
-	print("Jobs are now in job slot and job backlog")
-	
-	ob , reward , done , info = env.step(0)
-	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
-	ob , reward , done , info = env.step(1)
-	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
-	ob , reward , done , info = env.step(2)
-	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
-	ob , reward , done , info = env.step(3)
-	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
-	ob , reward , done , info = env.step(4)
-	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
-	ob , reward , done , info = env.step(4)
-	print("Jobs in waiting queue (M): " , ob , "\n Reward: " , reward , "\n Done: " , done)
