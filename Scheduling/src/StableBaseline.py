@@ -5,6 +5,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import parameters
+import job_distribution
 import argparse
 from random import sample
 import os
@@ -19,20 +20,10 @@ import pandas as pd
 
 if __name__ == '__main__' :
     print("Stable baseline main method")
-    #dataframe = pd.read_csv("/home/aicon/kunalS/workspace/csvTest/container_usage.csv")
-    #print(dataframe.head(10)) 
-    #np_array = dataframe.to_numpy()
-    #np_array1 = np.asarray(np_array, dtype=int)
-
     pa = parameters.Parameters()
-    pa.job_wait_queue = 5
-    pa.simu_len = 10
-    pa.num_ex = 10
-    pa.new_job_rate = 1
-    env = Env(pa , job_sequence_len = [3 , 1 , 1 , 1 , 3 , 1 , 2 , 3 , 4 , 5] ,
-	          job_sequence_size = [[9 , 2] , [9 , 1] , [2 , 8] , [8 , 2] , [7 , 1] , [2 , 10] , [1 , 10] , [2 , 7] ,
-	                               [4 , 8] , [2 , 9]])
-    check_env(env,warn=True)
+    job_sequence_len , job_sequence_size = job_distribution.generate_sequence_work(pa, seed=42)
+    env = Env(pa , job_sequence_len, job_sequence_size)
+    print("job_sequence_len", job_sequence_len,"job_sequence_size", job_sequence_size)
     model = DQN("MlpPolicy", env, verbose=1)
     model.learn(total_timesteps=25000)
     model.save("job_scheduling")
@@ -52,7 +43,7 @@ if __name__ == '__main__' :
         iterations = iterations + 1
         print("Iteration or Time step :",iterations, ",Action :",action,",Reward : ",reward)
 
-        if iterations == 1000:
+        if iterations == pa.episode_max_length:
             done = True
         Rew = Rew + reward
 
