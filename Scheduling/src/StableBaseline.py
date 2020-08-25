@@ -24,7 +24,7 @@ if __name__ == '__main__' :
     pa = parameters.Parameters()
     job_sequence_len , job_sequence_size = job_distribution.generate_sequence_work(pa, seed=42)
     env = Env(pa , job_sequence_len = job_sequence_len, job_sequence_size = job_sequence_size)
-    Job_len = Rew = timesteps = misprediction_counter = 0
+    Job_len = Rew = timesteps = iterations = misprediction_counter = 0
     for i in range(len(job_sequence_len)):
         Job_len = Job_len + job_sequence_len[i]
     print("job_sequence_len", job_sequence_len,"job_sequence_size", job_sequence_size)
@@ -37,6 +37,7 @@ if __name__ == '__main__' :
     done = False
     action_list = []
     while not done:
+        iterations = iterations + 1
         action, _states = model.predict(obs, deterministic=True)
         # logic for handling job starvation and mispredicted action overriding
         if override_misprediction and ((action != 5 and all(s.all() == 0 for s in obs[action+1]))\
@@ -50,16 +51,18 @@ if __name__ == '__main__' :
 
         if action not in action_list:
             action_list.append(action)
-        timesteps = timesteps + 1
-        print("Time step :",timesteps, ",Action :",action,",Reward : ",reward)
+        # to demonstrate that multiple jobs may get assigned in the same time step
+        if env.curr_time != 0:
+            timesteps = env.curr_time
+        print("Iteration :",iterations,",Time step :",timesteps, ",Action :",action,",Reward : ",reward)
 
         if timesteps == pa.episode_max_length:
             done = True
         Rew = Rew + reward
 
     Job_slow_down = timesteps / Job_len
-    AverageReward = Rew / timesteps
-    misprediction_percentage = misprediction_counter / timesteps
+    AverageReward = Rew / iterations
+    misprediction_percentage = misprediction_counter / iterations
     print("Job_len :", Job_len,",Average Reward :", AverageReward,",Job_slow_down :", Job_slow_down,",misprediction_percentage :",misprediction_percentage)
     for i in env.job_slot.slot :
         if i is not None:
