@@ -29,7 +29,7 @@ if __name__ == '__main__' :
         Job_len = Job_len + job_sequence_len[i]
     print("job_sequence_len", job_sequence_len,"job_sequence_size", job_sequence_size)
     model = DQN("MlpPolicy", env, verbose=1)
-    #model.learn(total_timesteps = 25000)
+    model.learn(total_timesteps = 25000)
     model.save("job_scheduling")
     del model # remove to demonstrate saving and loading
     model = DQN.load("job_scheduling",env)
@@ -40,7 +40,7 @@ if __name__ == '__main__' :
         action, _states = model.predict(obs, deterministic=True)
         # logic for handling job starvation and mispredicted action overriding
         if override_misprediction and ((action != 5 and all(s.all() == 0 for s in obs[action+1]))\
-           or (action == 5 and all(s.all() == 10 for s in obs[0]))):
+           or (action == 5 and len(env.machine.running_job) == 0)):
             for i in range(env.pa.job_wait_queue) :
                 if env.job_slot.slot[i] is not None:
                     action = i
