@@ -305,7 +305,7 @@ class W_MAC_Env(gym.Env):
     print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
     print('packet_lost ', self.packet_lost)
-    #print ('test')
+    print ('test')
 
     return reward
 
