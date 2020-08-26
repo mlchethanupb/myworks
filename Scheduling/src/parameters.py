@@ -1,3 +1,5 @@
+import job_distribution
+
 class Parameters:
     #intializing parameters required for env
     def __init__(self):
@@ -10,7 +12,7 @@ class Parameters:
         # interval for output and store parameters
         self.num_seq_per_batch = 10
         # number of sequences to compute baseline ???
-        self.episode_max_length = 200
+        self.episode_max_length = self.simu_len * self.simu_len * 4
         # enforcing an artificial terminal - no of feasable training episodes
         self.num_resources = 2
         # number of resources in the system - CPU,Memory
@@ -30,8 +32,10 @@ class Parameters:
         # track how many time steps since last new jobs
         self.job_num_cap = 40
         # maximum number of distinct colors in current work graph . not required
-        self.new_job_rate = 0.7
+        self.new_job_rate = 1 # not less than 1 for correct job length
         assert self.backlog_size % self.time_horizon == 0
-        self.penalty = -1       # penalty for delaying things in the current work screen
+        # penalty for delaying things in the current work screen
+        self.penalty = -1 
         # supervised learning mimic policy
         self.batch_size = 10
+        self.dist = job_distribution.Dist(self.num_resources, self.max_job_size, self.max_job_len)
