@@ -15,14 +15,59 @@ import matplotlib.pyplot as plt
 class W_MAC_Env(gym.Env):
   metadata = {'render.modes': ['human']}
 
-  def __init__(self):
-   #print("init")
+  def __init__(self, graph:nx.Graph):
+    super(W_MAC_Env, self).__init__()
+    print("init")
 
     #Create the graph
-    self.graph = nx.Graph()
-    self.graph.add_nodes_from([0, 1, 2, 3, 4])
-    self.graph.add_edges_from([(0, 1), (0, 2), (1, 2), (2, 3), (2, 4), (3, 4)])
+    self.graph = graph
     nx.draw(self.graph, with_labels=True, font_weight='bold')
+
+    for i in self.graph.nodes:
+      count =0
+      domain = []
+    
+      for j in self.graph.nodes:
+        if (i,j) in self.graph.edges:
+            
+          count = count +1
+          if count > 2:
+            intermediate_node = i
+            print('Intermediate node', intermediate_node)
+
+    range_domain = {} #to get the range of each node for each iteration it will get {0:{0,1,2}}
+    full_range={} #to get the range of all nodes merging it with range_domain the total domain will have is {0:{0,1,2},1:{0,1,2}etc}
+    for i in self.graph.nodes: 
+      domain = [] #to get the domain of each node
+      for j in self.graph.nodes:
+        if (i,j) in self.graph.edges:      
+          print(i,j)
+          domain.append(i)
+          domain.append(j)
+          print(domain)
+      range_domain[i] = domain
+    
+      print(range_domain)
+      full_range.update(range_domain)
+      print(full_range)
+
+    del full_range[intermediate_node]
+    print('Fullrange after intermediate nodedeletion',full_range) 
+
+
+    fullrange_wo_dupli = {}
+    for key,value in full_range.items():
+      fullrange_wo_dupli[key] = set(value)
+    print(fullrange_wo_dupli)
+
+    d2 = {tuple(v): k for k, v in fullrange_wo_dupli.items()}  # exchange keys, values
+    fullrange_wo_dupli = {v: list(k) for k, v in d2.items()} 
+    print(fullrange_wo_dupli)
+
+    collision_domain ={}
+    collision_domain = fullrange_wo_dupli
+    print(collision_domain)
+
     self.packet_delivered = 0
     self.packet_lost = 0
     #Each node can do 2 actions {Transmit, Wait}
@@ -30,9 +75,9 @@ class W_MAC_Env(gym.Env):
     # print(action_space)
     self.action_space = spaces.MultiDiscrete(action_space)
     #creating the collision domains
-    self.collision_domain = {0:[0,1,2],1:[2,3,4]}  
-    self.common_domain = [2] #nodes common in both range trying to work on this still
-
+    self.collision_domain = collision_domain
+    print('Collision Domain',self.collision_domain) 
+    
     self.node_in_domains = {}
 
     for key, value in self.collision_domain.items():
