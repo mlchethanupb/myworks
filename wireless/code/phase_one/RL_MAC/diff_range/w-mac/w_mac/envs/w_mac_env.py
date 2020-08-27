@@ -7,28 +7,81 @@ import numpy as np
 import random
 import w_mac
 from w_mac.envs.packet import Packet
+from collections import defaultdict
 
 
 
 class W_MAC_Env(gym.Env):
   metadata = {'render.modes': ['human']}
 
-  def __init__(self):
+  def __init__(self, graph: nx.Graph):
+    super(W_MAC_Env, self).__init__()
    #print("init")
 
     #Create the graph
-    self.graph = nx.Graph()
-    self.graph.add_nodes_from([0, 1, 2, 3, 4])
-    self.graph.add_edges_from([(0, 1), (0, 2), (1, 2), (2, 3), (2, 4), (3, 4)])
+    self.graph = graph
+    # self.graph.add_nodes_from([0, 1, 2, 3, 4])
+    # self.graph.add_edges_from([(0, 1), (0, 2), (1, 2), (2, 3), (2, 4), (3, 4)])
     nx.draw(self.graph, with_labels=True, font_weight='bold')
+
     self.packet_delivered = 0
     self.packet_lost = 0
+
+
+
+    # range_domain = {}
+    # full_range={}
+    for i in self.graph.nodes:
+      count =0
+      domain = []
+   
+      for j in self.graph.nodes:
+        if (i,j) in self.graph.edges:
+      
+            
+          count = count +1
+          if count > 2:
+            intermediate_node = i
+            print('Intermediate node', intermediate_node)
+
+    range_domain = {} #to get the range of each node for each iteration it will get {0:{0,1,2}}
+    full_range={} #to get the range of all nodes merging it with range_domain the total domain will have is {0:{0,1,2},1:{0,1,2}etc}
+    for i in self.graph.nodes: 
+      domain = [] #to get the domain of each node
+      for j in self.graph.nodes:
+        if (i,j) in self.graph.edges:      
+          print(i,j)
+          domain.append(i)
+          domain.append(j)
+          print(domain)
+      range_domain[i] = domain
+    
+      print(range_domain)
+      full_range.update(range_domain)
+      print(full_range)
+
+    del full_range[intermediate_node]
+    print(full_range) 
+
+
+    fullrange_wo_dupli = {}
+    for key,value in full_range.items():
+      fullrange_wo_dupli[key] = set(value)
+    print(fullrange_wo_dupli)
+
+    d2 = {tuple(v): k for k, v in fullrange_wo_dupli.items()}  # exchange keys, values
+    fullrange_wo_dupli = {v: list(k) for k, v in d2.items()} 
+    print(fullrange_wo_dupli)
+
+
+
     #Each node can do 2 actions {Transmit, Wait}
     action_space = [2 for i in range(len(self.graph.nodes()))]
     # print(action_space)
     self.action_space = spaces.MultiDiscrete(action_space)
     #creating the collision domains
-    self.collision_domain = {0:[0,1,2],1:[2,3,4]}  
+    self.collision_domain = fullrange_wo_dupli
+    print('collision_domain',self.collision_domain) 
     self.common_domain = [2] #nodes common in both range trying to work on this still
 
     self.node_in_domains = {}
@@ -64,7 +117,7 @@ class W_MAC_Env(gym.Env):
              self.num_nodes,), dtype=np.int8)]
     print(self.observation_space)"""
 
-    self.__reset_queue()
+    # self.__reset_queue()
 
   #new reset queue function
   def __reset_queue(self):
@@ -158,6 +211,7 @@ class W_MAC_Env(gym.Env):
 
     reward = self.perform_actions(actions)
     
+    
     next_state = [] #empty list for next_state
     for node in self.queues.values():
       if len(node):
@@ -191,6 +245,7 @@ class W_MAC_Env(gym.Env):
         isdone = False
     return isdone
 
+  
 
 
 
@@ -199,6 +254,7 @@ class W_MAC_Env(gym.Env):
     reward = 0
 
     for id, action in enumerate(actions):
+
       """
       1. Get the list of domains the node is associated with.
       2. If it belongs to only one domain (else part)
@@ -206,6 +262,10 @@ class W_MAC_Env(gym.Env):
       3. If node belongs to multiple domains (if part)
           - find the value of packet next_hop and check for colloiion with that nodes  
       """
+
+      
+
+      
       if (actions[id] == 1):
         queue = self.queues[id]
         
@@ -335,5 +395,7 @@ class W_MAC_Env(gym.Env):
 
   def render(self, mode='human', close=False):
     print('render')
+  
+  
 
 
