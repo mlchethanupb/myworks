@@ -1,16 +1,16 @@
+import argparse
+from networkx import nx
 import gym
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+import time
+from IPython.display import clear_output
+from gym.spaces import Tuple, Discrete, Box, MultiDiscrete
 from gym import error, spaces, utils
 from gym.utils import seeding
-from gym.spaces import MultiDiscrete, Tuple, Box
-import networkx as nx
-import numpy as np
-import random
 import w_mac
 from w_mac.envs.packet import Packet
-import matplotlib.pyplot as plt
-
-
-
 
 class W_MAC_Env(gym.Env):
   metadata = {'render.modes': ['human']}
@@ -339,62 +339,77 @@ class W_MAC_Env(gym.Env):
    #def render(self, mode='human', close=False):
   #   print('render')
 
-
 def render(self, mode='human'):
-          
-        self.collision_domain = {0:[0,1,2],1:[2,3,4]} 
-        self.common_domain = [2] #nodes common in both range trying to work on this still
 
-        self.node_in_domains = {}
+    num_episodes = 10000  # Number of episodes we want our agent to play
+    # Maximum number of steps out agent is allowed to take in a single episode
+    max_steps_per_episode = 10
 
-        for key, value in self.collision_domain.items():
-          for i in range(len(value)):
-            if value[i] not in self.node_in_domains: 
-              self.node_in_domains[value[i]] = [key]
+    learning_rate = 0.1  # Symbol Alpha
+    discount_rate = 0.99  # Symbol Gamma
+
+    # Allparameters related to exploration exploitation tradeoff using the greedy strategy
+    exploration_rate = 1  # initialiing the exploration rate (epsilon)
+    max_exploration_Rate = 1
+    min_exploration_Rate = 0.01
+    exploration_decay_rate = 0.001  # The rate at which exploration rate will decay
+
+    rewards_all_episodes = []
+    episodes = []
+    self.collision_domain = {0: [0, 1, 2], 1: [2, 3, 4]}
+    # nodes common in both range trying to work on this still
+    self.common_domain = [2]
+
+    self.node_in_domains = {}
+
+    for key, value in self.collision_domain.items():
+        for i in range(len(value)):
+            if value[i] not in self.node_in_domains:
+                self.node_in_domains[value[i]] = [key]
             else:
-              self.node_in_domains[value[i]].append(key)
-        print("self.node_in_domains : ",self.node_in_domains) 
+                self.node_in_domains[value[i]].append(key)
+    print("self.node_in_domains : ", self.node_in_domains)
 
-        for i in self.graph.nodes(data=False):
-          for count in range(8):
+    for i in self.graph.nodes(data=False):
+        for count in range(8):
             src = i
-            dest = random.randrange(0,5)
-          while src == dest:
-            dest = random.randrange(0,5)
-            
-        #To fetch the domain of source and destination node
-        for key,values in self.collision_domain.items():
-          #print("key, values, src, dest", key, values, src, dest)
-          if (src in values):  
+            dest = random.randrange(0, 5)
+        while src == dest:
+            dest = random.randrange(0, 5)
+
+    # To fetch the domain of source and destination node
+    for key, values in self.collision_domain.items():
+        #print("key, values, src, dest", key, values, src, dest)
+        if (src in values):
             source_key = key
-          if (dest in values):
+        if (dest in values):
             dest_key = key
-            break #destination key not present in the same collision domain
-        
+            break  # destination key not present in the same collision domain
 
-        source_nodes = self.collision_domain[source_key]
-        dest_nodes = self.collision_domain[dest_key]
-        for node in source_nodes:
-          if node in dest_nodes:
+    source_nodes = self.collision_domain[source_key]
+    dest_nodes = self.collision_domain[dest_key]
+    for node in source_nodes:
+        if node in dest_nodes:
             next_hop = node
-        packet= Packet(src,dest,next_hop)
-
-
-        # Assigning labels to the nodes
-        labels = {}
-        labels[0] = '$0$'
-        labels[1] = '$1$'
-        labels[2] = '$2$'
-        labels[3] = '$3$'
-        labels[4] = '$4$'
-        pos = nx.spring_layout(self.graph)
-        nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = source_nodes, node_color = 'red')
-        nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = dest_nodes , node_color = 'green')
-        nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = packet , node_color = 'blue')
-        nx.draw_networkx_edges(self.graph , pos , edgelist =[(0 , 1) , (1 , 3) , (3 , 4) , (0 , 2) , (1 , 4) , (4,0) ], alpha = 0.5 , edge_color = 'black')
-        nx.draw_networkx_labels(self.graph , pos , labels , font_size = 10)
-        plt.axis('off')
-        plt.show(block = False)
-        plt.pause(3)
-        plt.close('all')
-
+    packet = Packet(src, dest, next_hop)
+    # Assigning labels to the nodes
+    labels = {}
+    labels[0] = '$0$'
+    labels[1] = '$1$'
+    labels[2] = '$2$'
+    labels[3] = '$3$'
+    labels[4] = '$4$'
+    pos = nx.spring_layout(self.graph)
+    nx.draw_networkx_nodes(self.graph, pos, with_labels=True,
+                           nodelist=source_nodes, node_color='red')
+    nx.draw_networkx_nodes(self.graph, pos, with_labels=True,
+                           nodelist=dest_nodes, node_color='green')
+    nx.draw_networkx_nodes(self.graph, pos, with_labels=True,
+                           nodelist=next_hop, node_color='blue')
+    nx.draw_networkx_edges(self.graph, pos, edgelist=[(
+        0, 1), (1, 3), (3, 4), (0, 2), (1, 4), (4, 0)], alpha=0.5, edge_color='black')
+    nx.draw_networkx_labels(self.graph, pos, labels, font_size=10)
+    plt.axis('off')
+    plt.show(block=False)
+    plt.pause(3)
+    plt.close('all')
