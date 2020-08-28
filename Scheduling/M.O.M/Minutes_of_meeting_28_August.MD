@@ -1,21 +1,23 @@
-Advisor: Asif Hasnain
+# Scheduling
 
-Members present for the meeting
+**Advisor: Asif Hasnain**
 
-Aluri Mohini
+**Members present for the meeting**
 
-Tejas Ravindra Dhawale
+* Aluri Mohini 
 
-Kunal Sisodia
+* Tejas Ravindra Dhawale
 
-Meeting Action Points :
+* Kunal Sisodia
 
-Job completion time 
-Multiple action same timestamp
-Comparison DQN Results with random agent 
-Change job arrival rate, 
-A2C and PPO2 model
-Penalize the mis-prediction, 
-Hyper parameters (layers in neuron network, no of neurons).
-Tetris
 
+## Meeting Action Points :
+ 
+  * Job completion time 
+  * Multiple action same timestamp
+  * Comparison DQN Results with random agent 
+  * Change job arrival rate, 
+  * A2C and PPO2 model
+  * Penalize the mis-prediction, 
+  * Hyper parameters (layers in neuron network, no of neurons).
+  * Tetris
