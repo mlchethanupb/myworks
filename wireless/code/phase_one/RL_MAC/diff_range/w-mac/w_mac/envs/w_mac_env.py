@@ -7,12 +7,8 @@ import numpy as np
 import random
 import w_mac
 from w_mac.envs.packet import Packet
-<<<<<<< HEAD
-from collections import defaultdict
-=======
 import matplotlib.pyplot as plt
 
->>>>>>> 4f6b94bab0749c3cfd8b32bc0665c25f347fb6da
 
 
 
@@ -399,12 +395,6 @@ class W_MAC_Env(gym.Env):
     return ret_val
 
 
-<<<<<<< HEAD
-  def render(self, mode='human', close=False):
-    print('render')
-  
-  
-=======
    #def render(self, mode='human', close=False):
   #   print('render')
 
@@ -440,7 +430,6 @@ def render(self, mode='human'):
             dest_key = key
             break #destination key not present in the same collision domain
         
->>>>>>> 4f6b94bab0749c3cfd8b32bc0665c25f347fb6da
 
         source_nodes = self.collision_domain[source_key]
         dest_nodes = self.collision_domain[dest_key]
