@@ -1,16 +1,14 @@
-# reference: https://github.com/hongzimao/deeprm/blob/master/job_distribution.py
-# modified the original code to fit our project needs
 import numpy as np
 import parameters
 
 class Dist:
 
-    def __init__(self, num_resources, max_nw_size, job_len):
+    def __init__(self, num_resources, max_nw_size, job_len,job_small_chance):
         self.num_resources = num_resources
         self.max_nw_size = max_nw_size
         self.job_len = job_len
 
-        self.job_small_chance = 1
+        self.job_small_chance = job_small_chance
 
         self.job_len_big_lower = job_len * 2 / 3
         self.job_len_big_upper = job_len
@@ -36,7 +34,7 @@ class Dist:
 
         return nw_len, nw_size
 
-    def bi_model_dist(self):
+    def bi_model_dist(self,pa):
 
         # -- job length --
         if np.random.rand() < self.job_small_chance:  # small job
@@ -49,21 +47,20 @@ class Dist:
         nw_size = np.zeros(self.num_resources)
 
         # -- job resource request --
-        dominant_res = np.random.randint(1, self.num_resources)
+        dominant_res = pa.dominant_res # 0 and 1 for respecive indixes and 2 for both resources
         for i in range(self.num_resources):
-            if i == dominant_res:
+            if i == dominant_res or dominant_res == 2:
                 nw_size[i] = np.random.randint(self.dominant_res_lower,
                                                self.dominant_res_upper + 1)
             else:
                 nw_size[i] = np.random.randint(self.other_res_lower,
                                                self.other_res_upper + 1)
-
         return nw_len, nw_size
 
 
-def generate_sequence_work(pa, seed):
+def generate_sequence_work(pa):
 
-    np.random.seed(seed)
+    np.random.seed(pa.random_seed)
 
     simu_len = pa.simu_len * pa.num_ex
 
@@ -76,7 +73,7 @@ def generate_sequence_work(pa, seed):
 
         if np.random.rand() < pa.new_job_rate:  # a new job comes
 
-            nw_len_seq[i], nw_size_seq[i, :] = nw_dist()
+            nw_len_seq[i], nw_size_seq[i, :] = nw_dist(pa)
 
     nw_size_seq_list = []
     for i in range(len(nw_size_seq)):

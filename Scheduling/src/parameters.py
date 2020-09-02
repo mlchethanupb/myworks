@@ -12,7 +12,7 @@ class Parameters:
         # interval for output and store parameters
         self.num_seq_per_batch = 10
         # number of sequences to compute baseline ???
-        self.episode_max_length = self.simu_len * self.simu_len * 4
+        self.episode_max_length = self.simu_len * self.simu_len * 20
         # enforcing an artificial terminal - no of feasable training episodes
         self.num_resources = 2
         # number of resources in the system - CPU,Memory
@@ -38,4 +38,9 @@ class Parameters:
         self.penalty = -1 
         # supervised learning mimic policy
         self.batch_size = 10
-        self.dist = job_distribution.Dist(self.num_resources, self.max_job_size, self.max_job_len)
+        # random number seed
+        self.random_seed = 42
+        self.num_episode = 10
+        self.job_small_chance = 0.7
+        self.dominant_res = 1
+        self.dist = job_distribution.Dist(self.num_resources, self.max_job_size, self.max_job_len, self.job_small_chance)
