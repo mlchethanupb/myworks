@@ -16,13 +16,13 @@ spec:
         image: digitaltwin:dev
         imagePullPolicy: Never
         ports:
-        - containerPort: 15001
+        - containerPort: 4840
         env:
         - name: DT_WEB_PORT
           value: "15001"
         - name: DT_WEB_LISTEN
           value: 0.0.0.0
         - name: OPCUA_HOST
-          value: localhost
+          value: 10.108.157.0
         - name: OPCUA_PORT
           value: "4840"
