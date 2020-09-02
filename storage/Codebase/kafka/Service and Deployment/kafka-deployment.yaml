@@ -13,7 +13,7 @@ spec:
       nodeName: pg-aicon-storage-3
       containers:
       - name: kafka
-        image: kafka:01
+        image: kafka:dev
         imagePullPolicy: Never
         ports:
         - containerPort: 9092
