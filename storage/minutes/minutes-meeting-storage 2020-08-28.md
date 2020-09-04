@@ -28,8 +28,8 @@ End: 14:40
 
 ## Action Points
 
-* Should have a look on disk usage (how fast it grows, current storage is sufficient enough or not). Run the python scripts for a long time and make message time more frequently on Digital Twin to see the effects of disk usage. May need to find another way to measure disk useage if it doesn't work for current scenario. 
-* Setup the components on different vms and test whether they works properly on distributed system.
+* Should have a look on disk usage (how fast it grows, current storage is sufficient enough or not). Run the python scripts for a long time and make message transfer time more frequent on Digital Twin to see the effects of disk usage. May need to find another way to measure disk usage if it doesn't work for current scenario. 
+* Setup the components on different vms and test whether they work properly on distributed system.
 * Use OPC UA connector for collecting the previously discussed metrics.
 
 
