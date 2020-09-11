@@ -19,27 +19,21 @@ class W_MAC_Env(gym.Env):
 
     #Create the graph
     self.graph = graph
-    # self.graph.add_nodes_from([0, 1, 2, 3, 4])
-    # self.graph.add_edges_from([(0, 1), (0, 2), (1, 2), (2, 3), (2, 4), (3, 4)])
+
     nx.draw(self.graph, with_labels=True, font_weight='bold')
 
     self.packet_delivered = 0
     self.packet_lost = 0
 
-    # range_domain = {}
-    # full_range={}
-    for i in self.graph.nodes:
-      count =0
-      domain = []
-   
-      for j in self.graph.nodes:
-        if (i,j) in self.graph.edges:
-      
-            
-          count = count +1
-          if count > 2:
-            intermediate_node = i
-            print('Intermediate node', intermediate_node)
+
+
+    """
+    Commenting out previous intermediate node detection in multiple collision domain
+
+    """
+
+
+
 
     range_domain = {} #to get the range of each node for each iteration it will get {0:{0,1,2}}
     full_range={} #to get the range of all nodes merging it with range_domain the total domain will have is {0:{0,1,2},1:{0,1,2}etc}
@@ -47,38 +41,73 @@ class W_MAC_Env(gym.Env):
       domain = [] #to get the domain of each node
       for j in self.graph.nodes:
         if (i,j) in self.graph.edges:      
-          print(i,j)
           domain.append(i)
           domain.append(j)
-          print(domain)
       range_domain[i] = domain
     
-      print(range_domain)
-      full_range.update(range_domain)
-      print(full_range)
-
-    del full_range[intermediate_node]
-    print(full_range) 
+     
+    full_range.update(range_domain)
+    print('Full Range with duplicates',full_range)
 
 
     fullrange_wo_dupli = {}
+    sorted_list = []
     for key,value in full_range.items():
-      fullrange_wo_dupli[key] = set(value)
-    print(fullrange_wo_dupli)
+          sorted_list = sorted(value) #to arrange values in ascending order in dict and removes duplicate values of the single key
+          # print('With dupli',sorted_list)
 
+          sorted_wo_dupli = []
+          for i in sorted_list:
+            if i not in sorted_wo_dupli:
+              sorted_wo_dupli.append(i)
+          # print('sorted list wo dupli',sorted_wo_dupli)
+          fullrange_wo_dupli[key] = sorted_wo_dupli
+    print('fullrange_wo_dupli' ,fullrange_wo_dupli)
+
+
+    """
+    Finding the intermediate nodes in multi domain network
+
+    """ 
+
+    intermediate_nodes = []
+    for ranges, nodes in fullrange_wo_dupli.items():
+      for ranges1, nodes1 in fullrange_wo_dupli.items():
+        if set(nodes) < set(nodes1):      #check whether values are subset of values1, if values are subset
+          intermediate_nodes.append(ranges1)
+    intermediate_nodes_wo_dupli = set(intermediate_nodes) #removing the duplicate intermediate nodes
+
+
+    """
+    Removing the range of intermediate nodes, to avoid problem with collision
+
+    """
+
+    for nodes in intermediate_nodes_wo_dupli:
+      print('Intermediate nodes',nodes)
+      del fullrange_wo_dupli[nodes]
+    print('Fullrange after intermediate node deletion',fullrange_wo_dupli)
+
+
+
+    """
+    Removing the duplicate domains in the network
+
+    """
     d2 = {tuple(v): k for k, v in fullrange_wo_dupli.items()}  # exchange keys, values
     fullrange_wo_dupli = {v: list(k) for k, v in d2.items()} 
-    print(fullrange_wo_dupli)
+    print('Multiple Collision Domains',fullrange_wo_dupli)
+ 
 
 
 
     #Each node can do 2 actions {Transmit, Wait}
     action_space = [2 for i in range(len(self.graph.nodes()))]
-    # print(action_space)
+    
     self.action_space = spaces.MultiDiscrete(action_space)
     #creating the collision domains
     self.collision_domain = fullrange_wo_dupli
-    print('collision_domain',self.collision_domain) 
+     
     self.common_domain = [2] #nodes common in both range trying to work on this still
 
     self.node_in_domains = {}
