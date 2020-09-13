@@ -22,5 +22,6 @@ ENV OUT_FILE /respone_time_measurements/response
 
 COPY opc_ua_kafka_connector.py opc_ua_kafka_connector.py
 COPY start.sh start.sh
+COPY met.sh met.sh
 RUN chmod +x start.sh
 CMD /start.sh
