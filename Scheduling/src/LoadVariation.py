@@ -19,7 +19,7 @@ from gym import spaces
 import pandas as pd
 from stable_baselines.common import make_vec_env
 import Randomscheduler
-import RunStablebaselines
+import Script
 from statistics import mean 
 
 
@@ -53,8 +53,7 @@ if __name__ == '__main__':
                 model = model2
             elif pa.objective == pa.objective_random: 
                 model = None
-            print("-------------------------------------------------------------------")
-            episode_a2c, reward_a2c, slowdown_a2c, completion_time_a2c = RunStablebaselines.run_episodes(model, pa, env, job_sequence_len)
+            episode_a2c, reward_a2c, slowdown_a2c, completion_time_a2c = Script.run_episodes(model, pa, env, job_sequence_len)
 
             mean_slowdown = mean(slowdown_a2c)
             mean_reward = mean(reward_a2c)

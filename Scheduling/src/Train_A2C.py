@@ -24,7 +24,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 if __name__ == '__main__':
     print("------------------------------------------------------------------")
     pa = parameters.Parameters()
-    jobsets = [42, 23, 5, 78, 96, 28, 87, 35, 73, 64]
+    jobsets = [42]#, 23, 5, 78, 96, 28, 87, 35, 73, 64]
     pa.objective = pa.objective_slowdown
     for jobset in jobsets:
         pa.random_seed = jobset
@@ -44,9 +44,9 @@ if __name__ == '__main__':
     for jobset in jobsets:
         pa.random_seed = jobset
         job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(pa)
-        env = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
+        envi = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
                             job_sequence_size=job_sequence_size)
-        env2 = make_vec_env(lambda: env, n_envs=1)
+        env2 = make_vec_env(lambda: envi, n_envs=1)
 
         # Training the A2C agent for completion time
         model2 = A2C("MlpPolicy", env2, verbose=1,
