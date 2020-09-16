@@ -1,5 +1,6 @@
 import numpy as np
 import parameters
+import random
 
 class Dist:
 
@@ -16,11 +17,11 @@ class Dist:
         self.job_len_small_lower = 1
         self.job_len_small_upper = job_len / 5
 
-        self.dominant_res_lower = max_nw_size / 2
-        self.dominant_res_upper = max_nw_size
+        self.dominant_res_lower = 0.25 * max_nw_size
+        self.dominant_res_upper = 0.5 * max_nw_size
 
-        self.other_res_lower = 1
-        self.other_res_upper = max_nw_size / 5
+        self.other_res_lower = max(0.05 * max_nw_size, 1)
+        self.other_res_upper = 0.1 * max_nw_size
 
     def normal_dist(self):
 
@@ -48,6 +49,9 @@ class Dist:
 
         # -- job resource request --
         dominant_res = pa.dominant_res # 0 and 1 for respecive indixes and 2 for both resources
+        if dominant_res == 3:
+            dominant_res = random.randint(0, 1)
+            
         for i in range(self.num_resources):
             if i == dominant_res or dominant_res == 2:
                 nw_size[i] = np.random.randint(self.dominant_res_lower,

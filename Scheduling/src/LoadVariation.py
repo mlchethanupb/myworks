@@ -1,3 +1,4 @@
+import Deeprm
 import Deeprm1
 import operator
 import numpy as np
@@ -18,83 +19,72 @@ from gym import spaces
 import pandas as pd
 from stable_baselines.common import make_vec_env
 import Randomscheduler
+import RunStablebaselines
 from statistics import mean 
 
 
 if __name__ == '__main__':
     pa = parameters.Parameters()
-    Job_arrival_rate = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
-    Job_arrival_rate_slowdown = []
-    Job_arrival_rate_reward = []
-    for rate in Job_arrival_rate:
-        pa.new_job_rate = rate
-        job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(pa)
-        env = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
-                            job_sequence_size=job_sequence_size)
-        env1 = make_vec_env(lambda: env, n_envs=1)
-        model3 = A2C.load("job_scheduling_A2C", env1)
-        obs = env.reset()
-        done = False
-        action_list = []
-        episode_a2c = []
-        reward_a2c = []
-        slowdown_a2c = []
-        print("-------------------------------------------------------------------")
-        print("Scheduling using trained A2C agent")
-        for episode in range(pa.num_episode):
-            cumulated_episode_reward = 0
-            cumulated_job_slowdown = 0
-            obs = env.reset()
-            done = False
-            while not done:
-                action, _states = model3.predict(obs, deterministic=False)
-                obs, reward, done, info = env.step(action)
-                if bool(info) == True:
-                    cumulated_job_slowdown += info['Job Slowdown']
-                if done == True:
-                    # print("All jobs scheduled")
-                    break
-                
-                if reward != 0:
-                    action_list.append(action)
-                    # action_list = []
-                    print("Timestep: ", env.curr_time, "Action: ",
-                        action, "Reward: ", reward)
-                    cumulated_episode_reward += reward
-                    if env.curr_time == pa.episode_max_length:
-                        done = True
-                # elif reward == 0 and done != True:
-                #     action_list.append(action)
-            episode_a2c.append(episode+1)
-            reward_a2c.append(cumulated_episode_reward)
-            slowdown_a2c.append(cumulated_job_slowdown / len(job_sequence_len))
+    Job_arrival_rate_slowdown_sd = []
+    Job_arrival_rate_slowdown_ct = []
+    Job_arrival_rate_reward_sd = []
+    Job_arrival_rate_reward_ct = []
+    Job_arrival_rate_completion_time_sd = []
+    Job_arrival_rate_completion_time_ct = []
+    Job_arrival_rate = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190]
+    objectives = [pa.objective_slowdown, pa.objective_random]
+    for objective in objectives:
+        pa.objective = objective
+        Job_arrival_rate_slowdown = []
+        Job_arrival_rate_reward = []
+        Job_arrival_rate_completion_time = []
+        for rate in Job_arrival_rate:
+            pa.new_job_rate = rate / 100
+            job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(pa)
+            env = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
+                                job_sequence_size=job_sequence_size)
+            env1 = make_vec_env(lambda: env, n_envs=1)
+            model = None
+            if pa.objective == pa.objective_slowdown:
+                model1 = A2C.load("job_scheduling_A2C_Slowdown", env1)
+                model = model1
+            elif pa.objective == pa.objective_Ctime:
+                model2 = A2C.load("job_scheduling_A2C_Ctime", env1)
+                model = model2
+            elif pa.objective == pa.objective_random: 
+                model = None
+            print("-------------------------------------------------------------------")
+            episode_a2c, reward_a2c, slowdown_a2c, completion_time_a2c = RunStablebaselines.run_episodes(model, pa, env, job_sequence_len)
 
-        mean_slowdown = mean(slowdown_a2c)
-        mean_reward = mean(reward_a2c)
-        Job_arrival_rate_slowdown.append(mean_slowdown)
-        Job_arrival_rate_reward.append(mean_reward)
+            mean_slowdown = mean(slowdown_a2c)
+            mean_reward = mean(reward_a2c)
+            mean_completion_time = mean(completion_time_a2c)
+            Job_arrival_rate_slowdown.append(mean_slowdown)
+            Job_arrival_rate_reward.append(mean_reward)
+            Job_arrival_rate_completion_time.append(mean_completion_time)
 
+        if pa.objective == pa.objective_slowdown:
+            Job_arrival_rate_slowdown_sd = Job_arrival_rate_slowdown
+            Job_arrival_rate_reward_sd = Job_arrival_rate_reward
+            Job_arrival_rate_completion_time_sd = Job_arrival_rate_completion_time
 
+        elif pa.objective == pa.objective_Ctime:
+            Job_arrival_rate_slowdown_ct = Job_arrival_rate_slowdown
+            Job_arrival_rate_reward_ct = Job_arrival_rate_reward
+            Job_arrival_rate_completion_time_ct = Job_arrival_rate_completion_time
 
-fig = plt.figure()
-# plt.plot(episode_dqn, reward_dqn, color='skyblue', label='DQN agent')
-# plt.plot(episode_ppo2, reward_ppo2,  color='red', label='PPO2 agent')
-plt.plot(Job_arrival_rate, Job_arrival_rate_reward, color='olive', label='A2C agent')
-plt.xlabel("Job_arrival_rate")
-plt.ylabel("Job_arrival_rate_reward")
-plt.legend()
-plt.grid()
-plt.show()
-plt.savefig('Job_arrival_rate_reward.png')
+        elif pa.objective == pa.objective_random:
+            Job_arrival_rate_slowdown_random = Job_arrival_rate_slowdown
+            Job_arrival_rate_reward_random = Job_arrival_rate_reward
+            Job_arrival_rate_completion_time_random = Job_arrival_rate_completion_time
 
-fig2 = plt.figure()
-# plt.plot(episode_dqn, slowdown_dqn, color='skyblue', label='DQN agent')
-# plt.plot(episode_ppo2, slowdown_ppo2,  color='red', label='PPO2 agent')
-plt.plot(Job_arrival_rate, Job_arrival_rate_slowdown, color='olive', label='A2C agent')
-plt.xlabel("Job_arrival_rate")
-plt.ylabel("Job_arrival_rate_slowdown")
-plt.title("Job_arrival_rate_slowdown")
-plt.legend()
-plt.grid()
-plt.show()
-fig2.savefig('Job_arrival_rate_slowdown.png')
+    fig = plt.figure()
+    plt.plot(Job_arrival_rate, Job_arrival_rate_slowdown_sd, color='blue', label='A2C Slowdown agent')
+    plt.plot(Job_arrival_rate, Job_arrival_rate_slowdown_random, color='yellow', label='Random agent')
+    plt.xlabel("Cluster Load(Percentage)")
+    plt.ylabel("Average Slowdown")
+    plt.title("Job_arrival_rate_slowdown")
+    plt.legend()
+    plt.grid()
+    plt.show()
+    fig.savefig('Job_arrival_rate_Slowdown.png')
