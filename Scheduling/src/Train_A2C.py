@@ -32,12 +32,14 @@ if __name__ == '__main__':
     env1 = make_vec_env(lambda: env, n_envs=1)
 
     # Training the A2C agent
+    env.reset()
     model1 = A2C("MlpPolicy", env1, verbose=1,
                  tensorboard_log='/home/aicon/kunalS/workspace/tensor_A2C/')
     model1.learn(total_timesteps=25000)
     model1.save("job_scheduling_A2C_Slowdown")
 
     pa.objective = pa.objective_Ctime
+    env.reset()
     model2 = A2C("MlpPolicy", env1, verbose=1,
                  tensorboard_log='/home/aicon/kunalS/workspace/tensor_A2C/')
     model2.learn(total_timesteps=25000)
