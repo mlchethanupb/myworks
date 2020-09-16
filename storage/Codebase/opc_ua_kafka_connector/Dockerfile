@@ -18,6 +18,7 @@ ENV KAFKA_PORT 9092
 ENV KAFKA_TOPIC my-topic
 ENV SLEEP_DURATION 1
 ENV OUT_FILE /respone_time_measurements/response
+ENV OUT_FILE_TXT /respone_time_measurements/response
 #ENV COMPRESSION snappy
 
 COPY opc_ua_kafka_connector.py opc_ua_kafka_connector.py
