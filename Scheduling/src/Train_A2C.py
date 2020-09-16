@@ -24,7 +24,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 if __name__ == '__main__':
     print("------------------------------------------------------------------")
     pa = parameters.Parameters()
-    jobsets = [42]#, 23, 5, 78, 96, 28, 87, 35, 73, 64]
+    jobsets = [42, 23, 5, 78, 96, 28, 87, 35, 73, 64]
     pa.objective = pa.objective_slowdown
     for jobset in jobsets:
         pa.random_seed = jobset
