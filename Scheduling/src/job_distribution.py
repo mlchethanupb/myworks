@@ -1,3 +1,5 @@
+# reference: https://github.com/hongzimao/deeprm/blob/master/job_distribution.py
+# modified the original code to fit our project needs
 import numpy as np
 import parameters
 import random
