@@ -129,6 +129,8 @@ class W_MAC_Env(gym.Env):
 
     self.wait_counter = [0 for i in range(len(self.graph.nodes()))]
     self.__reset_queue()
+  """ Observation space for SDN """
+    # self.observation_space = Tuple((Discrete(6),Discrete(6),Box(0, 1, shape=(1, 5))))
 
   """-------------------------------------------------------------------------------------------- """
 
@@ -209,6 +211,33 @@ class W_MAC_Env(gym.Env):
 
   def step(self, actions):
     print("received action",actions)
+
+  """ Pavitra's code for Flowtable implementation """
+
+    # next_hop = actions[0][src]
+    # flowtable = collections.defautdict(list)
+    # flowentry = []
+    # flowentry = next_hop, dest
+    # flowtable[src].append(flowentry)
+    # if (len(flowtable[src] == 5)):
+    #   attacked_node = src
+
+    # flowtable_status = [0] * len(self.graph.nodes)
+    # flowtable_ratio = len(flowtable[src])/5
+      
+    # for index,item in enumerate(flowtable_status):
+    #   if index == src:
+    #     flowtable_status[index] = flowtable_ratio
+    #   if flowtable_status[index] == 1:
+    #      attacked_node = src
+    #       print('attacked_node',attacked_node)
+    # print('Flow table status',flowtable_status)
+
+    # next_state = []
+    # next_state.append(flowentry)
+    # next_state.append(flowtable_status)
+
+    # reward = self.perform_actions(actions)
 
     #for node, action in enumerate(actions):
       #print(node, action)
