@@ -29,7 +29,7 @@ class Wireless2(gym.Env):
         self.num_packets = [1 for i in self.num_nodes]
 
 
-
+    
     # In same range, 2 nodes can't transmit at a same time
     # if action =1 transmit, action = 0 then wait
     # Give reward when number of 1's occured once in a action list
@@ -47,7 +47,7 @@ class Wireless2(gym.Env):
             reward = -100
 
         elif(c[1]<2): #if no of 1's are > 1 ex:[0,1,1,1,0] collision will happen
-
+            
             print("TRANSMIT ACTION")
             index = action.index(1) # Fetching index of 1, to get the node which is permitted to transfer
             print("printiting INDEX of the list",index) #ex: [1,0,0,0,0] node 0 can transmit now
@@ -62,13 +62,13 @@ class Wireless2(gym.Env):
 
                 self.num_packets[index] = self.num_packets[index] - 1
                 reward = 100
-
+        
         else:
             print("WAIT ACTION to avoid collision")
             # index = action.index(0)
             reward = -100
 
-
+            
         print(self.num_packets)
         state = self.num_packets
         reward += reward
@@ -79,19 +79,19 @@ class Wireless2(gym.Env):
 
         print("New_state",np.array(state))
         print("Reward",reward)
-
+        
 
         return np.array(state), reward, done, info
 
+        
+
+
+                                    
 
 
 
 
-
-
-
-
-
+    
 
     def reset(self):
         self.num_packets = [1 for i in self.num_nodes]
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     new_state = env.reset()
     print(new_state)
     # rew=[]
-
+    
     for i in range(10):
         action, _states = model.predict(new_state, deterministic=True)
         new_state, reward, dones, info = env.step(action)
