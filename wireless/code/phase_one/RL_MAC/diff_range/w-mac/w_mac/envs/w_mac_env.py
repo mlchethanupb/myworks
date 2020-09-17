@@ -107,7 +107,8 @@ class W_MAC_Env(gym.Env):
     self.action_space = spaces.MultiDiscrete(action_space)
     #creating the collision domains
     self.collision_domain = fullrange_wo_dupli
-    
+     
+    self.common_domain = [2] #nodes common in both range trying to work on this still
 
     self.node_in_domains = {}
 
@@ -119,18 +120,15 @@ class W_MAC_Env(gym.Env):
           self.node_in_domains[value[i]].append(key)
     #print("self.node_in_domains : ",self.node_in_domains)
     
-    observation_space = [15 for i in range(len(self.graph.nodes()))] #next hops are the observation space
+    observation_space = [5 for i in range(len(self.graph.nodes()))] #next hops are the observation space
     for i in range(len(self.graph.nodes())):
       observation_space.append(10)
     self.observation_space = spaces.MultiDiscrete(observation_space)
     #print(self.observation_space)
-    #print(self.observation_space.sample()) 
+    #print(self.observation_space.sample())
 
     self.wait_counter = [0 for i in range(len(self.graph.nodes()))]
     self.__reset_queue()
-    """new observation space for SDN-IOT """
-    # self.observation_space = Tuple((Discrete(6),Discrete(6),Box(0, 1, shape=(1, 5))))
-
 
   """-------------------------------------------------------------------------------------------- """
 
@@ -146,9 +144,9 @@ class W_MAC_Env(gym.Env):
       #Add 8 packets for each node
       for count in range(8):
         src = i
-        dest = random.randrange(0,15)
+        dest = random.randrange(0,5)
         while src == dest:
-          dest = random.randrange(0,15)
+          dest = random.randrange(0,5)
             
         #To fetch the domain of source and destination node
         for key,values in self.collision_domain.items():
@@ -180,9 +178,6 @@ class W_MAC_Env(gym.Env):
           print("2. src,dest,next_hop",src,dest,next_hop)
           packet= Packet(src,dest,next_hop)
           self.queues[src].insert(0, packet)
-
-
-
     
   def reset(self):
     #reset the queue
@@ -213,34 +208,7 @@ class W_MAC_Env(gym.Env):
   """-------------------------------------------------------------------------------------------- """
 
   def step(self, actions):
-
-    """Pavitra's code for flow table status"""
-    # print("received action",actions)
-    # next_hop = actions[0][src]
-    # flowtable = collections.defautdict(list)
-    # flowentry = []
-    # flowentry = next_hop, dest
-    # flowtable[src].append(flowentry)
-    # if (len(flowtable[src] == 5)):
-    #   attacked_node = src
-
-    # flowtable_status = [0] * len(self.graph.nodes)
-    # flowtable_ratio = len(flowtable[src])/5
-      
-    # for index,item in enumerate(flowtable_status):
-    #   if index == src:
-    #     flowtable_status[index] = flowtable_ratio
-    #   if flowtable_status[index] == 1:
-    #     attacked_node = src
-    #     print('attacked_node',attacked_node)
-    # print('Flow table status',flowtable_status)
-
-    # next_state = []
-    # next_state.append(flowentry)
-    # next_state.append(flowtable_status)
-
-    # reward = self.perform_actions(actions)
-
+    print("received action",actions)
 
     #for node, action in enumerate(actions):
       #print(node, action)
