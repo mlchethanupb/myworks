@@ -19,26 +19,17 @@ class W_MAC_Env(gym.Env):
 
     #Create the graph
     self.graph = graph
+    self.total_nodes = len(self.graph.nodes())
 
     nx.draw(self.graph, with_labels=True, font_weight='bold')
 
     self.packet_delivered = 0
     self.packet_lost = 0
 
-
-
-    """
-    Commenting out previous intermediate node detection in multiple collision domain
-
-    """
-
-
-
-
-    range_domain = {} #to get the range of each node for each iteration it will get {0:{0,1,2}}
-    full_range={} #to get the range of all nodes merging it with range_domain the total domain will have is {0:{0,1,2},1:{0,1,2}etc}
+    range_domain = {} ## to get the range of each node for each iteration it will get {0:{0,1,2}}
+    full_range={} ## to get the range of all nodes merging it with range_domain the total domain will have is {0:{0,1,2},1:{0,1,2}etc}
     for i in self.graph.nodes: 
-      domain = [] #to get the domain of each node
+      domain = [] ## to get the domain of each node
       for j in self.graph.nodes:
         if (i,j) in self.graph.edges:      
           domain.append(i)
@@ -47,13 +38,13 @@ class W_MAC_Env(gym.Env):
     
      
     full_range.update(range_domain)
-    print('Full Range with duplicates',full_range)
+    #print('Full Range with duplicates',full_range)
 
 
     fullrange_wo_dupli = {}
     sorted_list = []
     for key,value in full_range.items():
-          sorted_list = sorted(value) #to arrange values in ascending order in dict and removes duplicate values of the single key
+          sorted_list = sorted(value) ## to arrange values in ascending order in dict and removes duplicate values of the single key
           # print('With dupli',sorted_list)
 
           sorted_wo_dupli = []
@@ -62,56 +53,51 @@ class W_MAC_Env(gym.Env):
               sorted_wo_dupli.append(i)
           # print('sorted list wo dupli',sorted_wo_dupli)
           fullrange_wo_dupli[key] = sorted_wo_dupli
-    print('fullrange_wo_dupli' ,fullrange_wo_dupli)
+    #print('fullrange_wo_dupli' ,fullrange_wo_dupli)
 
 
-    """
-    Finding the intermediate nodes in multi domain network
-
-    """ 
+    
+    ### Finding the intermediate nodes in multi domain network
 
     intermediate_nodes = []
     for ranges, nodes in fullrange_wo_dupli.items():
       for ranges1, nodes1 in fullrange_wo_dupli.items():
-        if set(nodes) < set(nodes1):      #check whether values are subset of values1, if values are subset
+        if set(nodes) < set(nodes1):  ## check whether values are subset of values1, if values are subset
           intermediate_nodes.append(ranges1)
-    intermediate_nodes_wo_dupli = set(intermediate_nodes) #removing the duplicate intermediate nodes
+    intermediate_nodes_wo_dupli = set(intermediate_nodes) ## removing the duplicate intermediate nodes
 
 
-    """
-    Removing the range of intermediate nodes, to avoid problem with collision
-
-    """
+    ### Removing the range of intermediate nodes, to avoid problem with collision
 
     for nodes in intermediate_nodes_wo_dupli:
       print('Intermediate nodes',nodes)
       del fullrange_wo_dupli[nodes]
-    print('Fullrange after intermediate node deletion',fullrange_wo_dupli)
+    # print('Fullrange after intermediate node deletion',fullrange_wo_dupli)
+   
+    ### Removing the duplicate domains in the network
 
-
-
-    """
-    Removing the duplicate domains in the network
-
-    """
     d2 = {tuple(v): k for k, v in fullrange_wo_dupli.items()}  # exchange keys, values
     fullrange_wo_dupli = {v: list(k) for k, v in d2.items()} 
-    print('Multiple Collision Domains',fullrange_wo_dupli)
+    # print('Multiple Collision Domains',fullrange_wo_dupli)
  
-
-
-
-    #Each node can do 2 actions {Transmit, Wait}
-    action_space = [2 for i in range(len(self.graph.nodes()))]
-    
+    """ Creating Action space """
+    ### Action space will have 2 actions Nexthop + transmitwait
+    ### 1. All the nexthops that a node can take (@todo-limit the actions spaces | possible extension for multipacket transmission)
+    ### 2. Each node can do 2 actions {Transmit, Wait}
+    nh_tup = tuple((self.total_nodes,)*self.total_nodes)
+    tw_tup = tuple((2,)*self.total_nodes)   ## wait = 0 | transmit = 1
+    action_space = []
+    action_space.append(nh_tup)
+    action_space.append(tw_tup)
     self.action_space = spaces.MultiDiscrete(action_space)
-    #creating the collision domains
+    print(self.action_space)
+    print(self.action_space.sample())
+
+    ### creating the collision domains
     self.collision_domain = fullrange_wo_dupli
      
-    self.common_domain = [2] #nodes common in both range trying to work on this still
-
+    ### Find all the domains a node belong too.  
     self.node_in_domains = {}
-
     for key, value in self.collision_domain.items():
       for i in range(len(value)):
         if value[i] not in self.node_in_domains: 
@@ -120,26 +106,44 @@ class W_MAC_Env(gym.Env):
           self.node_in_domains[value[i]].append(key)
     #print("self.node_in_domains : ",self.node_in_domains)
     
-    observation_space = [5 for i in range(len(self.graph.nodes()))] #next hops are the observation space
-    for i in range(len(self.graph.nodes())):
-      observation_space.append(10)
-    self.observation_space = spaces.MultiDiscrete(observation_space)
-    #print(self.observation_space)
-    #print(self.observation_space.sample())
+    """ Creating observation space """
+    ### observation_space = [ current_node , destination, [ list of flowtable status @ each node] ]
+    ### || @todo - all in single list, try to differentiate || 
+    ### || @todo - somthing like Tuple((Discrete(6),Discrete(6),Box(0, 1, shape=(1, 5)))) ||
 
-    self.wait_counter = [0 for i in range(len(self.graph.nodes()))]
+    observation_space = [len(self.graph.nodes())] ## Current node info
+    observation_space.append(len(self.graph.nodes())) ## Destination
+    for i in range(len(self.graph.nodes())): 
+      observation_space.append(2) ## node attacked or not
+    self.observation_space = spaces.MultiDiscrete(observation_space)
+    print(self.observation_space)
+    print(self.observation_space.sample())
+
+    # | not_needed |  self.wait_counter = [0 for i in range(len(self.graph.nodes()))]
     self.__reset_queue()
-  """ Observation space for SDN """
-    # self.observation_space = Tuple((Discrete(6),Discrete(6),Box(0, 1, shape=(1, 5))))
 
   """-------------------------------------------------------------------------------------------- """
 
 
-  #new reset queue function
   def __reset_queue(self):
-    self.queues = {i: [] for i in self.graph.nodes(data=False)}  #{1: [], 2: [], 3: [], 4: [], 5: []} create a empty list for all nodes
+    
+    ### Create queue for each node  || @todo = possible extenstion for multiple packet transmition || 
+    ### Create a packet, fix source and destination for now - choose randomly later (but fixed for one episode)
+    ### Add packet to that queue of source. 
+
+    self.queues = {i: [] for i in self.graph.nodes(data=False)} 
     #print(self.queues)
 
+    ### Find source and destination for each episode
+    self.src = 0 #random.randrange(0,self.total_nodes)
+    self.dest = 4 #random.randrange(0,self.total_nodes)
+    while self.src == self.dest:
+      dest = random.randrange(0,self.total_nodes)
+    print("src: ",self.src,"dest: ",self.dest)
+    packet = Packet(self.src,self.dest)
+    self.queues[self.src].insert(0, packet)
+    
+    """  
     for i in self.graph.nodes(data=False):
       #print("-----------------------------")
       #print("Adding packets for node : ",i)  
@@ -160,7 +164,7 @@ class W_MAC_Env(gym.Env):
             break #destination key not present in the same collision domain
         
 
-          #when source and destination belong to same domain, compared with key value of source and destination then next hop = destination      
+        ## when source and destination belong to same domain, compared with key value of source and destination then next hop = destination      
         if source_key == dest_key:
           next_hop = dest
           print("1. src,dest,next_hop",src,dest,next_hop)
@@ -168,10 +172,10 @@ class W_MAC_Env(gym.Env):
           self.queues[src].insert(0, packet)
           
         else:
-          """
-              when source and destination are in different range then find the common node of both range 
-              and assign as a next hop    
-          """
+          
+          #    when source and destination are in different range then find the common node of both range 
+          #    and assign as a next hop    
+          
           source_nodes = self.collision_domain[source_key]
           dest_nodes = self.collision_domain[dest_key]
           for node in source_nodes:
@@ -180,26 +184,24 @@ class W_MAC_Env(gym.Env):
           print("2. src,dest,next_hop",src,dest,next_hop)
           packet= Packet(src,dest,next_hop)
           self.queues[src].insert(0, packet)
-    
+    """
   def reset(self):
-    #reset the queue
+    ## reset the queue
     self.__reset_queue()
     self.packet_delivered = 0
     self.packet_lost = 0
-    #Frame the state - Next hop of all first packets in queue.
+    
+    ## Frame the state - Next hop of all first packets in queue.
 
     state = [] #empty list for state
-
-    for node in self.queues.values():
-      if len(node):
-        state.append(node[len(node)-1].nxt_hop)
+    state.append(self.src)
+    state.append(self.dest)
     
-    """
-    for node in self.queues.values():
-      state.append(len(node))
-    """
-    for i in self.wait_counter:
-      state.append(i)
+    for i in range(self.total_nodes):
+      if i == 2:
+        state.append(1)
+      else:
+        state.append(0)
 
     print(state)
     arr = np.array(state)
@@ -207,13 +209,13 @@ class W_MAC_Env(gym.Env):
     #return the state
     return(arr)
 
-  """-------------------------------------------------------------------------------------------- """
+  """--------------------------------------------------------------------------------------------"""
 
   def step(self, actions):
     print("received action",actions)
 
-  """ Pavitra's code for Flowtable implementation """
-
+    """ Pavitra's code for Flowtable implementation """
+    """
     # next_hop = actions[0][src]
     # flowtable = collections.defautdict(list)
     # flowentry = []
@@ -241,31 +243,33 @@ class W_MAC_Env(gym.Env):
 
     #for node, action in enumerate(actions):
       #print(node, action)
-
-    reward = self.perform_actions(actions)
+    """
+    #reward = self.perform_actions(actions)
     
-    """ Form the next state by adding next jop of all nodes and values of wait counter"""
+    ### next state = curr_node + dest + flow_table_status
     next_state = [] #empty list for next_state
-    for node in self.queues.values():
-      if len(node):
-        next_state.append(node[len(node)-1].nxt_hop)
-      else:
-        #invalid value
-        next_state.append(999)
+
+    for index, values in self.queues.items():
+          if len(values):
+            next_state.append(index)
+            break
+
+    next_state.append(self.dest)
     
-    for i in self.wait_counter:
-          next_state.append(i)
+    for i in range(self.total_nodes):
+      if i == 2:
+        next_state.append(1)
+      else:
+        next_state.append(0)
     
     nxt_state_arr = np.array(next_state)
 
-
     isdone = self.isdone()
     info = {}
-
-    actions_list = list(actions)
-    if isdone == False and actions_list.count(1) == 0 :
-      reward -= 1000
-
+    reward = 0
+    #actions_list = list(actions)
+    #if isdone == False and actions_list.count(1) == 0 :
+      #reward -= 1000
 
     print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
