@@ -137,6 +137,7 @@ class W_MAC_Env(gym.Env):
     ### Find source and destination for each episode
     self.src = 0 #random.randrange(0,self.total_nodes)
     self.dest = 4 #random.randrange(0,self.total_nodes)
+    self.curr_node = self.src
     while self.src == self.dest:
       dest = random.randrange(0,self.total_nodes)
     print("src: ",self.src,"dest: ",self.dest)
@@ -213,7 +214,59 @@ class W_MAC_Env(gym.Env):
 
   def step(self, actions):
     print("received action",actions)
+    nxt_hop_list = actions[0]
+    tw_status_list = actions[1]
+    print("nxt_hop_list: ",nxt_hop_list)
+    print("tw_status_list", tw_status_list)
+    
+    reward = 0
+    isdone = False
 
+    for index , tw_status in enumerate(tw_status_list):
+      if(index == self.curr_node) and tw_status == 1:
+        print("one")
+        reward += 100
+      else:
+        if(tw_status == 1):
+          print("two.one")
+          reward -= 100
+        else:
+          print("two.two")
+          reward += 10
+    
+    for index, nxt_hop in enumerate(nxt_hop_list):
+      ## attck node 
+      if (index == self.curr_node):
+        if(nxt_hop == 2):
+          print("three")
+          reward -= 1000
+        
+        if (False == self.graph.has_edge(self.curr_node,nxt_hop_list[index])):
+          print("four")
+          reward -= 100
+        elif (nxt_hop_list[index] == self.dest) and (tw_status_list[index] == 1):
+          print("five")
+          reward += 1000
+          isdone = True
+          packet =self.queues[index].pop()
+          print("Packet reached destination") 
+        else:
+          print("six")
+          if tw_status_list[index] == 1:
+            if(len(self.queues[index])):
+              packet =self.queues[index].pop()
+              print("Moving packet from ", self.curr_node,"to ", nxt_hop)
+
+              self.curr_node = nxt_hop
+              self.queues[self.curr_node].insert(0, packet)
+            
+              reward += 100
+
+            else:
+              print("Empty queue... wrong node?? ")
+        
+        break
+  
     """ Pavitra's code for Flowtable implementation """
     """
     # next_hop = actions[0][src]
@@ -264,9 +317,8 @@ class W_MAC_Env(gym.Env):
     
     nxt_state_arr = np.array(next_state)
 
-    isdone = self.isdone()
+    #isdone = self.isdone()
     info = {}
-    reward = 0
     #actions_list = list(actions)
     #if isdone == False and actions_list.count(1) == 0 :
       #reward -= 1000
