@@ -84,11 +84,16 @@ class W_MAC_Env(gym.Env):
     ### Action space will have 2 actions Nexthop + transmitwait
     ### 1. All the nexthops that a node can take (@todo-limit the actions spaces | possible extension for multipacket transmission)
     ### 2. Each node can do 2 actions {Transmit, Wait}
-    nh_tup = tuple((self.total_nodes,)*self.total_nodes)
-    tw_tup = tuple((2,)*self.total_nodes)   ## wait = 0 | transmit = 1
+    #nh_tup = tuple((self.total_nodes,)*self.total_nodes)
+    #tw_tup = tuple((2,)*self.total_nodes)   ## wait = 0 | transmit = 1
     action_space = []
-    action_space.append(nh_tup)
-    action_space.append(tw_tup)
+    #action_space.append(nh_tup)
+    #action_space.append(tw_tup)
+    for i in range(self.total_nodes):
+      action_space.append(self.total_nodes)
+    for i in range(self.total_nodes):
+      action_space.append(2)
+
     self.action_space = spaces.MultiDiscrete(action_space)
     print(self.action_space)
     print(self.action_space.sample())
@@ -214,8 +219,14 @@ class W_MAC_Env(gym.Env):
 
   def step(self, actions):
     print("received action",actions)
-    nxt_hop_list = actions[0]
-    tw_status_list = actions[1]
+    nxt_hop_list = []#actions[0]
+    tw_status_list = []#actions[1]
+    for id, value in enumerate(actions):
+      if (id >= self.total_nodes):
+        tw_status_list.append(value)
+      else:
+        nxt_hop_list.append(value)
+
     print("nxt_hop_list: ",nxt_hop_list)
     print("tw_status_list", tw_status_list)
     
@@ -224,14 +235,14 @@ class W_MAC_Env(gym.Env):
 
     for index , tw_status in enumerate(tw_status_list):
       if(index == self.curr_node) and tw_status == 1:
-        print("one")
+        #print("one")
         reward += 100
       else:
         if(tw_status == 1):
-          print("two.one")
+          #print("two.one")
           reward -= 100
         else:
-          print("two.two")
+          #print("two.two")
           reward += 10
     
     for index, nxt_hop in enumerate(nxt_hop_list):
