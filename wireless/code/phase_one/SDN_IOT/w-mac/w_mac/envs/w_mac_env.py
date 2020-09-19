@@ -21,7 +21,6 @@ class W_MAC_Env(gym.Env):
     self.graph = graph
     self.total_nodes = len(self.graph.nodes())
 
-    nx.draw(self.graph, with_labels=True, font_weight='bold')
 
     self.packet_delivered = 0
     self.packet_lost = 0
@@ -486,63 +485,21 @@ class W_MAC_Env(gym.Env):
     return ret_val
 
 
-   #def render(self, mode='human', close=False):
-  #   print('render')
-
-
   def render(self, mode='human'):
-          
-        self.collision_domain = {0:[0,1,2],1:[2,3,4]} 
-        self.common_domain = [2] #nodes common in both range trying to work on this still
 
-        self.node_in_domains = {}
-
-        for key, value in self.collision_domain.items():
-          for i in range(len(value)):
-            if value[i] not in self.node_in_domains: 
-              self.node_in_domains[value[i]] = [key]
-            else:
-              self.node_in_domains[value[i]].append(key)
-        print("self.node_in_domains : ",self.node_in_domains) 
-
-        for i in self.graph.nodes(data=False):
-          for count in range(8):
-            src = i
-            dest = random.randrange(0,5)
-          while src == dest:
-            dest = random.randrange(0,5)
-            
-        #To fetch the domain of source and destination node
-        for key,values in self.collision_domain.items():
-          #print("key, values, src, dest", key, values, src, dest)
-          if (src in values):  
-            source_key = key
-          if (dest in values):
-            dest_key = key
-            break #destination key not present in the same collision domain
-        
-
-        source_nodes = self.collision_domain[source_key]
-        dest_nodes = self.collision_domain[dest_key]
-        for node in source_nodes:
-          if node in dest_nodes:
-            next_hop = node
-        packet= Packet(src,dest,next_hop)
+        source_node= [self.src]
+        dest_node =[self.dest]
+        nodes = self.node_in_domains
 
 
         # Assigning labels to the nodes
-        labels = {}
-        labels[0] = '$0$'
-        labels[1] = '$1$'
-        labels[2] = '$2$'
-        labels[3] = '$3$'
-        labels[4] = '$4$'
         pos = nx.spring_layout(self.graph)
-        nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = source_nodes, node_color = 'red')
-        nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = dest_nodes , node_color = 'green')
-        nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = packet , node_color = 'blue')
-        nx.draw_networkx_edges(self.graph , pos , edgelist =[(0 , 1) , (1 , 3) , (3 , 4) , (0 , 2) , (1 , 4) , (4,0) ], alpha = 0.5 , edge_color = 'black')
-        nx.draw_networkx_labels(self.graph , pos , labels , font_size = 10)
+        nx.draw(self.graph, pos , with_labels=True, font_weight='bold')
+        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nodes , node_color = 'blue')
+        nx.draw_networkx_nodes(self.graph , pos , nodelist = source_node, node_color = 'red')
+        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = dest_node , node_color = 'green')
+        nx.draw_networkx_edges(self.graph , pos , edge_color = 'black')
+
         plt.axis('off')
         plt.show(block = False)
         plt.pause(3)
