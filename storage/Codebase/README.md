@@ -39,7 +39,8 @@ docker run -it --rm --name opc_ua_kafka_connector \
 -e INSTANCE_NAME=dt-imms-opcua-0 \
 -e OPCUA_SERVER=131.234.29.2 \
 -e OPCUA_PORT=4840 \
--e KAFKA_SERVER=131.234.28.250\
+-e KAFKA_SERVER=131.234.28.250 \
+-e KAFKA_PORT=31090 \
 -e KAFKA_TOPIC=dt-imms-opcua-0 \
 -e SLEEP_DURATION=0.5 \
 -e NUMBER_MESSAGES=100 \
