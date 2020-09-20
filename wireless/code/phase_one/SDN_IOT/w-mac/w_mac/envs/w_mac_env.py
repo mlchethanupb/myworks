@@ -114,10 +114,19 @@ class W_MAC_Env(gym.Env):
       observation_space.append(self.total_nodes)
     for i in range(self.total_nodes):
       observation_space.append(2)
+<<<<<<< Updated upstream
     observation_space = MultiDiscrete(observation_space)
     print(observation_space)
     print(observation_space.sample())
  
+=======
+    self.observation_space = MultiDiscrete(observation_space)
+    print(self.observation_space)
+    print(self.observation_space.sample())
+    
+
+
+>>>>>>> Stashed changes
     # | not_needed |  self.wait_counter = [0 for i in range(len(self.graph.nodes()))]
     self.__reset_queue()
 
@@ -144,6 +153,21 @@ class W_MAC_Env(gym.Env):
         self.dest = random.randrange(0,self.total_nodes)
         while self.src == self.dest:
           self.dest = random.randrange(0,self.total_nodes)
+<<<<<<< Updated upstream
+=======
+        print("src: ",self.src,"dest: ",self.dest)
+        packet = Packet(self.src,self.dest)
+        self.queues[self.src].insert(0, packet)
+            
+        #To fetch the domain of source and destination node
+        for key,values in self.collision_domain.items():
+          #print("key, values, src, dest", key, values, src, dest)
+          if (self.src in values):  
+            source_key = key
+          if (self.dest in values):
+            dest_key = key
+            break #destination key not present in the same collision domain
+>>>>>>> Stashed changes
         
         ### Create packet and add it to queue.
         print("src: ",self.src,"dest: ",self.dest)
@@ -166,6 +190,11 @@ class W_MAC_Env(gym.Env):
     
     for i in range(self.total_nodes):
       if i == 2:
+<<<<<<< Updated upstream
+=======
+        self.attacked_node = i
+      #print('attacked node',self.attacked_node)
+>>>>>>> Stashed changes
         state.append(1)
       else:
         state.append(0)
@@ -283,21 +312,37 @@ class W_MAC_Env(gym.Env):
     reward = 0
     """ Reward for attacked node as a next hop """
     for id in self.graph.nodes:
+<<<<<<< Updated upstream
       next_hop = self.nxt_hop_list[id]
+=======
+      nxt_hop = self.nxt_hop_list[id]
+      
+
+>>>>>>> Stashed changes
 
       if next_hop == 2:
-        reward = -1000
+        reward += -1000
       else:
         for tw in self.tw_status_list:
+<<<<<<< Updated upstream
           if(self.tw_status_list[id] == 1):
+=======
+          if (self.tw_status_list[id] == 1):
+>>>>>>> Stashed changes
             queue = self.queues[id]
             if len(queue):
               packet_2_send = queue.pop()
               domain_list = self.node_in_domains[id]
               len_domain_list = len(domain_list) 
               if  len_domain_list > 1 :
+<<<<<<< Updated upstream
                 for itr in range(len_domain_list):
                   if next_hop in self.collision_domain[domain_list[itr]]:
+=======
+                # nxt_hop = packet_2_send.nxt_hop
+                for itr in range(len_domain_list):
+                  if nxt_hop in self.collision_domain[domain_list[itr]]:
+>>>>>>> Stashed changes
                     node_list = self.collision_domain[domain_list[itr]]
                     break
 
@@ -313,6 +358,37 @@ class W_MAC_Env(gym.Env):
                   reward +=1000
                   self.packet_delivered +=1
 
+<<<<<<< Updated upstream
+=======
+              #Node belongs to single domain.
+              else:
+                node_list = self.collision_domain[domain_list[0]]
+                action_sublist = [self.tw_status_list[i] for i in node_list]
+
+                if (self.tw_status_list[id]) == 1):
+                  if(action_sublist.count(1) > 1):
+                    print("node ",id, " transmission collision")
+                    reward -=1000
+                  elif (self.hidden_terminal_problem(self.tw_status_list, id, domain_list[0], packet_2_send )):
+                    print("node ", id," transmission collision because of hidden terminal problem")
+                    reward -= 1000
+                    self.packet_lost += 1
+                  else:
+                    print("node ", id," transmission SUCCESS")
+                    self.packet_delivered += 1
+                    reward += 1000
+
+                    # packet_2_send.update_hop_count()
+                    if (nxt_hop == packet_2_send.dest):
+                      print("Packet reached destination")
+                    else:
+                      print("Adding packet to the queue of ", nxt_hop)
+            
+                      self.queues[nxt_hop].insert(0, packet_2_send)
+            else:
+              print("Action taken on empty queue")
+              reward -= 1000
+>>>>>>> Stashed changes
 
 
 
