@@ -111,7 +111,7 @@ class W_MAC_Env(gym.Env):
 
     observation_space = []
     for i in range(self.total_nodes):
-      observation_space.append(self.total_nodes)
+      observation_space.append(self.total_nodes+1)
     for i in range(self.total_nodes):
       observation_space.append(2)
     self.observation_space = MultiDiscrete(observation_space)
@@ -206,7 +206,6 @@ class W_MAC_Env(gym.Env):
     print("tw_status_list", self.tw_status_list)
     
     reward = 0
-    isdone = False
 
     # for index , tw_status in enumerate(tw_status_list):
     #   if(index == self.curr_node) and tw_status == 1:
@@ -262,20 +261,22 @@ class W_MAC_Env(gym.Env):
     for node_queue in self.queues.values():
       if len(node_queue):
         next_state.append(node_queue[len(node_queue)-1].dest)
+      else:
+        next_state.append(self.total_nodes)
 
     for i in range(self.total_nodes):
       if i == 2:
         next_state.append(1)
       else:
         next_state.append(0)
-    
+
     nxt_state_arr = np.array(next_state)
     
     isdone = self.isdone()
     info = {}
-    #actions_list = list(actions)
-    #if isdone == False and actions_list.count(1) == 0 :
-      #reward -= 1000
+    
+    if isdone == False and self.tw_status_list.count(1) == 0 :
+      reward -= 1000
 
     print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
@@ -298,151 +299,149 @@ class W_MAC_Env(gym.Env):
     """ Reward for attacked node as a next hop """
     for id in self.graph.nodes:
       nxt_hop = self.nxt_hop_list[id]
+      if nxt_hop == 2:
+        reward -= 1000
+      #for tw in self.tw_status_list:
       
-
-
-      if next_hop == 2:
-        reward += -1000
-      else:
-        for tw in self.tw_status_list:
-          if (self.tw_status_list[id] == 1):
-            queue = self.queues[id]
-            if len(queue):
-              packet_2_send = queue.pop()
-              domain_list = self.node_in_domains[id]
-              len_domain_list = len(domain_list) 
-              if  len_domain_list > 1 :
-                # nxt_hop = packet_2_send.nxt_hop
-                for itr in range(len_domain_list):
-                  if nxt_hop in self.collision_domain[domain_list[itr]]:
-                    node_list = self.collision_domain[domain_list[itr]]
-                    break
-
-                action_sublist = [self.tw_status_list[i] for i in node_list]
-
-                if(action_sublist.count(1) > 1):
-                  print("node ", id," transmission collision")
-                  self.packet_lost += 1
-                  reward -=1000
-                
-                else:
-                  print("node ", id, " transmission SUCCESS")
-                  reward +=1000
-                  self.packet_delivered +=1
-
-              #Node belongs to single domain.
-              else:
-                node_list = self.collision_domain[domain_list[0]]
-                action_sublist = [self.tw_status_list[i] for i in node_list]
-
-                if (self.tw_status_list[id]) == 1):
-                  if(action_sublist.count(1) > 1):
-                    print("node ",id, " transmission collision")
-                    reward -=1000
-                  elif (self.hidden_terminal_problem(self.tw_status_list, id, domain_list[0], packet_2_send )):
-                    print("node ", id," transmission collision because of hidden terminal problem")
-                    reward -= 1000
-                    self.packet_lost += 1
-                  else:
-                    print("node ", id," transmission SUCCESS")
-                    self.packet_delivered += 1
-                    reward += 1000
-
-                    # packet_2_send.update_hop_count()
-                    if (nxt_hop == packet_2_send.dest):
-                      print("Packet reached destination")
-                    else:
-                      print("Adding packet to the queue of ", nxt_hop)
-            
-                      self.queues[nxt_hop].insert(0, packet_2_send)
-            else:
-              print("Action taken on empty queue")
-              reward -= 1000
-
-
-
-    for id, action in enumerate(actions):
-
-      """
-      1. Get the list of domains the node is associated with.
-      2. If it belongs to only one domain (else part)
-          - Check all the actions of that node and decide accordingly
-      3. If node belongs to multiple domains (if part)
-          - find the value of packet next_hop and check for colloiion with that nodes  
-      """
-   
-      if (actions[id] == 1):
+      if (self.tw_status_list[id] == 1):
         queue = self.queues[id]
-        
         if len(queue):
-
           packet_2_send = queue.pop()
           domain_list = self.node_in_domains[id]
           len_domain_list = len(domain_list) 
           if  len_domain_list > 1 :
-            
-            nxt_hop = packet_2_send.nxt_hop
+            # nxt_hop = packet_2_send.nxt_hop
             for itr in range(len_domain_list):
               if nxt_hop in self.collision_domain[domain_list[itr]]:
                 node_list = self.collision_domain[domain_list[itr]]
                 break
-            
-            action_sublist = [actions[i] for i in node_list]
-            
+
+            action_sublist = [self.tw_status_list[i] for i in node_list]
+
             if(action_sublist.count(1) > 1):
               print("node ", id," transmission collision")
               self.packet_lost += 1
-              reward -= 1000
-            #elif (self.hidden_terminal_problem(actions, id, domain_list[0] )):
-              #print("node ", id," transmission collision because of hidden terminal problem")
+              reward -= 100
+                
             else:
-              print("node ", id," transmission SUCCESS")
-              reward += 1000
-              self.packet_delivered += 1
+              print("node ", id, " transmission SUCCESS")
+              reward -= 10
+              self.packet_delivered +=1
+              self.queues[nxt_hop].insert(0, packet_2_send)
 
-              packet_2_send.update_hop_count()
-              if (packet_2_send.nxt_hop == packet_2_send.dest):
-                print("Packet reached destination")
-              else:
-                rcvd_node = packet_2_send.nxt_hop
-                packet_2_send.update_nxt_hop(packet_2_send.dest)
-                print("Adding packet to the queue of ", rcvd_node)
-                self.queues[rcvd_node].insert(0, packet_2_send)
-          
           #Node belongs to single domain.
           else:
             node_list = self.collision_domain[domain_list[0]]
-            action_sublist = [actions[i] for i in node_list]
-
-            if (actions[id] == 1):
+            action_sublist = [self.tw_status_list[i] for i in node_list]
+            if ((self.tw_status_list[id]) == 1):
               if(action_sublist.count(1) > 1):
-                print("node ", id," transmission collision")
-                reward -= 1000
-                self.packet_lost += 1
-              elif (self.hidden_terminal_problem(actions, id, domain_list[0], packet_2_send )):
+                print("node ",id, " transmission collision")
+                reward -= 100
+              elif (self.hidden_terminal_problem(self.tw_status_list, id, domain_list[0], nxt_hop)):
                 print("node ", id," transmission collision because of hidden terminal problem")
-                reward -= 1000
+                reward -= 100
                 self.packet_lost += 1
               else:
                 print("node ", id," transmission SUCCESS")
                 self.packet_delivered += 1
-                reward += 1000
+                reward -= 10
 
-                packet_2_send.update_hop_count()
-                if (packet_2_send.nxt_hop == packet_2_send.dest):
+                # packet_2_send.update_hop_count()
+                if (nxt_hop == packet_2_send.dest):
                   print("Packet reached destination")
-                else:
-                  rcvd_node = packet_2_send.nxt_hop
-                  packet_2_send.update_nxt_hop(packet_2_send.dest)
-                  print("Adding packet to the queue of ", rcvd_node)
-                  self.queues[rcvd_node].insert(0, packet_2_send)
+                  reward += 1000
 
+                else:
+                  print("Adding packet to the queue of ", nxt_hop)
+                  self.queues[nxt_hop].insert(0, packet_2_send)
         else:
           print("Action taken on empty queue")
-          reward -= 1000
-      else:
-            #print("node", id , "waiting to send")
-            ...
+          reward -= 100
+
+
+
+    # for id, action in enumerate(actions):
+
+    #   """
+    #   1. Get the list of domains the node is associated with.
+    #   2. If it belongs to only one domain (else part)
+    #       - Check all the actions of that node and decide accordingly
+    #   3. If node belongs to multiple domains (if part)
+    #       - find the value of packet next_hop and check for colloiion with that nodes  
+    #   """
+   
+    #   if (actions[id] == 1):
+    #     queue = self.queues[id]
+        
+    #     if len(queue):
+
+    #       packet_2_send = queue.pop()
+    #       domain_list = self.node_in_domains[id]
+    #       len_domain_list = len(domain_list) 
+    #       if  len_domain_list > 1 :
+            
+    #         nxt_hop = packet_2_send.nxt_hop
+    #         for itr in range(len_domain_list):
+    #           if nxt_hop in self.collision_domain[domain_list[itr]]:
+    #             node_list = self.collision_domain[domain_list[itr]]
+    #             break
+            
+    #         action_sublist = [actions[i] for i in node_list]
+            
+    #         if(action_sublist.count(1) > 1):
+    #           print("node ", id," transmission collision")
+    #           self.packet_lost += 1
+    #           reward -= 1000
+    #         #elif (self.hidden_terminal_problem(actions, id, domain_list[0] )):
+    #           #print("node ", id," transmission collision because of hidden terminal problem")
+    #         else:
+    #           print("node ", id," transmission SUCCESS")
+    #           reward += 1000
+    #           self.packet_delivered += 1
+
+    #           packet_2_send.update_hop_count()
+    #           if (packet_2_send.nxt_hop == packet_2_send.dest):
+    #             print("Packet reached destination")
+    #           else:
+    #             rcvd_node = packet_2_send.nxt_hop
+    #             packet_2_send.update_nxt_hop(packet_2_send.dest)
+    #             print("Adding packet to the queue of ", rcvd_node)
+    #             self.queues[rcvd_node].insert(0, packet_2_send)
+          
+    #       #Node belongs to single domain.
+    #       else:
+    #         node_list = self.collision_domain[domain_list[0]]
+    #         action_sublist = [actions[i] for i in node_list]
+
+    #         if (actions[id] == 1):
+    #           if(action_sublist.count(1) > 1):
+    #             print("node ", id," transmission collision")
+    #             reward -= 1000
+    #             self.packet_lost += 1
+    #           elif (self.hidden_terminal_problem(actions, id, domain_list[0], packet_2_send )):
+    #             print("node ", id," transmission collision because of hidden terminal problem")
+    #             reward -= 1000
+    #             self.packet_lost += 1
+    #           else:
+    #             print("node ", id," transmission SUCCESS")
+    #             self.packet_delivered += 1
+    #             reward += 1000
+
+    #             packet_2_send.update_hop_count()
+    #             if (packet_2_send.nxt_hop == packet_2_send.dest):
+    #               print("Packet reached destination")
+    #             else:
+    #               rcvd_node = packet_2_send.nxt_hop
+    #               packet_2_send.update_nxt_hop(packet_2_send.dest)
+    #               print("Adding packet to the queue of ", rcvd_node)
+    #               self.queues[rcvd_node].insert(0, packet_2_send)
+
+    #     else:
+    #       print("Action taken on empty queue")
+    #       reward -= 1000
+    #   else:
+    #         #print("node", id , "waiting to send")
+    #         ...
 
     """
     for id, count_val in enumerate(self.wait_counter):
@@ -450,15 +449,15 @@ class W_MAC_Env(gym.Env):
         reward -= 100 * self.wait_counter[id]
     """
 
-    for id, act_val in enumerate(actions):
-      if act_val == 0:
-        self.wait_counter[id] = 0
-      else:
-        self.wait_counter[id] += 1
+    # for id, act_val in enumerate(actions):
+    #   if act_val == 0:
+    #     self.wait_counter[id] = 0
+    #   else:
+    #     self.wait_counter[id] += 1
       
-      if self.wait_counter[id] > 2 :
-        reward -= 100 * self.wait_counter[id] 
-        print("id :", id , "wait counter reward :", -1*100*self.wait_counter[id])
+    #   if self.wait_counter[id] > 2 :
+    #     reward -= 100 * self.wait_counter[id] 
+    #     print("id :", id , "wait counter reward :", -1*100*self.wait_counter[id])
 
 
     print('final reward', reward)
@@ -470,25 +469,25 @@ class W_MAC_Env(gym.Env):
 
   """-------------------------------------------------------------------------------------------- """
 
-  def hidden_terminal_problem(self, actions, id, domain_key, packet_2_send):
+  def hidden_terminal_problem(self, tw_status_lis, id, domain_key, nxt_hop):
     #special case - Hidden terminal problem
     ret_val = False
 
     #print("id : ", id )
-    src_nxt_hop = packet_2_send.nxt_hop
+    # src_nxt_hop = packet_2_send.nxt_hop
     #print("src_nxt_hop", src_nxt_hop)
     for h_key,h_values in self.collision_domain.items():
-      if( src_nxt_hop in h_values):
+      if( nxt_hop in h_values):
         if(domain_key != h_key):
-          h_action = [actions[i] for i in h_values]
-          #print("h_values : ",h_values)
-          #print("h_action : ",h_action)
+          h_action = [self.tw_status_list[i] for i in h_values]
+          print("h_values : ",h_values)
+          print("h_action : ",h_action)
           for itr in range(len(h_action)):
             if(h_action[itr] == 1):
-              other_queue = self.queues[h_values[itr]]
-              if len(other_queue):
-                if(id != h_values[itr] and other_queue[len(other_queue)-1].nxt_hop == src_nxt_hop):
-                  ret_val = True
+              #other_queue = self.queues[h_values[itr]]
+              #if len(other_queue):
+              if(id != h_values[itr] and self.nxt_hop_list[itr] == nxt_hop):
+                ret_val = True
 
     return ret_val
 
