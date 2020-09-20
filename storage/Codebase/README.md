@@ -1,13 +1,15 @@
 ## Master Node (pg-aicon-storage-1):
-* zookeeper service and deployment (Path:/home/user/heketi/extras/kubernetes/kafka/)
+#### Distributed system using Kubernetes
 * kafka service and deployment (Path:/home/user/heketi/extras/kubernetes/kafka/)
 * digitaltwin service and deployment (Path:/home/user/heketi/extras/kubernetes/digitaltwin/)
+* opc_ua_kafka_connector deployment (Path:/home/user/heketi/extras/kubernetes/opc)
 
-## Worker Node (pg-aicon-storage-2):
+## Worker Node (pg-aicon-storage-3):
 #### kafka (Path:/home/user/kafka)
 ```
 docker build -t kafka:dev .
 ```
+#### Distributed system using docker
 ```
 docker run -it --rm --name kafka \
 -e KAFKA_PORT=9092 \
@@ -16,11 +18,12 @@ docker run -it --rm --name kafka \
 kafka:dev
 ```
 
-## Worker Node (pg-aicon-storage-3):
+## Worker Node (pg-aicon-storage-2):
 #### digitaltwin (Path:/home/user/tng-industrial-pilot/vnfs/dt-digitaltwin-docker/containers/)
 ```
 docker build -t digitaltwin:dev . 
 ```
+#### Distributed system using docker
 ```
 docker run -it --rm --name digitaltwin \
 -e DT_WEB_LISTEN=0.0.0.0 \
@@ -34,12 +37,14 @@ digitaltwin:dev
 ```
 docker build -t opc_ua_kafka_connector:dev .
 ```
+#### Distributed system using docker
 ```
 docker run -it --rm --name opc_ua_kafka_connector \
 -e INSTANCE_NAME=dt-imms-opcua-0 \
--e OPCUA_SERVER=131.234.29.2 \
+-e OPCUA_SERVER=131.234.28.250 \
 -e OPCUA_PORT=4840 \
--e KAFKA_SERVER=131.234.28.250\
+-e KAFKA_SERVER=131.234.29.2 \
+-e KAFKA_PORT=31090 \
 -e KAFKA_TOPIC=dt-imms-opcua-0 \
 -e SLEEP_DURATION=0.5 \
 -e NUMBER_MESSAGES=100 \

@@ -32,9 +32,6 @@ class W_MAC_Env(gym.Env):
 
     """
 
-
-
-
     range_domain = {} #to get the range of each node for each iteration it will get {0:{0,1,2}}
     full_range={} #to get the range of all nodes merging it with range_domain the total domain will have is {0:{0,1,2},1:{0,1,2}etc}
     for i in self.graph.nodes: 
@@ -129,6 +126,7 @@ class W_MAC_Env(gym.Env):
 
     self.wait_counter = [0 for i in range(len(self.graph.nodes()))]
     self.__reset_queue()
+    
 
   """-------------------------------------------------------------------------------------------- """
 
@@ -395,26 +393,18 @@ class W_MAC_Env(gym.Env):
 
 
   def render(self, mode='human'):
-          
-        self.collision_domain = {0:[0,1,2],1:[2,3,4]} 
-        self.common_domain = [2] #nodes common in both range trying to work on this still
+    self.queues = {i: [] for i in self.graph.nodes(data=False)}  #{1: [], 2: [], 3: [], 4: [], 5: []} create a empty list for all nodes
+    #print(self.queues)
 
-        self.node_in_domains = {}
-
-        for key, value in self.collision_domain.items():
-          for i in range(len(value)):
-            if value[i] not in self.node_in_domains: 
-              self.node_in_domains[value[i]] = [key]
-            else:
-              self.node_in_domains[value[i]].append(key)
-        print("self.node_in_domains : ",self.node_in_domains) 
-
-        for i in self.graph.nodes(data=False):
-          for count in range(8):
-            src = i
-            dest = random.randrange(0,5)
-          while src == dest:
-            dest = random.randrange(0,5)
+    for i in self.graph.nodes(data=False):
+      #print("-----------------------------")
+      #print("Adding packets for node : ",i)  
+      #Add 8 packets for each node
+      for count in range(8):
+        src = i
+        dest = random.randrange(0,5)
+        while src == dest:
+          dest = random.randrange(0,5)
             
         #To fetch the domain of source and destination node
         for key,values in self.collision_domain.items():
@@ -426,15 +416,28 @@ class W_MAC_Env(gym.Env):
             break #destination key not present in the same collision domain
         
 
-        source_nodes = self.collision_domain[source_key]
-        dest_nodes = self.collision_domain[dest_key]
-        for node in source_nodes:
-          if node in dest_nodes:
-            next_hop = node
-        packet= Packet(src,dest,next_hop)
-
-
-        # Assigning labels to the nodes
+          #when source and destination belong to same domain, compared with key value of source and destination then next hop = destination      
+        if source_key == dest_key:
+          next_hop = dest
+          print("1. src,dest,next_hop",src,dest,next_hop)
+          packet = Packet(src,dest,next_hop)
+          self.queues[src].insert(0, packet)
+          
+        else:
+          """
+              when source and destination are in different range then find the common node of both range 
+              and assign as a next hop    
+          """
+          source_nodes = self.collision_domain[source_key]
+          dest_nodes = self.collision_domain[dest_key]
+          for node in source_nodes:
+              if node in dest_nodes:
+                next_hop = node
+          print("2. src,dest,next_hop",src,dest,next_hop)
+          packet= Packet(src,dest,next_hop)
+          self.queues[src].insert(0, packet)
+      
+        # # Assigning labels to the nodes
         labels = {}
         labels[0] = '$0$'
         labels[1] = '$1$'
@@ -446,7 +449,7 @@ class W_MAC_Env(gym.Env):
         nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = dest_nodes , node_color = 'green')
         nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = packet , node_color = 'blue')
         nx.draw_networkx_edges(self.graph , pos , edgelist =[(0 , 1) , (1 , 3) , (3 , 4) , (0 , 2) , (1 , 4) , (4,0) ], alpha = 0.5 , edge_color = 'black')
-        nx.draw_networkx_labels(self.graph , pos , labels , font_size = 10)
+        nx.draw_networkx_labels(self.graph , pos , font_size = 10)
         plt.axis('off')
         plt.show(block = False)
         plt.pause(3)

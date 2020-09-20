@@ -21,7 +21,6 @@ class W_MAC_Env(gym.Env):
     self.graph = graph
     self.total_nodes = len(self.graph.nodes())
 
-    nx.draw(self.graph, with_labels=True, font_weight='bold')
 
     self.packet_delivered = 0
     self.packet_lost = 0
@@ -84,11 +83,16 @@ class W_MAC_Env(gym.Env):
     ### Action space will have 2 actions Nexthop + transmitwait
     ### 1. All the nexthops that a node can take (@todo-limit the actions spaces | possible extension for multipacket transmission)
     ### 2. Each node can do 2 actions {Transmit, Wait}
-    nh_tup = tuple((self.total_nodes,)*self.total_nodes)
-    tw_tup = tuple((2,)*self.total_nodes)   ## wait = 0 | transmit = 1
+    #nh_tup = tuple((self.total_nodes,)*self.total_nodes)
+    #tw_tup = tuple((2,)*self.total_nodes)   ## wait = 0 | transmit = 1
     action_space = []
-    action_space.append(nh_tup)
-    action_space.append(tw_tup)
+    #action_space.append(nh_tup)
+    #action_space.append(tw_tup)
+    for i in range(self.total_nodes):
+      action_space.append(self.total_nodes)
+    for i in range(self.total_nodes):
+      action_space.append(2)
+
     self.action_space = spaces.MultiDiscrete(action_space)
     print(self.action_space)
     print(self.action_space.sample())
@@ -224,6 +228,7 @@ class W_MAC_Env(gym.Env):
 
   def step(self, actions):
     print("received action",actions)
+<<<<<<< HEAD
     # nxt_hop_list = actions[0]
     # tw_status_list = actions[1]
     # print("nxt_hop_list: ",nxt_hop_list)
@@ -238,10 +243,23 @@ class W_MAC_Env(gym.Env):
 
     print("nxt_hop_list: ",self.nxt_hop_list)
     print("tw_status_list",self.tw_status_list)
+=======
+    nxt_hop_list = []#actions[0]
+    tw_status_list = []#actions[1]
+    for id, value in enumerate(actions):
+      if (id >= self.total_nodes):
+        tw_status_list.append(value)
+      else:
+        nxt_hop_list.append(value)
+
+    print("nxt_hop_list: ",nxt_hop_list)
+    print("tw_status_list", tw_status_list)
+>>>>>>> 530174ac1a78d6a4336f6c27887d0b23eb848295
     
     reward = 0
     isdone = False
 
+<<<<<<< HEAD
     # for index , tw_status in enumerate(tw_status_list):
     #   if(index == self.curr_node) and tw_status == 1:
     #     print("one")
@@ -253,6 +271,19 @@ class W_MAC_Env(gym.Env):
     #     else:
     #       print("two.two")
     #       reward += 10
+=======
+    for index , tw_status in enumerate(tw_status_list):
+      if(index == self.curr_node) and tw_status == 1:
+        #print("one")
+        reward += 100
+      else:
+        if(tw_status == 1):
+          #print("two.one")
+          reward -= 100
+        else:
+          #print("two.two")
+          reward += 10
+>>>>>>> 530174ac1a78d6a4336f6c27887d0b23eb848295
     
     # for index, nxt_hop in enumerate(nxt_hop_list):
     #   ## attck node 
@@ -530,63 +561,21 @@ class W_MAC_Env(gym.Env):
     return ret_val
 
 
-   #def render(self, mode='human', close=False):
-  #   print('render')
-
-
   def render(self, mode='human'):
-          
-        self.collision_domain = {0:[0,1,2],1:[2,3,4]} 
-        self.common_domain = [2] #nodes common in both range trying to work on this still
 
-        self.node_in_domains = {}
-
-        for key, value in self.collision_domain.items():
-          for i in range(len(value)):
-            if value[i] not in self.node_in_domains: 
-              self.node_in_domains[value[i]] = [key]
-            else:
-              self.node_in_domains[value[i]].append(key)
-        print("self.node_in_domains : ",self.node_in_domains) 
-
-        for i in self.graph.nodes(data=False):
-          for count in range(8):
-            src = i
-            dest = random.randrange(0,5)
-          while src == dest:
-            dest = random.randrange(0,5)
-            
-        #To fetch the domain of source and destination node
-        for key,values in self.collision_domain.items():
-          #print("key, values, src, dest", key, values, src, dest)
-          if (src in values):  
-            source_key = key
-          if (dest in values):
-            dest_key = key
-            break #destination key not present in the same collision domain
-        
-
-        source_nodes = self.collision_domain[source_key]
-        dest_nodes = self.collision_domain[dest_key]
-        for node in source_nodes:
-          if node in dest_nodes:
-            next_hop = node
-        packet= Packet(src,dest,next_hop)
+        source_node= [self.src]
+        dest_node =[self.dest]
+        nodes = self.node_in_domains
 
 
         # Assigning labels to the nodes
-        labels = {}
-        labels[0] = '$0$'
-        labels[1] = '$1$'
-        labels[2] = '$2$'
-        labels[3] = '$3$'
-        labels[4] = '$4$'
         pos = nx.spring_layout(self.graph)
-        nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = source_nodes, node_color = 'red')
-        nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = dest_nodes , node_color = 'green')
-        nx.draw_networkx_nodes(self.graph , pos , with_labels = True , nodelist = packet , node_color = 'blue')
-        nx.draw_networkx_edges(self.graph , pos , edgelist =[(0 , 1) , (1 , 3) , (3 , 4) , (0 , 2) , (1 , 4) , (4,0) ], alpha = 0.5 , edge_color = 'black')
-        nx.draw_networkx_labels(self.graph , pos , labels , font_size = 10)
+        nx.draw(self.graph, pos , with_labels=True, font_weight='bold')
+        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nodes , node_color = 'blue')
+        nx.draw_networkx_nodes(self.graph , pos , nodelist = source_node, node_color = 'red')
+        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = dest_node , node_color = 'green')
+        nx.draw_networkx_edges(self.graph , pos , edge_color = 'black')
+
         plt.axis('off')
         plt.show(block = False)
         plt.pause(3)

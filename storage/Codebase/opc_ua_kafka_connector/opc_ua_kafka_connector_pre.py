@@ -16,11 +16,7 @@ lines = []
 print("program started")
 from subprocess import call
 tempList=[]
-consumerList=[]
-producerList=[]
-countConsumer=0
-countProducer=0
-msg_arr=[]
+
 INSTANCE_NAME = os.environ.get('INSTANCE_NAME', 'MY-INSTACE')
 OPCUA_SERVER = os.environ.get('OPCUA_SERVER', 'localhost')
 OPCUA_PORT = os.environ.get('OPCUA_PORT', '4840')
@@ -28,35 +24,31 @@ KAFKA_SERVER = os.environ.get('KAFKA_SERVER', '192.168.0.7')
 KAFKA_PORT = os.environ.get('KAFKA_PORT', '9092')
 KAFKA_TOPIC = os.environ.get('KAFKA_TOPIC', 'my-topic')
 SLEEP_DURATION = os.environ.get('SLEEP_DURATION', '1') # seconds sleep after each update written to kafka
-#OUT_FILE = os.environ.get('OUT_FILE', 'response_time.json')
-OUT_FILE_TXT= os.environ.get('OUT_FILE_TXT','fileWrite.txt')
+OUT_FILE = os.environ.get('OUT_FILE', 'response_time.json')
 NUMBER_MESSAGES = os.environ.get('NUMBER_MESSAGES', 10)
 t_slot=4
 number_messages = 0
 set_c=0
 q = Queue()
-#file = open(OUT_FILE, "w")
-fileTxt=open(OUT_FILE_TXT, "w+")
-
+file = open(OUT_FILE, "w")
+msg_arr=[]
 kafka_consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers='%s:%s' % (KAFKA_SERVER, KAFKA_PORT),
                              # auto_offset_reset='earliest',
                              consumer_timeout_ms=30000)
 
 def _monitor_response_time(kafka_consumer, q):
     global number_messages
-    global countConsumer
     t1 = datetime.now()
-    i=0
+
     while True:
         try:
             message = next(kafka_consumer)
-            print("Inside consumer")
             timestamp_received = datetime.now()
             msg = json.loads(message.value.decode('utf-8'))
             timestamp_sent = datetime.strptime(str(msg['TimestampSent']), '%Y-%m-%d %H:%M:%S.%f')
             response_time = timestamp_received - timestamp_sent
-            print("Response time: %f seconds" % response_time.total_seconds())
-            print("\n\n\nSlot time",s_time)
+            #print("Response time: %f seconds" % response_time.total_seconds())
+            #print("\n\n\nSlot time",s_time)
             q.put(response_time.total_seconds())
             tempList.append(response_time.total_seconds())
             number_messages += 1
@@ -65,11 +57,7 @@ def _monitor_response_time(kafka_consumer, q):
             elif s_time% t_slot==0 :
                 t22 = datetime.now()
                 t33=t22-t11
-                consumerList.insert(countConsumer,t33)
-                countConsumer+=1
-                print('Till now consumer list', consumerList)
-
-                print("\n\ncon 33time: %f seconds" % t33.total_seconds())
+                print("\nCon time: %f seconds" % t33.total_seconds())
 
 
             if int(NUMBER_MESSAGES) > 0:
@@ -77,28 +65,16 @@ def _monitor_response_time(kafka_consumer, q):
                     _thread.interrupt_main()
                     t2 = datetime.now()
                     t3=t2-t1
-                    print("consume time: %f seconds" % t3.total_seconds())                   
+                    #print("consume time: %f seconds" % t3.total_seconds())                   
                     sys.exit()
         except StopIteration:
             pass
         # except Exception:
         #     pass
 
-def listToString(s):  
-    
-    # initialize an empty string 
-    str1 = ""  
-    
-    # traverse in the string   
-    for ele in s:  
-        str1 += str(ele)
-    
-    # return string   
-    return str1  
 
 if __name__== "__main__":
 
-    global countProducer
     thread = threading.Thread(target=_monitor_response_time, args=(kafka_consumer, q,))
     thread.daemon = True
     thread.start()
@@ -117,10 +93,10 @@ if __name__== "__main__":
                                 # compression_type='snappy')
                                 # compression_type='lz4')
     kafka_producer.flush()
-    # thred.sleep(500)
+
     print('Connected to Kafka %s:%s' % (KAFKA_SERVER, KAFKA_PORT))
     s_time=0
-    if s_time==0 or s_time % t_slot==1:
+    if s_time==0:
         t4 = datetime.now()
 
     while True:
@@ -144,63 +120,39 @@ if __name__== "__main__":
             
 
             future = kafka_producer.send(KAFKA_TOPIC, json.dumps(msg, default=str).encode('utf-8'))
+            #msg1=msg.encode("utf-8")
             msg_size=int(sys.getsizeof(msg))
             msg_arr.append(msg_size)
             kafka_producer.flush()
-            
-            if s_time% t_slot==0 and s_time>0:
+            if s_time % t_slot==1:
+                t4 = datetime.now()
+
+            elif s_time% t_slot==0 and s_time>0:
                 t5 = datetime.now()
+
                 t6=t5-t4
-                producerList.insert(countProducer,t6)
-                countProducer+=1
-                print("\n\n\nPro time: %f seconds" % t6.total_seconds())
+                print("\nPro time: %f seconds" % t6.total_seconds())
                 arr_s=s_time-t_slot
                 arr_e=s_time+t_slot-1
                 set_c=set_c+1
-                print("\n\n Set val:",set_c)
+                #print("\n\n Set val:",set_c)
                 chk_arr=[]
+                chk_msg=[]
                 chk_arr=tempList[arr_s:arr_e]
                 chk_msg=msg_arr[arr_s:arr_e]
                 maxList=max(chk_arr)
                 sumList=sum(chk_arr)
                 sumMsg=sum(chk_msg)
                 avgList=float(sumList/int(t_slot))
-                print("Max List",maxList," Whole List",tempList)
-                print("Average of List",avgList)
-                fileTxt.write(str(maxList))
-                fileTxt.write(" ")
-                fileTxt.write(str(avgList))
-                fileTxt.write(" ")
-                fileTxt.write(str(sumMsg))
-                #fileTxt.write("\n")
+                print("\n\nMax List",maxList,"\nWhole List",tempList,"\nAverage of List",avgList,"\nMsg size",sumMsg)
                 
-                fileTxt.write("    ")
-                fileTxt.write(str(consumerList[countConsumer-1]))
-                fileTxt.write("   ")
-                fileTxt.write(str(producerList[countProducer-1]))
-                fileTxt.write("\n")
-                fileTxt.write("\n")
-                fileTxt.write("\n")
-                print('Till now consumer list', consumerList)
-                
-                time.sleep(float(SLEEP_DURATION))
-
-
 
 
                 
-            print('sys.argv[0] =', sys.argv[0])             
-            pathname = os.path.dirname(sys.argv[0])        
-            print('path =', pathname)
-            print('full path =', os.path.abspath(pathname))
-            print('Update written to topic %s' % KAFKA_TOPIC)
-            fileDir = os.path.dirname(os.path.realpath('/home/user/opc_ua_kafka_connector/'))
-            print ("fileDir",fileDir)
-            filename = os.path.join(fileDir, 'opc_ua_kafka_connector/c.txt')
-            print ("filename ",filename)
-            #with open('/home/user/opc_ua_kafka_connector/met.sh', 'r') as file:
-            #with open(filename, 'r') as file:
-            #    script = file.read()
+
+            #print('Update written to topic %s' % KAFKA_TOPIC)
+            #with open('/home/user/dt/met.sh', 'rb') as file:
+                #script = file.read()
             #rc = call(script, shell=True)            
 
             time.sleep(float(SLEEP_DURATION))
@@ -212,10 +164,7 @@ if __name__== "__main__":
             except Exception:
                 pass
             finally:
-                #print("Witing response time to", OUT_FILE_TXT)
-                #fileTxt.write(listToString(list(q.queue)))
-                #print("Consumer List", consumerList)
-                #print("Writing response times to", OUT_FILE)
-                #file.write(json.dumps(list(q.queue)))
-                #file.close()
+                print("Writing response times to", OUT_FILE)
+                file.write(json.dumps(list(q.queue)))
+                file.close()
                 sys.exit()
