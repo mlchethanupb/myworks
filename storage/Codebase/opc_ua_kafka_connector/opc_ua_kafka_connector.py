@@ -123,11 +123,9 @@ if __name__== "__main__":
             kafka_producer.flush()
             prod_time = datetime.now().strftime('.%f')
             producerList.append(prod_time)
+            cur_time=str(datetime.now().strftime("%H:%M:%S"))
             countProducer+=1
-      
             if countConsumer>0:
-                
-                cur_time=str(datetime.now().strftime("%H:%M:%S"))
                 print(cur_time,  consumerList[countConsumer-1],  producerList[countProducer-1],  tempList[countConsumer-1],  msg_arr[countProducer-1],)
         except KeyboardInterrupt:
             try:
