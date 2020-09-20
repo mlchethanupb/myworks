@@ -228,22 +228,6 @@ class W_MAC_Env(gym.Env):
 
   def step(self, actions):
     print("received action",actions)
-<<<<<<< HEAD
-    # nxt_hop_list = actions[0]
-    # tw_status_list = actions[1]
-    # print("nxt_hop_list: ",nxt_hop_list)
-    # print("tw_status_list", tw_status_list)
-    self.nxt_hop_list = []#actions[0]
-    self.tw_status_list = []#actions[1]
-    for id, value in enumerate(actions):
-      if (id >= self.total_nodes):
-        self.tw_status_list.append(value)
-      else:
-        self.nxt_hop_list.append(value)
-
-    print("nxt_hop_list: ",self.nxt_hop_list)
-    print("tw_status_list",self.tw_status_list)
-=======
     nxt_hop_list = []#actions[0]
     tw_status_list = []#actions[1]
     for id, value in enumerate(actions):
@@ -254,12 +238,10 @@ class W_MAC_Env(gym.Env):
 
     print("nxt_hop_list: ",nxt_hop_list)
     print("tw_status_list", tw_status_list)
->>>>>>> 530174ac1a78d6a4336f6c27887d0b23eb848295
     
     reward = 0
     isdone = False
 
-<<<<<<< HEAD
     # for index , tw_status in enumerate(tw_status_list):
     #   if(index == self.curr_node) and tw_status == 1:
     #     print("one")
@@ -271,19 +253,6 @@ class W_MAC_Env(gym.Env):
     #     else:
     #       print("two.two")
     #       reward += 10
-=======
-    for index , tw_status in enumerate(tw_status_list):
-      if(index == self.curr_node) and tw_status == 1:
-        #print("one")
-        reward += 100
-      else:
-        if(tw_status == 1):
-          #print("two.one")
-          reward -= 100
-        else:
-          #print("two.two")
-          reward += 10
->>>>>>> 530174ac1a78d6a4336f6c27887d0b23eb848295
     
     # for index, nxt_hop in enumerate(nxt_hop_list):
     #   ## attck node 
