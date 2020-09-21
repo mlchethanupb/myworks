@@ -79,22 +79,9 @@ class W_MAC_Env(gym.Env):
     fullrange_wo_dupli = {v: list(k) for k, v in d2.items()} 
     # print('Multiple Collision Domains',fullrange_wo_dupli)
  
-    """ Creating Action space """
-    ### Action space will have 2 actions [ Nexthop list of all nodes + transmitwait list of nodes ]
-    ### 1. All the nexthops that a node can take (@todo-limit the actions spaces | possible extension for multipacket transmission)
-    ### 2. Each node can do 2 actions {Transmit, Wait}
-
-    action_space = []
-    for i in range(self.total_nodes):
-      action_space.append(self.total_nodes)
-    for i in range(self.total_nodes):
-      action_space.append(2)
-    self.action_space = spaces.MultiDiscrete(action_space)
-    print(self.action_space)
-    print(self.action_space.sample())
-
-    ### creating the collision domains
+     ### creating the collision domains
     self.collision_domain = fullrange_wo_dupli
+    print("self.collision_domain",self.collision_domain)
      
     ### Find all the domains a node belong too.  
     self.node_in_domains = {}
@@ -104,8 +91,45 @@ class W_MAC_Env(gym.Env):
           self.node_in_domains[value[i]] = [key]
         else:
           self.node_in_domains[value[i]].append(key)
-    #print("self.node_in_domains : ",self.node_in_domains)
+    print("self.node_in_domains : ", self.node_in_domains)
+
+
+    """ Creating Action space """
+    ### Action space will have 2 actions [ Nexthop list of all nodes + transmitwait list of nodes ]
+    ### 1. All the nexthops that a node can take (@todo-limit the actions spaces | possible extension for multipacket transmission)
+    ### 2. Each node can do 2 actions {Transmit, Wait}
     
+    action_space = []
+    for i in range(self.total_nodes):
+      action_space.append(self.total_nodes)
+    for i in range(self.total_nodes):
+      action_space.append(2)
+    self.action_space = spaces.MultiDiscrete(action_space)
+    print(self.action_space)
+    print(self.action_space.sample())
+    
+    """
+    ### finding the low and high array
+    lower_bound = []
+    higher_bound = []
+
+    for node in range(self.total_nodes):
+      domain_list = self.node_in_domains[node]
+      min_value = min(self.collision_domain[domain_list[0]])
+      max_value = max(self.collision_domain[domain_list[len(domain_list)-1]])
+      #print("min_value", min_value, "max_value", max_value)
+      lower_bound.append(min_value)
+      higher_bound.append(max_value)
+
+    for node in range(self.total_nodes):
+      lower_bound.append(0)
+      higher_bound.append(1)
+    print("lower_bound", lower_bound, "higher_bound",higher_bound)
+    self.action_space = Box(low=np.array(lower_bound), high=np.array(higher_bound), dtype=np.uint8)
+    print(self.action_space)
+    print(self.action_space.sample())  
+    """
+
     """ Creating observation space """
     ### observation_space = [ [ list of all destination nodes ], [ list of flowtable status @ each node] ]
 
@@ -144,23 +168,9 @@ class W_MAC_Env(gym.Env):
         ### Find source and destination
         self.src = i
         self.dest = random.randrange(0,self.total_nodes)
-        while self.src == self.dest:
+        while self.src == self.dest or self.dest == 2:
           self.dest = random.randrange(0,self.total_nodes)
-        print("src: ",self.src,"dest: ",self.dest)
-        packet = Packet(self.src,self.dest)
-        self.queues[self.src].insert(0, packet)
-            
-        #To fetch the domain of source and destination node
-        for key,values in self.collision_domain.items():
-          #print("key, values, src, dest", key, values, src, dest)
-          if (self.src in values):  
-            source_key = key
-          if (self.dest in values):
-            dest_key = key
-            break #destination key not present in the same collision domain
-        
-        ### Create packet and add it to queue.
-        print("src: ",self.src,"dest: ",self.dest)
+        print("src: ",self.src,"dest: ",self.dest) 
         packet = Packet(self.src,self.dest)
         self.queues[self.src].insert(0, packet)
 
@@ -276,7 +286,7 @@ class W_MAC_Env(gym.Env):
     info = {}
     
     if isdone == False and self.tw_status_list.count(1) == 0 :
-      reward -= 1000
+      reward -= 100
 
     print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
@@ -295,15 +305,33 @@ class W_MAC_Env(gym.Env):
 
   def perform_actions(self):
 
-    reward = 0
+    reward1 = 0
+    reward2 = 0
     """ Reward for attacked node as a next hop """
     for id in self.graph.nodes:
       nxt_hop = self.nxt_hop_list[id]
+      
+      ### Verify for the valid next hop
+      valid_next_hop = False
+      domain_list = self.node_in_domains[id]
+      for domain_id in range(len(domain_list)):
+        if nxt_hop in self.collision_domain[domain_list[domain_id]] and nxt_hop != id:
+          valid_next_hop = True
+      
+      if valid_next_hop == False:
+        print("Invalid next hop")
+        reward1 -= 100
+      else:
+        reward1 -= 10    
+      
       if nxt_hop == 2:
-        reward -= 1000
+        reward1 -= 200
+        if valid_next_hop and self.tw_status_list[id] == 1:
+          self.packet_lost += 1
+
       #for tw in self.tw_status_list:
       
-      if (self.tw_status_list[id] == 1):
+      if (self.tw_status_list[id] == 1) and (valid_next_hop == True):
         queue = self.queues[id]
         if len(queue):
           packet_2_send = queue.pop()
@@ -321,13 +349,20 @@ class W_MAC_Env(gym.Env):
             if(action_sublist.count(1) > 1):
               print("node ", id," transmission collision")
               self.packet_lost += 1
-              reward -= 100
+              reward2 -= 100
                 
             else:
               print("node ", id, " transmission SUCCESS")
-              reward -= 10
+              reward2 -= 10
               self.packet_delivered +=1
-              self.queues[nxt_hop].insert(0, packet_2_send)
+              # packet_2_send.update_hop_count()
+
+              if (nxt_hop == packet_2_send.dest):
+                print("Packet reached destination")
+                reward2 += 1000
+              else:
+                print("Adding packet to the queue of ", nxt_hop)
+                self.queues[nxt_hop].insert(0, packet_2_send)
 
           #Node belongs to single domain.
           else:
@@ -336,27 +371,26 @@ class W_MAC_Env(gym.Env):
             if ((self.tw_status_list[id]) == 1):
               if(action_sublist.count(1) > 1):
                 print("node ",id, " transmission collision")
-                reward -= 100
+                reward2 -= 100
               elif (self.hidden_terminal_problem(self.tw_status_list, id, domain_list[0], nxt_hop)):
                 print("node ", id," transmission collision because of hidden terminal problem")
-                reward -= 100
+                reward2 -= 100
                 self.packet_lost += 1
               else:
                 print("node ", id," transmission SUCCESS")
                 self.packet_delivered += 1
-                reward -= 10
+                reward2 -= 10
 
                 # packet_2_send.update_hop_count()
                 if (nxt_hop == packet_2_send.dest):
                   print("Packet reached destination")
-                  reward += 1000
-
+                  reward2 += 1000
                 else:
                   print("Adding packet to the queue of ", nxt_hop)
                   self.queues[nxt_hop].insert(0, packet_2_send)
         else:
           print("Action taken on empty queue")
-          reward -= 100
+          reward2 -= 100
 
 
 
@@ -459,7 +493,8 @@ class W_MAC_Env(gym.Env):
     #     reward -= 100 * self.wait_counter[id] 
     #     print("id :", id , "wait counter reward :", -1*100*self.wait_counter[id])
 
-
+    print("reward1", reward1, "reward2", reward2)
+    reward = (0.4) * reward1 + (0.6) * reward2
     print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
     print('packet_lost ', self.packet_lost)
@@ -480,8 +515,8 @@ class W_MAC_Env(gym.Env):
       if( nxt_hop in h_values):
         if(domain_key != h_key):
           h_action = [self.tw_status_list[i] for i in h_values]
-          print("h_values : ",h_values)
-          print("h_action : ",h_action)
+          #print("h_values : ",h_values)
+          #print("h_action : ",h_action)
           for itr in range(len(h_action)):
             if(h_action[itr] == 1):
               #other_queue = self.queues[h_values[itr]]
