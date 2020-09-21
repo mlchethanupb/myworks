@@ -163,7 +163,7 @@ class W_MAC_Env(gym.Env):
       #print("-----------------------------")
       #print("Adding packets for node : ",i)  
       #Add 2 packets for each node
-      for count in range(2):
+      for count in range(5):
 
         ### Find source and destination
         self.src = i
@@ -371,11 +371,14 @@ class W_MAC_Env(gym.Env):
             if ((self.tw_status_list[id]) == 1):
               if(action_sublist.count(1) > 1):
                 print("node ",id, " transmission collision")
+                self.packet_lost += 1
                 reward2 -= 100
+
               elif (self.hidden_terminal_problem(self.tw_status_list, id, domain_list[0], nxt_hop)):
                 print("node ", id," transmission collision because of hidden terminal problem")
                 reward2 -= 100
                 self.packet_lost += 1
+
               else:
                 print("node ", id," transmission SUCCESS")
                 self.packet_delivered += 1
@@ -494,7 +497,7 @@ class W_MAC_Env(gym.Env):
     #     print("id :", id , "wait counter reward :", -1*100*self.wait_counter[id])
 
     print("reward1", reward1, "reward2", reward2)
-    reward = (0.4) * reward1 + (0.6) * reward2
+    reward = (0.5) * reward1 + (0.5) * reward2
     print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
     print('packet_lost ', self.packet_lost)
