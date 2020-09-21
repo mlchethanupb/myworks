@@ -93,6 +93,8 @@ class W_MAC_Env(gym.Env):
           self.node_in_domains[value[i]].append(key)
     print("self.node_in_domains : ", self.node_in_domains)
 
+    self.attack_nodes = [random.randrange(0,self.total_nodes) for i in range(1)]
+    print("self.attack_nodes", self.attack_nodes)
 
     """ Creating Action space """
     ### Action space will have 2 actions [ Nexthop list of all nodes + transmitwait list of nodes ]
@@ -168,7 +170,7 @@ class W_MAC_Env(gym.Env):
         ### Find source and destination
         self.src = i
         self.dest = random.randrange(0,self.total_nodes)
-        while self.src == self.dest or self.dest == 2:
+        while self.src == self.dest or self.dest in self.attack_nodes:
           self.dest = random.randrange(0,self.total_nodes)
         print("src: ",self.src,"dest: ",self.dest) 
         packet = Packet(self.src,self.dest)
@@ -176,6 +178,10 @@ class W_MAC_Env(gym.Env):
 
   def reset(self):
     ## reset the queue
+    
+    self.attack_nodes = [random.randrange(0,self.total_nodes) for i in range(1)]
+    print("self.attack_nodes", self.attack_nodes)
+
     self.__reset_queue()
     self.packet_delivered = 0
     self.packet_lost = 0
@@ -189,7 +195,7 @@ class W_MAC_Env(gym.Env):
         state.append(node_queue[len(node_queue)-1].dest)
     
     for i in range(self.total_nodes):
-      if i == 2:
+      if i in self.attack_nodes:
         state.append(1)
       else:
         state.append(0)
@@ -216,52 +222,6 @@ class W_MAC_Env(gym.Env):
     print("tw_status_list", self.tw_status_list)
     
     reward = 0
-
-    # for index , tw_status in enumerate(tw_status_list):
-    #   if(index == self.curr_node) and tw_status == 1:
-    #     print("one")
-    #     reward += 100
-    #   else:
-    #     if(tw_status == 1):
-    #       print("two.one")
-    #       reward -= 100
-    #     else:
-    #       print("two.two")
-    #       reward += 10
-    
-    # for index, nxt_hop in enumerate(nxt_hop_list):
-    #   ## attck node 
-    #   if (index == self.curr_node):
-    #     if(nxt_hop == 2):
-    #       print("three")
-    #       reward -= 1000
-        
-    #     if (False == self.graph.has_edge(self.curr_node,nxt_hop_list[index])):
-    #       print("four")
-    #       reward -= 100
-    #     elif (nxt_hop_list[index] == self.dest) and (tw_status_list[index] == 1):
-    #       print("five")
-    #       reward += 1000
-    #       isdone = True
-    #       packet =self.queues[index].pop()
-    #       print("Packet reached destination") 
-    #     else:
-    #       print("six")
-    #       if tw_status_list[index] == 1:
-    #         if(len(self.queues[index])):
-    #           packet =self.queues[index].pop()
-    #           print("Moving packet from ", self.curr_node,"to ", nxt_hop)
-
-    #           self.curr_node = nxt_hop
-    #           self.queues[self.curr_node].insert(0, packet)
-            
-    #           reward += 100
-
-    #         else:
-    #           print("Empty queue... wrong node?? ")
-        
-    #     break
-  
     
     reward = self.perform_actions()
     
@@ -275,7 +235,7 @@ class W_MAC_Env(gym.Env):
         next_state.append(self.total_nodes)
 
     for i in range(self.total_nodes):
-      if i == 2:
+      if i in self.attack_nodes:
         next_state.append(1)
       else:
         next_state.append(0)
@@ -324,7 +284,7 @@ class W_MAC_Env(gym.Env):
       else:
         reward1 -= 10    
       
-      if nxt_hop == 2:
+      if nxt_hop in self.attack_nodes:
         reward1 -= 200
         if valid_next_hop and self.tw_status_list[id] == 1:
           self.packet_lost += 1
@@ -354,11 +314,11 @@ class W_MAC_Env(gym.Env):
             else:
               print("node ", id, " transmission SUCCESS")
               reward2 -= 10
-              self.packet_delivered +=1
               # packet_2_send.update_hop_count()
 
               if (nxt_hop == packet_2_send.dest):
                 print("Packet reached destination")
+                self.packet_delivered +=1
                 reward2 += 1000
               else:
                 print("Adding packet to the queue of ", nxt_hop)
@@ -381,12 +341,12 @@ class W_MAC_Env(gym.Env):
 
               else:
                 print("node ", id," transmission SUCCESS")
-                self.packet_delivered += 1
                 reward2 -= 10
 
                 # packet_2_send.update_hop_count()
                 if (nxt_hop == packet_2_send.dest):
                   print("Packet reached destination")
+                  self.packet_delivered += 1
                   reward2 += 1000
                 else:
                   print("Adding packet to the queue of ", nxt_hop)
