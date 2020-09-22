@@ -22,19 +22,14 @@ import Randomscheduler
 import Script
 from statistics import mean 
 
-
 if __name__ == '__main__':
     pa = parameters.Parameters()
-    Job_arrival_rate_slowdown_sd = []
-    Job_arrival_rate_slowdown_ct = []
-    Job_arrival_rate_reward_sd = []
-    Job_arrival_rate_reward_ct = []
-    Job_arrival_rate_completion_time_sd = []
-    Job_arrival_rate_completion_time_ct = []
+    models = [pa.A2C_Slowdown, pa.A2C_Ctime, pa.random, pa.PPO2]
+    y_slowdown_readings = []
     Job_arrival_rate = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190]
-    objectives = [pa.objective_slowdown, pa.objective_random]
-    for objective in objectives:
-        pa.objective = objective
+    for i in range(len(models)):
+        pa.objective = models[i]
+        save_path = models[i]['save_path']
         Job_arrival_rate_slowdown = []
         Job_arrival_rate_reward = []
         Job_arrival_rate_completion_time = []
@@ -43,43 +38,24 @@ if __name__ == '__main__':
             job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(pa)
             env = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
                                 job_sequence_size=job_sequence_size)
-            env1 = make_vec_env(lambda: env, n_envs=1)
+            env1 = make_vec_env(lambda: env, n_envs=4)
             model = None
-            if pa.objective == pa.objective_slowdown:
-                model1 = A2C.load("job_scheduling_A2C_Slowdown", env1)
-                model = model1
-            elif pa.objective == pa.objective_Ctime:
-                model2 = A2C.load("job_scheduling_A2C_Ctime", env1)
-                model = model2
-            elif pa.objective == pa.objective_random: 
-                model = None
-            episode_a2c, reward_a2c, slowdown_a2c, completion_time_a2c = Script.run_episodes(model, pa, env, job_sequence_len)
+            if save_path != None:
+                model = models[i]['agent'].load(save_path, env1)
+            episode, reward, slowdown, completion_time = Script.run_episodes(model, pa, env, job_sequence_len)
 
-            mean_slowdown = mean(slowdown_a2c)
-            mean_reward = mean(reward_a2c)
-            mean_completion_time = mean(completion_time_a2c)
+            mean_slowdown = mean(slowdown)
+            mean_reward = mean(reward)
+            mean_completion_time = mean(completion_time)
             Job_arrival_rate_slowdown.append(mean_slowdown)
             Job_arrival_rate_reward.append(mean_reward)
             Job_arrival_rate_completion_time.append(mean_completion_time)
 
-        if pa.objective == pa.objective_slowdown:
-            Job_arrival_rate_slowdown_sd = Job_arrival_rate_slowdown
-            Job_arrival_rate_reward_sd = Job_arrival_rate_reward
-            Job_arrival_rate_completion_time_sd = Job_arrival_rate_completion_time
-
-        elif pa.objective == pa.objective_Ctime:
-            Job_arrival_rate_slowdown_ct = Job_arrival_rate_slowdown
-            Job_arrival_rate_reward_ct = Job_arrival_rate_reward
-            Job_arrival_rate_completion_time_ct = Job_arrival_rate_completion_time
-
-        elif pa.objective == pa.objective_random:
-            Job_arrival_rate_slowdown_random = Job_arrival_rate_slowdown
-            Job_arrival_rate_reward_random = Job_arrival_rate_reward
-            Job_arrival_rate_completion_time_random = Job_arrival_rate_completion_time
+        y_slowdown_readings.append(Job_arrival_rate_slowdown)
 
     fig = plt.figure()
-    plt.plot(Job_arrival_rate, Job_arrival_rate_slowdown_sd, color='blue', label='A2C Slowdown agent')
-    plt.plot(Job_arrival_rate, Job_arrival_rate_slowdown_random, color='yellow', label='Random agent')
+    for i in range(len(models)):
+        plt.plot(Job_arrival_rate, y_slowdown_readings[i], color=models[i]['color'], label=models[i]['title'])
     plt.xlabel("Cluster Load(Percentage)")
     plt.ylabel("Average Slowdown")
     plt.title("Job_arrival_rate_slowdown")

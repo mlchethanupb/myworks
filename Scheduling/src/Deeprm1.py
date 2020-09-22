@@ -164,7 +164,7 @@ class Env(gym.Env):
 
     def get_reward(self):
         reward = 0
-        if self.pa.objective == self.pa.objective_slowdown:
+        if self.pa.objective != self.pa.A2C_Ctime:
             # Reward based on jobs currently running
             for j in self.machine.running_job:
                 reward += self.pa.penalty / float(j.len)
@@ -177,7 +177,7 @@ class Env(gym.Env):
                 if j is not None:
                     reward += self.pa.penalty / float(j.len)
 
-        elif self.pa.objective == self.pa.objective_Ctime:
+        elif self.pa.objective == self.pa.A2C_Ctime:
             reward = 0
             remaining_jobs = 0
             for j in self.machine.running_job:

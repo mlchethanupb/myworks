@@ -1,5 +1,3 @@
-# reference: https://github.com/hongzimao/deeprm/blob/master/job_distribution.py
-# modified the original code to fit our project needs
 import numpy as np
 import parameters
 import random
@@ -67,6 +65,7 @@ class Dist:
 def generate_sequence_work(pa):
 
     np.random.seed(pa.random_seed)
+    random.seed(pa.random_seed)
 
     simu_len = pa.simu_len * pa.num_ex
 

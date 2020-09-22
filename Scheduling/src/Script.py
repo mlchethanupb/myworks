@@ -22,6 +22,11 @@ from stable_baselines.common import make_vec_env
 import Randomscheduler
 from statistics import mean 
 
+def autolabel(rects):
+    for rect in rects:
+        height = rect.get_height()
+        ax.text(rect.get_x() + rect.get_width()/2., height, '%.2f' % height, ha='center', va='bottom')
+
 def run_episodes(model, pa, env, job_sequence_len):
     episode_list = []
     reward_list = []
@@ -65,85 +70,53 @@ def run_episodes(model, pa, env, job_sequence_len):
 
 if __name__ == '__main__':
     pa = parameters.Parameters()
+    models = [pa.A2C_Slowdown, pa.A2C_Ctime, pa.random, pa.PPO2]
     job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(pa)
     env = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
                         job_sequence_size=job_sequence_size)
-    env1 = make_vec_env(lambda: env, n_envs=1)
+    env1 = make_vec_env(lambda: env, n_envs=4)
 
-    ################################################################################################
-
-    pa.objective = pa.objective_slowdown
-    model1 = A2C.load("job_scheduling_A2C_Slowdown", env1)
-    obs = env.reset()
-    done = False
-    print("-------------------------------------------------------------------")
-    print("Scheduling using trained A2C agent for slowdown")
-    episode_a2c_sd, reward_a2c_sd, slowdown_a2c_sd, completion_time_a2c_sd = run_episodes(model1, pa, env, job_sequence_len)
-
-    ################################################################################################
+    episodes = []
+    rewards = []
+    slowdowns = []
+    ctimes = []
     
-    pa.objective = pa.objective_Ctime
-    model2 = A2C.load("job_scheduling_A2C_Ctime", env1)
-    obs = env.reset()
-    done = False
-    print("-------------------------------------------------------------------")
-    print("Scheduling using trained A2C agent for Ctime")
-    episode_a2c_ct, reward_a2c_ct, slowdown_a2c_ct, completion_time_a2c_ct = run_episodes(model2, pa, env, job_sequence_len)
+    for i in range(len(models)):
+        pa.objective = models[i]
+        save_path = models[i]['save_path']
+        model = None
+        if save_path != None:
+            model = models[i]['agent'].load(save_path, env1)
+        episode, reward, slowdown, completion_time = run_episodes(model, pa, env, job_sequence_len)
+        episodes.append(episode)
+        rewards.append(reward)
+        slowdowns.append(slowdown)
+        ctimes.append(completion_time)
 
-    ################################################################################################
-
-    model3 = None
-    obs = env.reset()
-    done = False
-    print("-------------------------------------------------------------------")
-    print("Scheduling using Random agent")
-    episode_random, reward_random, slowdown_random, completion_time_random = run_episodes(model3, pa, env, job_sequence_len)
-    
-    ################################################################################################
-    
     # data to plot
     n_groups = 2
-    a2c_sd = (mean(slowdown_a2c_sd), mean(completion_time_a2c_sd))
-    a2c_ct = (mean(slowdown_a2c_ct), mean(completion_time_a2c_ct))
-    random = (mean(slowdown_random), mean(completion_time_random))
-
-    # create plot
     fig, ax = plt.subplots()
     index = np.arange(n_groups)
     bar_width = 0.1
     opacity = 0.8
+    agent_plots = []
 
-    rects1 = plt.bar(index, a2c_sd, bar_width,
-    alpha=opacity,
-    color='blue',
-    label='A2C Slowdown agent')
-
-    rects2 = plt.bar(index + bar_width, a2c_ct, bar_width,
-    alpha=opacity,
-    color='red',
-    label='A2C CTime agent')
-
-    rects3 = plt.bar(index + 2*bar_width, random, bar_width,
-    alpha=opacity,
-    color='yellow',
-    label='Random agent')
+    for i in range(len(models)):
+        mean_values = (mean(slowdowns[i]), mean(ctimes[i]))
+        deviation = (np.std(slowdowns[i]), np.std(ctimes[i]))
+        agent_plot = plt.bar(index + i*bar_width, mean_values, bar_width, yerr=deviation, ecolor='black', capsize=10,
+         alpha=opacity, color=models[i]['color'], label=models[i]['title'])
+        agent_plots.append(agent_plot)
 
     plt.xlabel('Performance metrics')
     plt.ylabel('Time')
     plt.title('Performance for different objectives')
     plt.xticks(index + bar_width, ('Slowdown', 'Completion time'))
-    plt.legend((rects1[0], rects2[0], rects3[0]), ('A2C Slowdown agent', 'A2C CTime agent', 'Random agent'))
-    def autolabel(rects):
-        for rect in rects:
-            height = rect.get_height()
-            ax.text(rect.get_x() + rect.get_width()/2., height, '%.2f' % height, ha='center', va='bottom')
+    plt.legend()
 
-    autolabel(rects1)
-    autolabel(rects2)
-    autolabel(rects3)
+    for agent_plot in agent_plots:
+        autolabel(agent_plot)
 
     plt.tight_layout()
     plt.show()
     fig.savefig('Performance.png')
-
-    print(a2c_sd,a2c_ct)
