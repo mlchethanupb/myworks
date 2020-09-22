@@ -108,15 +108,17 @@ if __name__ == '__main__':
          alpha=opacity, color=models[i]['color'], label=models[i]['title'])
         agent_plots.append(agent_plot)
 
-    plt.xlabel('Performance metrics')
-    plt.ylabel('Time')
-    plt.title('Performance for different objectives')
-    plt.xticks(index + bar_width, ('Slowdown', 'Completion time'))
-    plt.legend()
-
     for agent_plot in agent_plots:
         autolabel(agent_plot)
 
+    plt.xlabel('Performance metrics')
+    plt.ylabel('Average Job Slowdown')
+    plt.title('Performance for different objectives')
+    plt.xticks(index + bar_width, ('Slowdown', 'Completion time'))
+    plt.legend()
+    ax2 = ax.twinx()
+    plt.ylabel('Average Job Completion Time')
+    ax2.set_ylim(ax.get_ylim())
     plt.tight_layout()
     plt.show()
     fig.savefig('Performance.png')
