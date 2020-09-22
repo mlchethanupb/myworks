@@ -25,6 +25,7 @@ class W_MAC_Env(gym.Env):
     self.packet_delivered = 0
     self.packet_lost = 0
 
+    """
     range_domain = {} ## to get the range of each node for each iteration it will get {0:{0,1,2}}
     full_range={} ## to get the range of all nodes merging it with range_domain the total domain will have is {0:{0,1,2},1:{0,1,2}etc}
     for i in self.graph.nodes: 
@@ -37,7 +38,7 @@ class W_MAC_Env(gym.Env):
     
      
     full_range.update(range_domain)
-    #print('Full Range with duplicates',full_range)
+    print('Full Range with duplicates',full_range)
 
 
     fullrange_wo_dupli = {}
@@ -50,14 +51,91 @@ class W_MAC_Env(gym.Env):
           for i in sorted_list:
             if i not in sorted_wo_dupli:
               sorted_wo_dupli.append(i)
-          # print('sorted list wo dupli',sorted_wo_dupli)
+          print('sorted list wo dupli',sorted_wo_dupli)
           fullrange_wo_dupli[key] = sorted_wo_dupli
+    print('fullrange_wo_dupli' ,fullrange_wo_dupli)
+    """
+    collision_domain = {}
+
+    dict_index = 0
+    for i in self.graph.nodes:
+      domain_list1 = []
+      domain_list2 = []
+      for j in self.graph.nodes:
+        if(self.graph.has_edge(i,j) == True):
+          if i not in domain_list1:
+            domain_list1.append(i)
+        
+          connected = True
+          for node in domain_list1:
+            if(self.graph.has_edge(node,j) == False):
+              connected = False
+        
+          if connected == True:
+            if j not in domain_list1:
+              domain_list1.append(j)
+          else:
+            for index,values in collision_domain.items():
+              
+              connected = True
+              for node in values:
+                if(self.graph.has_edge(node,j) == False):
+                  connected = False
+              
+              if connected == True:
+                if j not in values:
+                  collision_domain[index].append(j)
+              else:
+                domain_list2 = [i,j]
+                    
+                        
+      #print("domain_list1",domain_list1)
+      #print("domain_list2",domain_list2)
+      if len(domain_list1):
+        dict_index += 1
+        collision_domain[dict_index] = domain_list1
+        
+      if len(domain_list2):
+        dict_index += 1
+        collision_domain[dict_index] = domain_list2
+            
+    #print("collision_domain",collision_domain)
+
+    fullrange_wo_dupli = {}
+    sorted_list = []
+    for key,value in collision_domain.items():
+        sorted_list = sorted(value) ## to arrange values in ascending order in dict and removes duplicate values of the single key
+        # print('With dupli',sorted_list)
+        fullrange_wo_dupli[key] = sorted_list
     #print('fullrange_wo_dupli' ,fullrange_wo_dupli)
 
+    d2 = {tuple(v): k for k, v in fullrange_wo_dupli.items()}  # exchange keys, values
+    fullrange_wo_dupli = {v: list(k) for k, v in d2.items()}
+    #print('fullrange_wo_dupli' ,fullrange_wo_dupli)
 
+    to_remove_index = []
+    for index, values in fullrange_wo_dupli.items():
+      #print(index, values)
+      is_subset = False
+      for test_values in fullrange_wo_dupli.values():
+        #print("test_values",test_values)
+        if values != test_values:
+          if(set(values).issubset(set(test_values))):
+            is_subset = True
+            #print("subset_values",values)
+            break
+      if is_subset:
+        to_remove_index.append(index)
+
+    #print("to_remove_index", to_remove_index)
+
+    for key in to_remove_index:
+        fullrange_wo_dupli.pop(key,None)
+
+    #print('fullrange_wo_dupli' ,fullrange_wo_dupli)
     
     ### Finding the intermediate nodes in multi domain network
-
+    """
     intermediate_nodes = []
     for ranges, nodes in fullrange_wo_dupli.items():
       for ranges1, nodes1 in fullrange_wo_dupli.items():
@@ -71,14 +149,14 @@ class W_MAC_Env(gym.Env):
     for nodes in intermediate_nodes_wo_dupli:
       print('Intermediate nodes',nodes)
       del fullrange_wo_dupli[nodes]
-    # print('Fullrange after intermediate node deletion',fullrange_wo_dupli)
-   
+    print('Fullrange after intermediate node deletion',fullrange_wo_dupli)
     ### Removing the duplicate domains in the network
 
     d2 = {tuple(v): k for k, v in fullrange_wo_dupli.items()}  # exchange keys, values
     fullrange_wo_dupli = {v: list(k) for k, v in d2.items()} 
-    # print('Multiple Collision Domains',fullrange_wo_dupli)
- 
+    #print('Multiple Collision Domains',fullrange_wo_dupli)
+    """
+
      ### creating the collision domains
     self.collision_domain = fullrange_wo_dupli
     print("self.collision_domain",self.collision_domain)
@@ -93,7 +171,14 @@ class W_MAC_Env(gym.Env):
           self.node_in_domains[value[i]].append(key)
     print("self.node_in_domains : ", self.node_in_domains)
 
-    self.attack_nodes = [random.randrange(0,self.total_nodes) for i in range(1)]
+    self.attack_nodes = []
+    for i in range(3):
+      a_node = random.randrange(0,self.total_nodes)
+      while (a_node not in self.attack_nodes):
+        a_node = random.randrange(0,self.total_nodes)
+      self.attack_nodes.append(a_node)
+
+
     print("self.attack_nodes", self.attack_nodes)
 
     """ Creating Action space """
@@ -107,8 +192,8 @@ class W_MAC_Env(gym.Env):
     for i in range(self.total_nodes):
       action_space.append(2)
     self.action_space = spaces.MultiDiscrete(action_space)
-    print(self.action_space)
-    print(self.action_space.sample())
+    #print(self.action_space)
+    #print(self.action_space.sample())
     
     """
     ### finding the low and high array
@@ -141,8 +226,8 @@ class W_MAC_Env(gym.Env):
     for i in range(self.total_nodes):
       observation_space.append(2)
     self.observation_space = MultiDiscrete(observation_space)
-    print(self.observation_space)
-    print(self.observation_space.sample())
+    #print(self.observation_space)
+    #print(self.observation_space.sample())
     
 
 
@@ -172,14 +257,19 @@ class W_MAC_Env(gym.Env):
         self.dest = random.randrange(0,self.total_nodes)
         while self.src == self.dest or self.dest in self.attack_nodes:
           self.dest = random.randrange(0,self.total_nodes)
-        print("src: ",self.src,"dest: ",self.dest) 
+        #print("src: ",self.src,"dest: ",self.dest) 
         packet = Packet(self.src,self.dest)
         self.queues[self.src].insert(0, packet)
 
   def reset(self):
     ## reset the queue
     
-    self.attack_nodes = [random.randrange(0,self.total_nodes) for i in range(1)]
+    for i in range(3):
+      a_node = random.randrange(0,self.total_nodes)
+      while (a_node not in self.attack_nodes):
+        a_node = random.randrange(0,self.total_nodes)
+      self.attack_nodes.append(a_node)
+
     print("self.attack_nodes", self.attack_nodes)
 
     self.__reset_queue()
@@ -218,8 +308,8 @@ class W_MAC_Env(gym.Env):
       else:
         self.nxt_hop_list.append(value)
 
-    print("nxt_hop_list: ",self.nxt_hop_list)
-    print("tw_status_list", self.tw_status_list)
+    #print("nxt_hop_list: ",self.nxt_hop_list)
+    #print("tw_status_list", self.tw_status_list)
     
     reward = 0
     
@@ -279,7 +369,7 @@ class W_MAC_Env(gym.Env):
           valid_next_hop = True
       
       if valid_next_hop == False:
-        print("Invalid next hop")
+        #print("Invalid next hop")
         reward1 -= 100
       else:
         reward1 -= 10    
@@ -307,21 +397,21 @@ class W_MAC_Env(gym.Env):
             action_sublist = [self.tw_status_list[i] for i in node_list]
 
             if(action_sublist.count(1) > 1):
-              print("node ", id," transmission collision")
+              #print("node ", id," transmission collision")
               self.packet_lost += 1
               reward2 -= 100
                 
             else:
-              print("node ", id, " transmission SUCCESS")
+              #print("node ", id, " transmission SUCCESS")
               reward2 -= 10
               # packet_2_send.update_hop_count()
 
               if (nxt_hop == packet_2_send.dest):
-                print("Packet reached destination")
+                #print("Packet reached destination")
                 self.packet_delivered +=1
                 reward2 += 1000
               else:
-                print("Adding packet to the queue of ", nxt_hop)
+                #print("Adding packet to the queue of ", nxt_hop)
                 self.queues[nxt_hop].insert(0, packet_2_send)
 
           #Node belongs to single domain.
@@ -330,29 +420,29 @@ class W_MAC_Env(gym.Env):
             action_sublist = [self.tw_status_list[i] for i in node_list]
             if ((self.tw_status_list[id]) == 1):
               if(action_sublist.count(1) > 1):
-                print("node ",id, " transmission collision")
+                #print("node ",id, " transmission collision")
                 self.packet_lost += 1
                 reward2 -= 100
 
               elif (self.hidden_terminal_problem(self.tw_status_list, id, domain_list[0], nxt_hop)):
-                print("node ", id," transmission collision because of hidden terminal problem")
+                #print("node ", id," transmission collision because of hidden terminal problem")
                 reward2 -= 100
                 self.packet_lost += 1
 
               else:
-                print("node ", id," transmission SUCCESS")
+                #print("node ", id," transmission SUCCESS")
                 reward2 -= 10
 
                 # packet_2_send.update_hop_count()
                 if (nxt_hop == packet_2_send.dest):
-                  print("Packet reached destination")
+                  #print("Packet reached destination")
                   self.packet_delivered += 1
                   reward2 += 1000
                 else:
-                  print("Adding packet to the queue of ", nxt_hop)
+                  #print("Adding packet to the queue of ", nxt_hop)
                   self.queues[nxt_hop].insert(0, packet_2_send)
         else:
-          print("Action taken on empty queue")
+          #print("Action taken on empty queue")
           reward2 -= 100
 
 
@@ -456,9 +546,9 @@ class W_MAC_Env(gym.Env):
     #     reward -= 100 * self.wait_counter[id] 
     #     print("id :", id , "wait counter reward :", -1*100*self.wait_counter[id])
 
-    print("reward1", reward1, "reward2", reward2)
+    #print("reward1", reward1, "reward2", reward2)
     reward = (0.5) * reward1 + (0.5) * reward2
-    print('final reward', reward)
+    #print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
     print('packet_lost ', self.packet_lost)
     #print ('test')
