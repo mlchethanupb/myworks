@@ -171,12 +171,12 @@ class W_MAC_Env(gym.Env):
           self.node_in_domains[value[i]].append(key)
     print("self.node_in_domains : ", self.node_in_domains)
 
-    self.attack_nodes = []
+    self.attack_nodes = [3]
     for i in range(3):
       a_node = random.randrange(0,self.total_nodes)
-      while (a_node not in self.attack_nodes):
-        a_node = random.randrange(0,self.total_nodes)
-      self.attack_nodes.append(a_node)
+      #while (a_node not in self.attack_nodes):
+        #a_node = random.randrange(0,self.total_nodes)
+      #self.attack_nodes.append(a_node)
 
 
     print("self.attack_nodes", self.attack_nodes)
@@ -263,12 +263,12 @@ class W_MAC_Env(gym.Env):
 
   def reset(self):
     ## reset the queue
-    
+    self.attack_nodes = [3]
     for i in range(3):
       a_node = random.randrange(0,self.total_nodes)
-      while (a_node not in self.attack_nodes):
-        a_node = random.randrange(0,self.total_nodes)
-      self.attack_nodes.append(a_node)
+      #while (a_node not in self.attack_nodes):
+      #  a_node = random.randrange(0,self.total_nodes)
+     # self.attack_nodes.append(a_node)
 
     print("self.attack_nodes", self.attack_nodes)
 
