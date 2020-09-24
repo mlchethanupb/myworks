@@ -77,7 +77,7 @@ for k in range(ct2):
             coun_all+=1
 
 
-file = open('G:\\metrics_data.csv.csv', 'w+', newline ='')  
+file = open('G:\\metrics_data.csv', 'w+', newline ='')  
 with file:     
     write = csv.writer(file)
     write.writerow(('Time', 'consumer', 'producer', 'response time', 'message size','cpu utilization(mb)', 'memory consumption(in gigabytes)', 'disk usage(gb)'))
