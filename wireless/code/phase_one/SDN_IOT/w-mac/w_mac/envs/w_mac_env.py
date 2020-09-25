@@ -581,18 +581,37 @@ class W_MAC_Env(gym.Env):
 
 
   def render(self, mode='human'):
+        queue0 = self.queues[0]
+        source_node0 = []
+        dest_node0 = []
+        source_node1 = []
+        dest_node1 = []
 
-        source_node= [self.src]
-        dest_node =[self.dest]
+        if len(queue0):
+          packet0 = queue0[len(queue0)-1]
+          source_node0= [packet0.src]
+          dest_node0 =[packet0.dest]
+          
+        queue1 = self.queues[1]
+        if len(queue1):
+          packet1 = queue1[len(queue1)-1]
+          source_node1= [packet1.src]
+          dest_node1 =[packet1.dest]
+
+        
+
         nodes = self.node_in_domains
+        # next_hop = self.nxt_hop_list
 
 
         # Assigning labels to the nodes
         pos = nx.spring_layout(self.graph)
         nx.draw(self.graph, pos , with_labels=True, font_weight='bold')
-        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nodes , node_color = 'blue')
-        nx.draw_networkx_nodes(self.graph , pos , nodelist = source_node, node_color = 'red')
-        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = dest_node , node_color = 'green')
+        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nodes , node_color = 'white')
+        nx.draw_networkx_nodes(self.graph , pos , nodelist = source_node0, node_color = 'red')
+        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = dest_node0 , node_color = 'green')
+        nx.draw_networkx_nodes(self.graph , pos , nodelist = source_node1, node_color = 'orange')
+        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = dest_node1 , node_color = 'blue')
         nx.draw_networkx_edges(self.graph , pos , edge_color = 'black')
 
         plt.axis('off')
