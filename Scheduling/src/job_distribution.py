@@ -65,7 +65,6 @@ class Dist:
 def generate_sequence_work(pa):
 
     np.random.seed(pa.random_seed)
-    random.seed(pa.random_seed)
 
     simu_len = pa.simu_len * pa.num_ex
 
@@ -73,15 +72,56 @@ def generate_sequence_work(pa):
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
     nw_size_seq = np.zeros((simu_len, pa.num_resources), dtype=int)
+    cluster_occupied = 0
     
     for i in range(simu_len):
 
-        if np.random.rand() < pa.new_job_rate:  # a new job comes
+        if np.random.rand() < pa.new_job_rate and cluster_occupied <= (pa.cluster_capacity * pa.cluster_load):  # a new job comes
 
             nw_len_seq[i], nw_size_seq[i, :] = nw_dist(pa)
+            cluster_occupied = cluster_occupied + (nw_len_seq[i] * nw_size_seq[i][0] * nw_size_seq[i][1])
 
+    pa.cluster_occupied = cluster_occupied  
     nw_size_seq_list = []
     for i in range(len(nw_size_seq)):
         nw_size_seq_list.append(list(nw_size_seq[i]))
 
     return list(nw_len_seq), nw_size_seq_list
+
+# compute simulen and arrival_rate wrt max cluser load passed
+def compute_simulen_and_arrival_rate(max_load,pa):
+    max_load = max_load
+    pa.new_job_rate = 1
+    loads = [max_load, pa.cluster_load]
+    np.random.seed(pa.random_seed)
+    random.seed(pa.random_seed)
+    nw_dist = pa.dist.bi_model_dist
+    nw_len_seq = []
+    nw_size_seq = []
+    req_len_seq = []
+    req_size_seq = []
+    cluster_capacity = pa.cluster_capacity
+    
+    for load in loads:
+        cluster_occupied = 0
+        while cluster_occupied <= (cluster_capacity * load):
+            len_i = 0
+            size_i = [0, 0]
+            if np.random.rand() < pa.new_job_rate:  # a new job comes
+                len_i, size_i = nw_dist(pa)
+                cluster_occupied = cluster_occupied + (len_i * size_i[0] * size_i[1])
+
+            if load == max_load:
+                nw_len_seq.append(len_i)
+                nw_size_seq.append(size_i)
+            elif load == pa.cluster_load:
+                req_len_seq.append(len_i)
+                req_size_seq.append(size_i)
+
+        if max_load == pa.cluster_load:
+            req_len_seq = nw_len_seq
+            break
+        
+    simu_len = len(nw_len_seq)
+    new_job_arrival_rate = len(req_len_seq) / len(nw_len_seq)
+    return simu_len, new_job_arrival_rate
