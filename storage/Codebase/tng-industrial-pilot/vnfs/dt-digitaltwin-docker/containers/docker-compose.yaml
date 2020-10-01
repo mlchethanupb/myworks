@@ -1,0 +1,11 @@
+version: '2'
+services:
+  digitaltwin:
+    image: digitaltwin:dev
+    ports:
+      - '4840:4840'
+    environment:
+      DT_WEB_LISTEN: 0.0.0.0
+      DT_WEB_PORT: 15001
+      OPCUA_HOST: 0.0.0.0
+      OPCUA_PORT: 4840     

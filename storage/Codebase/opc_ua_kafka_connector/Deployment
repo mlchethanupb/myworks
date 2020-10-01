@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (f63a961c)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: opc-ua-kafka-connector
+  name: opc-ua-kafka-connector
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.19.0 (f63a961c)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: opc-ua-kafka-connector
+    spec:
+      nodeName: pg-aicon-storage-2
+      containers:
+      - env:
+        - name: INSTANCE_NAME
+          value: dt-imms-opcua-0
+        - name: KAFKA_PORT
+          value: "31090"
+        - name: KAFKA_SERVER
+          value: 10.0.0.80
+        - name: KAFKA_TOPIC
+          value: dt-imms-opcua-0
+        - name: NUMBER_MESSAGES
+          value: "15000"
+        - name: OPCUA_PORT
+          value: "4840"
+        - name: OPCUA_SERVER
+          value: 10.0.0.81
+        - name: OUT_FILE
+          value: dt-imms-opcua-0.json
+        - name: SLEEP_DURATION
+          value: "0.5"
+        image: opc_ua_kafka_connector:dev
+        name: opc-ua-kafka-connector
+        resources: {}
+      restartPolicy: Always
+status: {}
