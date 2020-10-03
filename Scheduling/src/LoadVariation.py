@@ -6,7 +6,6 @@ import job_distribution
 import argparse
 import os
 import gym
-from stable_baselines.deepq.policies import MlpPolicy
 from stable_baselines import PPO2, A2C
 from stable_baselines.common.env_checker import check_env
 from gym import spaces
@@ -23,7 +22,8 @@ if __name__ == '__main__':
     cluster_load = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190] # aprrox loads which gets recalculated later
     for i in range(len(models)):
         pa.objective = models[i]
-        save_path = models[i]['save_path']
+        log_dir = models[i]['log_dir']
+        save_path = None
         Job_arrival_rate_slowdown = []
         Job_arrival_rate_reward = []
         Job_arrival_rate_completion_time = []
@@ -40,9 +40,10 @@ if __name__ == '__main__':
             load_occupied.append(cluster_values)
             env = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
                                 job_sequence_size=job_sequence_size)
-            env1 = make_vec_env(lambda: env, n_envs=4)
+            env1 = make_vec_env(lambda: env, n_envs=1)
             model = None
-            if save_path != None:
+            if models[i]['save_path'] != None:
+                save_path = log_dir + models[i]['save_path']
                 model = models[i]['agent'].load(save_path, env1)
             episode, reward, slowdown, completion_time = Script.run_episodes(model, pa, env, job_sequence_len)
 
@@ -62,9 +63,9 @@ if __name__ == '__main__':
         plt.plot(res['cluster_load'], y_slowdown_readings[i], color=models[i]['color'], label=models[i]['title'])
     plt.xlabel("Cluster Load(Percentage)")
     plt.ylabel("Average Slowdown")
-    plt.title("Job_arrival_rate_slowdown")
+    plt.title("ClusterLoadVsSlowdown")
     plt.legend()
     plt.grid()
     plt.show()
-    fig.savefig('Job_arrival_rate_Slowdown.png')
+    fig.savefig('workspace/ClusterLoadVariation.png')
     # print("Cluster capacity: ", pa.cluster_capacity, ", Job units(total) for various loads: ", load_occupied)

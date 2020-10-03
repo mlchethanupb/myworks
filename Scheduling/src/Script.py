@@ -9,7 +9,6 @@ import argparse
 from random import sample
 import os
 import gym
-from stable_baselines.deepq.policies import MlpPolicy
 from stable_baselines import PPO2, A2C
 from stable_baselines.common.env_checker import check_env
 from gym import spaces
@@ -17,12 +16,14 @@ from stable_baselines.common import make_vec_env
 import Randomscheduler
 from statistics import mean 
 
+# labeling the bar graph
 def autolabel(rects):
     for rect in rects:
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width()/2., 1.15*height, '%.2f' % height, ha='center', va='bottom')
         ax.text(rect.get_x() + rect.get_width()/2., 1.15*height, '%.2f' % height, ha='center', va='bottom')
 
+# returns the list of average rewards, slowdowns etc., for specified number of episodes episode
 def run_episodes(model, pa, env, job_sequence_len):
     episode_list = []
     reward_list = []
@@ -76,7 +77,7 @@ if __name__ == '__main__':
     job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(pa)
     env = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
                         job_sequence_size=job_sequence_size)
-    env1 = make_vec_env(lambda: env, n_envs=4)
+    env1 = make_vec_env(lambda: env, n_envs=1)
 
     episodes = []
     rewards = []
@@ -85,9 +86,11 @@ if __name__ == '__main__':
     
     for i in range(len(models)):
         pa.objective = models[i]
-        save_path = models[i]['save_path']
+        log_dir = models[i]['log_dir']
+        save_path = None
         model = None
-        if save_path != None:
+        if models[i]['save_path'] != None:
+            save_path = log_dir + models[i]['save_path']
             model = models[i]['agent'].load(save_path, env1)
         episode, reward, slowdown, completion_time = run_episodes(model, pa, env, job_sequence_len)
         episodes.append(episode)
@@ -123,5 +126,5 @@ if __name__ == '__main__':
     ax2.set_ylim(ax.get_ylim())
     plt.tight_layout()
     plt.show()
-    fig.savefig('Performance.png')
+    fig.savefig('workspace/Performances.png')
     print("Cluster capacity(units): ", pa.cluster_capacity, ", Job rate:", pa.new_job_rate, ",Simulation length: ", pa.simu_len, ", Job units(total): ", pa.cluster_occupied,", Cluster load: ", pa.cluster_load)
