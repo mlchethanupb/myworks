@@ -251,11 +251,12 @@ class W_MAC_Env(gym.Env):
       #print("-----------------------------")
       #print("Adding packets for node : ",i)  
       #Add 2 packets for each node
-      for count in range(5):
+      if i not in self.attack_nodes:
+        for count in range(5):
 
         ### Find source and destination
-        self.src = i
-        if i not in self.attack_nodes:
+          self.src = i
+        
           self.dest = random.randrange(0,self.total_nodes)
           while self.src == self.dest or self.dest in self.attack_nodes:
             self.dest = random.randrange(0,self.total_nodes)
@@ -359,7 +360,7 @@ class W_MAC_Env(gym.Env):
     ### Next hop in same domain is valid_next_hop
     for id in self.graph.nodes:
       nxt_hop = actions[id]
-      print('next hop and source',nxt_hop,id)
+      print( 'source', id , 'next hop', nxt_hop)
       valid_next_hop = False
       domain_list = self.node_in_domains[id]
       for domain_id in range(len(domain_list)):
@@ -453,8 +454,8 @@ class W_MAC_Env(gym.Env):
         if(actions[id] == self.total_nodes):
           print('wait to transmit')
         else:
-          print('invalid state and packet lost')
-          reward1 -=100
+          print( 'source', id , 'invalid next hop', nxt_hop)
+          # reward1 -=100
     
 
     #print("reward1", reward1, "reward2", reward2)
