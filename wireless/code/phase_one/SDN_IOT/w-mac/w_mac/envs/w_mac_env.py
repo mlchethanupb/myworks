@@ -25,36 +25,6 @@ class W_MAC_Env(gym.Env):
     self.packet_delivered = 0
     self.packet_lost = 0
 
-    """
-    range_domain = {} ## to get the range of each node for each iteration it will get {0:{0,1,2}}
-    full_range={} ## to get the range of all nodes merging it with range_domain the total domain will have is {0:{0,1,2},1:{0,1,2}etc}
-    for i in self.graph.nodes: 
-      domain = [] ## to get the domain of each node
-      for j in self.graph.nodes:
-        if (i,j) in self.graph.edges:      
-          domain.append(i)
-          domain.append(j)
-      range_domain[i] = domain
-    
-     
-    full_range.update(range_domain)
-    print('Full Range with duplicates',full_range)
-
-
-    fullrange_wo_dupli = {}
-    sorted_list = []
-    for key,value in full_range.items():
-          sorted_list = sorted(value) ## to arrange values in ascending order in dict and removes duplicate values of the single key
-          # print('With dupli',sorted_list)
-
-          sorted_wo_dupli = []
-          for i in sorted_list:
-            if i not in sorted_wo_dupli:
-              sorted_wo_dupli.append(i)
-          print('sorted list wo dupli',sorted_wo_dupli)
-          fullrange_wo_dupli[key] = sorted_wo_dupli
-    print('fullrange_wo_dupli' ,fullrange_wo_dupli)
-    """
     collision_domain = {}
 
     dict_index = 0
@@ -134,30 +104,7 @@ class W_MAC_Env(gym.Env):
 
     #print('fullrange_wo_dupli' ,fullrange_wo_dupli)
     
-    ### Finding the intermediate nodes in multi domain network
-    """
-    intermediate_nodes = []
-    for ranges, nodes in fullrange_wo_dupli.items():
-      for ranges1, nodes1 in fullrange_wo_dupli.items():
-        if set(nodes) < set(nodes1):  ## check whether values are subset of values1, if values are subset
-          intermediate_nodes.append(ranges1)
-    intermediate_nodes_wo_dupli = set(intermediate_nodes) ## removing the duplicate intermediate nodes
-
-
-    ### Removing the range of intermediate nodes, to avoid problem with collision
-
-    for nodes in intermediate_nodes_wo_dupli:
-      print('Intermediate nodes',nodes)
-      del fullrange_wo_dupli[nodes]
-    print('Fullrange after intermediate node deletion',fullrange_wo_dupli)
-    ### Removing the duplicate domains in the network
-
-    d2 = {tuple(v): k for k, v in fullrange_wo_dupli.items()}  # exchange keys, values
-    fullrange_wo_dupli = {v: list(k) for k, v in d2.items()} 
-    #print('Multiple Collision Domains',fullrange_wo_dupli)
-    """
-
-     ### creating the collision domains
+    ### creating the collision domains
     self.collision_domain = fullrange_wo_dupli
     print("self.collision_domain",self.collision_domain)
      
@@ -195,28 +142,6 @@ class W_MAC_Env(gym.Env):
     #print(self.action_space)
     #print(self.action_space.sample())
     
-    """
-    ### finding the low and high array
-    lower_bound = []
-    higher_bound = []
-
-    for node in range(self.total_nodes):
-      domain_list = self.node_in_domains[node]
-      min_value = min(self.collision_domain[domain_list[0]])
-      max_value = max(self.collision_domain[domain_list[len(domain_list)-1]])
-      #print("min_value", min_value, "max_value", max_value)
-      lower_bound.append(min_value)
-      higher_bound.append(max_value)
-
-    for node in range(self.total_nodes):
-      lower_bound.append(0)
-      higher_bound.append(1)
-    print("lower_bound", lower_bound, "higher_bound",higher_bound)
-    self.action_space = Box(low=np.array(lower_bound), high=np.array(higher_bound), dtype=np.uint8)
-    print(self.action_space)
-    print(self.action_space.sample())  
-    """
-
     """ Creating observation space """
     ### observation_space = [ list of all destination nodes, attacked node status for each node ]
 
@@ -228,10 +153,7 @@ class W_MAC_Env(gym.Env):
     self.observation_space = MultiDiscrete(observation_space)
     #print(self.observation_space)
     #print(self.observation_space.sample())
-    
 
-
-    # | not_needed |  self.wait_counter = [0 for i in range(len(self.graph.nodes()))]
     self.__reset_queue()
 
   """-------------------------------------------------------------------------------------------- """
@@ -245,7 +167,6 @@ class W_MAC_Env(gym.Env):
     ### No packets added to attacked node
 
     self.queues = {i: [] for i in self.graph.nodes(data=False)} 
-    
 
     for i in self.graph.nodes(data=False):
       #print("-----------------------------")
@@ -265,6 +186,8 @@ class W_MAC_Env(gym.Env):
           self.queues[self.src].insert(0, packet)
 
   def reset(self):
+        
+    print("------------------ resetting environment--------------------")
     ## reset the queue
     self.attack_nodes = []
     # for i in range(3):
@@ -355,20 +278,17 @@ class W_MAC_Env(gym.Env):
       if src_id in self.attack_nodes:
         valid_next_hops_list.append(0) ## invalid action for attack node
         #print("append 1")
-      elif (next_hop == 6):
+      elif (next_hop == self.total_nodes):
         #print("append 1.1")
         valid_next_hops_list.append(0) ## wait case
       else:
          ### doubt : if src and next hop are same, do we need to punish here along with giving invalid state
       #find the collision domain of src id
         if next_hop != src_id:
-          # print('source not equal to next hop')
-          
-          # break
+              
           src_domain_list = self.node_in_domains[src_id]
           src_domain_list_count = len(src_domain_list)
           if src_domain_list_count > 1:
-            # print('intermediate node')
             for src_domain_id in range(len(src_domain_list)):
               if next_hop in self.collision_domain[src_domain_list[src_domain_id]]:
                 valid_next_hops_list.append(1)
@@ -391,10 +311,6 @@ class W_MAC_Env(gym.Env):
 
     return valid_next_hops_list
 
-
-
-
-
   """-------------------------------------------------------------------------------------------- """
 
   def isdone(self):
@@ -415,125 +331,156 @@ class W_MAC_Env(gym.Env):
     ### Next hop in same domain is valid_next_hop
     for id in self.graph.nodes:
       nxt_hop = actions[id]
+      #print("id: ", id, "nxt_hop",nxt_hop)
     #   # print( 'source', id , 'next hop', nxt_hop)
     
       domain_list = self.node_in_domains[id]
+      #print("id: ", id, "domain_list",domain_list)
     #   # for domain_id in range(len(domain_list)):
     #   #   if nxt_hop in self.collision_domain[domain_list[domain_id]] and nxt_hop != id:
     #       valid_next_hop = True
 
       valid_next_hop = False
+
       if valid_next_hops_list[id] == 1:
         valid_next_hop = True #valid next hop
-        reward1 -= 10
+        reward1 -= 1
+      elif nxt_hop == self.total_nodes: ## When the action is for waiting.
+        reward1 -= 1  
       else:
         valid_next_hop == False
-      #   #print("Invalid next hop")
         reward1 -= 1000
-      # else:
-      #   reward1 -= 10
+
       
       ### Check if next hop defect/attack node
       if nxt_hop in self.attack_nodes:
         reward1 -= 1000
-        if valid_next_hop and actions[id] in range(self.total_nodes):
-          self.packet_lost += 1
+        ### Cross check this logic
+        if valid_next_hop and actions[id] in range(self.total_nodes): ## next hop validity + not waiting
+          if(len(self.queues[id])):
+            self.packet_lost += 1
+            packet_to_send = self.queues[id].pop()
           valid_next_hop = False 
           
       ### Transmit when node is not defect node
       if (actions[id] in range(self.total_nodes)) and valid_next_hop == True: 
         queue = self.queues[id]
+
         if(len(queue)):
           packet_to_send = queue.pop()
           domain_list_of_id = self.node_in_domains[id]
+          #print("id: ", id, "domain_list_of_id",domain_list_of_id)
           len_domain_list = len(domain_list_of_id)
+
           ### intermediate node
           if len_domain_list > 1: 
             for domains in range(len_domain_list):
               if nxt_hop in self.collision_domain[domain_list_of_id[domains]]:
                 node_list = self.collision_domain[domain_list_of_id[domains]]
+                #print("intermediate id: ", id, "node_list",node_list)
                 break
             ### actions for other nodes in the destination's domain
-            action_sublist = [actions[i] for i in node_list] #valid action sublist, check for num of 1's, 
+            action_validity_sublist = [valid_next_hops_list[i] for i in node_list] #valid action sublist, check for num of 1's,
+            #print("intermediate id: ", id, "action_sublist",action_validity_sublist)
             #if node is attack node, give invalid state. 
             count = 0
-            for action_sublist_id in range(len(action_sublist)):
-              if valid_next_hops_list[action_sublist_id] == 1:
+            for validity_check_item in action_validity_sublist:
+              if validity_check_item == 1:
                 count += 1
+            #print("count ", count)
             if count > 1:
-              print('Packet collision')
+              print('Packet collision, id:', id)
               self.packet_lost += 1
               reward2 -= 100
               
             else:
-              print('transmission success')
-              reward2 -= 10
+              #print('transmission success')
+              reward2 -= 1
 
               if (nxt_hop == packet_to_send.dest):
-                # print("Packet reached destination inter node")
+                print("Packet reached destination node with hopcount",packet_to_send.get_hop_count() )
                 self.packet_delivered +=1
-                reward2 += 10000
+                hopcount_reward = 50 * packet_to_send.get_hop_count()
+                reward2 += (1000 - hopcount_reward)
 
               else:
+                    
+                path_reward = self.__is_in_shortest_path(id, packet_to_send, nxt_hop)
+                reward2 += path_reward ## path reward is in negative
+                #print("reward2 after path", reward2)
                 print("Adding packet to the queue of ", nxt_hop)
+                packet_to_send.update_hop_count()
                 self.queues[nxt_hop].insert(0, packet_to_send)
+
           ### for single domain node
           else:
             node_list = self.collision_domain[domain_list[0]]
+            #print("single domain id: ", id, "node_list",node_list)
             ### check if any node in the same domain is transmitting
-            action_sublist = [actions[i] for i in node_list]
+            action_validity_sublist = [valid_next_hops_list[i] for i in node_list]
+            #print("single domain id: ", id, "action_validity_sublist",action_validity_sublist)
+
             count = 0
-            for action_sublist_id in range(len(action_sublist)):
-              if valid_next_hops_list[action_sublist_id] == 1:
+            for validity_check_item in action_validity_sublist:
+              if validity_check_item == 1:
                 count += 1
-              
+            #print("count ", count)  
             if count > 1:
               self.packet_lost += 1
-              # print('collision')
+              print('Packet collision, id :', id)
               reward2 -= 100
               
-            elif (self.hidden_terminal_problem(actions, id, domain_list[0])): #remove next  hop
+            elif (self.hidden_terminal_problem(actions, valid_next_hops_list, id, domain_list[0])):
               reward2 -= 100
               self.packet_lost += 1
               
             else:
-              print('transmission success')
-              reward2 -= 10
+              #print('transmission success')
+              reward2 -= 1
 
               if (nxt_hop == packet_to_send.dest):
-                # print('same dest and nexthop single node')
-                self.packet_delivered += 1
-                reward2 += 10000
+                print("Packet reached destination node with hopcount",packet_to_send.get_hop_count())
+                self.packet_delivered +=1
+                hopcount_reward = 50 * packet_to_send.get_hop_count()
+                reward2 += (1000 - hopcount_reward)
                 
               else:
+
+                path_reward = self.__is_in_shortest_path(id,packet_to_send,nxt_hop)
+                reward2 += path_reward ## path reward is in negative
+                #print("reward2 after path", reward2)
+
                 print("Adding packet to the queue of single node range", nxt_hop)
+                packet_to_send.update_hop_count()
                 self.queues[nxt_hop].insert(0, packet_to_send)
+
         else:
+          ## Queue length 0. Agent should not take action.
           reward2 -= 100
       else:
         if(actions[id] == self.total_nodes):
-          print('wait to transmit')
+          ...
+          #print('wait to transmit')
         else:
           ...
           #print('invalid next hop')
           # reward1 -=100
     
 
-    #print("reward1", reward1, "reward2", reward2)
-    reward = (0.5) * reward1 + (0.5) * reward2
+    print("reward1", reward1, "reward2", reward2)
+    reward = (1) * reward1 + (1) * reward2
     #print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
     print('packet_lost ', self.packet_lost)
-    #print ('test')
 
     return reward
 
   """-------------------------------------------------------------------------------------------- """
 
-  def hidden_terminal_problem(self, actions, id, domain_key):
+  def hidden_terminal_problem(self, actions, valid_next_hops_list, src, domain_key):
     #special case - Hidden terminal problem
     ret_val = False
-    nxt_hop = actions[id]
+    nxt_hop = actions[src]
     #print("id : ", id )
     # src_nxt_hop = packet_2_send.nxt_hop
     #print("src_nxt_hop", src_nxt_hop)
@@ -541,17 +488,82 @@ class W_MAC_Env(gym.Env):
       if( nxt_hop in h_values):
         if(domain_key != h_key):
           h_action = [actions[i] for i in h_values]
+          h_action_validity = [valid_next_hops_list[i] for i in h_values]
           #print("h_values : ",h_values)
           #print("h_action : ",h_action)
+          #print("h_action_validity : ",h_action_validity)
+          
+          
           for itr in range(len(h_action)):
-            if(h_action[itr] in range(self.total_nodes)):
-              #other_queue = self.queues[h_values[itr]]
-              #if len(other_queue):
-              if(id != h_values[itr] and actions[itr] == nxt_hop):
+            if(h_action_validity[itr] == 1):
+              #print("src:",src)
+              #print("h_values[itr]", h_values[itr])
+              if(src != h_values[itr] and h_action[itr] == nxt_hop): 
                 ret_val = True
 
     return ret_val
 
+  """-------------------------------------------------------------------------------------------- """
+
+  def __is_in_shortest_path(self, src, packet_to_send, nxt_hop):
+    
+    path_reward = 0
+
+    src_in_domains = self.node_in_domains[src]
+    #print("src_in_domains", src_in_domains)
+
+    dest = packet_to_send.dest
+    dest_in_domains = self.node_in_domains[dest]
+    #print("dest_in_domains", dest_in_domains)
+
+    nxthop_in_domains = self.node_in_domains[nxt_hop]
+    #print("nxthop_in_domains", nxthop_in_domains)
+
+    ### source and destination are in same collision domain, but agent did not choose the destination. 
+    if src_in_domains == dest_in_domains:
+      #print("One")
+      path_reward -= 100
+    ### destination in different domain but the next hop is in same domain as that of source (looping in same domain)
+    ### punish the agent
+    elif src_in_domains == nxthop_in_domains:
+      #print("Two")
+      path_reward -= 100
+    ### destination and nexthop both are same, but the next hop is not destination
+    ### Pusnish the agent, not the shortest path
+    elif dest_in_domains == nxthop_in_domains:
+      #print("five")
+      path_reward -= 100 
+
+    else:
+      #print("Three")
+      ### destination domain is part of next hop domains. 
+      ### i.e nexthop is the intermediate node between destination and source
+      ### example: src = [1] dest = [2] nxthop = [1, 2]
+      ### positive reward to agent
+      for dmn_id in dest_in_domains:
+          if dmn_id in nxthop_in_domains:
+                #print("Four")
+                path_reward += 100
+                break
+    
+      ### destination is part of source domain but next hop is not
+      ### ex: src = [1,2] dest = [1], next_hop = [2]
+      ### Program Logic: 
+      ### if dest_domain is part of src_domain, then nxthop_domain should be part of dest_domain
+      ### else, agent is choosing the wrong path. 
+
+      for dmn_id in dest_in_domains:
+          if dmn_id in src_in_domains:
+              for nh_dmn_id in nxthop_in_domains:
+                    if nh_dmn_id not in dest_in_domains:
+                      #print("Five")
+                      path_reward -= 100
+                      break
+
+
+    print("path_reward:",path_reward)
+    return path_reward
+        
 
   def render(self, mode='human'):
         queue0 = self.queues[0]

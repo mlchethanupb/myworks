@@ -14,6 +14,9 @@ class Packet(object):
 
     def update_hop_count(self):
         self.hop_count += 1
+    
+    def get_hop_count(self):
+        return self.hop_count
 
     def return_id(self):
         return str(self.id)
