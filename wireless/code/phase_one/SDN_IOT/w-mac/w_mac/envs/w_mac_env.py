@@ -350,18 +350,18 @@ class W_MAC_Env(gym.Env):
     
     for src_id in self.graph.nodes:
 
-      valid_next_hop = actions[src_id]
+      next_hop = actions[src_id]
 
       if src_id in self.attack_nodes:
         valid_next_hops_list.append(0) ## invalid action for attack node
         #print("append 1")
-      elif (valid_next_hop == 6):
+      elif (next_hop == 6):
         #print("append 1.1")
         valid_next_hops_list.append(0) ## wait case
       else:
          ### doubt : if src and next hop are same, do we need to punish here along with giving invalid state
       #find the collision domain of src id
-        if valid_next_hop != src_id:
+        if next_hop != src_id:
           # print('source not equal to next hop')
           
           # break
@@ -370,13 +370,13 @@ class W_MAC_Env(gym.Env):
           if src_domain_list_count > 1:
             # print('intermediate node')
             for src_domain_id in range(len(src_domain_list)):
-              if valid_next_hop in self.collision_domain[src_domain_list[src_domain_id]]:
+              if next_hop in self.collision_domain[src_domain_list[src_domain_id]]:
                 valid_next_hops_list.append(1)
                 #print("append 2")
                 break
           else:
               
-            if valid_next_hop in self.collision_domain[src_domain_list[0]]:
+            if next_hop in self.collision_domain[src_domain_list[0]]:
               #print("append 4")
               valid_next_hops_list.append(1)
             else:
