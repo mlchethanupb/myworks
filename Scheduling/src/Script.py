@@ -20,14 +20,17 @@ from statistics import mean
 def autolabel(rects):
     for rect in rects:
         height = rect.get_height()
-        ax.text(rect.get_x() + rect.get_width()/2., 1.15*height, '%.2f' % height, ha='center', va='bottom')
-        ax.text(rect.get_x() + rect.get_width()/2., 1.15*height, '%.2f' % height, ha='center', va='bottom')
+        if height > 0:
+            ax.text(rect.get_x() + rect.get_width()/2., 1.15*height, '%.2f' % height, ha='center', va='bottom')
+            ax.text(rect.get_x() + rect.get_width()/2., 1.15*height, '%.2f' % height, ha='center', va='bottom')
 
 # returns the list of average rewards, slowdowns etc., for specified number of episodes episode
 def run_episodes(model, pa, env, job_sequence_len):
     episode_list = []
     reward_list = []
     slowdown_list = []
+    withheld_jobs = []
+    allocated_jobs = []
     completion_time_list = []
     for episode in range(pa.num_episode):
         cumulated_episode_reward = 0
@@ -43,10 +46,18 @@ def run_episodes(model, pa, env, job_sequence_len):
 
             obs, reward, done, info = env.step(action)
 
-            if 'Completion Time' in info.keys() and  info['Completion Time'] != None:
-                cumulated_job_completion_time.append(info['Completion Time'])
-            if 'Job Slowdown' in info.keys() and info['Job Slowdown'] != None:
-                cumulated_job_slowdown.append(info['Job Slowdown'])
+            if 'Allocated Job' in info.keys() and info['Allocated Job'] != []:
+                for i in range(len(info['Allocated Job'])):
+                    job = info['Allocated Job'][i]
+                    if job not in allocated_jobs:
+                        allocated_jobs.append(job)
+                        cumulated_job_slowdown.append(job.job_slowdown)
+                        cumulated_job_completion_time.append(job.job_completion_time)
+            if 'Withheld Job' in info.keys() and info['Withheld Job'] != []:
+                for i in range(len(info['Withheld Job'])):
+                    job = info['Withheld Job'][i]
+                    if job not in withheld_jobs:
+                        withheld_jobs.append(job)
 
             if done == True:
                 break
@@ -58,6 +69,7 @@ def run_episodes(model, pa, env, job_sequence_len):
                     done = True
         cumulated_job_completion_time = list(flatten(cumulated_job_completion_time))
         cumulated_job_slowdown = list(flatten(cumulated_job_slowdown))
+        
         episode_list.append(episode+1)
         reward_list.append(cumulated_episode_reward)
         if cumulated_job_completion_time != [] and cumulated_job_slowdown != []:
@@ -66,8 +78,10 @@ def run_episodes(model, pa, env, job_sequence_len):
         else: 
             completion_time_list.append(pa.episode_max_length)
             slowdown_list.append(pa.episode_max_length)
+    withheld_jobs = list(flatten(withheld_jobs))
+    allocated_jobs = list(flatten(allocated_jobs))
 
-    return episode_list, reward_list, slowdown_list, completion_time_list
+    return episode_list, reward_list, slowdown_list, completion_time_list, withheld_jobs, allocated_jobs
 
 if __name__ == '__main__':
     pa = parameters.Parameters()
@@ -92,7 +106,7 @@ if __name__ == '__main__':
         if models[i]['save_path'] != None:
             save_path = log_dir + models[i]['save_path']
             model = models[i]['agent'].load(save_path, env1)
-        episode, reward, slowdown, completion_time = run_episodes(model, pa, env, job_sequence_len)
+        episode, reward, slowdown, completion_time, withheld_jobs, allocated_jobs = run_episodes(model, pa, env, job_sequence_len)
         episodes.append(episode)
         rewards.append(reward)
         slowdowns.append(slowdown)

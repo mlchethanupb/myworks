@@ -45,7 +45,7 @@ if __name__ == '__main__':
             if models[i]['save_path'] != None:
                 save_path = log_dir + models[i]['save_path']
                 model = models[i]['agent'].load(save_path, env1)
-            episode, reward, slowdown, completion_time = Script.run_episodes(model, pa, env, job_sequence_len)
+            episode, reward, slowdown, completion_time, withheld_jobs, allocated_jobs = Script.run_episodes(model, pa, env, job_sequence_len)
 
             mean_slowdown = mean(slowdown)
             mean_reward = mean(reward)

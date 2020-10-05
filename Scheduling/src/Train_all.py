@@ -2,9 +2,6 @@ import os
 import gym
 import numpy as np
 import matplotlib.pyplot as plt
-from stable_baselines import results_plotter
-from stable_baselines.bench import Monitor
-from stable_baselines.results_plotter import load_results, ts2xy
 from stable_baselines.common.noise import AdaptiveParamNoiseSpec
 from stable_baselines.common.callbacks import BaseCallback
 import tensorflow
@@ -47,7 +44,7 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
     def _on_step(self)-> bool:
       if self.n_calls % self.check_freq == 0:
         iter = int((self.n_calls/self.check_freq)) + 1
-        episode, reward_lst, slowdown_lst, completion_time = Script.run_episodes(model, pa, env, job_sequence_len)
+        episode, reward_lst, slowdown_lst, completion_time, withheld_jobs, allocated_jobs = Script.run_episodes(model, pa, env, job_sequence_len)
         mean_reward = mean(reward_lst)
         # save or update saved model only for best training results. 
         # Max possible iterations is time_steps/check_freq.
@@ -114,7 +111,7 @@ if __name__ == '__main__':
   plt.legend()
   plt.grid()
   plt.show()
-  fig2.savefig('workspace/learningcurve_Slowdown')
+  fig2.savefig('workspace/Learningcurve_Slowdown')
 
   fig3 = plt.figure()
   for i in range(len(models)):
@@ -127,4 +124,4 @@ if __name__ == '__main__':
   plt.legend()
   plt.grid()
   plt.show()
-  fig3.savefig('workspace/learningcurve_Reward')
+  fig3.savefig('workspace/Learningcurve_Reward')

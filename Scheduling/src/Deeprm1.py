@@ -46,8 +46,8 @@ class Env(gym.Env):
         done = False
         reward = 0
         info = {}
-        info['Job Slowdown'] = []
-        info['Completion Time'] = []
+        info['Withheld Job'] = []
+        info['Allocated Job'] = []
         # void action
         for act in range(len(a)):
             if (a[act] == 1 or a.all() == 0):
@@ -58,6 +58,8 @@ class Env(gym.Env):
                         self.job_slot.slot[act], self.curr_time)
                     if not allocated:  # implicit void action
                         status = 'MoveOn'
+                        if self.job_slot.slot[act] != None and self.job_slot.slot[act] not in info['Withheld Job']:
+                            info['Withheld Job'].append(self.job_slot.slot[act])
                     else:
                         status = 'Allocate'
 
@@ -103,10 +105,7 @@ class Env(gym.Env):
                     reward = reward + self.get_reward()
 
                 elif status == 'Allocate':
-                    job_completion_time = self.job_slot.slot[act].job_completion_time
-                    info['Completion Time'].append(float(job_completion_time))
-                    job_slowdown = self.job_slot.slot[act].job_slowdown
-                    info['Job Slowdown'].append(job_slowdown)
+                    info['Allocated Job'].append(self.job_slot.slot[act])
 
                     self.job_record.record[self.job_slot.slot[act].id] = self.job_slot.slot[act]
                     self.job_slot.slot[act] = None
@@ -123,7 +122,6 @@ class Env(gym.Env):
 
         ob = self.observe()
         if done:
-            #info['Completion Time'] = self.curr_time
             self.seq_idx = 0
             self.seq_no = 0
             self.reset()
@@ -242,7 +240,7 @@ class Machine:
                 self.available_res_slot[t: t + job.len, :] = new_avbl_res
                 job.start_time = curr_time + t
                 job.finish_time = job.start_time + job.len
-                job.job_completion_time = job.finish_time - job.enter_time
+                job.job_completion_time = float(job.finish_time - job.enter_time)
                 job.job_slowdown = (job.finish_time - job.enter_time) / job.len
                 self.running_job.append(job)
                 assert job.start_time != -1
