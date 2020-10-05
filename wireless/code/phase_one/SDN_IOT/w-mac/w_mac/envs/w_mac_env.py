@@ -307,7 +307,11 @@ class W_MAC_Env(gym.Env):
   def step(self, actions):
     print("received action",actions)
     reward = 0
-    reward = self.perform_actions(actions)
+    valid_next_hops_list =[]
+    ### call an API to check validity of each action, this shud be in the form of list (0 - invalid,1 - valid) for all nodes.
+    ### pass validity list into perform actions
+    valid_next_hops_list  = self.check_valid_nxt_hop(actions)
+    reward = self.perform_actions(actions, valid_next_hops_list)
     
     ### next state =  dest + attack nodes status
     next_state = [] #empty list for next_state
@@ -339,6 +343,57 @@ class W_MAC_Env(gym.Env):
 
     print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
+  """--------------------------------------------------------------------------------------------"""
+
+  def check_valid_nxt_hop(self,actions):
+    valid_next_hops_list = []
+    
+    for src_id in self.graph.nodes:
+
+      next_hop = actions[src_id]
+
+      if src_id in self.attack_nodes:
+        valid_next_hops_list.append(0) ## invalid action for attack node
+        #print("append 1")
+      elif (next_hop == 6):
+        #print("append 1.1")
+        valid_next_hops_list.append(0) ## wait case
+      else:
+         ### doubt : if src and next hop are same, do we need to punish here along with giving invalid state
+      #find the collision domain of src id
+        if next_hop != src_id:
+          # print('source not equal to next hop')
+          
+          # break
+          src_domain_list = self.node_in_domains[src_id]
+          src_domain_list_count = len(src_domain_list)
+          if src_domain_list_count > 1:
+            # print('intermediate node')
+            for src_domain_id in range(len(src_domain_list)):
+              if next_hop in self.collision_domain[src_domain_list[src_domain_id]]:
+                valid_next_hops_list.append(1)
+                #print("append 2")
+                break
+          else:
+              
+            if next_hop in self.collision_domain[src_domain_list[0]]:
+              #print("append 4")
+              valid_next_hops_list.append(1)
+            else:
+              #print("append 5")
+              valid_next_hops_list.append(0)              
+        else:
+          # print('source and destination are same')
+          #print("append 6")
+          valid_next_hops_list.append(0)
+
+    print('valid_next_hops_list',valid_next_hops_list)
+
+    return valid_next_hops_list
+
+
+
+
 
   """-------------------------------------------------------------------------------------------- """
 
@@ -352,7 +407,7 @@ class W_MAC_Env(gym.Env):
 
   """-------------------------------------------------------------------------------------------- """
 
-  def perform_actions(self, actions):
+  def perform_actions(self, actions, valid_next_hops_list):
 
     reward1 = 0
     reward2 = 0
@@ -360,19 +415,23 @@ class W_MAC_Env(gym.Env):
     ### Next hop in same domain is valid_next_hop
     for id in self.graph.nodes:
       nxt_hop = actions[id]
-      print( 'source', id , 'next hop', nxt_hop)
-      valid_next_hop = False
+    #   # print( 'source', id , 'next hop', nxt_hop)
+    
       domain_list = self.node_in_domains[id]
-      for domain_id in range(len(domain_list)):
-        if nxt_hop in self.collision_domain[domain_list[domain_id]] and nxt_hop != id:
-          valid_next_hop = True
-      
-      
-      if valid_next_hop == False:
-        #print("Invalid next hop")
-        reward1 -= 1000
-      else:
+    #   # for domain_id in range(len(domain_list)):
+    #   #   if nxt_hop in self.collision_domain[domain_list[domain_id]] and nxt_hop != id:
+    #       valid_next_hop = True
+
+      valid_next_hop = False
+      if valid_next_hops_list[id] == 1:
+        valid_next_hop = True #valid next hop
         reward1 -= 10
+      else:
+        valid_next_hop == False
+      #   #print("Invalid next hop")
+        reward1 -= 1000
+      # else:
+      #   reward1 -= 10
       
       ### Check if next hop defect/attack node
       if nxt_hop in self.attack_nodes:
@@ -382,7 +441,7 @@ class W_MAC_Env(gym.Env):
           valid_next_hop = False 
           
       ### Transmit when node is not defect node
-      if (actions[id] in range(self.total_nodes)) and valid_next_hop == True:
+      if (actions[id] in range(self.total_nodes)) and valid_next_hop == True: 
         queue = self.queues[id]
         if(len(queue)):
           packet_to_send = queue.pop()
@@ -395,10 +454,11 @@ class W_MAC_Env(gym.Env):
                 node_list = self.collision_domain[domain_list_of_id[domains]]
                 break
             ### actions for other nodes in the destination's domain
-            action_sublist = [actions[i] for i in node_list]
+            action_sublist = [actions[i] for i in node_list] #valid action sublist, check for num of 1's, 
+            #if node is attack node, give invalid state. 
             count = 0
-            for action_sublist_id in action_sublist:
-              if action_sublist_id in range(self.total_nodes):
+            for action_sublist_id in range(len(action_sublist)):
+              if valid_next_hops_list[action_sublist_id] == 1:
                 count += 1
             if count > 1:
               print('Packet collision')
@@ -410,7 +470,7 @@ class W_MAC_Env(gym.Env):
               reward2 -= 10
 
               if (nxt_hop == packet_to_send.dest):
-                print("Packet reached destination inter node")
+                # print("Packet reached destination inter node")
                 self.packet_delivered +=1
                 reward2 += 10000
 
@@ -423,13 +483,13 @@ class W_MAC_Env(gym.Env):
             ### check if any node in the same domain is transmitting
             action_sublist = [actions[i] for i in node_list]
             count = 0
-            for action_sublist_id in action_sublist:
-              if action_sublist_id in range(self.total_nodes):
+            for action_sublist_id in range(len(action_sublist)):
+              if valid_next_hops_list[action_sublist_id] == 1:
                 count += 1
               
             if count > 1:
               self.packet_lost += 1
-              print('collision')
+              # print('collision')
               reward2 -= 100
               
             elif (self.hidden_terminal_problem(actions, id, domain_list[0])): #remove next  hop
@@ -441,7 +501,7 @@ class W_MAC_Env(gym.Env):
               reward2 -= 10
 
               if (nxt_hop == packet_to_send.dest):
-                print('same dest and nexthop single node')
+                # print('same dest and nexthop single node')
                 self.packet_delivered += 1
                 reward2 += 10000
                 
@@ -454,7 +514,8 @@ class W_MAC_Env(gym.Env):
         if(actions[id] == self.total_nodes):
           print('wait to transmit')
         else:
-          print( 'source', id , 'invalid next hop', nxt_hop)
+          ...
+          #print('invalid next hop')
           # reward1 -=100
     
 
