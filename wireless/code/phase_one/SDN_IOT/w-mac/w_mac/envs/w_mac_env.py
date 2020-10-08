@@ -19,6 +19,7 @@ class W_MAC_Env(gym.Env):
 
     #Create the graph
     self.graph = graph
+    nx.draw_networkx(self.graph)
     self.total_nodes = len(self.graph.nodes())
 
 
@@ -120,13 +121,15 @@ class W_MAC_Env(gym.Env):
     print("self.node_in_domains : ", self.node_in_domains)
 
     ### Attack node generation.
-    self.attack_nodes = []
+    self.attack_nodes = []#[4]
+    
     for i in range(1):
     #a_node = 2
       a_node = random.randrange(0,self.total_nodes)
       while (a_node in self.attack_nodes):
         a_node = random.randrange(0,self.total_nodes)
       self.attack_nodes.append(a_node)
+    
     print("self.attack_nodes", self.attack_nodes)
 
     """Create list of all the valid actions for each node"""
@@ -191,14 +194,15 @@ class W_MAC_Env(gym.Env):
         
     print("------------------ resetting environment--------------------")
 
-    self.attack_nodes = []
+    self.attack_nodes = []# [4]
+    
     for i in range(1):
       a_node = random.randrange(0,self.total_nodes)
     #a_node = 2
       while (a_node in self.attack_nodes):
         a_node = random.randrange(0,self.total_nodes)
       self.attack_nodes.append(a_node)
-
+    
     print("self.attack_nodes", self.attack_nodes)
 
     self.__reset_queue()  ##  reset the queue
@@ -274,9 +278,9 @@ class W_MAC_Env(gym.Env):
         no_transmit = False
     
     if isdone == False and no_transmit == True:
-      reward -= 100
+      reward -= 1000
 
-    print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
+    #print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
   """--------------------------------------------------------------------------------------------"""
 
@@ -355,6 +359,8 @@ class W_MAC_Env(gym.Env):
     isdone = False
     if queue_empty or counter_exceeded:
           isdone = True
+          print('packets delivered ',self.packet_delivered)
+          print('packet_lost ', self.packet_lost)
 
     return isdone
 
@@ -418,17 +424,21 @@ class W_MAC_Env(gym.Env):
           ### Pop the packet from the queue
           packet_to_send = queue.pop()
 
-          len_domain_list = len(domain_list)
+          ### How many domains does the node belong to? 
+          ### More than 1, then intermediate node.
 
-          ### intermediate node
-          if len_domain_list > 1: 
-            for domains in domain_list:
-              if nxt_hop in self.collision_domain[domains]:
-                node_list = self.collision_domain[domains]
-                #print("intermediate node:",node,"nxt_hop",nxt_hop,"node_list",node_list)
+          len_domain_list = len(domain_list)
+          if len_domain_list > 1:
+
+            ### Find which domain the next hop belongs, so that we can check for interference in that collision domain. 
+            for domain in domain_list:
+              if nxt_hop in self.collision_domain[domain]:
+                node_list = self.collision_domain[domain]
+                domain_key = domain ## domain_key is used to check the hidden terminal problem
+                #print("intermediate; node:",node,"nxt_hop",nxt_hop,"domain_key",domain_key,"node_list",node_list)
                 break
 
-            ### actions for other nodes in the destination's domain
+            ### actions for other nodes in the nexthop collision domain
             action_validity_sublist = []
             for i_node in node_list:
                   i_index = self.get_index(i_node)
@@ -439,21 +449,27 @@ class W_MAC_Env(gym.Env):
             for validity_check_item in action_validity_sublist:
               if validity_check_item == 1:
                 count += 1
-            #print("count ", count)
+            #print("intermediate; count ", count)
+
             if count > 1:
               #print('Packet collision, node:', node)
               self.packet_lost += 1
-              reward2 -= 100
-              
+              reward2 -= 1000
+
+            elif (self.hidden_terminal_problem(actions, valid_next_hops_list, node, domain_key)):
+              #print("intermediate; Hidden terminal problem, packet lost")
+              reward2 -= 1000
+              self.packet_lost += 1
+
             else:
-              #print('transmission success')
-              reward2 -= 1
+              #print('intermediate; transmission success')
+              reward2 -= 10
 
               if (nxt_hop == packet_to_send.dest):
-                #print("Packet reached destination node with hopcount",packet_to_send.get_hop_count() )
+                print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
                 self.packet_delivered +=1
                 hopcount_reward = 50 * packet_to_send.get_hop_count()
-                reward2 += (10000 - hopcount_reward)
+                reward2 += ((1000*self.total_nodes) - hopcount_reward)
 
               else:
                     
@@ -485,22 +501,23 @@ class W_MAC_Env(gym.Env):
             #print("count ", count)  
             if count > 1:
               self.packet_lost += 1
-              #print('Packet collision, node :', node)
-              reward2 -= 100
+              #print('single domain; Packet collision, node :', node)
+              reward2 -= 1000
               
             elif (self.hidden_terminal_problem(actions, valid_next_hops_list, node, domain_list[0])):
-              reward2 -= 100
+              #print("single domain; Hidden terminal problem, packet lost")
+              reward2 -= 1000
               self.packet_lost += 1
               
             else:
-              #print('transmission success')
-              reward2 -= 1
+              #print(' single domain; transmission success')
+              reward2 -= 10
 
               if (nxt_hop == packet_to_send.dest):
-                #print("Packet reached destination node with hopcount",packet_to_send.get_hop_count())
+                print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
                 self.packet_delivered +=1
-                hopcount_reward = 50 * packet_to_send.get_hop_count()
-                reward2 += (10000 - hopcount_reward)
+                hopcount_reward = 500 * packet_to_send.get_hop_count()
+                reward2 += ((1000*self.total_nodes) - hopcount_reward)
                 
               else:
 
@@ -514,7 +531,7 @@ class W_MAC_Env(gym.Env):
 
         else:
           ## Queue length 0. Agent should not take action.
-          reward2 -= 100
+          reward2 -= 1000
       else:
         if(actions[index] == self.total_nodes):
           ...
@@ -528,8 +545,8 @@ class W_MAC_Env(gym.Env):
     #print("reward1", reward1, "reward2", reward2)
     reward = (1) * reward1 + (1) * reward2
     #print('final reward', reward)
-    print('packets delivered ',self.packet_delivered)
-    print('packet_lost ', self.packet_lost)
+    #print('packets delivered ',self.packet_delivered)
+    #print('packet_lost ', self.packet_lost)
 
     return reward
 
@@ -541,14 +558,13 @@ class W_MAC_Env(gym.Env):
     
     index = self.get_index(src)
     nxt_hop = actions[index]
-    #print("src : ", src )
+    #print("src : ", src, "nxt_hop : ", nxt_hop )
 
     for h_key,h_values in self.collision_domain.items():
-      if( nxt_hop in h_values):
-        if(domain_key != h_key):
+      if( nxt_hop in h_values): ## Next hop is in other collision domain. 
+        if(domain_key != h_key): ## Its not same as the source collision domain
           h_action = []
           h_action_validity = []
-          #print("h_values : ",h_values)
 
           for i_node in h_values:
                 h_action.append(actions[self.get_index(i_node)])
@@ -557,14 +573,14 @@ class W_MAC_Env(gym.Env):
           #print("h_action : ",h_action)
           #print("h_action_validity : ",h_action_validity)
           
-          
-          for itr in range(len(h_action)):
-            if(h_action_validity[itr] == 1):
-              #print("src:",src)
-              #print("h_values[itr]", h_values[itr])
-              if(src != h_values[itr] and h_action[itr] == nxt_hop): 
+          count = 0
+          for validity_check_item in h_action_validity:
+                if validity_check_item == 1:
+                  count += 1
+          #print("hidden terminal count ", count)  
+          if count > 0:
                 ret_val = True
-
+                  
     return ret_val
 
   """-------------------------------------------------------------------------------------------- """
@@ -586,17 +602,17 @@ class W_MAC_Env(gym.Env):
     ### source and destination are in same collision domain, but agent did not choose the destination. 
     if src_in_domains == dest_in_domains:
       #print("One")
-      path_reward -= 100
+      path_reward -= 1000
     ### destination in different domain but the next hop is in same domain as that of source (looping in same domain)
     ### punish the agent
     elif src_in_domains == nxthop_in_domains:
       #print("Two")
-      path_reward -= 100
-    ### destination and nexthop both are same, but the next hop is not destination
+      path_reward -= 1000
+    ### collision domain for destination and nexthop both are same, but the next hop is not destination
     ### Pusnish the agent, not the shortest path
     elif dest_in_domains == nxthop_in_domains:
       #print("five")
-      path_reward -= 100 
+      path_reward -= 1000
 
     else:
       #print("Three")
@@ -621,7 +637,7 @@ class W_MAC_Env(gym.Env):
               for nh_dmn_id in nxthop_in_domains:
                     if nh_dmn_id not in dest_in_domains:
                       #print("Five")
-                      path_reward -= 100
+                      path_reward -= 1000
                       break
 
 
@@ -648,7 +664,7 @@ class W_MAC_Env(gym.Env):
               #print("Node",node,"index",index,"Action: ",actions[index],"action_list",action_list ,"mapped action:",valid_actions[index])
 
         
-        print("valid_actions",valid_actions)
+        #print("valid_actions",valid_actions)
         return valid_actions
 
   """-------------------------------------------------------------------------------------------- """
