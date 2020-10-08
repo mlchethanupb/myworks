@@ -37,7 +37,7 @@ Let's consider, there is wireless network with 2 collision domains. node0, node1
 
 ![Network Topology](D:\Summer Sem 2020 -Corona Online\Network_Topology.PNG)
 
-The network topology can be changed by providing the new graph data in agents.py.
+The network topology can be changed by providing the new graph data in agents.py
 
 ## Development Setup
 The environment is developed using Python 3.6
