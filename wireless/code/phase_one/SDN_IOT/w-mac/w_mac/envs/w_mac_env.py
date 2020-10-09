@@ -8,24 +8,32 @@ import random
 import w_mac
 from w_mac.envs.packet import Packet
 import matplotlib.pyplot as plt
-
-
+import csv
+from collections import defaultdict
+# with open('data.csv','w',newline='') as data
+ 
+  
 class W_MAC_Env(gym.Env):
   metadata = {'render.modes': ['human']}
+    # fieldnames = ['src','dest','no of packets']
+    # thewriter = csv.DictWriter(c , fieldnames= fieldnames)
+    # thewriter.writeheader()
+    # thewriter.writerow({'src' : '1','dest':'2','no of packets':'3'}
+    # c.writerow([self.packet_to_send.src , self.packet_to_send.dest, len(self.queues[node])])
+  
 
   def __init__(self, graph: nx.Graph):
     super(W_MAC_Env, self).__init__()
-   #print("init")
-
+    #print("init")
+    
     #Create the graph
     self.graph = graph
     nx.draw_networkx(self.graph)
     self.total_nodes = len(self.graph.nodes())
-
-
     self.packet_delivered = 0
     self.packet_lost = 0
     self.counter = 0
+    self.f = open('data.csv','w',newline='')
 
     collision_domain = {}
 
@@ -209,6 +217,8 @@ class W_MAC_Env(gym.Env):
     self.packet_delivered = 0
     self.packet_lost = 0
     self.counter = 0
+    self.f = open('data.csv','w',newline='')
+    self.c = csv.writer(self.f)
     
     ### Frame the state - Next hop of all first packets in queue.
     """ initial state - destination of first packet and attacked nodes status """
@@ -361,7 +371,7 @@ class W_MAC_Env(gym.Env):
           isdone = True
           print('packets delivered ',self.packet_delivered)
           print('packet_lost ', self.packet_lost)
-
+          self.f.close()
     return isdone
 
   """-------------------------------------------------------------------------------------------- """
@@ -373,8 +383,17 @@ class W_MAC_Env(gym.Env):
         return index
 
   """-------------------------------------------------------------------------------------------- """
+  def data(self, packet_to_send,len_queue):
+        # print("hello")
+        f = open('data.csv','w',newline='')
+        c = csv.writer(f)
+        c.writerow([packet_to_send.src , packet_to_send.dest, len_queue])
+        c.writerow(['100','200','300'])
+      
 
-
+    
+        
+     
   def perform_actions(self, actions, valid_next_hops_list):
 
     reward1 = 0
@@ -385,7 +404,7 @@ class W_MAC_Env(gym.Env):
 
       index = self.get_index(node)
       nxt_hop = actions[index]
-      #print("node: ", node, "nxt_hop",nxt_hop)
+      print("node: ", node, "nxt_hop",nxt_hop)
     
       domain_list = self.node_in_domains[node]
       #print("node: ", node, "domain_list",domain_list)
@@ -413,7 +432,9 @@ class W_MAC_Env(gym.Env):
           if(len(self.queues[node])):
             self.packet_lost += 1
             packet_to_send = self.queues[node].pop()
-          valid_next_hop = False 
+          valid_next_hop = False
+
+       
           
       ### Transmit when node is not defect node
       if (actions[index] in range(self.total_nodes)) and valid_next_hop == True: 
@@ -423,6 +444,10 @@ class W_MAC_Env(gym.Env):
           
           ### Pop the packet from the queue
           packet_to_send = queue.pop()
+          self.data(packet_to_send , len(queue))
+         
+        
+
 
           ### How many domains does the node belong to? 
           ### More than 1, then intermediate node.
@@ -485,32 +510,32 @@ class W_MAC_Env(gym.Env):
           ### for single domain node
           else:
             node_list = self.collision_domain[domain_list[0]]
-            #print("single domain node: ", node,"nxt_hop",nxt_hop, "node_list",node_list)
+            print("single domain node: ", node,"nxt_hop",nxt_hop, "node_list",node_list)
 
-            ### check if any node in the same domain is transmitting
+            ## check if any node in the same domain is transmitting
             action_validity_sublist = []
             for i_node in node_list:
                   i_index = self.get_index(i_node)
                   action_validity_sublist.append(valid_next_hops_list[i_index])
-            #print("single domain node: ", node, "action_validity_sublist",action_validity_sublist)
+            print("single domain node: ", node, "action_validity_sublist",action_validity_sublist)
 
             count = 0
             for validity_check_item in action_validity_sublist:
               if validity_check_item == 1:
                 count += 1
-            #print("count ", count)  
+            print("count ", count)  
             if count > 1:
               self.packet_lost += 1
-              #print('single domain; Packet collision, node :', node)
+              print('single domain; Packet collision, node :', node)
               reward2 -= 1000
               
             elif (self.hidden_terminal_problem(actions, valid_next_hops_list, node, domain_list[0])):
-              #print("single domain; Hidden terminal problem, packet lost")
+              print("single domain; Hidden terminal problem, packet lost")
               reward2 -= 1000
               self.packet_lost += 1
               
             else:
-              #print(' single domain; transmission success')
+              print(' single domain; transmission success')
               reward2 -= 10
 
               if (nxt_hop == packet_to_send.dest):
@@ -525,9 +550,15 @@ class W_MAC_Env(gym.Env):
                 reward2 += path_reward ## path reward is in negative
                 #print("reward2 after path", reward2)
 
-                #print("Adding packet to the queue of single node range", nxt_hop)
+                print("Adding packet to the queue of single node range", nxt_hop)
                 packet_to_send.update_hop_count()
+
                 self.queues[nxt_hop].insert(0, packet_to_send)
+                
+                
+                
+                
+                
 
         else:
           ## Queue length 0. Agent should not take action.
@@ -540,8 +571,8 @@ class W_MAC_Env(gym.Env):
           ...
           #print('invalid next hop')
           # reward1 -=100
+  
     
-
     #print("reward1", reward1, "reward2", reward2)
     reward = (1) * reward1 + (1) * reward2
     #print('final reward', reward)
