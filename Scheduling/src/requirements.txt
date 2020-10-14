@@ -1,8 +1,4 @@
-autopep8
-numpy
-scipy
-matplotlib
-tensorflow==1.15
-keras
 gym
 stable-baselines
+matplotlib
+tensorflow==1.5

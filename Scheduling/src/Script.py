@@ -1,28 +1,20 @@
-import Deeprm1
-import operator
+import MultiBinaryDeepRM
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.cbook import flatten
 import parameters
 import job_distribution
-import argparse
-from random import sample
-import os
-import gym
 from stable_baselines import PPO2, A2C
-from stable_baselines.common.env_checker import check_env
-from gym import spaces
 from stable_baselines.common import make_vec_env
-import Randomscheduler
+import Otheragents
 from statistics import mean 
 
 # labeling the bar graph
-def autolabel(rects):
+def autolabel(rects, deviation):
     for rect in rects:
-        height = rect.get_height()
+        height = rect.get_height() 
         if height > 0:
-            ax.text(rect.get_x() + rect.get_width()/2., 1.15*height, '%.2f' % height, ha='center', va='bottom')
-            ax.text(rect.get_x() + rect.get_width()/2., 1.15*height, '%.2f' % height, ha='center', va='bottom')
+            ax.text(rect.get_x() + rect.get_width()/2., height + deviation[1], '%.2f' % height, ha='center', va='bottom')
 
 # returns the list of average rewards, slowdowns etc., for specified number of episodes episode
 def run_episodes(model, pa, env, job_sequence_len):
@@ -42,7 +34,12 @@ def run_episodes(model, pa, env, job_sequence_len):
             if model != None:
                 action, _states = model.predict(obs, deterministic=False)
             else:
-                action = Randomscheduler.rand_key(pa.job_wait_queue)
+                if pa.objective == pa.random:
+                    action = Otheragents.rand_key(pa.job_wait_queue)
+                elif pa.objective == pa.SJF:
+                    action = Otheragents.get_sjf_action(env.machine, env.job_slot)
+                elif pa.objective == pa.Packer:
+                    action = Otheragents.get_packer_action(env.machine, env.job_slot)
 
             obs, reward, done, info = env.step(action)
 
@@ -62,11 +59,10 @@ def run_episodes(model, pa, env, job_sequence_len):
             if done == True:
                 break
 
-            if reward != 0:
-                print("Timestep: ", env.curr_time, "Action: ",action, "Reward: ", reward)
-                cumulated_episode_reward += reward
-                if env.curr_time == pa.episode_max_length:
-                    done = True
+            print("Timestep: ", env.curr_time, "Action: ",action, "Reward: ", reward)
+            cumulated_episode_reward += reward
+            if env.curr_time == pa.episode_max_length:
+                done = True
         cumulated_job_completion_time = list(flatten(cumulated_job_completion_time))
         cumulated_job_slowdown = list(flatten(cumulated_job_slowdown))
         
@@ -85,11 +81,11 @@ def run_episodes(model, pa, env, job_sequence_len):
 
 if __name__ == '__main__':
     pa = parameters.Parameters()
-    models = [pa.A2C_Slowdown, pa.A2C_Ctime, pa.random, pa.PPO2]
+    models = [pa.A2C_Slowdown, pa.A2C_Ctime, pa.random, pa.SJF, pa.Packer]
     pa.cluster_load = 1.3
     pa.simu_len, pa.new_job_rate = job_distribution.compute_simulen_and_arrival_rate(pa.cluster_load ,pa)     
     job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(pa)
-    env = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
+    env = MultiBinaryDeepRM.Env(pa, job_sequence_len=job_sequence_len,
                         job_sequence_size=job_sequence_size)
     env1 = make_vec_env(lambda: env, n_envs=1)
 
@@ -118,17 +114,13 @@ if __name__ == '__main__':
     index = np.arange(n_groups)
     bar_width = 0.14
     opacity = 0.8
-    agent_plots = []
 
     for i in range(len(models)):
         mean_values = (mean(slowdowns[i]), mean(ctimes[i]))
         deviation = (np.std(slowdowns[i]), np.std(ctimes[i]))
         agent_plot = plt.bar(index + i*bar_width, mean_values, bar_width, yerr=deviation, ecolor=models[i]['yerrcolor'], capsize=14,
          alpha=opacity, color=models[i]['color'], label=models[i]['title'])
-        agent_plots.append(agent_plot)
-
-    for agent_plot in agent_plots:
-        autolabel(agent_plot)
+        autolabel(agent_plot, deviation)
 
     plt.xlabel('Performance metrics')
     plt.ylabel('Average Job Slowdown')

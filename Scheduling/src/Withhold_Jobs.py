@@ -1,27 +1,10 @@
-import tensorflow as tf
-import numpy as np
-import Deeprm1
+import MultiBinaryDeepRM
 import parameters
 import job_distribution
 import matplotlib.pyplot as plt
-import numpy as np
-import math
-import matplotlib.pyplot as plt
-import argparse
-from random import sample
-import os
-import gym
 from stable_baselines import PPO2, A2C
-from collections import Counter
-from stable_baselines.common.env_checker import check_env
-from gym import spaces
 from stable_baselines.common import make_vec_env
-import Randomscheduler
-import warnings
-import random
 import Script
-from statistics import mean
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 # labeling the bar graph
 def autolabel(rects):
@@ -56,7 +39,7 @@ if __name__ == '__main__':
     pa.objective = pa.A2C_Slowdown
     pa.simu_len, pa.new_job_rate = job_distribution.compute_simulen_and_arrival_rate(pa.cluster_load ,pa)     
     job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(pa)
-    env = Deeprm1.Env(pa, job_sequence_len=job_sequence_len,
+    env = MultiBinaryDeepRM.Env(pa, job_sequence_len=job_sequence_len,
                         job_sequence_size=job_sequence_size)
     env1 = make_vec_env(lambda: env, n_envs=1)
     
@@ -65,13 +48,12 @@ if __name__ == '__main__':
     model = pa.A2C_Slowdown['agent'].load(save_path, env1)
     episode, reward, slowdown, completion_time, withheld_jobs, allocated_jobs = Script.run_episodes(model, pa, env, job_sequence_len)
 
-    withheld_job_len=[]
-    for k in range(len(withheld_jobs)):
-        withheld_job_len.append(withheld_jobs[k].len)
-    
-    # data to plot
+    withheld_job_len = []
     x = ()
     y = ()
+    for k in range(len(withheld_jobs)):
+        withheld_job_len.append(withheld_jobs[k].len)
+
     fig, ax = plt.subplots()
     if len(withheld_job_len) != 0:
         for i in range(int(pa.max_job_len)):

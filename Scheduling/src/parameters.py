@@ -55,4 +55,6 @@ class Parameters:
         self.A2C_Slowdown = {'agent':A2C, 'save_path':'job_scheduling_A2C_Slowdown', 'log_dir':"workspace/tensor_A2C_Slowdown/", 'color':'SkyBlue', 'yerrcolor':'Blue', 'title':'A2C Slowdown agent', 'figure_name':'learning_curve_Slowdown.png'}
         self.PPO2 = {'agent':PPO2, 'save_path':'job_scheduling_PPO2', 'log_dir':"workspace/tensor_PPO2/", 'color':'Green', 'yerrcolor':'DarkGreen', 'title':'PPO2 agent', 'figure_name':'learning_curve_PPO2.png'}
         self.random = {'agent':None, 'save_path':None, 'log_dir':None, 'color':'Yellow', 'yerrcolor':'Gold', 'title':'Random agent', 'figure_name':'learning_curve_Random.png'}
+        self.SJF = {'agent':None, 'save_path':None, 'log_dir':None, 'color':'pink', 'yerrcolor':'Hotpink', 'title':'SJF agent', 'figure_name':'learning_curve_SJF.png'}
+        self.Packer = {'agent':None, 'save_path':None, 'log_dir':None, 'color':'lime', 'yerrcolor':'teal', 'title':'Packer agent', 'figure_name':'learning_curve_Packer.png'}
         self.objective = self.A2C_Slowdown

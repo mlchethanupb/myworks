@@ -1,5 +1,4 @@
 import numpy as np
-import parameters
 import random
 
 class Dist:
