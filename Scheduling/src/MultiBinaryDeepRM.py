@@ -49,9 +49,7 @@ class Env(gym.Env):
         # iterate over valid actions
         for act in range(len(a)):
             if (a[act] == 1) or (1 not in a and self.pa.objective['agent'] == None) or (a.all() == 0 and self.pa.objective['agent'] != None):
-                if (self.pa.objective['agent'] != None and (a.all() == 0  or act == self.pa.job_wait_queue or self.job_slot.slot[act] is None)):
-                    status = 'MoveOn'
-                elif (self.pa.objective['agent'] == None and (1 not in a or act == self.pa.job_wait_queue or self.job_slot.slot[act] is None)):
+                if 1 not in a  or act == self.pa.job_wait_queue or self.job_slot.slot[act] is None:
                     status = 'MoveOn'
                 else:
                     allocated = self.machine.allocate_job(

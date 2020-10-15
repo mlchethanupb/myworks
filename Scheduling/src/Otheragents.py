@@ -4,7 +4,7 @@ import random
 def get_sjf_action(machine, job_slot):
     act = np.array([0,0,0,0,0])  # if no action available, hold
     len_list = []
-    K = 5
+    K = 3
     for i in range(len(job_slot.slot)):
         new_job = job_slot.slot[i]
         if new_job is not None:  # there is a pending job
@@ -31,7 +31,7 @@ def get_sjf_action(machine, job_slot):
 def get_packer_action(machine, job_slot):
     act = np.array([0,0,0,0,0])  # if no action available, hold
     res_req_list = []
-    K = 2
+    K = 3
     for i in range(len(job_slot.slot)):
         new_job = job_slot.slot[i]
         avbl_res = machine.available_res_slot

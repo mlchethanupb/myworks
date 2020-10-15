@@ -13,7 +13,7 @@ class Parameters:
         # interval for output and store parameters
         self.num_seq_per_batch = 10
         # number of sequences to compute baseline ???
-        self.episode_max_length = 2000 #self.simu_len * self.simu_len * 20
+        self.episode_max_length = 2000 
         # enforcing an artificial terminal - no of feasable training episodes
         self.num_resources = 2
         # number of resources in the system - CPU,Memory
