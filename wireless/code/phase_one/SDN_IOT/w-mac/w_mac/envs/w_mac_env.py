@@ -8,8 +8,13 @@ import random
 import w_mac
 from w_mac.envs.packet import Packet
 import matplotlib.pyplot as plt
+from IPython.display import clear_output
+import time
 import csv
 from collections import defaultdict
+from matplotlib.animation import FuncAnimation
+from matplotlib.pyplot import pause
+
 # with open('data.csv','w',newline='') as data
  
   
@@ -40,7 +45,11 @@ class W_MAC_Env(gym.Env):
     self.packet_delivered = 0
     self.packet_lost = 0
     self.counter = 0
-    self.f = open('data.csv','w',newline='')
+
+    #for visualisation
+    self.src_node = []
+    self.nxt_hop_node = []
+    # self.f = open('data.csv','w',newline='')
 
     ### read the graph to collect information about nodes and collision domains
     self.__read_graph_data()
@@ -466,7 +475,7 @@ class W_MAC_Env(gym.Env):
           
           ### Pop the packet from the queue
           packet_to_send = queue.pop()
-          self.data(packet_to_send , len(queue))
+          # self.data(packet_to_send , len(queue))
 
           ### How many domains does the node belong to? 
           ### More than 1, then intermediate node.
@@ -511,6 +520,8 @@ class W_MAC_Env(gym.Env):
 
               if (nxt_hop == packet_to_send.dest):
                 print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
+                self.src_node.append(node)
+                self.nxt_hop_node.append(packet_to_send.dest)
                 self.packet_delivered +=1
                 hopcount_reward = self.HOP_COUNT_MULT * packet_to_send.get_hop_count()
                 reward2 += (self.MAX_REWARD) - hopcount_reward
@@ -524,6 +535,8 @@ class W_MAC_Env(gym.Env):
                 ### successful transmission, add the packet to the queue.
                 #print("Adding packet to the queue of ", nxt_hop) 
                 packet_to_send.update_hop_count()
+                self.src_node.append(node)
+                self.nxt_hop_node.append(nxt_hop)
                 self.queues[nxt_hop].insert(0, packet_to_send)
 
           ### for single domain node
@@ -558,6 +571,8 @@ class W_MAC_Env(gym.Env):
 
               if (nxt_hop == packet_to_send.dest):
                 print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
+                self.src_node.append(node)
+                self.nxt_hop_node.append(packet_to_send.dest)
                 self.packet_delivered +=1
                 hopcount_reward = self.HOP_COUNT_MULT * packet_to_send.get_hop_count()
                 reward2 += self.MAX_REWARD - hopcount_reward
@@ -570,6 +585,8 @@ class W_MAC_Env(gym.Env):
 
                 #print("Adding packet to the queue of single node range", nxt_hop)
                 packet_to_send.update_hop_count()
+                self.src_node.append(node)
+                self.nxt_hop_node.append(nxt_hop)
 
                 self.queues[nxt_hop].insert(0, packet_to_send)
                                                 
@@ -718,41 +735,36 @@ class W_MAC_Env(gym.Env):
 
 
   def render(self, mode='human'):
-        queue0 = self.queues[0]
-        source_node0 = []
-        dest_node0 = []
-        source_node1 = []
-        dest_node1 = []
-
-        if len(queue0):
-          packet0 = queue0[len(queue0)-1]
-          source_node0= [packet0.src]
-          dest_node0 =[packet0.dest]
-          
-        queue1 = self.queues[1]
-        if len(queue1):
-          packet1 = queue1[len(queue1)-1]
-          source_node1= [packet1.src]
-          dest_node1 =[packet1.dest]
+        nodes = self.node_in_domains
+        src = self.src_node
+        nxt_hop = self.nxt_hop_node
+        print('src nodes',src)
+        print('next_hop edges',nxt_hop)
+        attack = self.attack_nodes
 
         
 
-        nodes = self.node_in_domains
-        # next_hop = self.nxt_hop_list
-
-
         # Assigning labels to the nodes
         pos = nx.spring_layout(self.graph)
+        plt.axis('off')
         nx.draw(self.graph, pos , with_labels=True, font_weight='bold')
         nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nodes , node_color = 'white')
-        nx.draw_networkx_nodes(self.graph , pos , nodelist = source_node0, node_color = 'red')
-        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = dest_node0 , node_color = 'green')
-        nx.draw_networkx_nodes(self.graph , pos , nodelist = source_node1, node_color = 'orange')
-        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = dest_node1 , node_color = 'blue')
-        nx.draw_networkx_edges(self.graph , pos , edge_color = 'black')
+        nx.draw_networkx_nodes(self.graph , pos , nodelist = attack, node_color = 'red')
+        nx.draw_networkx_nodes(self.graph , pos , nodelist = src, node_color = 'orange')
+        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nxt_hop , node_color = 'blue')
+        nx.draw_networkx_edges(self.graph , pos , edge_color = 'w')
+        edges1 =list(zip(src,nxt_hop))
+        edges2 =list(zip(src,attack))
+        # edges3 =list(zip(src,nodes))
+
+        # for source, destination      
+        nx.draw_networkx_edges(self.graph , pos , edgelist= edges1, edge_color = 'green')
+        nx.draw_networkx_edges(self.graph , pos , edgelist= edges2, edge_color = 'red')
+        # nx.draw_networkx_edges(self.graph , pos , edgelist= edges3, edge_color = 'white')
+
 
         plt.axis('off')
-        plt.show(block = False)
+        plt.show(block=False)
         plt.pause(3)
         plt.close('all')
 
