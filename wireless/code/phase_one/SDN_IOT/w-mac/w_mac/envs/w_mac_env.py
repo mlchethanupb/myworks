@@ -10,21 +10,13 @@ from w_mac.envs.packet import Packet
 import matplotlib.pyplot as plt
 from IPython.display import clear_output
 import time
-import csv
 from collections import defaultdict
-from matplotlib.animation import FuncAnimation
 from matplotlib.pyplot import pause
+from matplotlib.lines import Line2D
 
-# with open('data.csv','w',newline='') as data
- 
   
 class W_MAC_Env(gym.Env):
   metadata = {'render.modes': ['human']}
-    # fieldnames = ['src','dest','no of packets']
-    # thewriter = csv.DictWriter(c , fieldnames= fieldnames)
-    # thewriter.writeheader()
-    # thewriter.writerow({'src' : '1','dest':'2','no of packets':'3'}
-    # c.writerow([self.packet_to_send.src , self.packet_to_send.dest, len(self.queues[node])])
   
 
   def __init__(self, graph: nx.Graph):
@@ -49,7 +41,6 @@ class W_MAC_Env(gym.Env):
     #for visualisation
     self.src_node = []
     self.nxt_hop_node = []
-    # self.f = open('data.csv','w',newline='')
 
     ### read the graph to collect information about nodes and collision domains
     self.__read_graph_data()
@@ -99,8 +90,6 @@ class W_MAC_Env(gym.Env):
     self.packet_delivered = 0
     self.packet_lost = 0
     self.counter = 0
-    self.f = open('data.csv','w',newline='')
-    self.c = csv.writer(self.f)
     
     ### Frame the state - Next hop of all first packets in queue.
     """ initial state - destination of first packet and attacked nodes status """
@@ -407,7 +396,6 @@ class W_MAC_Env(gym.Env):
           isdone = True
           print('packets delivered ',self.packet_delivered)
           print('packet_lost ', self.packet_lost)
-          self.f.close()
     return isdone
 
   """-------------------------------------------------------------------------------------------- """
@@ -419,12 +407,12 @@ class W_MAC_Env(gym.Env):
         return index
 
   """-------------------------------------------------------------------------------------------- """
-  def data(self, packet_to_send,len_queue):
-        # print("hello")
-        f = open('data.csv','w',newline='')
-        c = csv.writer(f)
-        c.writerow([packet_to_send.src , packet_to_send.dest, len_queue])
-        c.writerow(['100','200','300'])
+  # def data(self, packet_to_send,len_queue):
+  #       # print("hello")
+  #       f = open('data.csv','w',newline='')
+  #       c = csv.writer(f)
+  #       c.writerow([packet_to_send.src , packet_to_send.dest, len_queue])
+  #       c.writerow(['100','200','300'])
 
   """-------------------------------------------------------------------------------------------- """
 
@@ -735,36 +723,40 @@ class W_MAC_Env(gym.Env):
 
 
   def render(self, mode='human'):
-        nodes = self.node_in_domains
-        src = self.src_node
-        nxt_hop = self.nxt_hop_node
-        print('src nodes',src)
-        print('next_hop edges',nxt_hop)
-        attack = self.attack_nodes
 
+    nodes = self.node_in_domains
+    src = self.src_node
+    nxt_hop = self.nxt_hop_node
+    # print('src nodes',src)
+    # print('next_hop',nxt_hop)
+    attack = self.attack_nodes
+    for i in self.graph.nodes:
+          queue = self.queues[i]
+          print("no of packets at node",i,"=",len(queue),)
+
+
+    #loop for multiple plotting
+    # for i in range(len(nodes)):
+    #   if nxt_hop == attack:
+    #       break;
+    #   else:
+    #       plt.figure(i)
+    #giving position to the graph
+    pos = nx.spring_layout(self.graph)
+    nx.draw(self.graph, pos , with_labels=True, font_weight='bold')
+    nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nodes , node_color = 'white',label='inactive')
+    nx.draw_networkx_nodes(self.graph , pos , nodelist = attack, node_color = 'red' , label='attacked node')
+    nx.draw_networkx_nodes(self.graph , pos , nodelist = src, node_color = 'orange', label='src')
+    nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nxt_hop , node_color = 'blue',label='next hop')
+    nx.draw_networkx_edges(self.graph , pos , edge_color = 'w')
+    edges1 =list(zip(src,nxt_hop))
+    edges2 =list(zip(src,attack))
         
-
-        # Assigning labels to the nodes
-        pos = nx.spring_layout(self.graph)
-        plt.axis('off')
-        nx.draw(self.graph, pos , with_labels=True, font_weight='bold')
-        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nodes , node_color = 'white')
-        nx.draw_networkx_nodes(self.graph , pos , nodelist = attack, node_color = 'red')
-        nx.draw_networkx_nodes(self.graph , pos , nodelist = src, node_color = 'orange')
-        nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nxt_hop , node_color = 'blue')
-        nx.draw_networkx_edges(self.graph , pos , edge_color = 'w')
-        edges1 =list(zip(src,nxt_hop))
-        edges2 =list(zip(src,attack))
-        # edges3 =list(zip(src,nodes))
-
-        # for source, destination      
-        nx.draw_networkx_edges(self.graph , pos , edgelist= edges1, edge_color = 'green')
-        nx.draw_networkx_edges(self.graph , pos , edgelist= edges2, edge_color = 'red')
-        # nx.draw_networkx_edges(self.graph , pos , edgelist= edges3, edge_color = 'white')
-
-
-        plt.axis('off')
-        plt.show(block=False)
-        plt.pause(3)
-        plt.close('all')
-
+    # for source, destination      
+    nx.draw_networkx_edges(self.graph , pos , edgelist= edges1, edge_color = 'green')
+    nx.draw_networkx_edges(self.graph , pos , edgelist= edges2, edge_color = 'red')
+    plt.legend(scatterpoints = 1) 
+    plt.axis('off')
+    plt.show()
+    plt.pause(2)
+    plt.close('all')
