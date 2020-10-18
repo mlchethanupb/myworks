@@ -1,4 +1,0 @@
-gym
-stable-baselines
-matplotlib
-tensorflow==1.5
