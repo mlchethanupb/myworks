@@ -1,7 +1,7 @@
 version: '2'
 services:
   kafka0:
-    image: kafka:f
+    image: kafka:dev
     ports:
       - '9092:9092'
       - '31090:31090'
@@ -12,3 +12,5 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://172.17.42.1:9092,EXTERNAL://10.0.0.80:31090
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: EXTERNAL
+     
+            
