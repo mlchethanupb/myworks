@@ -63,8 +63,8 @@ if __name__ == '__main__':
         plt.plot(res['cluster_load'], y_slowdown_readings[i],
                  color=models[i]['color'], label=models[i]['title'])
     plt.xlabel("Cluster Load(Percentage)")
-    plt.ylabel("Average Slowdown")
-    plt.title("ClusterLoadVsSlowdown")
+    plt.ylabel("Average Job Slowdown")
+    plt.title("Job slowdown at different levels of load")
     plt.legend()
     plt.grid()
     plt.show()

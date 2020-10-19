@@ -33,12 +33,12 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
       episode, reward_lst, slowdown_lst, completion_time, withheld_jobs, allocated_jobs = Script.run_episodes(model, pa, env, job_sequence_len)  
       # save or update saved model only for best training results. Max possible iterations is time_steps/check_freq.
       mean_reward = mean(reward_lst)
+      slowdown = mean(slowdown_lst)
+      model_slowdowns.append(slowdown)
+      model_rewards.append(mean_reward)
+      model_max_rewards.append(max(reward_lst))
+      model_iterations.append(iter)
       if mean_reward >= self.best_mean_reward:
-        slowdown = mean(slowdown_lst)
-        model_slowdowns.append(slowdown)
-        model_rewards.append(mean_reward)
-        model_max_rewards.append(max(reward_lst))
-        model_iterations.append(iter)
         self.best_mean_reward = mean_reward
         if self.verbose > 0:
           print("Saving new best model to {}".format(self.save_path))
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     iterations.append(model_iterations)
 
   fig2 = plt.figure()
-  plt.ylim(0, 20)
+  plt.ylim(0, 15)
   for i in range(len(models)):
     plt.plot(iterations[i], env_slowdowns[i], color=models[i]['color'], label=models[i]['title'])
   plt.xlabel("Iterations")
@@ -110,7 +110,7 @@ if __name__ == '__main__':
   plt.legend()
   plt.grid()
   plt.show()
-  fig2.savefig('workspace/learningcurve_Slowdown')
+  fig2.savefig('workspace/Learningcurve_Slowdown')
 
   fig3 = plt.figure()
   for i in range(len(models)):
@@ -124,4 +124,4 @@ if __name__ == '__main__':
   plt.grid()
   plt.show()
 
-  fig3.savefig('workspace/learningcurve_Reward')
+  fig3.savefig('workspace/Learningcurve_Reward')

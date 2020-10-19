@@ -27,9 +27,9 @@ def len_withheld_jobs(x, y):
     for agent_plot in agent_plots:
         autolabel(agent_plot)
 
-    plt.xlabel('job length')
+    plt.xlabel('Job length')
     plt.ylabel('Fraction')
-    plt.title('length of withheld jobs')
+    plt.title('Length of withheld jobs')
     plt.xticks(x)
     plt.legend()
     plt.show()

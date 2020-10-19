@@ -91,7 +91,7 @@ if __name__ == '__main__':
     ax.legend()
     plt.xlabel('Job length')
     plt.ylabel('Job Slowdown')
-    plt.title('Slowdown vs. job length')
+    plt.title('Slowdown versus Job length')
     if len(models) == 2:
         autolabel(rects1, A2C_z)
         autolabel(rects2, Other_z)
