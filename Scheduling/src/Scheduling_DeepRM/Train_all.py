@@ -110,7 +110,7 @@ if __name__ == '__main__':
   plt.legend()
   plt.grid()
   plt.show()
-  fig2.savefig('workspace/Learningcurve_Slowdown')
+  fig2.savefig('workspace/MultiBinary/Learningcurve_Slowdown')
 
   fig3 = plt.figure()
   for i in range(len(models)):
@@ -124,4 +124,4 @@ if __name__ == '__main__':
   plt.grid()
   plt.show()
 
-  fig3.savefig('workspace/Learningcurve_Reward')
+  fig3.savefig('workspace/MultiBinary/Learningcurve_Reward')

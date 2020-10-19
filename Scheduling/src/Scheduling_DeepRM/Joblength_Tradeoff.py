@@ -98,4 +98,4 @@ if __name__ == '__main__':
     else:
         print("Please add exactly 2 agent names in models list for comparision")
     plt.show()
-    fig.savefig('workspace/SDVsJobLen.png')
+    fig.savefig('workspace/MultiBinary/SDVsJobLen.png')

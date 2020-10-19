@@ -33,7 +33,7 @@ def len_withheld_jobs(x, y):
     plt.xticks(x)
     plt.legend()
     plt.show()
-    fig.savefig('workspace/WithheldJobs.png')
+    fig.savefig('workspace/MultiBinary/WithheldJobs.png')
 
 
 if __name__ == '__main__':

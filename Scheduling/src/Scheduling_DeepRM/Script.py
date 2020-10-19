@@ -133,5 +133,5 @@ if __name__ == '__main__':
     ax2.set_ylim(ax.get_ylim())
     plt.tight_layout()
     plt.show()
-    fig.savefig('workspace/Performances.png')
+    fig.savefig('workspace/MultiBinary/Performances.png')
     print("Cluster capacity(units): ", pa.cluster_capacity, ", Job rate:", pa.new_job_rate, ",Simulation length: ", pa.simu_len, ", Job units(total): ", pa.cluster_occupied,", Cluster load: ", pa.cluster_load)
