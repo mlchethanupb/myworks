@@ -73,7 +73,7 @@ class W_MAC_Env(gym.Env):
 
   def reset(self):
         
-    print("------------------ resetting environment--------------------")
+    #print("------------------ resetting environment--------------------")
 
     self.attack_nodes = []# [4]
     
@@ -84,7 +84,7 @@ class W_MAC_Env(gym.Env):
         a_node = random.randrange(0,self.total_nodes)
       self.attack_nodes.append(a_node)
     #self.attack_nodes = [2]
-    print("self.attack_nodes", self.attack_nodes)
+    #print("self.attack_nodes", self.attack_nodes)
 
     self.__reset_queue()  ##  reset the queue
     self.packet_delivered = 0
@@ -113,7 +113,7 @@ class W_MAC_Env(gym.Env):
           else:
                 state.append(0)
     """
-    print(state)
+    #print(state)
     arr = np.array(state)
     #todo : add ques lenght to state space
     #return the state
@@ -299,6 +299,12 @@ class W_MAC_Env(gym.Env):
     print("sorted self.node_action_list", self.node_action_list)       
 
   """--------------------------------------------------------------------------------------------"""
+  
+  def get_packet_lost(self):
+        return self.packet_lost
+        
+  """--------------------------------------------------------------------------------------------"""
+
 
   def __reset_queue(self):
     
@@ -394,8 +400,8 @@ class W_MAC_Env(gym.Env):
     isdone = False
     if queue_empty or counter_exceeded:
           isdone = True
-          print('packets delivered ',self.packet_delivered)
-          print('packet_lost ', self.packet_lost)
+          #print('packets delivered ',self.packet_delivered)
+          #print('packet_lost ', self.packet_lost)
     return isdone
 
   """-------------------------------------------------------------------------------------------- """
@@ -450,7 +456,7 @@ class W_MAC_Env(gym.Env):
         ### Cross check this logic
         if valid_next_hop and actions[index] in range(self.total_nodes): ## next hop validity + not waiting
           if(len(self.queues[node])):
-            print("Packet lost due to passing to defect node",node,"index",index, actions, valid_next_hops_list)
+            #print("Packet lost due to passing to defect node",node,"index",index, actions, valid_next_hops_list)
             self.packet_lost += 1
             packet_to_send = self.queues[node].pop()
           valid_next_hop = False
@@ -507,7 +513,7 @@ class W_MAC_Env(gym.Env):
               #reward2 -= 10
 
               if (nxt_hop == packet_to_send.dest):
-                print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
+                #print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
                 self.src_node.append(node)
                 self.nxt_hop_node.append(packet_to_send.dest)
                 self.packet_delivered +=1
@@ -558,7 +564,7 @@ class W_MAC_Env(gym.Env):
               #print(' single domain; transmission success')
 
               if (nxt_hop == packet_to_send.dest):
-                print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
+                #print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
                 self.src_node.append(node)
                 self.nxt_hop_node.append(packet_to_send.dest)
                 self.packet_delivered +=1
