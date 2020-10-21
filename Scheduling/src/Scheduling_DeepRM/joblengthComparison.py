@@ -30,8 +30,6 @@ import packer
 import warnings
 import random
 from statistics import mean
-# warnings.simplefilter(action='ignore', category=FutureWarning)
-# warnings.simplefilter(action='ignore', category=Warning)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 if __name__ == '__main__':
@@ -103,7 +101,8 @@ if __name__ == '__main__':
     pa = parameters.Parameters()
     pa.job_wait_queue = 10
     pa.objective_disc = pa.objective_slowdown
-    models = [pa.SJF_disc, pa.Packer_disc, pa.A2C_SL]
+    
+    models = [pa.Packer_disc, pa.A2C_SL]
     pa.cluster_load = 1.1
     pa.simu_len, pa.new_job_rate = job_distribution.compute_simulen_and_arrival_rate(
         pa.cluster_load, pa)
@@ -121,7 +120,7 @@ if __name__ == '__main__':
                 ax.text(rect.get_x() + rect.get_width()/2., height,
                         '%.1f' % height, ha='center', va='bottom')
 
-    def plot_slowdown_len(slowdown, job_length):
+    def plot_slowdown_len(slowdown, job_length,agent1,agent2):
         values = []
         for sl in range(len(slowdown)):
             labels = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [],
@@ -147,40 +146,19 @@ if __name__ == '__main__':
         opacity = 0.8
         fig, ax = plt.subplots()
         # rects1 = ax.bar(width, values[0], width, label='SJF')
-        rects2 = ax.bar(x - width/2, values[1], width, label='Packer')
-        rects3 = ax.bar(x + width/2, values[2], width, label='A2C')
-        ax.set_ylabel('Slowdown')
+        rects1 = ax.bar(x - width/2, values[0], width, label=agent1)
+        rects2 = ax.bar(x + width/2, values[1], width, label=agent2)
+        ax.set_ylabel('Job Slowdown')
         ax.set_xlabel('Job Length')
-        ax.set_title('Slowdown vs Job Length')
+        ax.set_title('Job Length Vs Slowdown')
         ax.set_xticks(x)
         ax.set_xticklabels(keys)
         ax.legend()
         # autolabel(rects1, ax)
+        autolabel(rects1, ax)
         autolabel(rects2, ax)
-        autolabel(rects3, ax)
         fig.tight_layout()
-        fig.savefig('workspace/Discrete/output/SDvsSlowdown.png')
-        # for i in range(len(models)):
-
-        print("Done processing")
-        # labels = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [],
-        #           11: [], 12: [], 13: [], 14: [], 15: [], 16: [], 17: [], 18: [], 19: [], 20: []}
-        # list1 = []
-        # for i in range(len(slowdown)):
-        #     key = job_length[i]
-        #     labels[key].append(slowdown[i])
-        #     # dictionary = dict(zip(slowdown[i], job_length[i]))
-        #     # l1 = collections.OrderedDict(sorted(dictionary.keys()))
-        #     # for label in labels:
-        # for k, v in labels.items():
-        #     if not v:
-        #         value = 0
-        #     else:
-        #         value = mean(v)
-        #     list1.append(value)
-
-        print("Done")
-        # return values
+        fig.savefig(pa.figure_path + "JobLength_Vs_Slowdown" + pa.figure_extension)
 
     for i in range(len(models)):
         reward, sl, Ct, job_slowdown, job_len, withheld_jobs = run(
@@ -189,6 +167,6 @@ if __name__ == '__main__':
         job_length.append(job_len)
 
     # plot_slowdown_len(job_slowdown, job_len)
-    plot_slowdown_len(slowdown, job_length)
+    plot_slowdown_len(slowdown, job_length,models[0]['title'],models[1]['title'])
 
-    print("done")
+    print("JobLength_Vs_Slowdown figure plotted")

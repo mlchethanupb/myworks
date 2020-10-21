@@ -137,13 +137,12 @@ def plot_slowdown(episodes, slowdown_sl, models):
         plt.plot(episodes, slowdown_sl[i],
                  color=models[i]['color'], label=models[i]['title'])
     plt.xlabel("Number of episodes")
-    plt.ylabel("Avg Job Slowdown per episodes")
+    plt.ylabel("Average Job Slowdown per episodes")
     plt.title("Average Job Slowdown per episode for Stable Baselines")
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.grid()
     plt.show()
-    fig.savefig('workspace/Discrete/output/JobSlowdown.png',
-                bbox_inches='tight')
+    fig.savefig(pa.figure_path + "JobSlowdown" + pa.figure_extension, bbox_inches='tight')
 
 
 def autolabel(rects, ax):
@@ -186,9 +185,9 @@ def plot_performance(slowdown_sl, Ctime_ct, models):
     plt.tight_layout()
 
     plt.tight_layout()
-    fig.savefig('workspace/Discrete/output/Performance.png')
-
+    fig.savefig(pa.figure_path + "Performance" + pa.figure_extension)
 
 plot_slowdown(episodes, slowdown_sl, models)
 plot_performance(slowdown_sl, Ctime_ct, models)
-print("Done")
+
+print("Performance graphs plotted")

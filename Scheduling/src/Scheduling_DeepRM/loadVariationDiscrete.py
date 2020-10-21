@@ -17,8 +17,6 @@ import packer
 import warnings
 from statistics import mean
 from collections import defaultdict
-# warnings.simplefilter(action='ignore', category=FutureWarning)
-# warnings.simplefilter(action='ignore', category=Warning)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 if __name__ == '__main__':
@@ -43,12 +41,12 @@ if __name__ == '__main__':
             plt.plot(res['cluster_load'], slowdown[i],
                      color=models[i]['color'], label=models[i]['title'])
         plt.xlabel("Cluster Load(Percentage)")
-        plt.ylabel("Average Slowdown")
-        plt.title("ClusterLoadVsSlowdown")
+        plt.ylabel("Average Job Slowdown")
+        plt.title("Job Slowdown at different levels of load")
         plt.legend()
         plt.grid()
         plt.show()
-        fig.savefig('workspace/Discrete/output/LoadVariation.png')
+        fig.savefig(pa.figure_path + "LoadVariation" + pa.figure_extension)
 
     def run_episode(agent, env):
 
@@ -165,40 +163,5 @@ if __name__ == '__main__':
         for i in range(len(cluster_load)):
             slowdown[j].append(mean(slowdown_ep[i][j]))
 
-    # for i in range(len(models)):
-    #     load_occupied = []
-    #     for rate in cluster_load:
-    #         pa.cluster_load = rate / 100
-    #         pa.simu_len, pa.new_job_rate = job_distribution.compute_simulen_and_arrival_rate(
-    #             cluster_load[-1]/100, pa)
-    #         cluster_values = {}
-    #         cluster_values['simu_len'] = pa.simu_len
-    #         cluster_values['new_job_rate'] = pa.new_job_rate
-    #         job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(
-    #             pa)
-    #         cluster_values['cluster_occupied'] = pa.cluster_occupied
-    #         # actual loads for which graph will be plotted
-    #         cluster_values['cluster_load'] = pa.cluster_occupied * \
-    #             100 / pa.cluster_capacity
-    #         load_occupied.append(cluster_values)
-    #         env = DeepRMEnv.Env(pa, job_sequence_len=job_sequence_len,
-    #                             job_sequence_size=job_sequence_size)
-    #         # Reward list, slowdown list and Completion time list over all episodes
-    #         reward_ep = []
-    #         slowdown_ep = []
-    #         completionTime_ep = []
-    #         for episode in episodes:
-    #             # Reward , Slowdown and Completion Time
-    #             rw, sl, ct = run_episode(models[i], env)
-    #             reward_ep.append(rw)
-    #             slowdown_ep.append(sl)
-    #             completionTime_ep.append(ct)
-    #             print("Done for episode", episode,
-    #                   "with seed", pa.random_seed,
-    #                   "for model", models[i]['agent'],
-    #                   "with rate", rate)
-    #         reward[i].append(mean(reward_ep))
-    #         slowdown[i].append(mean(slowdown_ep))
-    #         completionTime[i].append(mean(completionTime_ep))
-    print("Done")
     plot_load_variation(load_occupied, slowdown)
+    print("Graph ploted for load variation.")
