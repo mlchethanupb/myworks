@@ -1,4 +1,5 @@
-from MB_DeepRM.envs.MultiBinaryDeepRM import Env
+#File for Joblength VS Slowdown.
+from DeepRM.envs.MultiBinaryDeepRM import Env
 import gym
 import parameters
 import job_distribution

@@ -1,4 +1,5 @@
-from MB_DeepRM.envs.MultiBinaryDeepRM import Env
+#File for running script.
+from DeepRM.envs.MultiBinaryDeepRM import Env
 import gym
 import numpy as np
 import matplotlib.pyplot as plt

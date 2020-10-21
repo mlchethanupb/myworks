@@ -1,4 +1,5 @@
-from MB_DeepRM.envs.MultiBinaryDeepRM import Env
+#File for training agents.
+from DeepRM.envs.MultiBinaryDeepRM import Env
 import gym
 import os
 from stable_baselines.common.noise import AdaptiveParamNoiseSpec

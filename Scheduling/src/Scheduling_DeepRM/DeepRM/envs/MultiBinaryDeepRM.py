@@ -1,8 +1,8 @@
 import numpy as np
-import parameters
 import os
 import gym
 from gym import spaces
+
 
 class Env(gym.Env):
     # We pass a dictionary of parameters along with job requirements and also we set
@@ -49,7 +49,7 @@ class Env(gym.Env):
         # iterate over valid actions
         for act in range(len(a)):
             if (a[act] == 1) or (1 not in a and self.pa.objective['agent'] == None) or (a.all() == 0 and self.pa.objective['agent'] != None):
-                if (self.pa.objective['agent'] != None and (a.all() == 0  or act == self.pa.job_wait_queue or self.job_slot.slot[act] is None)):
+                if (self.pa.objective['agent'] != None and (a.all() == 0 or act == self.pa.job_wait_queue or self.job_slot.slot[act] is None)):
                     status = 'MoveOn'
                 elif (self.pa.objective['agent'] == None and (1 not in a or act == self.pa.job_wait_queue or self.job_slot.slot[act] is None)):
                     status = 'MoveOn'
@@ -59,7 +59,8 @@ class Env(gym.Env):
                     if not allocated:  # implicit void action
                         status = 'MoveOn'
                         if self.job_slot.slot[act] != None and self.job_slot.slot[act] not in info['Withheld Job']:
-                            info['Withheld Job'].append(self.job_slot.slot[act])
+                            info['Withheld Job'].append(
+                                self.job_slot.slot[act])
                     else:
                         status = 'Allocate'
 
@@ -114,7 +115,8 @@ class Env(gym.Env):
                     if self.job_backlog.curr_size > 0:
                         # if backlog empty, it will be 0
                         self.job_slot.slot[act] = self.job_backlog.backlog[0]
-                        self.job_backlog.backlog[: -1] = self.job_backlog.backlog[1:]
+                        self.job_backlog.backlog[: -
+                                                 1] = self.job_backlog.backlog[1:]
                         self.job_backlog.backlog[-1] = None
                         self.job_backlog.curr_size -= 1
 
@@ -187,7 +189,7 @@ class Env(gym.Env):
                 if j is not None:
                     remaining_jobs += 1
             reward = self.pa.penalty * abs(remaining_jobs)
-            
+
         return reward
 
 
@@ -238,7 +240,8 @@ class Machine:
                 self.available_res_slot[t: t + job.len, :] = new_avbl_res
                 job.start_time = curr_time + t
                 job.finish_time = job.start_time + job.len
-                job.job_completion_time = float(job.finish_time - job.enter_time)
+                job.job_completion_time = float(
+                    job.finish_time - job.enter_time)
                 job.job_slowdown = (job.finish_time - job.enter_time) / job.len
                 self.running_job.append(job)
                 assert job.start_time != -1

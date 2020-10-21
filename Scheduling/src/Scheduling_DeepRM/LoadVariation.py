@@ -1,4 +1,5 @@
-from MB_DeepRM.envs.MultiBinaryDeepRM import Env
+#File for Load variation.
+from DeepRM.envs.MultiBinaryDeepRM import Env
 import gym
 import matplotlib.pyplot as plt
 import parameters
