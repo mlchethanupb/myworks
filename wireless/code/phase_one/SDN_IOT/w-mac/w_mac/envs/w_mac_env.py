@@ -314,7 +314,7 @@ class W_MAC_Env(gym.Env):
     ### Add packets to the queue. 
     for node in self.graph.nodes:
           if node not in self.attack_nodes: ## If node is defect node, do not add packets.
-                for count in range(5):
+                for count in range(10):
                       self.src = node   ## node is the source
                       self.dest = random.randrange(0,self.total_nodes)  ## find random destination
                       while self.src == self.dest or self.dest in self.attack_nodes:
