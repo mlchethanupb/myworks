@@ -78,7 +78,7 @@ if __name__ == '__main__':
             obs, reward, done, info = env.step(action)
             if bool(info) == True:
                 cumulated_job_slowdown += info['Job Slowdown']
-                cumulated_completion_time = info['Completion Time']
+                cumulated_completion_time += info['Completion Time']
             if env.curr_time == pa.episode_max_length:
                 done = True
             elif reward == 0 and done != True:

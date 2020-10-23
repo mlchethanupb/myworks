@@ -68,7 +68,7 @@ if __name__ == '__main__':
                 cumulated_job_slowdown += info['Job Slowdown']
                 job_slowdown.append(info['Job Slowdown'])
                 job_len.append(info['Job Length'])
-                cumulated_completion_time = info['Completion Time']
+                cumulated_completion_time += info['Completion Time']
             if done == True:
                 # print("Done")
                 break
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     pa = parameters.Parameters()
     pa.job_wait_queue = 10
     pa.objective_disc = pa.objective_slowdown
-    
+
     models = [pa.Packer_disc, pa.A2C_SL]
     pa.cluster_load = 1.1
     pa.simu_len, pa.new_job_rate = job_distribution.compute_simulen_and_arrival_rate(
@@ -120,7 +120,7 @@ if __name__ == '__main__':
                 ax.text(rect.get_x() + rect.get_width()/2., height,
                         '%.1f' % height, ha='center', va='bottom')
 
-    def plot_slowdown_len(slowdown, job_length,agent1,agent2):
+    def plot_slowdown_len(slowdown, job_length, agent1, agent2):
         values = []
         for sl in range(len(slowdown)):
             labels = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [],
@@ -158,7 +158,8 @@ if __name__ == '__main__':
         autolabel(rects1, ax)
         autolabel(rects2, ax)
         fig.tight_layout()
-        fig.savefig(pa.figure_path + "JobLength_Vs_Slowdown" + pa.figure_extension)
+        fig.savefig(pa.figure_path + "JobLength_Vs_Slowdown" +
+                    pa.figure_extension)
 
     for i in range(len(models)):
         reward, sl, Ct, job_slowdown, job_len, withheld_jobs = run(
@@ -167,6 +168,7 @@ if __name__ == '__main__':
         job_length.append(job_len)
 
     # plot_slowdown_len(job_slowdown, job_len)
-    plot_slowdown_len(slowdown, job_length,models[0]['title'],models[1]['title'])
+    plot_slowdown_len(slowdown, job_length,
+                      models[0]['title'], models[1]['title'])
 
     print("JobLength_Vs_Slowdown figure plotted")

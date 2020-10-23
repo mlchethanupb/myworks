@@ -1,4 +1,4 @@
-#File for parameters.
+# File for parameters.
 import job_distribution
 from stable_baselines import A2C, PPO2, DQN
 
@@ -85,37 +85,37 @@ class Parameters:
         self.model_save_path = 'Scheduling_DeepRM/workspace/Discrete/hyperParamModels/'
 
         # DQN
-        self.DQN_SL = {'agent': 'DQN', 'save_path': self.model_save_path +"job_scheduling_"+ "DQN" +"_"+ self.objective_slowdown,
+        self.DQN_SL = {'agent': 'DQN', 'save_path': self.model_save_path + "job_scheduling_" + "DQN" + "_" + self.objective_slowdown,
                        'color': 'g', 'title': 'DQN agent trained for SL', 'load': DQN}
-        self.DQN_CT = {'agent': 'DQN', 'save_path': self.model_save_path +"job_scheduling_"+ "DQN" +"_"+ self.objective_Ctime,
+        self.DQN_CT = {'agent': 'DQN', 'save_path': self.model_save_path + "job_scheduling_" + "DQN" + "_" + self.objective_Ctime,
                        'color': 'c', 'title': 'DQN agent trained for CT', 'load': DQN}
         # PPO2
-        self.PPO2_SL = {'agent': 'PPO2', 'save_path': self.model_save_path +"job_scheduling_"+ "PPO2" +"_"+ self.objective_slowdown,
+        self.PPO2_SL = {'agent': 'PPO2', 'save_path': self.model_save_path + "job_scheduling_" + "PPO2" + "_" + self.objective_slowdown,
                         'color': 'm', 'title': 'PPO2 agent trained for SL', 'load': PPO2}
-        self.PPO2_CT = {'agent': 'PPO2', 'save_path': self.model_save_path +"job_scheduling_"+ "PPO2" +"_"+ self.objective_Ctime,
+        self.PPO2_CT = {'agent': 'PPO2', 'save_path': self.model_save_path + "job_scheduling_" + "PPO2" + "_" + self.objective_Ctime,
                         'color': 'y', 'title': 'PPO2 agent trained for CT', 'load': PPO2}
         # A2C
-        self.A2C_SL = {'agent': 'A2C', 'save_path': self.model_save_path +"job_scheduling_"+ "A2C" +"_"+ self.objective_slowdown,
+        self.A2C_SL = {'agent': 'A2C', 'save_path': self.model_save_path + "job_scheduling_" + "A2C" + "_" + self.objective_slowdown,
                        'color': 'k', 'title': 'A2C agent trained for SL', 'load': A2C}
-        self.A2C_CT = {'agent': 'A2C', 'save_path': self.model_save_path +"job_scheduling_"+ "A2C" +"_"+ self.objective_Ctime,
+        self.A2C_CT = {'agent': 'A2C', 'save_path': self.model_save_path + "job_scheduling_" + "A2C" + "_" + self.objective_Ctime,
                        'color': 'b', 'title': 'A2C agent trained for CT', 'load': A2C}
 
     # Tuned_model_DQN_Job_Completion_Time.zip
 
-        self.A2C_Tune_SL = {'agent': 'A2C_Tune_SL', 'save_path': self.model_save_path + "Tuned_model_A2C" +"_"+ self.objective_slowdown,
+        self.A2C_Tune_SL = {'agent': 'A2C_Tune_SL', 'save_path': self.model_save_path + "Tuned_model_A2C" + "_" + self.objective_slowdown,
                             'color': 'thistle', 'title': 'A2C Tune agent trained for SL', 'load': A2C}
-        self.A2C_Tune_CT = {'agent': 'A2C_Tune_CT', 'save_path': self.model_save_path + "Tuned_model_A2C" +"_"+ self.objective_Ctime,
+        self.A2C_Tune_CT = {'agent': 'A2C_Tune_CT', 'save_path': self.model_save_path + "Tuned_model_A2C" + "_" + self.objective_Ctime,
                             'color': 'sienna', 'title': 'A2C Tune agent trained for CT', 'load': A2C}
         # PPO2 Tuned
-        self.PPO2_Tune_SL = {'agent': 'PPO2_Tune_SL', 'save_path': self.model_save_path + "Tuned_model_PPO2" +"_"+ self.objective_slowdown,
+        self.PPO2_Tune_SL = {'agent': 'PPO2_Tune_SL', 'save_path': self.model_save_path + "Tuned_model_PPO2" + "_" + self.objective_slowdown,
                              'color': 'thistle', 'title': 'PPO2 Tune agent trained for SL', 'load': PPO2}
-        self.PPO2_Tune_CT = {'agent': 'PPO2_Tune_CT', 'save_path': self.model_save_path + "Tuned_model_PPO2" +"_"+ self.objective_Ctime,
+        self.PPO2_Tune_CT = {'agent': 'PPO2_Tune_CT', 'save_path': self.model_save_path + "Tuned_model_PPO2" + "_" + self.objective_Ctime,
                              'color': 'sienna', 'title': 'PPO2 Tune agent trained for CT', 'load': PPO2}
 
         # DQN Tuned
-        self.DQN_Tune_SL = {'agent': 'DQN_Tune_SL', 'save_path': self.model_save_path + "Tuned_model_DQN" +"_"+ self.objective_slowdown,
+        self.DQN_Tune_SL = {'agent': 'DQN_Tune_SL', 'save_path': self.model_save_path + "Tuned_model_DQN" + "_" + self.objective_slowdown,
                             'color': 'thistle', 'title': 'DQN Tune agent trained for SL', 'load': DQN}
-        self.DQN_Tune_CT = {'agent': 'DQN_Tune_CT', 'save_path': self.model_save_path + "Tuned_model_DQN" +"_"+ self.objective_Ctime,
+        self.DQN_Tune_CT = {'agent': 'DQN_Tune_CT', 'save_path': self.model_save_path + "Tuned_model_DQN" + "_" + self.objective_Ctime,
                             'color': 'sienna', 'title': 'DQN Tune agent trained for CT', 'load': DQN}
 
         self.model_training_iterations = 100

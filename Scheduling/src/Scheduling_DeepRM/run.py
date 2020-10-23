@@ -50,7 +50,6 @@ if __name__ == '__main__':
     episodes = [n for n in range(pa.num_episode)]
 
     def run_episode(agent, env, objective):
-
         if agent['agent'] == 'A2C' or agent['agent'] == 'PPO2':
             env1 = make_vec_env(lambda: env, n_envs=1)
             model = agent['load'].load(agent['save_path'], env1)
@@ -79,7 +78,7 @@ if __name__ == '__main__':
             obs, reward, done, info = env.step(action)
             if bool(info) == True:
                 cumulated_job_slowdown += info['Job Slowdown']
-                cumulated_completion_time = info['Completion Time']
+                cumulated_completion_time += info['Completion Time']
             if done == True:
                 # print("Done")
                 break
@@ -142,7 +141,8 @@ def plot_slowdown(episodes, slowdown_sl, models):
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.grid()
     plt.show()
-    fig.savefig(pa.figure_path + "JobSlowdown" + pa.figure_extension, bbox_inches='tight')
+    fig.savefig(pa.figure_path + "JobSlowdown" +
+                pa.figure_extension, bbox_inches='tight')
 
 
 def autolabel(rects, ax):
@@ -186,6 +186,7 @@ def plot_performance(slowdown_sl, Ctime_ct, models):
 
     plt.tight_layout()
     fig.savefig(pa.figure_path + "Performance" + pa.figure_extension)
+
 
 plot_slowdown(episodes, slowdown_sl, models)
 plot_performance(slowdown_sl, Ctime_ct, models)
