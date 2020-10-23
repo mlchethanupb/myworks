@@ -41,6 +41,7 @@ class W_MAC_Env(gym.Env):
     #for visualisation
     self.src_node = []
     self.nxt_hop_node = []
+    self.dest_list = []
 
     ### read the graph to collect information about nodes and collision domains
     self.__read_graph_data()
@@ -73,7 +74,7 @@ class W_MAC_Env(gym.Env):
 
   def reset(self):
         
-    #print("------------------ resetting environment--------------------")
+    print("------------------ resetting environment--------------------")
 
     self.attack_nodes = []# [4]
     
@@ -314,7 +315,7 @@ class W_MAC_Env(gym.Env):
     ### Add packets to the queue. 
     for node in self.graph.nodes:
           if node not in self.attack_nodes: ## If node is defect node, do not add packets.
-                for count in range(10):
+                for count in range(5):
                       self.src = node   ## node is the source
                       self.dest = random.randrange(0,self.total_nodes)  ## find random destination
                       while self.src == self.dest or self.dest in self.attack_nodes:
@@ -400,8 +401,8 @@ class W_MAC_Env(gym.Env):
     isdone = False
     if queue_empty or counter_exceeded:
           isdone = True
-          #print('packets delivered ',self.packet_delivered)
-          #print('packet_lost ', self.packet_lost)
+          print('packets delivered ',self.packet_delivered)
+          print('packet_lost ', self.packet_lost)
     return isdone
 
   """-------------------------------------------------------------------------------------------- """
@@ -426,6 +427,10 @@ class W_MAC_Env(gym.Env):
 
     reward1 = 0
     reward2 = 0
+    self.src_node = []
+    self.nxt_hop_node = []
+    self.dest_list = []
+
     """ Reward for attacked node as a next hop """
     ### Next hop in same domain is valid_next_hop
     for node in self.graph.nodes:
@@ -502,20 +507,25 @@ class W_MAC_Env(gym.Env):
               #print('intermediate; Packet loss due to collision',node, actions, valid_next_hops_list)
               self.packet_lost += 1
               reward2 -= self.COLLISION_REWARD
+              self.src_node.append(node)
+              self.nxt_hop_node.append(nxt_hop)
 
             elif (self.__hidden_terminal_problem(actions, valid_next_hops_list, node, domain_key)):
               #print("intermediate; Hidden terminal problem, packet lost",node,actions, valid_next_hops_list)
               reward2 -= self.COLLISION_REWARD
               self.packet_lost += 1
+              self.src_node.append(node)
+              self.nxt_hop_node.append(nxt_hop)
 
             else:
               #print('intermediate; transmission success')
               #reward2 -= 10
 
               if (nxt_hop == packet_to_send.dest):
-                #print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
+                print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count()+1)
                 self.src_node.append(node)
                 self.nxt_hop_node.append(packet_to_send.dest)
+                self.dest_list.append(packet_to_send.dest)
                 self.packet_delivered +=1
                 hopcount_reward = self.HOP_COUNT_MULT * packet_to_send.get_hop_count()
                 reward2 += (self.MAX_REWARD) - hopcount_reward
@@ -554,19 +564,24 @@ class W_MAC_Env(gym.Env):
               self.packet_lost += 1
               #print('single domain; Packet collision, actions:',node,actions, valid_next_hops_list)
               reward2 -= self.COLLISION_REWARD
+              self.src_node.append(node)
+              self.nxt_hop_node.append(nxt_hop)
               
             elif (self.__hidden_terminal_problem(actions, valid_next_hops_list, node, domain_list[0])):
               #print("single domain; Hidden terminal problem, packet lost",node ,actions, valid_next_hops_list)
               reward2 -= self.COLLISION_REWARD
               self.packet_lost += 1
+              self.src_node.append(node)
+              self.nxt_hop_node.append(nxt_hop)
               
             else:
               #print(' single domain; transmission success')
 
               if (nxt_hop == packet_to_send.dest):
-                #print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count())
+                print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count()+1)
                 self.src_node.append(node)
                 self.nxt_hop_node.append(packet_to_send.dest)
+                self.dest_list.append(packet_to_send.dest)
                 self.packet_delivered +=1
                 hopcount_reward = self.HOP_COUNT_MULT * packet_to_send.get_hop_count()
                 reward2 += self.MAX_REWARD - hopcount_reward
@@ -600,8 +615,8 @@ class W_MAC_Env(gym.Env):
     #print("reward1", reward1, "reward2", reward2)
     reward = (1) * reward1 + (1) * reward2
     #print('final reward', reward)
-    #print('packets delivered ',self.packet_delivered)
-    #print('packet_lost ', self.packet_lost)
+    print('packets delivered ',self.packet_delivered)
+    print('packet_lost ', self.packet_lost)
 
     return reward
 
@@ -733,12 +748,14 @@ class W_MAC_Env(gym.Env):
     nodes = self.node_in_domains
     src = self.src_node
     nxt_hop = self.nxt_hop_node
-    # print('src nodes',src)
-    # print('next_hop',nxt_hop)
+    dest_list = self.dest_list
+    #print('src nodes',src)
+    #print('next_hop',nxt_hop)
+    #print('dest_list',dest_list)
     attack = self.attack_nodes
     for i in self.graph.nodes:
           queue = self.queues[i]
-          print("no of packets at node",i,"=",len(queue),)
+          print("number of packets at node",i,"=",len(queue),)
 
 
     #loop for multiple plotting
@@ -748,19 +765,29 @@ class W_MAC_Env(gym.Env):
     #   else:
     #       plt.figure(i)
     #giving position to the graph
-    pos = nx.spring_layout(self.graph)
+
+    fixed_pos = {0:[0,2],1:[0,4],2:[2,2],3:[2,4],4:[4,2],5:[4,4]}
+    #print(fixed_pos)
+    fixed_nodes = fixed_pos.keys()
+    #print(fixed_nodes)
+    pos = nx.spring_layout(self.graph, pos=fixed_pos, fixed = fixed_nodes, scale=3)
     nx.draw(self.graph, pos , with_labels=True, font_weight='bold')
     nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nodes , node_color = 'white',label='inactive')
-    nx.draw_networkx_nodes(self.graph , pos , nodelist = attack, node_color = 'red' , label='attacked node')
-    nx.draw_networkx_nodes(self.graph , pos , nodelist = src, node_color = 'orange', label='src')
+    nx.draw_networkx_nodes(self.graph , pos , nodelist = src, node_color = 'orange', label='source')
     nx.draw_networkx_nodes(self.graph , pos ,  nodelist = nxt_hop , node_color = 'blue',label='next hop')
-    nx.draw_networkx_edges(self.graph , pos , edge_color = 'w')
+    nx.draw_networkx_nodes(self.graph , pos , nodelist = attack, node_color = 'red' , label='attacked node')
+    nx.draw_networkx_nodes(self.graph , pos , nodelist = dest_list, node_color = 'green' , label='destination')
+
+
     edges1 =list(zip(src,nxt_hop))
-    edges2 =list(zip(src,attack))
+    #edges2 =list(zip(src,attack))
         
     # for source, destination      
-    nx.draw_networkx_edges(self.graph , pos , edgelist= edges1, edge_color = 'green')
-    nx.draw_networkx_edges(self.graph , pos , edgelist= edges2, edge_color = 'red')
+    nx.draw_networkx_edges(self.graph , pos , edge_color = 'gray')
+
+    nx.draw_networkx_edges(self.graph , pos , edgelist= edges1, edge_color = 'blue')
+
+    #nx.draw_networkx_edges(self.graph , pos , edgelist= edges2, edge_color = 'red')
     plt.legend(scatterpoints = 1) 
     plt.axis('off')
     plt.show()
