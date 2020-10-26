@@ -444,6 +444,7 @@ class W_MAC_Env(gym.Env):
               #print('intermediate; Packet loss due to collision',node, actions, valid_next_hops_list)
               self.packet_lost += 1
               reward2 -= self.COLLISION_REWARD
+              #print("Collision actions: ",actions)
               
               ### Add details for visualization.
               self.src_node.append(node)
@@ -457,11 +458,12 @@ class W_MAC_Env(gym.Env):
               ### Add details for visualization.
               self.src_node.append(node)
               self.nxt_hop_node.append(nxt_hop)
+              #print("Collision due to hidden terminal, actions",actions)
 
             else:
 
               if (nxt_hop == packet_to_send.dest):
-                print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count()+1)
+                #print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count()+1)
                 
                 ### Add details for visualization.
                 self.src_node.append(node)
@@ -506,6 +508,7 @@ class W_MAC_Env(gym.Env):
             if count > 1:
               self.packet_lost += 1
               reward2 -= self.COLLISION_REWARD
+              #print("Collision, actions",actions)
               
               ### Add details for visualization.
               self.src_node.append(node)
@@ -515,6 +518,7 @@ class W_MAC_Env(gym.Env):
               reward2 -= self.COLLISION_REWARD
               self.packet_lost += 1
               
+              #print("Collision due to hidden terminal, actions",actions)
               ### Add details for visualization.
               self.src_node.append(node)
               self.nxt_hop_node.append(nxt_hop)
@@ -522,7 +526,7 @@ class W_MAC_Env(gym.Env):
             else:
 
               if (nxt_hop == packet_to_send.dest):
-                print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count()+1)
+                #print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count()+1)
                 
                 ### Add details for visualization.
                 self.src_node.append(node)
