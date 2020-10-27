@@ -1,3 +1,2 @@
-## Source Code :
+# How to execute the process.
 
-Details about the source code and how to implement it.
