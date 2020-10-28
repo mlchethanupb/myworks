@@ -82,7 +82,7 @@ class Parameters:
         self.Packer_disc = {'agent': 'Packer', 'save_path': None, 'color': 'magenta',
                             'title': 'Packer', 'load': None}
 
-        self.model_save_path = 'Scheduling_DeepRM/workspace/Discrete/hyperParamModels/'
+        self.model_save_path = 'workspace/Discrete/hyperParamModels/'
 
         # DQN
         self.DQN_SL = {'agent': 'DQN', 'save_path': self.model_save_path + "job_scheduling_" + "DQN" + "_" + self.objective_slowdown,
@@ -120,10 +120,10 @@ class Parameters:
 
         self.model_training_iterations = 100
 
-        self.tensorBoard_DQN_Logs = 'Scheduling_DeepRM/workspace/Discrete/tensorBoardLogs/'
+        self.tensorBoard_DQN_Logs = 'workspace/Discrete/tensorBoardLogs/'
 
         self.localhost = '0.0.0.0'
 
-        self.figure_path = 'Scheduling_DeepRM/workspace/Discrete/output/'
+        self.figure_path = 'workspace/Discrete/output/'
 
         self.figure_extension = '.png'
