@@ -24,7 +24,9 @@ This will install raytune and required prerequisties.
 
 This will help clean the cache in the project.
 
+
 After completing the pre-setup using the above commands, you can execute the following commands to get the results of the discrete action space.
+
 
 ### `make run-script`
 
@@ -42,7 +44,9 @@ This command will run the hyperparameter optimization.
 
 This command will generate the graphs for loadvariations.
 
+
 On the other hand, once the pre-setup is complete, the following commands can be executed to generate results for multiple binary action space.
+
 
 We need to train the agents and save their respective models by running the command mentioned below,
 
