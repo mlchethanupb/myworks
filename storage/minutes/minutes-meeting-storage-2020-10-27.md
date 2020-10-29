@@ -20,7 +20,7 @@ End: 12:17
 ## Discussed Issues
 
 * Discussion on leftover phase 1 tasks and how to proceed for phase 2.
-* Based on the fact that response time may depend on multiple metrics, considering multidimensional plots to draw correlation between them.  
+* Based on the fact that response time may depend on multiple metrics, considering multiple regression plots to draw correlation between them.  
 
 
 ## Action Points
