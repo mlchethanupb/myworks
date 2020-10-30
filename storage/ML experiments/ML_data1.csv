@@ -1,4 +1,4 @@
-Time,Consuming Time(ms),Producing Time(ms),Response time(ms),Message Size(bytes),CPU Utilization(%),Memory Consumption(gb),Disk Free Space(gb),Brick Space,Kafka Total Space(mb),Topic Space(mb),Total Time (sec)
+Time,Consuming Time(ms),Producing Time(ms),Response time(ms),Message Size(bytes),CPU Utilization(%),Memory Consumption(gb),Disk Free Space(gb),Brick Space(mb),Kafka Total Space(mb),Topic Space(mb),Total Time(s)
 19:15:36,5.862255,9.205329,2.777442,12960,1.28,1.032,4.9,68,388,0.035,1
 19:15:40,8.773523,9.297435,69.12377,65664,1.44,1.032,4.9,68,388,0.062,5
 19:15:44,8.653258,9.198052,136.971268,65664,1.45,1.032,4.9,68,388,0.089,9
