@@ -97,7 +97,7 @@ for k in range(ct2):
 file = open('G:\\metrics_data.csv', 'w+', newline ='')  
 with file:     
     write = csv.writer(file)
-    write.writerow(('Time', 'consumer', 'producer', 'response time', 'message size','cpu utilization(mb)', 'memory consumption(in gigabytes)', 'disk usage(gb)','Kafka Total Space(mb)','Topic Space(mb)','Total Time (sec)'))
+    write.writerow(('Time', 'Consuming Time(ms)', 'Producing Time(ms)', 'Response time(ms)', 'Message Size(bytes)','CPU Utilization(%)', 'Memory Consumption(gb)', 'Disk Free Space(gb)','Brick Space(mb)','Kafka Total Space(mb)','Topic Space(mb)','Total Time (s)'))
     write.writerows(arr_final) 
 print("Done")
     
