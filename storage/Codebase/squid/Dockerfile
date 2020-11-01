@@ -45,7 +45,7 @@ COPY start.sh start.sh
 RUN chmod 755 start.sh
 RUN ls -ld /var/spool/squid
 #RUN mkdir /var/log/squid
-RUN chown proxy:proxy /var/log/squid
+#RUN chown proxy:proxy /var/log/squid
 #RUN systemctl start squid
 EXPOSE 3128/tcp
 CMD ["./start.sh"]
