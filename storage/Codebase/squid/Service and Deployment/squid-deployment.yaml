@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (f63a961c)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: squid
+  name: squid
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.19.0 (f63a961c)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: squid
+    spec:
+      nodeName: pg-aicon-storage-3
+      containers:
+      - env:
+        - name: SQUID_LISTEN
+          value: 127.0.0.1
+        - name: SQUID_PORT
+          value: "3128"
+        image: squid:dev
+        name: squid
+        ports:
+        - containerPort: 3128
+        volumeMounts:
+        - name: squid-vol
+          mountPath: /var/spool/squid
+        resources: {}
+      volumes:
+      - name: squid-vol
+        persistentVolumeClaim:
+          claimName: gluster1
+      restartPolicy: Always
+status: {}
+
+
