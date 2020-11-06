@@ -1,0 +1,13 @@
+matplotlib
+plotly
+python-statemachine
+flask
+numpy
+plotly
+opcua
+opcua-client
+PyQt5
+pyqtgraph
+cryptography
+ipython
+pysmb
