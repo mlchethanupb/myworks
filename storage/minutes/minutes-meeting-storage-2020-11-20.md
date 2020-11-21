@@ -2,7 +2,7 @@
 
 Start: 12:00
 
-End: 01:56
+End: 12:56
 
 
 ## Participants
