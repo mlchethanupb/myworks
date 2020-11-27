@@ -72,7 +72,21 @@ class W_MAC_Env(gym.Env):
         no_transmit = False
     
     if isdone == False and no_transmit == True:
-      reward -= self.COLLISION_REWARD
+      reward -= self.COLLISION_REWARD / 2
+
+    if isdone == True:
+        queue_empty = True
+        for node in self.graph.nodes:
+            if len(self.queues[node]) > 0:
+                reward -= self.MAX_REWARD*10*self.total_nodes
+                print("Punishing when done if packets remain")
+                queue_empty = False
+                break
+        
+        if queue_empty == True and self.packet_lost == 0:
+          print("Hurray !!! All packets transmitted successfully")
+          reward += self.MAX_REWARD*self.total_nodes
+
 
     #print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
@@ -121,11 +135,11 @@ class W_MAC_Env(gym.Env):
   
   def __initialize_rewards(self):
     ### Rewards
-    self.MAX_REWARD = 1000*(self.total_nodes + 1)
-    self.COLLISION_REWARD = 100*self.total_nodes
-    self.PATH_REWARD = 10 * self.total_nodes
-    self.ATTACK_NODE_REWARD = 500 * self.total_nodes
-    self.HOP_COUNT_MULT = 10
+    self.MAX_REWARD = 20*(self.total_nodes + 1)
+    self.COLLISION_REWARD = 1*self.total_nodes
+    self.PATH_REWARD = 0.1 * self.total_nodes
+    self.ATTACK_NODE_REWARD = 5 * self.total_nodes
+    self.HOP_COUNT_MULT = 1
 
   #--------------------------------------------------------------------------------------------
 
@@ -375,6 +389,7 @@ class W_MAC_Env(gym.Env):
     ### Condition to avoid loops.
     if self.counter > 20000:
           counter_exceeded = True
+          print("Max counter exceeded")
     else:
           counter_exceeded = False
           self.counter += 1
@@ -527,6 +542,7 @@ class W_MAC_Env(gym.Env):
                 self.packet_lost += 1
               
             else:
+              
 
               if (nxt_hop == packet_to_send.dest):
                   #print("Packet reached destination node from source:",packet_to_send.src,"to destination",packet_to_send.dest," with hopcount",packet_to_send.get_hop_count()+1)
@@ -538,8 +554,10 @@ class W_MAC_Env(gym.Env):
                   reward2 += (self.MAX_REWARD) - hopcount_reward
 
               else:
-                    
-                  path_reward = self.__is_in_shortest_path(node, packet_to_send, nxt_hop)
+
+                  reward2 += self.COLLISION_REWARD/10
+  
+                  path_reward = 0 #self.__is_in_shortest_path(node, packet_to_send, nxt_hop)
                   reward2 += path_reward ## path reward is in negative
                 
                   ### successful transmission, add the packet to the queue.
@@ -548,7 +566,7 @@ class W_MAC_Env(gym.Env):
                                                
         else:
           ## Queue length 0. Agent should not take action.
-          reward2 -= self.COLLISION_REWARD
+          reward2 -= self.COLLISION_REWARD / 2
     
     #print("reward1", reward1, "reward2", reward2)
     reward = (1) * reward1 + (1) * reward2
