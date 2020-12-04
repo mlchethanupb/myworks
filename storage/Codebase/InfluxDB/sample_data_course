@@ -1,0 +1,1187 @@
+# DDL
+
+CREATE DATABASE holiday_france
+
+# DML
+
+# CONTEXT-DATABASE: holiday_france
+
+speed_ms,location=biron_france speed=13.570000,speed\ description="speed in meter per second" 1502208946
+speed_ms,location=biron_france speed=13.570000,speed\ description="speed in meter per second" 1502208946
+speed_ms,location=biron_france speed=13.320000,speed\ description="speed in meter per second" 1502208947
+speed_ms,location=biron_france speed=13.110000,speed\ description="speed in meter per second" 1502208948
+speed_ms,location=biron_france speed=12.790000,speed\ description="speed in meter per second" 1502208949
+speed_ms,location=biron_france speed=12.210000,speed\ description="speed in meter per second" 1502208950
+speed_ms,location=biron_france speed=10.760000,speed\ description="speed in meter per second" 1502208951
+speed_ms,location=biron_france speed=9.740000,speed\ description="speed in meter per second" 1502208952
+speed_ms,location=biron_france speed=8.510000,speed\ description="speed in meter per second" 1502208953
+speed_ms,location=biron_france speed=7.530000,speed\ description="speed in meter per second" 1502208954
+speed_ms,location=biron_france speed=6.870000,speed\ description="speed in meter per second" 1502208955
+speed_ms,location=biron_france speed=5.750000,speed\ description="speed in meter per second" 1502208956
+speed_ms,location=biron_france speed=4.600000,speed\ description="speed in meter per second" 1502208957
+speed_ms,location=biron_france speed=3.650000,speed\ description="speed in meter per second" 1502208958
+speed_ms,location=biron_france speed=2.640000,speed\ description="speed in meter per second" 1502208959
+speed_ms,location=biron_france speed=2.640000,speed\ description="speed in meter per second" 1502208959
+speed_ms,location=biron_france speed=2.340000,speed\ description="speed in meter per second" 1502208960
+speed_ms,location=biron_france speed=2.530000,speed\ description="speed in meter per second" 1502208961
+speed_ms,location=biron_france speed=2.260000,speed\ description="speed in meter per second" 1502208962
+speed_ms,location=biron_france speed=1.030000,speed\ description="speed in meter per second" 1502208963
+speed_ms,location=biron_france speed=1.030000,speed\ description="speed in meter per second" 1502208964
+speed_ms,location=biron_france speed=2.600000,speed\ description="speed in meter per second" 1502208965
+speed_ms,location=biron_france speed=1.850000,speed\ description="speed in meter per second" 1502208966
+speed_ms,location=biron_france speed=1.030000,speed\ description="speed in meter per second" 1502208967
+speed_ms,location=biron_france speed=0.520000,speed\ description="speed in meter per second" 1502208968
+speed_ms,location=biron_france speed=1.360000,speed\ description="speed in meter per second" 1502208969
+speed_ms,location=biron_france speed=3.330000,speed\ description="speed in meter per second" 1502208970
+speed_ms,location=biron_france speed=4.970000,speed\ description="speed in meter per second" 1502208971
+speed_ms,location=biron_france speed=4.970000,speed\ description="speed in meter per second" 1502208972
+speed_ms,location=biron_france speed=7.140000,speed\ description="speed in meter per second" 1502208973
+speed_ms,location=biron_france speed=7.140000,speed\ description="speed in meter per second" 1502208974
+speed_ms,location=biron_france speed=9.860000,speed\ description="speed in meter per second" 1502208975
+speed_ms,location=biron_france speed=10.340000,speed\ description="speed in meter per second" 1502208976
+speed_ms,location=biron_france speed=10.990000,speed\ description="speed in meter per second" 1502208977
+speed_ms,location=biron_france speed=11.200000,speed\ description="speed in meter per second" 1502208978
+speed_ms,location=biron_france speed=11.280000,speed\ description="speed in meter per second" 1502208979
+speed_ms,location=biron_france speed=11.280000,speed\ description="speed in meter per second" 1502208980
+speed_ms,location=biron_france speed=9.970000,speed\ description="speed in meter per second" 1502208981
+speed_ms,location=biron_france speed=11.150000,speed\ description="speed in meter per second" 1502208982
+speed_ms,location=biron_france speed=11.490000,speed\ description="speed in meter per second" 1502208983
+speed_ms,location=biron_france speed=12.420000,speed\ description="speed in meter per second" 1502208984
+speed_ms,location=biron_france speed=12.780000,speed\ description="speed in meter per second" 1502208985
+speed_ms,location=biron_france speed=12.670000,speed\ description="speed in meter per second" 1502208986
+speed_ms,location=biron_france speed=12.420000,speed\ description="speed in meter per second" 1502208987
+speed_ms,location=biron_france speed=12.450000,speed\ description="speed in meter per second" 1502208988
+speed_ms,location=biron_france speed=12.190000,speed\ description="speed in meter per second" 1502208989
+speed_ms,location=biron_france speed=11.360000,speed\ description="speed in meter per second" 1502208990
+speed_ms,location=biron_france speed=11.100000,speed\ description="speed in meter per second" 1502208991
+speed_ms,location=biron_france speed=11.440000,speed\ description="speed in meter per second" 1502208992
+speed_ms,location=biron_france speed=10.870000,speed\ description="speed in meter per second" 1502208993
+speed_ms,location=biron_france speed=10.970000,speed\ description="speed in meter per second" 1502208994
+speed_ms,location=biron_france speed=11.000000,speed\ description="speed in meter per second" 1502208995
+speed_ms,location=biron_france speed=11.000000,speed\ description="speed in meter per second" 1502208996
+speed_ms,location=biron_france speed=11.010000,speed\ description="speed in meter per second" 1502208997
+speed_ms,location=biron_france speed=11.030000,speed\ description="speed in meter per second" 1502208998
+speed_ms,location=biron_france speed=11.200000,speed\ description="speed in meter per second" 1502208999
+speed_ms,location=biron_france speed=10.700000,speed\ description="speed in meter per second" 1502209000
+speed_ms,location=biron_france speed=10.050000,speed\ description="speed in meter per second" 1502209001
+speed_ms,location=biron_france speed=9.100000,speed\ description="speed in meter per second" 1502209002
+speed_ms,location=biron_france speed=7.950000,speed\ description="speed in meter per second" 1502209003
+speed_ms,location=biron_france speed=7.000000,speed\ description="speed in meter per second" 1502209004
+speed_ms,location=biron_france speed=6.640000,speed\ description="speed in meter per second" 1502209005
+speed_ms,location=biron_france speed=7.600000,speed\ description="speed in meter per second" 1502209006
+speed_ms,location=biron_france speed=8.750000,speed\ description="speed in meter per second" 1502209007
+speed_ms,location=biron_france speed=8.750000,speed\ description="speed in meter per second" 1502209008
+speed_ms,location=biron_france speed=11.970000,speed\ description="speed in meter per second" 1502209009
+speed_ms,location=biron_france speed=12.460000,speed\ description="speed in meter per second" 1502209010
+speed_ms,location=biron_france speed=13.470000,speed\ description="speed in meter per second" 1502209011
+speed_ms,location=biron_france speed=15.270000,speed\ description="speed in meter per second" 1502209012
+speed_ms,location=biron_france speed=16.040001,speed\ description="speed in meter per second" 1502209013
+speed_ms,location=biron_france speed=15.850000,speed\ description="speed in meter per second" 1502209014
+speed_ms,location=biron_france speed=15.290000,speed\ description="speed in meter per second" 1502209015
+speed_ms,location=biron_france speed=14.590000,speed\ description="speed in meter per second" 1502209016
+speed_ms,location=biron_france speed=14.080000,speed\ description="speed in meter per second" 1502209017
+speed_ms,location=biron_france speed=13.690000,speed\ description="speed in meter per second" 1502209018
+speed_ms,location=biron_france speed=13.180000,speed\ description="speed in meter per second" 1502209019
+speed_ms,location=biron_france speed=13.590000,speed\ description="speed in meter per second" 1502209020
+speed_ms,location=biron_france speed=13.360000,speed\ description="speed in meter per second" 1502209021
+speed_ms,location=biron_france speed=13.960000,speed\ description="speed in meter per second" 1502209022
+speed_ms,location=biron_france speed=14.600000,speed\ description="speed in meter per second" 1502209023
+speed_ms,location=biron_france speed=14.540000,speed\ description="speed in meter per second" 1502209024
+speed_ms,location=biron_france speed=14.360000,speed\ description="speed in meter per second" 1502209025
+speed_ms,location=biron_france speed=14.150000,speed\ description="speed in meter per second" 1502209026
+speed_ms,location=biron_france speed=13.620000,speed\ description="speed in meter per second" 1502209027
+speed_ms,location=biron_france speed=12.280000,speed\ description="speed in meter per second" 1502209028
+speed_ms,location=biron_france speed=11.600000,speed\ description="speed in meter per second" 1502209029
+speed_ms,location=biron_france speed=11.150000,speed\ description="speed in meter per second" 1502209030
+speed_ms,location=biron_france speed=10.740000,speed\ description="speed in meter per second" 1502209031
+speed_ms,location=biron_france speed=10.740000,speed\ description="speed in meter per second" 1502209032
+speed_ms,location=biron_france speed=10.900000,speed\ description="speed in meter per second" 1502209033
+speed_ms,location=biron_france speed=10.790000,speed\ description="speed in meter per second" 1502209034
+speed_ms,location=biron_france speed=10.790000,speed\ description="speed in meter per second" 1502209035
+speed_ms,location=biron_france speed=13.910000,speed\ description="speed in meter per second" 1502209036
+speed_ms,location=biron_france speed=14.600000,speed\ description="speed in meter per second" 1502209037
+speed_ms,location=biron_france speed=14.900000,speed\ description="speed in meter per second" 1502209038
+speed_ms,location=biron_france speed=14.650000,speed\ description="speed in meter per second" 1502209039
+speed_ms,location=biron_france speed=15.570000,speed\ description="speed in meter per second" 1502209040
+speed_ms,location=biron_france speed=15.610000,speed\ description="speed in meter per second" 1502209041
+speed_ms,location=biron_france speed=16.059999,speed\ description="speed in meter per second" 1502209042
+speed_ms,location=biron_france speed=16.440001,speed\ description="speed in meter per second" 1502209043
+speed_ms,location=biron_france speed=16.910000,speed\ description="speed in meter per second" 1502209044
+speed_ms,location=biron_france speed=17.770000,speed\ description="speed in meter per second" 1502209045
+speed_ms,location=biron_france speed=17.770000,speed\ description="speed in meter per second" 1502209046
+speed_ms,location=biron_france speed=18.160000,speed\ description="speed in meter per second" 1502209047
+speed_ms,location=biron_france speed=18.520000,speed\ description="speed in meter per second" 1502209048
+speed_ms,location=biron_france speed=18.459999,speed\ description="speed in meter per second" 1502209049
+speed_ms,location=biron_france speed=18.780001,speed\ description="speed in meter per second" 1502209050
+speed_ms,location=biron_france speed=18.770000,speed\ description="speed in meter per second" 1502209051
+speed_ms,location=biron_france speed=19.160000,speed\ description="speed in meter per second" 1502209052
+speed_ms,location=biron_france speed=19.250000,speed\ description="speed in meter per second" 1502209053
+speed_ms,location=biron_france speed=19.570000,speed\ description="speed in meter per second" 1502209054
+speed_ms,location=biron_france speed=19.129999,speed\ description="speed in meter per second" 1502209055
+speed_ms,location=biron_france speed=19.139999,speed\ description="speed in meter per second" 1502209056
+speed_ms,location=biron_france speed=19.400000,speed\ description="speed in meter per second" 1502209057
+speed_ms,location=biron_france speed=19.410000,speed\ description="speed in meter per second" 1502209058
+speed_ms,location=biron_france speed=19.790001,speed\ description="speed in meter per second" 1502209059
+speed_ms,location=biron_france speed=20.120001,speed\ description="speed in meter per second" 1502209060
+speed_ms,location=biron_france speed=20.549999,speed\ description="speed in meter per second" 1502209061
+speed_ms,location=biron_france speed=20.459999,speed\ description="speed in meter per second" 1502209062
+speed_ms,location=biron_france speed=20.549999,speed\ description="speed in meter per second" 1502209063
+speed_ms,location=biron_france speed=20.600000,speed\ description="speed in meter per second" 1502209064
+speed_ms,location=biron_france speed=20.580000,speed\ description="speed in meter per second" 1502209065
+speed_ms,location=biron_france speed=20.320000,speed\ description="speed in meter per second" 1502209066
+speed_ms,location=biron_france speed=20.510000,speed\ description="speed in meter per second" 1502209067
+speed_ms,location=biron_france speed=19.639999,speed\ description="speed in meter per second" 1502209068
+speed_ms,location=biron_france speed=19.059999,speed\ description="speed in meter per second" 1502209069
+speed_ms,location=biron_france speed=19.080000,speed\ description="speed in meter per second" 1502209070
+speed_ms,location=biron_france speed=19.730000,speed\ description="speed in meter per second" 1502209071
+speed_ms,location=biron_france speed=19.690001,speed\ description="speed in meter per second" 1502209072
+speed_ms,location=biron_france speed=19.690001,speed\ description="speed in meter per second" 1502209073
+speed_ms,location=biron_france speed=19.549999,speed\ description="speed in meter per second" 1502209074
+speed_ms,location=biron_france speed=18.850000,speed\ description="speed in meter per second" 1502209075
+speed_ms,location=biron_france speed=19.080000,speed\ description="speed in meter per second" 1502209076
+speed_ms,location=biron_france speed=18.860001,speed\ description="speed in meter per second" 1502209077
+speed_ms,location=biron_france speed=18.860001,speed\ description="speed in meter per second" 1502209078
+speed_ms,location=biron_france speed=19.200001,speed\ description="speed in meter per second" 1502209079
+speed_ms,location=biron_france speed=18.450001,speed\ description="speed in meter per second" 1502209080
+speed_ms,location=biron_france speed=18.450001,speed\ description="speed in meter per second" 1502209081
+speed_ms,location=biron_france speed=18.510000,speed\ description="speed in meter per second" 1502209082
+speed_ms,location=biron_france speed=18.309999,speed\ description="speed in meter per second" 1502209083
+speed_ms,location=biron_france speed=18.170000,speed\ description="speed in meter per second" 1502209084
+speed_ms,location=biron_france speed=18.330000,speed\ description="speed in meter per second" 1502209085
+speed_ms,location=biron_france speed=18.139999,speed\ description="speed in meter per second" 1502209086
+speed_ms,location=biron_france speed=18.139999,speed\ description="speed in meter per second" 1502209087
+speed_ms,location=biron_france speed=19.320000,speed\ description="speed in meter per second" 1502209088
+speed_ms,location=biron_france speed=19.160000,speed\ description="speed in meter per second" 1502209089
+speed_ms,location=biron_france speed=19.160000,speed\ description="speed in meter per second" 1502209090
+speed_ms,location=biron_france speed=18.660000,speed\ description="speed in meter per second" 1502209091
+speed_ms,location=biron_france speed=18.139999,speed\ description="speed in meter per second" 1502209092
+speed_ms,location=biron_france speed=17.830000,speed\ description="speed in meter per second" 1502209093
+speed_ms,location=biron_france speed=17.469999,speed\ description="speed in meter per second" 1502209094
+speed_ms,location=biron_france speed=16.520000,speed\ description="speed in meter per second" 1502209095
+speed_ms,location=biron_france speed=17.350000,speed\ description="speed in meter per second" 1502209096
+speed_ms,location=biron_france speed=17.350000,speed\ description="speed in meter per second" 1502209097
+speed_ms,location=biron_france speed=17.500000,speed\ description="speed in meter per second" 1502209098
+speed_ms,location=biron_france speed=16.110001,speed\ description="speed in meter per second" 1502209099
+speed_ms,location=biron_france speed=14.350000,speed\ description="speed in meter per second" 1502209100
+speed_ms,location=biron_france speed=13.600000,speed\ description="speed in meter per second" 1502209101
+speed_ms,location=biron_france speed=13.500000,speed\ description="speed in meter per second" 1502209102
+speed_ms,location=biron_france speed=12.860000,speed\ description="speed in meter per second" 1502209103
+speed_ms,location=biron_france speed=12.370000,speed\ description="speed in meter per second" 1502209104
+speed_ms,location=biron_france speed=11.780000,speed\ description="speed in meter per second" 1502209105
+speed_ms,location=biron_france speed=12.020000,speed\ description="speed in meter per second" 1502209106
+speed_ms,location=biron_france speed=12.010000,speed\ description="speed in meter per second" 1502209107
+speed_ms,location=biron_france speed=11.490000,speed\ description="speed in meter per second" 1502209108
+speed_ms,location=biron_france speed=12.940000,speed\ description="speed in meter per second" 1502209109
+speed_ms,location=biron_france speed=13.390000,speed\ description="speed in meter per second" 1502209110
+speed_ms,location=biron_france speed=13.010000,speed\ description="speed in meter per second" 1502209111
+speed_ms,location=biron_france speed=13.460000,speed\ description="speed in meter per second" 1502209112
+speed_ms,location=biron_france speed=14.210000,speed\ description="speed in meter per second" 1502209113
+speed_ms,location=biron_france speed=15.190000,speed\ description="speed in meter per second" 1502209114
+speed_ms,location=biron_france speed=15.190000,speed\ description="speed in meter per second" 1502209115
+speed_ms,location=biron_france speed=15.950000,speed\ description="speed in meter per second" 1502209116
+speed_ms,location=biron_france speed=15.600000,speed\ description="speed in meter per second" 1502209117
+speed_ms,location=biron_france speed=15.740000,speed\ description="speed in meter per second" 1502209118
+speed_ms,location=biron_france speed=15.760000,speed\ description="speed in meter per second" 1502209119
+speed_ms,location=biron_france speed=15.890000,speed\ description="speed in meter per second" 1502209120
+speed_ms,location=biron_france speed=15.860000,speed\ description="speed in meter per second" 1502209121
+speed_ms,location=biron_france speed=16.280001,speed\ description="speed in meter per second" 1502209122
+speed_ms,location=biron_france speed=16.469999,speed\ description="speed in meter per second" 1502209123
+speed_ms,location=biron_france speed=16.490000,speed\ description="speed in meter per second" 1502209124
+speed_ms,location=biron_france speed=16.490000,speed\ description="speed in meter per second" 1502209125
+speed_ms,location=biron_france speed=15.920000,speed\ description="speed in meter per second" 1502209126
+speed_ms,location=biron_france speed=15.920000,speed\ description="speed in meter per second" 1502209127
+speed_ms,location=biron_france speed=15.690000,speed\ description="speed in meter per second" 1502209128
+speed_ms,location=biron_france speed=15.400000,speed\ description="speed in meter per second" 1502209129
+speed_ms,location=biron_france speed=15.560000,speed\ description="speed in meter per second" 1502209130
+speed_ms,location=biron_france speed=15.500000,speed\ description="speed in meter per second" 1502209131
+speed_ms,location=biron_france speed=15.980000,speed\ description="speed in meter per second" 1502209132
+speed_ms,location=biron_france speed=16.200001,speed\ description="speed in meter per second" 1502209133
+speed_ms,location=biron_france speed=16.969999,speed\ description="speed in meter per second" 1502209134
+speed_ms,location=biron_france speed=17.469999,speed\ description="speed in meter per second" 1502209135
+speed_ms,location=biron_france speed=17.510000,speed\ description="speed in meter per second" 1502209136
+speed_ms,location=biron_france speed=17.660000,speed\ description="speed in meter per second" 1502209137
+speed_ms,location=biron_france speed=18.110001,speed\ description="speed in meter per second" 1502209138
+speed_ms,location=biron_france speed=18.670000,speed\ description="speed in meter per second" 1502209139
+speed_ms,location=biron_france speed=18.770000,speed\ description="speed in meter per second" 1502209140
+speed_ms,location=biron_france speed=18.920000,speed\ description="speed in meter per second" 1502209141
+speed_ms,location=biron_france speed=18.840000,speed\ description="speed in meter per second" 1502209142
+speed_ms,location=biron_france speed=18.830000,speed\ description="speed in meter per second" 1502209143
+speed_ms,location=biron_france speed=18.730000,speed\ description="speed in meter per second" 1502209144
+speed_ms,location=biron_france speed=18.730000,speed\ description="speed in meter per second" 1502209145
+speed_ms,location=biron_france speed=18.040001,speed\ description="speed in meter per second" 1502209146
+speed_ms,location=biron_france speed=17.030001,speed\ description="speed in meter per second" 1502209147
+speed_ms,location=biron_france speed=16.670000,speed\ description="speed in meter per second" 1502209148
+speed_ms,location=biron_france speed=16.850000,speed\ description="speed in meter per second" 1502209149
+speed_ms,location=biron_france speed=16.879999,speed\ description="speed in meter per second" 1502209150
+speed_ms,location=biron_france speed=16.860001,speed\ description="speed in meter per second" 1502209151
+speed_ms,location=biron_france speed=16.910000,speed\ description="speed in meter per second" 1502209152
+speed_ms,location=biron_france speed=17.430000,speed\ description="speed in meter per second" 1502209153
+speed_ms,location=biron_france speed=15.970000,speed\ description="speed in meter per second" 1502209154
+speed_ms,location=biron_france speed=16.559999,speed\ description="speed in meter per second" 1502209155
+speed_ms,location=biron_france speed=16.549999,speed\ description="speed in meter per second" 1502209156
+speed_ms,location=biron_france speed=16.559999,speed\ description="speed in meter per second" 1502209157
+speed_ms,location=biron_france speed=16.639999,speed\ description="speed in meter per second" 1502209158
+speed_ms,location=biron_france speed=16.379999,speed\ description="speed in meter per second" 1502209159
+speed_ms,location=biron_france speed=16.610001,speed\ description="speed in meter per second" 1502209160
+speed_ms,location=biron_france speed=17.139999,speed\ description="speed in meter per second" 1502209161
+speed_ms,location=biron_france speed=17.139999,speed\ description="speed in meter per second" 1502209162
+speed_ms,location=biron_france speed=17.379999,speed\ description="speed in meter per second" 1502209163
+speed_ms,location=biron_france speed=17.680000,speed\ description="speed in meter per second" 1502209164
+speed_ms,location=biron_france speed=17.650000,speed\ description="speed in meter per second" 1502209165
+speed_ms,location=biron_france speed=17.850000,speed\ description="speed in meter per second" 1502209166
+speed_ms,location=biron_france speed=18.080000,speed\ description="speed in meter per second" 1502209167
+speed_ms,location=biron_france speed=18.430000,speed\ description="speed in meter per second" 1502209168
+speed_ms,location=biron_france speed=17.889999,speed\ description="speed in meter per second" 1502209169
+speed_ms,location=biron_france speed=18.629999,speed\ description="speed in meter per second" 1502209170
+speed_ms,location=biron_france speed=18.850000,speed\ description="speed in meter per second" 1502209171
+speed_ms,location=biron_france speed=18.110001,speed\ description="speed in meter per second" 1502209172
+speed_ms,location=biron_france speed=18.280001,speed\ description="speed in meter per second" 1502209173
+speed_ms,location=biron_france speed=17.900000,speed\ description="speed in meter per second" 1502209174
+speed_ms,location=biron_france speed=18.090000,speed\ description="speed in meter per second" 1502209175
+speed_ms,location=biron_france speed=17.879999,speed\ description="speed in meter per second" 1502209176
+speed_ms,location=biron_france speed=17.280001,speed\ description="speed in meter per second" 1502209177
+speed_ms,location=biron_france speed=16.740000,speed\ description="speed in meter per second" 1502209178
+speed_ms,location=biron_france speed=16.260000,speed\ description="speed in meter per second" 1502209179
+speed_ms,location=biron_france speed=16.490000,speed\ description="speed in meter per second" 1502209180
+speed_ms,location=biron_france speed=16.540001,speed\ description="speed in meter per second" 1502209181
+speed_ms,location=biron_france speed=16.299999,speed\ description="speed in meter per second" 1502209182
+speed_ms,location=biron_france speed=16.480000,speed\ description="speed in meter per second" 1502209183
+speed_ms,location=biron_france speed=17.690001,speed\ description="speed in meter per second" 1502209184
+speed_ms,location=biron_france speed=17.959999,speed\ description="speed in meter per second" 1502209185
+speed_ms,location=biron_france speed=18.020000,speed\ description="speed in meter per second" 1502209186
+speed_ms,location=biron_france speed=18.160000,speed\ description="speed in meter per second" 1502209187
+speed_ms,location=biron_france speed=18.350000,speed\ description="speed in meter per second" 1502209188
+speed_ms,location=biron_france speed=18.450001,speed\ description="speed in meter per second" 1502209189
+speed_ms,location=biron_france speed=18.450001,speed\ description="speed in meter per second" 1502209190
+speed_ms,location=biron_france speed=18.370001,speed\ description="speed in meter per second" 1502209191
+speed_ms,location=biron_france speed=18.490000,speed\ description="speed in meter per second" 1502209192
+speed_ms,location=biron_france speed=18.750000,speed\ description="speed in meter per second" 1502209193
+speed_ms,location=biron_france speed=18.780001,speed\ description="speed in meter per second" 1502209194
+speed_ms,location=biron_france speed=18.799999,speed\ description="speed in meter per second" 1502209195
+speed_ms,location=biron_france speed=18.719999,speed\ description="speed in meter per second" 1502209196
+speed_ms,location=biron_france speed=18.830000,speed\ description="speed in meter per second" 1502209197
+speed_ms,location=biron_france speed=18.850000,speed\ description="speed in meter per second" 1502209198
+speed_ms,location=biron_france speed=18.879999,speed\ description="speed in meter per second" 1502209199
+speed_ms,location=biron_france speed=19.010000,speed\ description="speed in meter per second" 1502209200
+speed_ms,location=biron_france speed=19.020000,speed\ description="speed in meter per second" 1502209201
+speed_ms,location=biron_france speed=19.129999,speed\ description="speed in meter per second" 1502209202
+speed_ms,location=biron_france speed=19.400000,speed\ description="speed in meter per second" 1502209203
+speed_ms,location=biron_france speed=19.299999,speed\ description="speed in meter per second" 1502209204
+speed_ms,location=biron_france speed=19.660000,speed\ description="speed in meter per second" 1502209205
+speed_ms,location=biron_france speed=19.850000,speed\ description="speed in meter per second" 1502209206
+speed_ms,location=biron_france speed=20.080000,speed\ description="speed in meter per second" 1502209207
+speed_ms,location=biron_france speed=19.959999,speed\ description="speed in meter per second" 1502209208
+speed_ms,location=biron_france speed=20.059999,speed\ description="speed in meter per second" 1502209209
+speed_ms,location=biron_france speed=20.020000,speed\ description="speed in meter per second" 1502209210
+speed_ms,location=biron_france speed=20.590000,speed\ description="speed in meter per second" 1502209211
+speed_ms,location=biron_france speed=18.850000,speed\ description="speed in meter per second" 1502209212
+speed_ms,location=biron_france speed=18.530001,speed\ description="speed in meter per second" 1502209213
+speed_ms,location=biron_france speed=18.410000,speed\ description="speed in meter per second" 1502209214
+speed_ms,location=biron_france speed=18.600000,speed\ description="speed in meter per second" 1502209215
+speed_ms,location=biron_france speed=18.740000,speed\ description="speed in meter per second" 1502209216
+speed_ms,location=biron_france speed=19.170000,speed\ description="speed in meter per second" 1502209217
+speed_ms,location=biron_france speed=19.450001,speed\ description="speed in meter per second" 1502209218
+speed_ms,location=biron_france speed=19.219999,speed\ description="speed in meter per second" 1502209219
+speed_ms,location=biron_france speed=19.250000,speed\ description="speed in meter per second" 1502209220
+speed_ms,location=biron_france speed=19.270000,speed\ description="speed in meter per second" 1502209221
+speed_ms,location=biron_france speed=19.430000,speed\ description="speed in meter per second" 1502209222
+speed_ms,location=biron_france speed=19.700001,speed\ description="speed in meter per second" 1502209223
+speed_ms,location=biron_france speed=20.110001,speed\ description="speed in meter per second" 1502209224
+speed_ms,location=biron_france speed=20.440001,speed\ description="speed in meter per second" 1502209225
+speed_ms,location=biron_france speed=20.670000,speed\ description="speed in meter per second" 1502209226
+speed_ms,location=biron_france speed=20.690001,speed\ description="speed in meter per second" 1502209227
+speed_ms,location=biron_france speed=20.469999,speed\ description="speed in meter per second" 1502209228
+speed_ms,location=biron_france speed=20.209999,speed\ description="speed in meter per second" 1502209229
+speed_ms,location=biron_france speed=20.000000,speed\ description="speed in meter per second" 1502209230
+speed_ms,location=biron_france speed=19.780001,speed\ description="speed in meter per second" 1502209231
+speed_ms,location=biron_france speed=19.559999,speed\ description="speed in meter per second" 1502209232
+speed_ms,location=biron_france speed=19.240000,speed\ description="speed in meter per second" 1502209233
+speed_ms,location=biron_france speed=19.059999,speed\ description="speed in meter per second" 1502209234
+speed_ms,location=biron_france speed=19.090000,speed\ description="speed in meter per second" 1502209235
+speed_ms,location=biron_france speed=19.080000,speed\ description="speed in meter per second" 1502209236
+speed_ms,location=biron_france speed=18.990000,speed\ description="speed in meter per second" 1502209237
+speed_ms,location=biron_france speed=18.990000,speed\ description="speed in meter per second" 1502209238
+speed_ms,location=biron_france speed=19.100000,speed\ description="speed in meter per second" 1502209239
+speed_ms,location=biron_france speed=19.400000,speed\ description="speed in meter per second" 1502209240
+speed_ms,location=biron_france speed=19.850000,speed\ description="speed in meter per second" 1502209241
+speed_ms,location=biron_france speed=20.230000,speed\ description="speed in meter per second" 1502209242
+speed_ms,location=biron_france speed=20.639999,speed\ description="speed in meter per second" 1502209243
+speed_ms,location=biron_france speed=20.299999,speed\ description="speed in meter per second" 1502209244
+speed_ms,location=biron_france speed=20.139999,speed\ description="speed in meter per second" 1502209245
+speed_ms,location=biron_france speed=19.610001,speed\ description="speed in meter per second" 1502209246
+speed_ms,location=biron_france speed=19.400000,speed\ description="speed in meter per second" 1502209247
+speed_ms,location=biron_france speed=19.260000,speed\ description="speed in meter per second" 1502209248
+speed_ms,location=biron_france speed=18.440001,speed\ description="speed in meter per second" 1502209249
+speed_ms,location=biron_france speed=18.010000,speed\ description="speed in meter per second" 1502209250
+speed_ms,location=biron_france speed=17.480000,speed\ description="speed in meter per second" 1502209251
+speed_ms,location=biron_france speed=17.020000,speed\ description="speed in meter per second" 1502209252
+speed_ms,location=biron_france speed=17.010000,speed\ description="speed in meter per second" 1502209253
+speed_ms,location=biron_france speed=16.200001,speed\ description="speed in meter per second" 1502209254
+speed_ms,location=biron_france speed=15.120000,speed\ description="speed in meter per second" 1502209255
+speed_ms,location=biron_france speed=13.850000,speed\ description="speed in meter per second" 1502209256
+speed_ms,location=biron_france speed=12.890000,speed\ description="speed in meter per second" 1502209257
+speed_ms,location=biron_france speed=10.020000,speed\ description="speed in meter per second" 1502209258
+speed_ms,location=biron_france speed=7.560000,speed\ description="speed in meter per second" 1502209259
+speed_ms,location=biron_france speed=3.890000,speed\ description="speed in meter per second" 1502209260
+speed_ms,location=biron_france speed=2.690000,speed\ description="speed in meter per second" 1502209261
+speed_ms,location=biron_france speed=3.520000,speed\ description="speed in meter per second" 1502209262
+speed_ms,location=biron_france speed=3.660000,speed\ description="speed in meter per second" 1502209263
+speed_ms,location=biron_france speed=6.060000,speed\ description="speed in meter per second" 1502209264
+speed_ms,location=biron_france speed=7.480000,speed\ description="speed in meter per second" 1502209265
+speed_ms,location=biron_france speed=9.250000,speed\ description="speed in meter per second" 1502209266
+speed_ms,location=biron_france speed=11.980000,speed\ description="speed in meter per second" 1502209267
+speed_ms,location=biron_france speed=12.130000,speed\ description="speed in meter per second" 1502209268
+speed_ms,location=biron_france speed=13.070000,speed\ description="speed in meter per second" 1502209269
+speed_ms,location=biron_france speed=13.070000,speed\ description="speed in meter per second" 1502209270
+speed_ms,location=biron_france speed=15.070000,speed\ description="speed in meter per second" 1502209271
+speed_ms,location=biron_france speed=15.050000,speed\ description="speed in meter per second" 1502209272
+speed_ms,location=biron_france speed=14.480000,speed\ description="speed in meter per second" 1502209273
+speed_ms,location=biron_france speed=13.580000,speed\ description="speed in meter per second" 1502209274
+speed_ms,location=biron_france speed=13.280000,speed\ description="speed in meter per second" 1502209275
+speed_ms,location=biron_france speed=13.280000,speed\ description="speed in meter per second" 1502209276
+speed_ms,location=biron_france speed=12.120000,speed\ description="speed in meter per second" 1502209277
+speed_ms,location=biron_france speed=11.720000,speed\ description="speed in meter per second" 1502209278
+speed_ms,location=biron_france speed=11.720000,speed\ description="speed in meter per second" 1502209279
+speed_ms,location=biron_france speed=13.750000,speed\ description="speed in meter per second" 1502209280
+speed_ms,location=biron_france speed=14.690000,speed\ description="speed in meter per second" 1502209281
+speed_ms,location=biron_france speed=14.690000,speed\ description="speed in meter per second" 1502209282
+speed_ms,location=biron_france speed=14.790000,speed\ description="speed in meter per second" 1502209283
+speed_ms,location=biron_france speed=14.580000,speed\ description="speed in meter per second" 1502209284
+speed_ms,location=biron_france speed=14.660000,speed\ description="speed in meter per second" 1502209285
+speed_ms,location=biron_france speed=14.650000,speed\ description="speed in meter per second" 1502209286
+speed_ms,location=biron_france speed=15.710000,speed\ description="speed in meter per second" 1502209287
+speed_ms,location=biron_france speed=15.860000,speed\ description="speed in meter per second" 1502209288
+speed_ms,location=biron_france speed=17.320000,speed\ description="speed in meter per second" 1502209289
+speed_ms,location=biron_france speed=16.730000,speed\ description="speed in meter per second" 1502209290
+speed_ms,location=biron_france speed=16.740000,speed\ description="speed in meter per second" 1502209291
+speed_ms,location=biron_france speed=16.730000,speed\ description="speed in meter per second" 1502209292
+speed_ms,location=biron_france speed=16.950001,speed\ description="speed in meter per second" 1502209293
+speed_ms,location=biron_france speed=16.780001,speed\ description="speed in meter per second" 1502209294
+speed_ms,location=biron_france speed=16.209999,speed\ description="speed in meter per second" 1502209295
+speed_ms,location=biron_france speed=15.520000,speed\ description="speed in meter per second" 1502209296
+speed_ms,location=biron_france speed=16.120001,speed\ description="speed in meter per second" 1502209297
+speed_ms,location=biron_france speed=16.309999,speed\ description="speed in meter per second" 1502209298
+speed_ms,location=biron_france speed=16.870001,speed\ description="speed in meter per second" 1502209299
+speed_ms,location=biron_france speed=17.200001,speed\ description="speed in meter per second" 1502209300
+speed_ms,location=biron_france speed=17.860001,speed\ description="speed in meter per second" 1502209301
+speed_ms,location=biron_france speed=18.250000,speed\ description="speed in meter per second" 1502209302
+speed_ms,location=biron_france speed=18.540001,speed\ description="speed in meter per second" 1502209303
+speed_ms,location=biron_france speed=19.389999,speed\ description="speed in meter per second" 1502209304
+speed_ms,location=biron_france speed=18.110001,speed\ description="speed in meter per second" 1502209305
+speed_ms,location=biron_france speed=17.219999,speed\ description="speed in meter per second" 1502209306
+speed_ms,location=biron_france speed=15.990000,speed\ description="speed in meter per second" 1502209307
+speed_ms,location=biron_france speed=15.570000,speed\ description="speed in meter per second" 1502209308
+speed_ms,location=biron_france speed=15.560000,speed\ description="speed in meter per second" 1502209309
+speed_ms,location=biron_france speed=15.260000,speed\ description="speed in meter per second" 1502209310
+speed_ms,location=biron_france speed=14.980000,speed\ description="speed in meter per second" 1502209311
+speed_ms,location=biron_france speed=14.840000,speed\ description="speed in meter per second" 1502209312
+speed_ms,location=biron_france speed=14.800000,speed\ description="speed in meter per second" 1502209313
+speed_ms,location=biron_france speed=14.590000,speed\ description="speed in meter per second" 1502209314
+speed_ms,location=biron_france speed=14.300000,speed\ description="speed in meter per second" 1502209315
+speed_ms,location=biron_france speed=14.360000,speed\ description="speed in meter per second" 1502209316
+speed_ms,location=biron_france speed=14.620000,speed\ description="speed in meter per second" 1502209317
+speed_ms,location=biron_france speed=14.770000,speed\ description="speed in meter per second" 1502209318
+speed_ms,location=biron_france speed=15.330000,speed\ description="speed in meter per second" 1502209319
+speed_ms,location=biron_france speed=16.010000,speed\ description="speed in meter per second" 1502209320
+speed_ms,location=biron_france speed=17.290001,speed\ description="speed in meter per second" 1502209321
+speed_ms,location=biron_france speed=17.309999,speed\ description="speed in meter per second" 1502209322
+speed_ms,location=biron_france speed=16.969999,speed\ description="speed in meter per second" 1502209323
+speed_ms,location=biron_france speed=17.299999,speed\ description="speed in meter per second" 1502209324
+speed_ms,location=biron_france speed=18.410000,speed\ description="speed in meter per second" 1502209325
+speed_ms,location=biron_france speed=19.469999,speed\ description="speed in meter per second" 1502209326
+speed_ms,location=biron_france speed=20.850000,speed\ description="speed in meter per second" 1502209327
+speed_ms,location=biron_france speed=21.639999,speed\ description="speed in meter per second" 1502209328
+speed_ms,location=biron_france speed=21.299999,speed\ description="speed in meter per second" 1502209329
+speed_ms,location=biron_france speed=21.150000,speed\ description="speed in meter per second" 1502209330
+speed_ms,location=biron_france speed=21.139999,speed\ description="speed in meter per second" 1502209331
+speed_ms,location=biron_france speed=21.969999,speed\ description="speed in meter per second" 1502209332
+speed_ms,location=biron_france speed=23.150000,speed\ description="speed in meter per second" 1502209333
+speed_ms,location=biron_france speed=24.360001,speed\ description="speed in meter per second" 1502209334
+speed_ms,location=biron_france speed=25.570000,speed\ description="speed in meter per second" 1502209335
+speed_ms,location=biron_france speed=26.250000,speed\ description="speed in meter per second" 1502209336
+speed_ms,location=biron_france speed=26.139999,speed\ description="speed in meter per second" 1502209337
+speed_ms,location=biron_france speed=26.080000,speed\ description="speed in meter per second" 1502209338
+speed_ms,location=biron_france speed=25.750000,speed\ description="speed in meter per second" 1502209339
+speed_ms,location=biron_france speed=25.270000,speed\ description="speed in meter per second" 1502209340
+speed_ms,location=biron_france speed=24.430000,speed\ description="speed in meter per second" 1502209341
+speed_ms,location=biron_france speed=23.410000,speed\ description="speed in meter per second" 1502209342
+speed_ms,location=biron_france speed=22.670000,speed\ description="speed in meter per second" 1502209343
+speed_ms,location=biron_france speed=22.520000,speed\ description="speed in meter per second" 1502209344
+speed_ms,location=biron_france speed=22.049999,speed\ description="speed in meter per second" 1502209345
+speed_ms,location=biron_france speed=22.180000,speed\ description="speed in meter per second" 1502209346
+speed_ms,location=biron_france speed=22.490000,speed\ description="speed in meter per second" 1502209347
+speed_ms,location=biron_france speed=22.879999,speed\ description="speed in meter per second" 1502209348
+speed_ms,location=biron_france speed=23.430000,speed\ description="speed in meter per second" 1502209349
+speed_ms,location=biron_france speed=23.240000,speed\ description="speed in meter per second" 1502209350
+speed_ms,location=biron_france speed=23.230000,speed\ description="speed in meter per second" 1502209351
+speed_ms,location=biron_france speed=22.820000,speed\ description="speed in meter per second" 1502209352
+speed_ms,location=biron_france speed=22.110001,speed\ description="speed in meter per second" 1502209353
+speed_ms,location=biron_france speed=21.370001,speed\ description="speed in meter per second" 1502209354
+speed_ms,location=biron_france speed=20.709999,speed\ description="speed in meter per second" 1502209355
+speed_ms,location=biron_france speed=20.410000,speed\ description="speed in meter per second" 1502209356
+speed_ms,location=biron_france speed=20.150000,speed\ description="speed in meter per second" 1502209357
+speed_ms,location=biron_france speed=19.750000,speed\ description="speed in meter per second" 1502209358
+speed_ms,location=biron_france speed=19.370001,speed\ description="speed in meter per second" 1502209359
+speed_ms,location=biron_france speed=18.900000,speed\ description="speed in meter per second" 1502209360
+speed_ms,location=biron_france speed=18.459999,speed\ description="speed in meter per second" 1502209361
+speed_ms,location=biron_france speed=18.049999,speed\ description="speed in meter per second" 1502209362
+speed_ms,location=biron_france speed=17.580000,speed\ description="speed in meter per second" 1502209363
+speed_ms,location=biron_france speed=17.650000,speed\ description="speed in meter per second" 1502209364
+speed_ms,location=biron_france speed=17.790001,speed\ description="speed in meter per second" 1502209365
+speed_ms,location=biron_france speed=17.790001,speed\ description="speed in meter per second" 1502209365
+speed_ms,location=biron_france speed=17.430000,speed\ description="speed in meter per second" 1502209367
+speed_ms,location=biron_france speed=17.100000,speed\ description="speed in meter per second" 1502209368
+speed_ms,location=biron_france speed=17.100000,speed\ description="speed in meter per second" 1502209369
+speed_ms,location=biron_france speed=17.260000,speed\ description="speed in meter per second" 1502209370
+speed_ms,location=biron_france speed=17.760000,speed\ description="speed in meter per second" 1502209371
+speed_ms,location=biron_france speed=18.680000,speed\ description="speed in meter per second" 1502209372
+speed_ms,location=biron_france speed=19.350000,speed\ description="speed in meter per second" 1502209373
+speed_ms,location=biron_france speed=19.940001,speed\ description="speed in meter per second" 1502209374
+speed_ms,location=biron_france speed=21.490000,speed\ description="speed in meter per second" 1502209375
+speed_ms,location=biron_france speed=23.150000,speed\ description="speed in meter per second" 1502209376
+speed_ms,location=biron_france speed=22.559999,speed\ description="speed in meter per second" 1502209377
+speed_ms,location=biron_france speed=22.010000,speed\ description="speed in meter per second" 1502209378
+speed_ms,location=biron_france speed=21.299999,speed\ description="speed in meter per second" 1502209379
+speed_ms,location=biron_france speed=21.240000,speed\ description="speed in meter per second" 1502209380
+speed_ms,location=biron_france speed=20.090000,speed\ description="speed in meter per second" 1502209381
+speed_ms,location=biron_france speed=19.570000,speed\ description="speed in meter per second" 1502209382
+speed_ms,location=biron_france speed=18.980000,speed\ description="speed in meter per second" 1502209383
+speed_ms,location=biron_france speed=18.420000,speed\ description="speed in meter per second" 1502209384
+speed_ms,location=biron_france speed=18.090000,speed\ description="speed in meter per second" 1502209385
+speed_ms,location=biron_france speed=18.090000,speed\ description="speed in meter per second" 1502209386
+speed_ms,location=biron_france speed=19.670000,speed\ description="speed in meter per second" 1502209387
+speed_ms,location=biron_france speed=19.670000,speed\ description="speed in meter per second" 1502209388
+speed_ms,location=biron_france speed=17.719999,speed\ description="speed in meter per second" 1502209389
+speed_ms,location=biron_france speed=18.129999,speed\ description="speed in meter per second" 1502209390
+speed_ms,location=biron_france speed=17.600000,speed\ description="speed in meter per second" 1502209391
+speed_ms,location=biron_france speed=17.559999,speed\ description="speed in meter per second" 1502209392
+speed_ms,location=biron_france speed=17.889999,speed\ description="speed in meter per second" 1502209393
+speed_ms,location=biron_france speed=17.500000,speed\ description="speed in meter per second" 1502209394
+speed_ms,location=biron_france speed=17.500000,speed\ description="speed in meter per second" 1502209395
+speed_ms,location=biron_france speed=16.830000,speed\ description="speed in meter per second" 1502209396
+speed_ms,location=biron_france speed=17.400000,speed\ description="speed in meter per second" 1502209397
+speed_ms,location=biron_france speed=17.170000,speed\ description="speed in meter per second" 1502209398
+speed_ms,location=biron_france speed=17.440001,speed\ description="speed in meter per second" 1502209399
+speed_ms,location=biron_france speed=17.370001,speed\ description="speed in meter per second" 1502209400
+speed_ms,location=biron_france speed=17.389999,speed\ description="speed in meter per second" 1502209401
+speed_ms,location=biron_france speed=17.250000,speed\ description="speed in meter per second" 1502209402
+speed_ms,location=biron_france speed=16.790001,speed\ description="speed in meter per second" 1502209403
+speed_ms,location=biron_france speed=16.600000,speed\ description="speed in meter per second" 1502209404
+speed_ms,location=biron_france speed=16.379999,speed\ description="speed in meter per second" 1502209405
+speed_ms,location=biron_france speed=16.160000,speed\ description="speed in meter per second" 1502209406
+speed_ms,location=biron_france speed=15.780000,speed\ description="speed in meter per second" 1502209407
+speed_ms,location=biron_france speed=15.150000,speed\ description="speed in meter per second" 1502209408
+speed_ms,location=biron_france speed=14.440000,speed\ description="speed in meter per second" 1502209409
+speed_ms,location=biron_france speed=14.440000,speed\ description="speed in meter per second" 1502209410
+speed_ms,location=biron_france speed=13.330000,speed\ description="speed in meter per second" 1502209411
+speed_ms,location=biron_france speed=13.330000,speed\ description="speed in meter per second" 1502209412
+speed_ms,location=biron_france speed=12.180000,speed\ description="speed in meter per second" 1502209413
+speed_ms,location=biron_france speed=11.100000,speed\ description="speed in meter per second" 1502209414
+speed_ms,location=biron_france speed=10.220000,speed\ description="speed in meter per second" 1502209415
+speed_ms,location=biron_france speed=10.160000,speed\ description="speed in meter per second" 1502209416
+speed_ms,location=biron_france speed=10.530000,speed\ description="speed in meter per second" 1502209417
+speed_ms,location=biron_france speed=10.780000,speed\ description="speed in meter per second" 1502209418
+speed_ms,location=biron_france speed=10.980000,speed\ description="speed in meter per second" 1502209419
+speed_ms,location=biron_france speed=11.090000,speed\ description="speed in meter per second" 1502209420
+speed_ms,location=biron_france speed=10.950000,speed\ description="speed in meter per second" 1502209421
+speed_ms,location=biron_france speed=11.070000,speed\ description="speed in meter per second" 1502209422
+speed_ms,location=biron_france speed=11.120000,speed\ description="speed in meter per second" 1502209423
+speed_ms,location=biron_france speed=11.140000,speed\ description="speed in meter per second" 1502209424
+speed_ms,location=biron_france speed=11.240000,speed\ description="speed in meter per second" 1502209425
+speed_ms,location=biron_france speed=11.300000,speed\ description="speed in meter per second" 1502209426
+speed_ms,location=biron_france speed=11.130000,speed\ description="speed in meter per second" 1502209427
+speed_ms,location=biron_france speed=11.210000,speed\ description="speed in meter per second" 1502209428
+speed_ms,location=biron_france speed=11.270000,speed\ description="speed in meter per second" 1502209429
+speed_ms,location=biron_france speed=10.950000,speed\ description="speed in meter per second" 1502209430
+speed_ms,location=biron_france speed=10.550000,speed\ description="speed in meter per second" 1502209431
+speed_ms,location=biron_france speed=10.580000,speed\ description="speed in meter per second" 1502209432
+speed_ms,location=biron_france speed=10.740000,speed\ description="speed in meter per second" 1502209433
+speed_ms,location=biron_france speed=10.930000,speed\ description="speed in meter per second" 1502209434
+speed_ms,location=biron_france speed=11.050000,speed\ description="speed in meter per second" 1502209435
+speed_ms,location=biron_france speed=11.100000,speed\ description="speed in meter per second" 1502209436
+speed_ms,location=biron_france speed=10.870000,speed\ description="speed in meter per second" 1502209437
+speed_ms,location=biron_france speed=10.570000,speed\ description="speed in meter per second" 1502209438
+speed_ms,location=biron_france speed=10.290000,speed\ description="speed in meter per second" 1502209439
+speed_ms,location=biron_france speed=9.620000,speed\ description="speed in meter per second" 1502209440
+speed_ms,location=biron_france speed=8.590000,speed\ description="speed in meter per second" 1502209441
+speed_ms,location=biron_france speed=7.740000,speed\ description="speed in meter per second" 1502209442
+speed_ms,location=biron_france speed=6.730000,speed\ description="speed in meter per second" 1502209443
+speed_ms,location=biron_france speed=5.870000,speed\ description="speed in meter per second" 1502209444
+speed_ms,location=biron_france speed=5.610000,speed\ description="speed in meter per second" 1502209445
+speed_ms,location=biron_france speed=4.980000,speed\ description="speed in meter per second" 1502209446
+speed_ms,location=biron_france speed=4.800000,speed\ description="speed in meter per second" 1502209447
+speed_ms,location=biron_france speed=4.670000,speed\ description="speed in meter per second" 1502209448
+speed_ms,location=biron_france speed=4.750000,speed\ description="speed in meter per second" 1502209449
+speed_ms,location=biron_france speed=5.850000,speed\ description="speed in meter per second" 1502209450
+speed_ms,location=biron_france speed=6.440000,speed\ description="speed in meter per second" 1502209451
+speed_ms,location=biron_france speed=6.800000,speed\ description="speed in meter per second" 1502209452
+speed_ms,location=biron_france speed=7.240000,speed\ description="speed in meter per second" 1502209453
+speed_ms,location=biron_france speed=7.620000,speed\ description="speed in meter per second" 1502209454
+speed_ms,location=biron_france speed=7.910000,speed\ description="speed in meter per second" 1502209455
+speed_ms,location=biron_france speed=8.230000,speed\ description="speed in meter per second" 1502209456
+speed_ms,location=biron_france speed=8.570000,speed\ description="speed in meter per second" 1502209457
+speed_ms,location=biron_france speed=8.580000,speed\ description="speed in meter per second" 1502209458
+speed_ms,location=biron_france speed=8.230000,speed\ description="speed in meter per second" 1502209459
+speed_ms,location=biron_france speed=8.090000,speed\ description="speed in meter per second" 1502209460
+speed_ms,location=biron_france speed=8.040000,speed\ description="speed in meter per second" 1502209461
+speed_ms,location=biron_france speed=8.740000,speed\ description="speed in meter per second" 1502209462
+speed_ms,location=biron_france speed=9.310000,speed\ description="speed in meter per second" 1502209463
+speed_ms,location=biron_france speed=9.640000,speed\ description="speed in meter per second" 1502209464
+speed_ms,location=biron_france speed=9.740000,speed\ description="speed in meter per second" 1502209465
+speed_ms,location=biron_france speed=9.610000,speed\ description="speed in meter per second" 1502209466
+speed_ms,location=biron_france speed=9.760000,speed\ description="speed in meter per second" 1502209467
+speed_ms,location=biron_france speed=9.800000,speed\ description="speed in meter per second" 1502209468
+speed_ms,location=biron_france speed=9.990000,speed\ description="speed in meter per second" 1502209469
+speed_ms,location=biron_france speed=10.130000,speed\ description="speed in meter per second" 1502209470
+speed_ms,location=biron_france speed=10.500000,speed\ description="speed in meter per second" 1502209471
+speed_ms,location=biron_france speed=10.970000,speed\ description="speed in meter per second" 1502209472
+speed_ms,location=biron_france speed=11.520000,speed\ description="speed in meter per second" 1502209473
+speed_ms,location=biron_france speed=11.860000,speed\ description="speed in meter per second" 1502209474
+speed_ms,location=biron_france speed=12.200000,speed\ description="speed in meter per second" 1502209475
+speed_ms,location=biron_france speed=12.370000,speed\ description="speed in meter per second" 1502209476
+speed_ms,location=biron_france speed=12.460000,speed\ description="speed in meter per second" 1502209477
+speed_ms,location=biron_france speed=12.140000,speed\ description="speed in meter per second" 1502209478
+speed_ms,location=biron_france speed=12.380000,speed\ description="speed in meter per second" 1502209479
+speed_ms,location=biron_france speed=12.150000,speed\ description="speed in meter per second" 1502209480
+speed_ms,location=biron_france speed=12.230000,speed\ description="speed in meter per second" 1502209481
+speed_ms,location=biron_france speed=12.350000,speed\ description="speed in meter per second" 1502209482
+speed_ms,location=biron_france speed=12.430000,speed\ description="speed in meter per second" 1502209483
+speed_ms,location=biron_france speed=12.540000,speed\ description="speed in meter per second" 1502209484
+speed_ms,location=biron_france speed=12.690000,speed\ description="speed in meter per second" 1502209485
+speed_ms,location=biron_france speed=12.720000,speed\ description="speed in meter per second" 1502209486
+speed_ms,location=biron_france speed=12.610000,speed\ description="speed in meter per second" 1502209487
+speed_ms,location=biron_france speed=13.580000,speed\ description="speed in meter per second" 1502209488
+speed_ms,location=biron_france speed=13.330000,speed\ description="speed in meter per second" 1502209489
+speed_ms,location=biron_france speed=14.770000,speed\ description="speed in meter per second" 1502209490
+speed_ms,location=biron_france speed=17.080000,speed\ description="speed in meter per second" 1502209491
+speed_ms,location=biron_france speed=19.020000,speed\ description="speed in meter per second" 1502209492
+speed_ms,location=biron_france speed=20.420000,speed\ description="speed in meter per second" 1502209493
+speed_ms,location=biron_france speed=20.240000,speed\ description="speed in meter per second" 1502209494
+speed_ms,location=biron_france speed=19.889999,speed\ description="speed in meter per second" 1502209495
+speed_ms,location=biron_france speed=19.320000,speed\ description="speed in meter per second" 1502209496
+speed_ms,location=biron_france speed=18.709999,speed\ description="speed in meter per second" 1502209497
+speed_ms,location=biron_france speed=18.110001,speed\ description="speed in meter per second" 1502209498
+speed_ms,location=biron_france speed=17.440001,speed\ description="speed in meter per second" 1502209499
+speed_ms,location=biron_france speed=16.620001,speed\ description="speed in meter per second" 1502209500
+speed_ms,location=biron_france speed=15.930000,speed\ description="speed in meter per second" 1502209501
+speed_ms,location=biron_france speed=15.950000,speed\ description="speed in meter per second" 1502209502
+speed_ms,location=biron_france speed=15.620000,speed\ description="speed in meter per second" 1502209503
+speed_ms,location=biron_france speed=14.990000,speed\ description="speed in meter per second" 1502209504
+speed_ms,location=biron_france speed=14.740000,speed\ description="speed in meter per second" 1502209505
+speed_ms,location=biron_france speed=14.500000,speed\ description="speed in meter per second" 1502209506
+speed_ms,location=biron_france speed=14.050000,speed\ description="speed in meter per second" 1502209507
+speed_ms,location=biron_france speed=14.090000,speed\ description="speed in meter per second" 1502209508
+speed_ms,location=biron_france speed=14.710000,speed\ description="speed in meter per second" 1502209509
+speed_ms,location=biron_france speed=15.030000,speed\ description="speed in meter per second" 1502209510
+speed_ms,location=biron_france speed=15.620000,speed\ description="speed in meter per second" 1502209511
+speed_ms,location=biron_france speed=16.129999,speed\ description="speed in meter per second" 1502209512
+speed_ms,location=biron_france speed=16.389999,speed\ description="speed in meter per second" 1502209513
+speed_ms,location=biron_france speed=16.740000,speed\ description="speed in meter per second" 1502209514
+speed_ms,location=biron_france speed=16.930000,speed\ description="speed in meter per second" 1502209515
+speed_ms,location=biron_france speed=17.150000,speed\ description="speed in meter per second" 1502209516
+speed_ms,location=biron_france speed=17.290001,speed\ description="speed in meter per second" 1502209517
+speed_ms,location=biron_france speed=16.830000,speed\ description="speed in meter per second" 1502209518
+speed_ms,location=biron_france speed=16.120001,speed\ description="speed in meter per second" 1502209519
+speed_ms,location=biron_france speed=15.130000,speed\ description="speed in meter per second" 1502209520
+speed_ms,location=biron_france speed=14.410000,speed\ description="speed in meter per second" 1502209521
+speed_ms,location=biron_france speed=13.320000,speed\ description="speed in meter per second" 1502209522
+speed_ms,location=biron_france speed=11.690000,speed\ description="speed in meter per second" 1502209523
+speed_ms,location=biron_france speed=9.590000,speed\ description="speed in meter per second" 1502209524
+speed_ms,location=biron_france speed=6.570000,speed\ description="speed in meter per second" 1502209525
+speed_ms,location=biron_france speed=4.880000,speed\ description="speed in meter per second" 1502209526
+speed_ms,location=biron_france speed=4.570000,speed\ description="speed in meter per second" 1502209527
+speed_ms,location=biron_france speed=5.220000,speed\ description="speed in meter per second" 1502209528
+speed_ms,location=biron_france speed=5.250000,speed\ description="speed in meter per second" 1502209529
+speed_ms,location=biron_france speed=5.710000,speed\ description="speed in meter per second" 1502209530
+speed_ms,location=biron_france speed=5.710000,speed\ description="speed in meter per second" 1502209530
+speed_ms,location=biron_france speed=4.880000,speed\ description="speed in meter per second" 1502209531
+
+altitude_m,location=biron_france altitude=193.342822,altitude\ description="altitude in meter" 1502208946
+altitude_m,location=biron_france altitude=193.342822,altitude\ description="altitude in meter" 1502208946
+altitude_m,location=biron_france altitude=193.379115,altitude\ description="altitude in meter" 1502208947
+altitude_m,location=biron_france altitude=193.139504,altitude\ description="altitude in meter" 1502208948
+altitude_m,location=biron_france altitude=193.397174,altitude\ description="altitude in meter" 1502208949
+altitude_m,location=biron_france altitude=193.087170,altitude\ description="altitude in meter" 1502208950
+altitude_m,location=biron_france altitude=192.850863,altitude\ description="altitude in meter" 1502208951
+altitude_m,location=biron_france altitude=192.850863,altitude\ description="altitude in meter" 1502208952
+altitude_m,location=biron_france altitude=192.850357,altitude\ description="altitude in meter" 1502208953
+altitude_m,location=biron_france altitude=192.622226,altitude\ description="altitude in meter" 1502208954
+altitude_m,location=biron_france altitude=192.688272,altitude\ description="altitude in meter" 1502208955
+altitude_m,location=biron_france altitude=192.720632,altitude\ description="altitude in meter" 1502208956
+altitude_m,location=biron_france altitude=192.605105,altitude\ description="altitude in meter" 1502208957
+altitude_m,location=biron_france altitude=192.178488,altitude\ description="altitude in meter" 1502208958
+altitude_m,location=biron_france altitude=192.533214,altitude\ description="altitude in meter" 1502208959
+altitude_m,location=biron_france altitude=192.533214,altitude\ description="altitude in meter" 1502208959
+altitude_m,location=biron_france altitude=192.916717,altitude\ description="altitude in meter" 1502208960
+altitude_m,location=biron_france altitude=193.263397,altitude\ description="altitude in meter" 1502208961
+altitude_m,location=biron_france altitude=193.484795,altitude\ description="altitude in meter" 1502208962
+altitude_m,location=biron_france altitude=193.635246,altitude\ description="altitude in meter" 1502208963
+altitude_m,location=biron_france altitude=194.254053,altitude\ description="altitude in meter" 1502208964
+altitude_m,location=biron_france altitude=194.718170,altitude\ description="altitude in meter" 1502208965
+altitude_m,location=biron_france altitude=194.813730,altitude\ description="altitude in meter" 1502208966
+altitude_m,location=biron_france altitude=194.977060,altitude\ description="altitude in meter" 1502208967
+altitude_m,location=biron_france altitude=195.250358,altitude\ description="altitude in meter" 1502208968
+altitude_m,location=biron_france altitude=195.707979,altitude\ description="altitude in meter" 1502208969
+altitude_m,location=biron_france altitude=196.098957,altitude\ description="altitude in meter" 1502208970
+altitude_m,location=biron_france altitude=195.932134,altitude\ description="altitude in meter" 1502208971
+altitude_m,location=biron_france altitude=196.057634,altitude\ description="altitude in meter" 1502208972
+altitude_m,location=biron_france altitude=195.503218,altitude\ description="altitude in meter" 1502208973
+altitude_m,location=biron_france altitude=195.281050,altitude\ description="altitude in meter" 1502208974
+altitude_m,location=biron_france altitude=195.111042,altitude\ description="altitude in meter" 1502208975
+altitude_m,location=biron_france altitude=194.565796,altitude\ description="altitude in meter" 1502208976
+altitude_m,location=biron_france altitude=194.125892,altitude\ description="altitude in meter" 1502208977
+altitude_m,location=biron_france altitude=193.226615,altitude\ description="altitude in meter" 1502208978
+altitude_m,location=biron_france altitude=193.226615,altitude\ description="altitude in meter" 1502208979
+altitude_m,location=biron_france altitude=192.728714,altitude\ description="altitude in meter" 1502208980
+altitude_m,location=biron_france altitude=192.047736,altitude\ description="altitude in meter" 1502208981
+altitude_m,location=biron_france altitude=191.713501,altitude\ description="altitude in meter" 1502208982
+altitude_m,location=biron_france altitude=191.290153,altitude\ description="altitude in meter" 1502208983
+altitude_m,location=biron_france altitude=190.789919,altitude\ description="altitude in meter" 1502208984
+altitude_m,location=biron_france altitude=190.295159,altitude\ description="altitude in meter" 1502208985
+altitude_m,location=biron_france altitude=189.773775,altitude\ description="altitude in meter" 1502208986
+altitude_m,location=biron_france altitude=188.918329,altitude\ description="altitude in meter" 1502208987
+altitude_m,location=biron_france altitude=188.718706,altitude\ description="altitude in meter" 1502208988
+altitude_m,location=biron_france altitude=188.406297,altitude\ description="altitude in meter" 1502208989
+altitude_m,location=biron_france altitude=187.880536,altitude\ description="altitude in meter" 1502208990
+altitude_m,location=biron_france altitude=187.278496,altitude\ description="altitude in meter" 1502208991
+altitude_m,location=biron_france altitude=186.604663,altitude\ description="altitude in meter" 1502208992
+altitude_m,location=biron_france altitude=186.149626,altitude\ description="altitude in meter" 1502208993
+altitude_m,location=biron_france altitude=185.704699,altitude\ description="altitude in meter" 1502208994
+altitude_m,location=biron_france altitude=185.566093,altitude\ description="altitude in meter" 1502208995
+altitude_m,location=biron_france altitude=185.380689,altitude\ description="altitude in meter" 1502208996
+altitude_m,location=biron_france altitude=185.011847,altitude\ description="altitude in meter" 1502208997
+altitude_m,location=biron_france altitude=184.534171,altitude\ description="altitude in meter" 1502208998
+altitude_m,location=biron_france altitude=184.012260,altitude\ description="altitude in meter" 1502208999
+altitude_m,location=biron_france altitude=183.373780,altitude\ description="altitude in meter" 1502209000
+altitude_m,location=biron_france altitude=182.393660,altitude\ description="altitude in meter" 1502209001
+altitude_m,location=biron_france altitude=181.837182,altitude\ description="altitude in meter" 1502209002
+altitude_m,location=biron_france altitude=181.188296,altitude\ description="altitude in meter" 1502209003
+altitude_m,location=biron_france altitude=180.887616,altitude\ description="altitude in meter" 1502209004
+altitude_m,location=biron_france altitude=180.865704,altitude\ description="altitude in meter" 1502209005
+altitude_m,location=biron_france altitude=180.682978,altitude\ description="altitude in meter" 1502209006
+altitude_m,location=biron_france altitude=180.682978,altitude\ description="altitude in meter" 1502209007
+altitude_m,location=biron_france altitude=180.449367,altitude\ description="altitude in meter" 1502209008
+altitude_m,location=biron_france altitude=180.435118,altitude\ description="altitude in meter" 1502209009
+altitude_m,location=biron_france altitude=179.634804,altitude\ description="altitude in meter" 1502209010
+altitude_m,location=biron_france altitude=178.783587,altitude\ description="altitude in meter" 1502209011
+altitude_m,location=biron_france altitude=178.240728,altitude\ description="altitude in meter" 1502209012
+altitude_m,location=biron_france altitude=178.203314,altitude\ description="altitude in meter" 1502209013
+altitude_m,location=biron_france altitude=177.615967,altitude\ description="altitude in meter" 1502209014
+altitude_m,location=biron_france altitude=177.557100,altitude\ description="altitude in meter" 1502209015
+altitude_m,location=biron_france altitude=177.919525,altitude\ description="altitude in meter" 1502209016
+altitude_m,location=biron_france altitude=178.553323,altitude\ description="altitude in meter" 1502209017
+altitude_m,location=biron_france altitude=179.491892,altitude\ description="altitude in meter" 1502209018
+altitude_m,location=biron_france altitude=180.585014,altitude\ description="altitude in meter" 1502209019
+altitude_m,location=biron_france altitude=181.117430,altitude\ description="altitude in meter" 1502209020
+altitude_m,location=biron_france altitude=181.665637,altitude\ description="altitude in meter" 1502209021
+altitude_m,location=biron_france altitude=182.440735,altitude\ description="altitude in meter" 1502209022
+altitude_m,location=biron_france altitude=182.413692,altitude\ description="altitude in meter" 1502209023
+altitude_m,location=biron_france altitude=182.106632,altitude\ description="altitude in meter" 1502209024
+altitude_m,location=biron_france altitude=181.820785,altitude\ description="altitude in meter" 1502209025
+altitude_m,location=biron_france altitude=181.724605,altitude\ description="altitude in meter" 1502209026
+altitude_m,location=biron_france altitude=181.489880,altitude\ description="altitude in meter" 1502209027
+altitude_m,location=biron_france altitude=181.098584,altitude\ description="altitude in meter" 1502209028
+altitude_m,location=biron_france altitude=180.718245,altitude\ description="altitude in meter" 1502209029
+altitude_m,location=biron_france altitude=180.500854,altitude\ description="altitude in meter" 1502209030
+altitude_m,location=biron_france altitude=180.093867,altitude\ description="altitude in meter" 1502209031
+altitude_m,location=biron_france altitude=179.297681,altitude\ description="altitude in meter" 1502209032
+altitude_m,location=biron_france altitude=178.189951,altitude\ description="altitude in meter" 1502209033
+altitude_m,location=biron_france altitude=178.189951,altitude\ description="altitude in meter" 1502209034
+altitude_m,location=biron_france altitude=177.173968,altitude\ description="altitude in meter" 1502209035
+altitude_m,location=biron_france altitude=176.607355,altitude\ description="altitude in meter" 1502209036
+altitude_m,location=biron_france altitude=175.283543,altitude\ description="altitude in meter" 1502209037
+altitude_m,location=biron_france altitude=174.346784,altitude\ description="altitude in meter" 1502209038
+altitude_m,location=biron_france altitude=173.372214,altitude\ description="altitude in meter" 1502209039
+altitude_m,location=biron_france altitude=172.443306,altitude\ description="altitude in meter" 1502209040
+altitude_m,location=biron_france altitude=172.030077,altitude\ description="altitude in meter" 1502209041
+altitude_m,location=biron_france altitude=171.100597,altitude\ description="altitude in meter" 1502209042
+altitude_m,location=biron_france altitude=170.018324,altitude\ description="altitude in meter" 1502209043
+altitude_m,location=biron_france altitude=169.149871,altitude\ description="altitude in meter" 1502209044
+altitude_m,location=biron_france altitude=168.507540,altitude\ description="altitude in meter" 1502209045
+altitude_m,location=biron_france altitude=167.221578,altitude\ description="altitude in meter" 1502209046
+altitude_m,location=biron_france altitude=166.219204,altitude\ description="altitude in meter" 1502209047
+altitude_m,location=biron_france altitude=165.357630,altitude\ description="altitude in meter" 1502209048
+altitude_m,location=biron_france altitude=164.313985,altitude\ description="altitude in meter" 1502209049
+altitude_m,location=biron_france altitude=163.412655,altitude\ description="altitude in meter" 1502209050
+altitude_m,location=biron_france altitude=162.069590,altitude\ description="altitude in meter" 1502209051
+altitude_m,location=biron_france altitude=160.923938,altitude\ description="altitude in meter" 1502209052
+altitude_m,location=biron_france altitude=160.153333,altitude\ description="altitude in meter" 1502209053
+altitude_m,location=biron_france altitude=158.660454,altitude\ description="altitude in meter" 1502209054
+altitude_m,location=biron_france altitude=157.665144,altitude\ description="altitude in meter" 1502209055
+altitude_m,location=biron_france altitude=155.857993,altitude\ description="altitude in meter" 1502209056
+altitude_m,location=biron_france altitude=155.034002,altitude\ description="altitude in meter" 1502209057
+altitude_m,location=biron_france altitude=153.934698,altitude\ description="altitude in meter" 1502209058
+altitude_m,location=biron_france altitude=152.539673,altitude\ description="altitude in meter" 1502209059
+altitude_m,location=biron_france altitude=150.771257,altitude\ description="altitude in meter" 1502209060
+altitude_m,location=biron_france altitude=150.771257,altitude\ description="altitude in meter" 1502209061
+altitude_m,location=biron_france altitude=149.343369,altitude\ description="altitude in meter" 1502209062
+altitude_m,location=biron_france altitude=148.189812,altitude\ description="altitude in meter" 1502209063
+altitude_m,location=biron_france altitude=147.223513,altitude\ description="altitude in meter" 1502209064
+altitude_m,location=biron_france altitude=145.853954,altitude\ description="altitude in meter" 1502209065
+altitude_m,location=biron_france altitude=145.018147,altitude\ description="altitude in meter" 1502209066
+altitude_m,location=biron_france altitude=143.469585,altitude\ description="altitude in meter" 1502209067
+altitude_m,location=biron_france altitude=142.751241,altitude\ description="altitude in meter" 1502209068
+altitude_m,location=biron_france altitude=141.696584,altitude\ description="altitude in meter" 1502209069
+altitude_m,location=biron_france altitude=141.349165,altitude\ description="altitude in meter" 1502209070
+altitude_m,location=biron_france altitude=141.770682,altitude\ description="altitude in meter" 1502209071
+altitude_m,location=biron_france altitude=140.913698,altitude\ description="altitude in meter" 1502209072
+altitude_m,location=biron_france altitude=140.373538,altitude\ description="altitude in meter" 1502209073
+altitude_m,location=biron_france altitude=139.976642,altitude\ description="altitude in meter" 1502209074
+altitude_m,location=biron_france altitude=140.023520,altitude\ description="altitude in meter" 1502209075
+altitude_m,location=biron_france altitude=139.701406,altitude\ description="altitude in meter" 1502209076
+altitude_m,location=biron_france altitude=139.591956,altitude\ description="altitude in meter" 1502209077
+altitude_m,location=biron_france altitude=139.312965,altitude\ description="altitude in meter" 1502209078
+altitude_m,location=biron_france altitude=139.130435,altitude\ description="altitude in meter" 1502209079
+altitude_m,location=biron_france altitude=138.574925,altitude\ description="altitude in meter" 1502209080
+altitude_m,location=biron_france altitude=138.417941,altitude\ description="altitude in meter" 1502209081
+altitude_m,location=biron_france altitude=137.994029,altitude\ description="altitude in meter" 1502209082
+altitude_m,location=biron_france altitude=138.022859,altitude\ description="altitude in meter" 1502209083
+altitude_m,location=biron_france altitude=137.560278,altitude\ description="altitude in meter" 1502209084
+altitude_m,location=biron_france altitude=137.657804,altitude\ description="altitude in meter" 1502209085
+altitude_m,location=biron_france altitude=137.532517,altitude\ description="altitude in meter" 1502209086
+altitude_m,location=biron_france altitude=137.424435,altitude\ description="altitude in meter" 1502209087
+altitude_m,location=biron_france altitude=137.424435,altitude\ description="altitude in meter" 1502209088
+altitude_m,location=biron_france altitude=137.395510,altitude\ description="altitude in meter" 1502209089
+altitude_m,location=biron_france altitude=137.127136,altitude\ description="altitude in meter" 1502209090
+altitude_m,location=biron_france altitude=136.856750,altitude\ description="altitude in meter" 1502209091
+altitude_m,location=biron_france altitude=136.756450,altitude\ description="altitude in meter" 1502209092
+altitude_m,location=biron_france altitude=136.333746,altitude\ description="altitude in meter" 1502209093
+altitude_m,location=biron_france altitude=136.275424,altitude\ description="altitude in meter" 1502209094
+altitude_m,location=biron_france altitude=136.014861,altitude\ description="altitude in meter" 1502209095
+altitude_m,location=biron_france altitude=136.237748,altitude\ description="altitude in meter" 1502209096
+altitude_m,location=biron_france altitude=136.220660,altitude\ description="altitude in meter" 1502209097
+altitude_m,location=biron_france altitude=135.999544,altitude\ description="altitude in meter" 1502209098
+altitude_m,location=biron_france altitude=135.872401,altitude\ description="altitude in meter" 1502209099
+altitude_m,location=biron_france altitude=135.549317,altitude\ description="altitude in meter" 1502209100
+altitude_m,location=biron_france altitude=135.569247,altitude\ description="altitude in meter" 1502209101
+altitude_m,location=biron_france altitude=135.705363,altitude\ description="altitude in meter" 1502209102
+altitude_m,location=biron_france altitude=135.919292,altitude\ description="altitude in meter" 1502209103
+altitude_m,location=biron_france altitude=135.877496,altitude\ description="altitude in meter" 1502209104
+altitude_m,location=biron_france altitude=136.108090,altitude\ description="altitude in meter" 1502209105
+altitude_m,location=biron_france altitude=136.031320,altitude\ description="altitude in meter" 1502209106
+altitude_m,location=biron_france altitude=136.100278,altitude\ description="altitude in meter" 1502209107
+altitude_m,location=biron_france altitude=136.276983,altitude\ description="altitude in meter" 1502209108
+altitude_m,location=biron_france altitude=136.820514,altitude\ description="altitude in meter" 1502209109
+altitude_m,location=biron_france altitude=136.788030,altitude\ description="altitude in meter" 1502209110
+altitude_m,location=biron_france altitude=136.688165,altitude\ description="altitude in meter" 1502209111
+altitude_m,location=biron_france altitude=136.850359,altitude\ description="altitude in meter" 1502209112
+altitude_m,location=biron_france altitude=137.130687,altitude\ description="altitude in meter" 1502209113
+altitude_m,location=biron_france altitude=136.903995,altitude\ description="altitude in meter" 1502209114
+altitude_m,location=biron_france altitude=136.903995,altitude\ description="altitude in meter" 1502209115
+altitude_m,location=biron_france altitude=137.149311,altitude\ description="altitude in meter" 1502209116
+altitude_m,location=biron_france altitude=136.837640,altitude\ description="altitude in meter" 1502209117
+altitude_m,location=biron_france altitude=136.500487,altitude\ description="altitude in meter" 1502209118
+altitude_m,location=biron_france altitude=136.625348,altitude\ description="altitude in meter" 1502209119
+altitude_m,location=biron_france altitude=136.563022,altitude\ description="altitude in meter" 1502209120
+altitude_m,location=biron_france altitude=136.770970,altitude\ description="altitude in meter" 1502209121
+altitude_m,location=biron_france altitude=136.647410,altitude\ description="altitude in meter" 1502209122
+altitude_m,location=biron_france altitude=136.793797,altitude\ description="altitude in meter" 1502209123
+altitude_m,location=biron_france altitude=136.686099,altitude\ description="altitude in meter" 1502209124
+altitude_m,location=biron_france altitude=136.361401,altitude\ description="altitude in meter" 1502209125
+altitude_m,location=biron_france altitude=136.098220,altitude\ description="altitude in meter" 1502209126
+altitude_m,location=biron_france altitude=136.006174,altitude\ description="altitude in meter" 1502209127
+altitude_m,location=biron_france altitude=135.749840,altitude\ description="altitude in meter" 1502209128
+altitude_m,location=biron_france altitude=135.526697,altitude\ description="altitude in meter" 1502209129
+altitude_m,location=biron_france altitude=135.543256,altitude\ description="altitude in meter" 1502209130
+altitude_m,location=biron_france altitude=135.567316,altitude\ description="altitude in meter" 1502209131
+altitude_m,location=biron_france altitude=135.345402,altitude\ description="altitude in meter" 1502209132
+altitude_m,location=biron_france altitude=135.342117,altitude\ description="altitude in meter" 1502209133
+altitude_m,location=biron_france altitude=135.145674,altitude\ description="altitude in meter" 1502209134
+altitude_m,location=biron_france altitude=135.274225,altitude\ description="altitude in meter" 1502209135
+altitude_m,location=biron_france altitude=134.892919,altitude\ description="altitude in meter" 1502209136
+altitude_m,location=biron_france altitude=134.662284,altitude\ description="altitude in meter" 1502209137
+altitude_m,location=biron_france altitude=134.586340,altitude\ description="altitude in meter" 1502209138
+altitude_m,location=biron_france altitude=134.508929,altitude\ description="altitude in meter" 1502209139
+altitude_m,location=biron_france altitude=134.314891,altitude\ description="altitude in meter" 1502209140
+altitude_m,location=biron_france altitude=134.379422,altitude\ description="altitude in meter" 1502209141
+altitude_m,location=biron_france altitude=134.169013,altitude\ description="altitude in meter" 1502209142
+altitude_m,location=biron_france altitude=134.169013,altitude\ description="altitude in meter" 1502209143
+altitude_m,location=biron_france altitude=134.108056,altitude\ description="altitude in meter" 1502209144
+altitude_m,location=biron_france altitude=134.084090,altitude\ description="altitude in meter" 1502209145
+altitude_m,location=biron_france altitude=133.869440,altitude\ description="altitude in meter" 1502209146
+altitude_m,location=biron_france altitude=133.826280,altitude\ description="altitude in meter" 1502209147
+altitude_m,location=biron_france altitude=133.381287,altitude\ description="altitude in meter" 1502209148
+altitude_m,location=biron_france altitude=133.517461,altitude\ description="altitude in meter" 1502209149
+altitude_m,location=biron_france altitude=133.574732,altitude\ description="altitude in meter" 1502209150
+altitude_m,location=biron_france altitude=133.303227,altitude\ description="altitude in meter" 1502209151
+altitude_m,location=biron_france altitude=133.248543,altitude\ description="altitude in meter" 1502209152
+altitude_m,location=biron_france altitude=132.857499,altitude\ description="altitude in meter" 1502209153
+altitude_m,location=biron_france altitude=132.734409,altitude\ description="altitude in meter" 1502209154
+altitude_m,location=biron_france altitude=132.860349,altitude\ description="altitude in meter" 1502209155
+altitude_m,location=biron_france altitude=132.730853,altitude\ description="altitude in meter" 1502209156
+altitude_m,location=biron_france altitude=132.830828,altitude\ description="altitude in meter" 1502209157
+altitude_m,location=biron_france altitude=132.620753,altitude\ description="altitude in meter" 1502209158
+altitude_m,location=biron_france altitude=132.500325,altitude\ description="altitude in meter" 1502209159
+altitude_m,location=biron_france altitude=132.520731,altitude\ description="altitude in meter" 1502209160
+altitude_m,location=biron_france altitude=132.663290,altitude\ description="altitude in meter" 1502209161
+altitude_m,location=biron_france altitude=132.176515,altitude\ description="altitude in meter" 1502209162
+altitude_m,location=biron_france altitude=131.982836,altitude\ description="altitude in meter" 1502209163
+altitude_m,location=biron_france altitude=131.732945,altitude\ description="altitude in meter" 1502209164
+altitude_m,location=biron_france altitude=131.252528,altitude\ description="altitude in meter" 1502209165
+altitude_m,location=biron_france altitude=131.189944,altitude\ description="altitude in meter" 1502209166
+altitude_m,location=biron_france altitude=131.079321,altitude\ description="altitude in meter" 1502209167
+altitude_m,location=biron_france altitude=131.288883,altitude\ description="altitude in meter" 1502209168
+altitude_m,location=biron_france altitude=130.823943,altitude\ description="altitude in meter" 1502209169
+altitude_m,location=biron_france altitude=130.823943,altitude\ description="altitude in meter" 1502209170
+altitude_m,location=biron_france altitude=130.699278,altitude\ description="altitude in meter" 1502209171
+altitude_m,location=biron_france altitude=130.356774,altitude\ description="altitude in meter" 1502209172
+altitude_m,location=biron_france altitude=130.529112,altitude\ description="altitude in meter" 1502209173
+altitude_m,location=biron_france altitude=130.147350,altitude\ description="altitude in meter" 1502209174
+altitude_m,location=biron_france altitude=130.117391,altitude\ description="altitude in meter" 1502209175
+altitude_m,location=biron_france altitude=129.820522,altitude\ description="altitude in meter" 1502209176
+altitude_m,location=biron_france altitude=129.574275,altitude\ description="altitude in meter" 1502209177
+altitude_m,location=biron_france altitude=129.916056,altitude\ description="altitude in meter" 1502209178
+altitude_m,location=biron_france altitude=129.771593,altitude\ description="altitude in meter" 1502209179
+altitude_m,location=biron_france altitude=129.886432,altitude\ description="altitude in meter" 1502209180
+altitude_m,location=biron_france altitude=130.075797,altitude\ description="altitude in meter" 1502209181
+altitude_m,location=biron_france altitude=130.380389,altitude\ description="altitude in meter" 1502209182
+altitude_m,location=biron_france altitude=130.764963,altitude\ description="altitude in meter" 1502209183
+altitude_m,location=biron_france altitude=131.039390,altitude\ description="altitude in meter" 1502209184
+altitude_m,location=biron_france altitude=131.065935,altitude\ description="altitude in meter" 1502209185
+altitude_m,location=biron_france altitude=131.125350,altitude\ description="altitude in meter" 1502209186
+altitude_m,location=biron_france altitude=131.349870,altitude\ description="altitude in meter" 1502209187
+altitude_m,location=biron_france altitude=131.742324,altitude\ description="altitude in meter" 1502209188
+altitude_m,location=biron_france altitude=131.986708,altitude\ description="altitude in meter" 1502209189
+altitude_m,location=biron_france altitude=131.976922,altitude\ description="altitude in meter" 1502209190
+altitude_m,location=biron_france altitude=132.537405,altitude\ description="altitude in meter" 1502209191
+altitude_m,location=biron_france altitude=132.626768,altitude\ description="altitude in meter" 1502209192
+altitude_m,location=biron_france altitude=132.794447,altitude\ description="altitude in meter" 1502209193
+altitude_m,location=biron_france altitude=133.151595,altitude\ description="altitude in meter" 1502209194
+altitude_m,location=biron_france altitude=132.699489,altitude\ description="altitude in meter" 1502209195
+altitude_m,location=biron_france altitude=132.264386,altitude\ description="altitude in meter" 1502209196
+altitude_m,location=biron_france altitude=131.662535,altitude\ description="altitude in meter" 1502209197
+altitude_m,location=biron_france altitude=131.662535,altitude\ description="altitude in meter" 1502209198
+altitude_m,location=biron_france altitude=131.118817,altitude\ description="altitude in meter" 1502209199
+altitude_m,location=biron_france altitude=130.331981,altitude\ description="altitude in meter" 1502209200
+altitude_m,location=biron_france altitude=129.913530,altitude\ description="altitude in meter" 1502209201
+altitude_m,location=biron_france altitude=129.153156,altitude\ description="altitude in meter" 1502209202
+altitude_m,location=biron_france altitude=128.627631,altitude\ description="altitude in meter" 1502209203
+altitude_m,location=biron_france altitude=128.040875,altitude\ description="altitude in meter" 1502209204
+altitude_m,location=biron_france altitude=127.358110,altitude\ description="altitude in meter" 1502209205
+altitude_m,location=biron_france altitude=126.488112,altitude\ description="altitude in meter" 1502209206
+altitude_m,location=biron_france altitude=126.040013,altitude\ description="altitude in meter" 1502209207
+altitude_m,location=biron_france altitude=125.203154,altitude\ description="altitude in meter" 1502209208
+altitude_m,location=biron_france altitude=124.551287,altitude\ description="altitude in meter" 1502209209
+altitude_m,location=biron_france altitude=124.049474,altitude\ description="altitude in meter" 1502209210
+altitude_m,location=biron_france altitude=123.957362,altitude\ description="altitude in meter" 1502209211
+altitude_m,location=biron_france altitude=124.001785,altitude\ description="altitude in meter" 1502209212
+altitude_m,location=biron_france altitude=123.905467,altitude\ description="altitude in meter" 1502209213
+altitude_m,location=biron_france altitude=124.450439,altitude\ description="altitude in meter" 1502209214
+altitude_m,location=biron_france altitude=124.984548,altitude\ description="altitude in meter" 1502209215
+altitude_m,location=biron_france altitude=125.548428,altitude\ description="altitude in meter" 1502209216
+altitude_m,location=biron_france altitude=125.601552,altitude\ description="altitude in meter" 1502209217
+altitude_m,location=biron_france altitude=125.068361,altitude\ description="altitude in meter" 1502209218
+altitude_m,location=biron_france altitude=124.871200,altitude\ description="altitude in meter" 1502209219
+altitude_m,location=biron_france altitude=125.087597,altitude\ description="altitude in meter" 1502209220
+altitude_m,location=biron_france altitude=125.132242,altitude\ description="altitude in meter" 1502209221
+altitude_m,location=biron_france altitude=125.020551,altitude\ description="altitude in meter" 1502209222
+altitude_m,location=biron_france altitude=125.076257,altitude\ description="altitude in meter" 1502209223
+altitude_m,location=biron_france altitude=124.851721,altitude\ description="altitude in meter" 1502209224
+altitude_m,location=biron_france altitude=124.851721,altitude\ description="altitude in meter" 1502209225
+altitude_m,location=biron_france altitude=124.874015,altitude\ description="altitude in meter" 1502209226
+altitude_m,location=biron_france altitude=124.818419,altitude\ description="altitude in meter" 1502209227
+altitude_m,location=biron_france altitude=124.486838,altitude\ description="altitude in meter" 1502209228
+altitude_m,location=biron_france altitude=124.374064,altitude\ description="altitude in meter" 1502209229
+altitude_m,location=biron_france altitude=125.016348,altitude\ description="altitude in meter" 1502209230
+altitude_m,location=biron_france altitude=124.786653,altitude\ description="altitude in meter" 1502209231
+altitude_m,location=biron_france altitude=124.998339,altitude\ description="altitude in meter" 1502209232
+altitude_m,location=biron_france altitude=124.896799,altitude\ description="altitude in meter" 1502209233
+altitude_m,location=biron_france altitude=125.066243,altitude\ description="altitude in meter" 1502209234
+altitude_m,location=biron_france altitude=124.907589,altitude\ description="altitude in meter" 1502209235
+altitude_m,location=biron_france altitude=124.706522,altitude\ description="altitude in meter" 1502209236
+altitude_m,location=biron_france altitude=124.249494,altitude\ description="altitude in meter" 1502209237
+altitude_m,location=biron_france altitude=124.383232,altitude\ description="altitude in meter" 1502209238
+altitude_m,location=biron_france altitude=124.383676,altitude\ description="altitude in meter" 1502209239
+altitude_m,location=biron_france altitude=124.285812,altitude\ description="altitude in meter" 1502209240
+altitude_m,location=biron_france altitude=124.163275,altitude\ description="altitude in meter" 1502209241
+altitude_m,location=biron_france altitude=124.236572,altitude\ description="altitude in meter" 1502209242
+altitude_m,location=biron_france altitude=124.158656,altitude\ description="altitude in meter" 1502209243
+altitude_m,location=biron_france altitude=124.220007,altitude\ description="altitude in meter" 1502209244
+altitude_m,location=biron_france altitude=123.958928,altitude\ description="altitude in meter" 1502209245
+altitude_m,location=biron_france altitude=123.925407,altitude\ description="altitude in meter" 1502209246
+altitude_m,location=biron_france altitude=123.749354,altitude\ description="altitude in meter" 1502209247
+altitude_m,location=biron_france altitude=123.643496,altitude\ description="altitude in meter" 1502209248
+altitude_m,location=biron_france altitude=123.128892,altitude\ description="altitude in meter" 1502209249
+altitude_m,location=biron_france altitude=123.018238,altitude\ description="altitude in meter" 1502209250
+altitude_m,location=biron_france altitude=122.055905,altitude\ description="altitude in meter" 1502209251
+altitude_m,location=biron_france altitude=122.036121,altitude\ description="altitude in meter" 1502209252
+altitude_m,location=biron_france altitude=122.036121,altitude\ description="altitude in meter" 1502209253
+altitude_m,location=biron_france altitude=122.742757,altitude\ description="altitude in meter" 1502209254
+altitude_m,location=biron_france altitude=122.376181,altitude\ description="altitude in meter" 1502209255
+altitude_m,location=biron_france altitude=121.654206,altitude\ description="altitude in meter" 1502209256
+altitude_m,location=biron_france altitude=121.328617,altitude\ description="altitude in meter" 1502209257
+altitude_m,location=biron_france altitude=121.369077,altitude\ description="altitude in meter" 1502209258
+altitude_m,location=biron_france altitude=120.986858,altitude\ description="altitude in meter" 1502209259
+altitude_m,location=biron_france altitude=120.816195,altitude\ description="altitude in meter" 1502209260
+altitude_m,location=biron_france altitude=121.243477,altitude\ description="altitude in meter" 1502209261
+altitude_m,location=biron_france altitude=121.401674,altitude\ description="altitude in meter" 1502209262
+altitude_m,location=biron_france altitude=121.711774,altitude\ description="altitude in meter" 1502209263
+altitude_m,location=biron_france altitude=121.970142,altitude\ description="altitude in meter" 1502209264
+altitude_m,location=biron_france altitude=122.245868,altitude\ description="altitude in meter" 1502209265
+altitude_m,location=biron_france altitude=122.899787,altitude\ description="altitude in meter" 1502209266
+altitude_m,location=biron_france altitude=124.006421,altitude\ description="altitude in meter" 1502209267
+altitude_m,location=biron_france altitude=124.416005,altitude\ description="altitude in meter" 1502209268
+altitude_m,location=biron_france altitude=125.077416,altitude\ description="altitude in meter" 1502209269
+altitude_m,location=biron_france altitude=126.187825,altitude\ description="altitude in meter" 1502209270
+altitude_m,location=biron_france altitude=127.208147,altitude\ description="altitude in meter" 1502209271
+altitude_m,location=biron_france altitude=127.595254,altitude\ description="altitude in meter" 1502209272
+altitude_m,location=biron_france altitude=128.802646,altitude\ description="altitude in meter" 1502209273
+altitude_m,location=biron_france altitude=129.638768,altitude\ description="altitude in meter" 1502209274
+altitude_m,location=biron_france altitude=130.606218,altitude\ description="altitude in meter" 1502209275
+altitude_m,location=biron_france altitude=131.255634,altitude\ description="altitude in meter" 1502209276
+altitude_m,location=biron_france altitude=132.313659,altitude\ description="altitude in meter" 1502209277
+altitude_m,location=biron_france altitude=133.571380,altitude\ description="altitude in meter" 1502209278
+altitude_m,location=biron_france altitude=134.675856,altitude\ description="altitude in meter" 1502209279
+altitude_m,location=biron_france altitude=134.675856,altitude\ description="altitude in meter" 1502209280
+altitude_m,location=biron_france altitude=135.800900,altitude\ description="altitude in meter" 1502209281
+altitude_m,location=biron_france altitude=136.345418,altitude\ description="altitude in meter" 1502209282
+altitude_m,location=biron_france altitude=136.889424,altitude\ description="altitude in meter" 1502209283
+altitude_m,location=biron_france altitude=137.570078,altitude\ description="altitude in meter" 1502209284
+altitude_m,location=biron_france altitude=138.085098,altitude\ description="altitude in meter" 1502209285
+altitude_m,location=biron_france altitude=138.727330,altitude\ description="altitude in meter" 1502209286
+altitude_m,location=biron_france altitude=139.690521,altitude\ description="altitude in meter" 1502209287
+altitude_m,location=biron_france altitude=140.100669,altitude\ description="altitude in meter" 1502209288
+altitude_m,location=biron_france altitude=141.066832,altitude\ description="altitude in meter" 1502209289
+altitude_m,location=biron_france altitude=142.162302,altitude\ description="altitude in meter" 1502209290
+altitude_m,location=biron_france altitude=143.207203,altitude\ description="altitude in meter" 1502209291
+altitude_m,location=biron_france altitude=144.538181,altitude\ description="altitude in meter" 1502209292
+altitude_m,location=biron_france altitude=146.324810,altitude\ description="altitude in meter" 1502209293
+altitude_m,location=biron_france altitude=147.703839,altitude\ description="altitude in meter" 1502209294
+altitude_m,location=biron_france altitude=148.948468,altitude\ description="altitude in meter" 1502209295
+altitude_m,location=biron_france altitude=150.462146,altitude\ description="altitude in meter" 1502209296
+altitude_m,location=biron_france altitude=151.898585,altitude\ description="altitude in meter" 1502209297
+altitude_m,location=biron_france altitude=153.615513,altitude\ description="altitude in meter" 1502209298
+altitude_m,location=biron_france altitude=155.566574,altitude\ description="altitude in meter" 1502209299
+altitude_m,location=biron_france altitude=157.172386,altitude\ description="altitude in meter" 1502209300
+altitude_m,location=biron_france altitude=158.620383,altitude\ description="altitude in meter" 1502209301
+altitude_m,location=biron_france altitude=160.253556,altitude\ description="altitude in meter" 1502209302
+altitude_m,location=biron_france altitude=162.142473,altitude\ description="altitude in meter" 1502209303
+altitude_m,location=biron_france altitude=163.217813,altitude\ description="altitude in meter" 1502209304
+altitude_m,location=biron_france altitude=164.772316,altitude\ description="altitude in meter" 1502209305
+altitude_m,location=biron_france altitude=165.814280,altitude\ description="altitude in meter" 1502209306
+altitude_m,location=biron_france altitude=165.814280,altitude\ description="altitude in meter" 1502209307
+altitude_m,location=biron_france altitude=167.268807,altitude\ description="altitude in meter" 1502209308
+altitude_m,location=biron_france altitude=169.310227,altitude\ description="altitude in meter" 1502209309
+altitude_m,location=biron_france altitude=171.016633,altitude\ description="altitude in meter" 1502209310
+altitude_m,location=biron_france altitude=173.143443,altitude\ description="altitude in meter" 1502209311
+altitude_m,location=biron_france altitude=174.372636,altitude\ description="altitude in meter" 1502209312
+altitude_m,location=biron_france altitude=175.878602,altitude\ description="altitude in meter" 1502209313
+altitude_m,location=biron_france altitude=176.924835,altitude\ description="altitude in meter" 1502209314
+altitude_m,location=biron_france altitude=178.177019,altitude\ description="altitude in meter" 1502209315
+altitude_m,location=biron_france altitude=179.315043,altitude\ description="altitude in meter" 1502209316
+altitude_m,location=biron_france altitude=180.153403,altitude\ description="altitude in meter" 1502209317
+altitude_m,location=biron_france altitude=180.892067,altitude\ description="altitude in meter" 1502209318
+altitude_m,location=biron_france altitude=181.557060,altitude\ description="altitude in meter" 1502209319
+altitude_m,location=biron_france altitude=182.426283,altitude\ description="altitude in meter" 1502209320
+altitude_m,location=biron_france altitude=183.098727,altitude\ description="altitude in meter" 1502209321
+altitude_m,location=biron_france altitude=183.482907,altitude\ description="altitude in meter" 1502209322
+altitude_m,location=biron_france altitude=183.798832,altitude\ description="altitude in meter" 1502209323
+altitude_m,location=biron_france altitude=184.956935,altitude\ description="altitude in meter" 1502209324
+altitude_m,location=biron_france altitude=185.715676,altitude\ description="altitude in meter" 1502209325
+altitude_m,location=biron_france altitude=186.470457,altitude\ description="altitude in meter" 1502209326
+altitude_m,location=biron_france altitude=187.045473,altitude\ description="altitude in meter" 1502209327
+altitude_m,location=biron_france altitude=186.581413,altitude\ description="altitude in meter" 1502209328
+altitude_m,location=biron_france altitude=185.681554,altitude\ description="altitude in meter" 1502209329
+altitude_m,location=biron_france altitude=185.904461,altitude\ description="altitude in meter" 1502209330
+altitude_m,location=biron_france altitude=186.245791,altitude\ description="altitude in meter" 1502209331
+altitude_m,location=biron_france altitude=186.390554,altitude\ description="altitude in meter" 1502209332
+altitude_m,location=biron_france altitude=187.162960,altitude\ description="altitude in meter" 1502209333
+altitude_m,location=biron_france altitude=187.162960,altitude\ description="altitude in meter" 1502209334
+altitude_m,location=biron_france altitude=187.110654,altitude\ description="altitude in meter" 1502209335
+altitude_m,location=biron_france altitude=187.720807,altitude\ description="altitude in meter" 1502209336
+altitude_m,location=biron_france altitude=187.574605,altitude\ description="altitude in meter" 1502209337
+altitude_m,location=biron_france altitude=187.847028,altitude\ description="altitude in meter" 1502209338
+altitude_m,location=biron_france altitude=187.741384,altitude\ description="altitude in meter" 1502209339
+altitude_m,location=biron_france altitude=187.624290,altitude\ description="altitude in meter" 1502209340
+altitude_m,location=biron_france altitude=187.457557,altitude\ description="altitude in meter" 1502209341
+altitude_m,location=biron_france altitude=187.503825,altitude\ description="altitude in meter" 1502209342
+altitude_m,location=biron_france altitude=187.637028,altitude\ description="altitude in meter" 1502209343
+altitude_m,location=biron_france altitude=188.537852,altitude\ description="altitude in meter" 1502209344
+altitude_m,location=biron_france altitude=188.620597,altitude\ description="altitude in meter" 1502209345
+altitude_m,location=biron_france altitude=189.279488,altitude\ description="altitude in meter" 1502209346
+altitude_m,location=biron_france altitude=189.258694,altitude\ description="altitude in meter" 1502209347
+altitude_m,location=biron_france altitude=188.565439,altitude\ description="altitude in meter" 1502209348
+altitude_m,location=biron_france altitude=188.728719,altitude\ description="altitude in meter" 1502209349
+altitude_m,location=biron_france altitude=187.725768,altitude\ description="altitude in meter" 1502209350
+altitude_m,location=biron_france altitude=186.801920,altitude\ description="altitude in meter" 1502209351
+altitude_m,location=biron_france altitude=186.315576,altitude\ description="altitude in meter" 1502209352
+altitude_m,location=biron_france altitude=185.665892,altitude\ description="altitude in meter" 1502209353
+altitude_m,location=biron_france altitude=184.943672,altitude\ description="altitude in meter" 1502209354
+altitude_m,location=biron_france altitude=184.644577,altitude\ description="altitude in meter" 1502209355
+altitude_m,location=biron_france altitude=183.636846,altitude\ description="altitude in meter" 1502209356
+altitude_m,location=biron_france altitude=183.766398,altitude\ description="altitude in meter" 1502209357
+altitude_m,location=biron_france altitude=183.876412,altitude\ description="altitude in meter" 1502209358
+altitude_m,location=biron_france altitude=183.957134,altitude\ description="altitude in meter" 1502209359
+altitude_m,location=biron_france altitude=184.079975,altitude\ description="altitude in meter" 1502209360
+altitude_m,location=biron_france altitude=184.217361,altitude\ description="altitude in meter" 1502209361
+altitude_m,location=biron_france altitude=184.217361,altitude\ description="altitude in meter" 1502209362
+altitude_m,location=biron_france altitude=184.081032,altitude\ description="altitude in meter" 1502209363
+altitude_m,location=biron_france altitude=184.322370,altitude\ description="altitude in meter" 1502209364
+altitude_m,location=biron_france altitude=184.431718,altitude\ description="altitude in meter" 1502209365
+altitude_m,location=biron_france altitude=184.953319,altitude\ description="altitude in meter" 1502209365
+altitude_m,location=biron_france altitude=185.204108,altitude\ description="altitude in meter" 1502209367
+altitude_m,location=biron_france altitude=185.269717,altitude\ description="altitude in meter" 1502209368
+altitude_m,location=biron_france altitude=185.542008,altitude\ description="altitude in meter" 1502209369
+altitude_m,location=biron_france altitude=185.862740,altitude\ description="altitude in meter" 1502209370
+altitude_m,location=biron_france altitude=186.207197,altitude\ description="altitude in meter" 1502209371
+altitude_m,location=biron_france altitude=186.513520,altitude\ description="altitude in meter" 1502209372
+altitude_m,location=biron_france altitude=186.769928,altitude\ description="altitude in meter" 1502209373
+altitude_m,location=biron_france altitude=187.042444,altitude\ description="altitude in meter" 1502209374
+altitude_m,location=biron_france altitude=187.328734,altitude\ description="altitude in meter" 1502209375
+altitude_m,location=biron_france altitude=188.393089,altitude\ description="altitude in meter" 1502209376
+altitude_m,location=biron_france altitude=188.718219,altitude\ description="altitude in meter" 1502209377
+altitude_m,location=biron_france altitude=188.567232,altitude\ description="altitude in meter" 1502209378
+altitude_m,location=biron_france altitude=189.019627,altitude\ description="altitude in meter" 1502209379
+altitude_m,location=biron_france altitude=189.037446,altitude\ description="altitude in meter" 1502209380
+altitude_m,location=biron_france altitude=189.474361,altitude\ description="altitude in meter" 1502209381
+altitude_m,location=biron_france altitude=189.499042,altitude\ description="altitude in meter" 1502209382
+altitude_m,location=biron_france altitude=189.829081,altitude\ description="altitude in meter" 1502209383
+altitude_m,location=biron_france altitude=189.926931,altitude\ description="altitude in meter" 1502209384
+altitude_m,location=biron_france altitude=190.172019,altitude\ description="altitude in meter" 1502209385
+altitude_m,location=biron_france altitude=190.927670,altitude\ description="altitude in meter" 1502209386
+altitude_m,location=biron_france altitude=191.657979,altitude\ description="altitude in meter" 1502209387
+altitude_m,location=biron_france altitude=192.382778,altitude\ description="altitude in meter" 1502209388
+altitude_m,location=biron_france altitude=192.382778,altitude\ description="altitude in meter" 1502209389
+altitude_m,location=biron_france altitude=192.747529,altitude\ description="altitude in meter" 1502209390
+altitude_m,location=biron_france altitude=193.397166,altitude\ description="altitude in meter" 1502209391
+altitude_m,location=biron_france altitude=193.520197,altitude\ description="altitude in meter" 1502209392
+altitude_m,location=biron_france altitude=193.906809,altitude\ description="altitude in meter" 1502209393
+altitude_m,location=biron_france altitude=194.268327,altitude\ description="altitude in meter" 1502209394
+altitude_m,location=biron_france altitude=194.625725,altitude\ description="altitude in meter" 1502209395
+altitude_m,location=biron_france altitude=195.042182,altitude\ description="altitude in meter" 1502209396
+altitude_m,location=biron_france altitude=195.465805,altitude\ description="altitude in meter" 1502209397
+altitude_m,location=biron_france altitude=195.929207,altitude\ description="altitude in meter" 1502209398
+altitude_m,location=biron_france altitude=196.309968,altitude\ description="altitude in meter" 1502209399
+altitude_m,location=biron_france altitude=196.582752,altitude\ description="altitude in meter" 1502209400
+altitude_m,location=biron_france altitude=196.449757,altitude\ description="altitude in meter" 1502209401
+altitude_m,location=biron_france altitude=196.919055,altitude\ description="altitude in meter" 1502209402
+altitude_m,location=biron_france altitude=196.669102,altitude\ description="altitude in meter" 1502209403
+altitude_m,location=biron_france altitude=196.907241,altitude\ description="altitude in meter" 1502209404
+altitude_m,location=biron_france altitude=196.981466,altitude\ description="altitude in meter" 1502209405
+altitude_m,location=biron_france altitude=197.330153,altitude\ description="altitude in meter" 1502209406
+altitude_m,location=biron_france altitude=197.523193,altitude\ description="altitude in meter" 1502209407
+altitude_m,location=biron_france altitude=198.254309,altitude\ description="altitude in meter" 1502209408
+altitude_m,location=biron_france altitude=198.958893,altitude\ description="altitude in meter" 1502209409
+altitude_m,location=biron_france altitude=199.447538,altitude\ description="altitude in meter" 1502209410
+altitude_m,location=biron_france altitude=199.974713,altitude\ description="altitude in meter" 1502209411
+altitude_m,location=biron_france altitude=200.884069,altitude\ description="altitude in meter" 1502209412
+altitude_m,location=biron_france altitude=201.446231,altitude\ description="altitude in meter" 1502209413
+altitude_m,location=biron_france altitude=201.841417,altitude\ description="altitude in meter" 1502209414
+altitude_m,location=biron_france altitude=202.519430,altitude\ description="altitude in meter" 1502209415
+altitude_m,location=biron_france altitude=203.343414,altitude\ description="altitude in meter" 1502209416
+altitude_m,location=biron_france altitude=203.343414,altitude\ description="altitude in meter" 1502209417
+altitude_m,location=biron_france altitude=203.747320,altitude\ description="altitude in meter" 1502209418
+altitude_m,location=biron_france altitude=204.316871,altitude\ description="altitude in meter" 1502209419
+altitude_m,location=biron_france altitude=204.729463,altitude\ description="altitude in meter" 1502209420
+altitude_m,location=biron_france altitude=205.497416,altitude\ description="altitude in meter" 1502209421
+altitude_m,location=biron_france altitude=206.174116,altitude\ description="altitude in meter" 1502209422
+altitude_m,location=biron_france altitude=206.958843,altitude\ description="altitude in meter" 1502209423
+altitude_m,location=biron_france altitude=207.815509,altitude\ description="altitude in meter" 1502209424
+altitude_m,location=biron_france altitude=208.370569,altitude\ description="altitude in meter" 1502209425
+altitude_m,location=biron_france altitude=209.101424,altitude\ description="altitude in meter" 1502209426
+altitude_m,location=biron_france altitude=209.451190,altitude\ description="altitude in meter" 1502209427
+altitude_m,location=biron_france altitude=209.766333,altitude\ description="altitude in meter" 1502209428
+altitude_m,location=biron_france altitude=209.865360,altitude\ description="altitude in meter" 1502209429
+altitude_m,location=biron_france altitude=209.608266,altitude\ description="altitude in meter" 1502209430
+altitude_m,location=biron_france altitude=209.533398,altitude\ description="altitude in meter" 1502209431
+altitude_m,location=biron_france altitude=209.498593,altitude\ description="altitude in meter" 1502209432
+altitude_m,location=biron_france altitude=209.562810,altitude\ description="altitude in meter" 1502209433
+altitude_m,location=biron_france altitude=209.400659,altitude\ description="altitude in meter" 1502209434
+altitude_m,location=biron_france altitude=209.074572,altitude\ description="altitude in meter" 1502209435
+altitude_m,location=biron_france altitude=208.408926,altitude\ description="altitude in meter" 1502209436
+altitude_m,location=biron_france altitude=207.881288,altitude\ description="altitude in meter" 1502209437
+altitude_m,location=biron_france altitude=207.634388,altitude\ description="altitude in meter" 1502209438
+altitude_m,location=biron_france altitude=207.310143,altitude\ description="altitude in meter" 1502209439
+altitude_m,location=biron_france altitude=206.747667,altitude\ description="altitude in meter" 1502209440
+altitude_m,location=biron_france altitude=206.537677,altitude\ description="altitude in meter" 1502209441
+altitude_m,location=biron_france altitude=206.172414,altitude\ description="altitude in meter" 1502209442
+altitude_m,location=biron_france altitude=206.122077,altitude\ description="altitude in meter" 1502209443
+altitude_m,location=biron_france altitude=206.122077,altitude\ description="altitude in meter" 1502209444
+altitude_m,location=biron_france altitude=206.165406,altitude\ description="altitude in meter" 1502209445
+altitude_m,location=biron_france altitude=206.165667,altitude\ description="altitude in meter" 1502209446
+altitude_m,location=biron_france altitude=205.989582,altitude\ description="altitude in meter" 1502209447
+altitude_m,location=biron_france altitude=205.967096,altitude\ description="altitude in meter" 1502209448
+altitude_m,location=biron_france altitude=205.668130,altitude\ description="altitude in meter" 1502209449
+altitude_m,location=biron_france altitude=205.942503,altitude\ description="altitude in meter" 1502209450
+altitude_m,location=biron_france altitude=205.785942,altitude\ description="altitude in meter" 1502209451
+altitude_m,location=biron_france altitude=205.909445,altitude\ description="altitude in meter" 1502209452
+altitude_m,location=biron_france altitude=206.037600,altitude\ description="altitude in meter" 1502209453
+altitude_m,location=biron_france altitude=205.855592,altitude\ description="altitude in meter" 1502209454
+altitude_m,location=biron_france altitude=205.704817,altitude\ description="altitude in meter" 1502209455
+altitude_m,location=biron_france altitude=205.530784,altitude\ description="altitude in meter" 1502209456
+altitude_m,location=biron_france altitude=205.362488,altitude\ description="altitude in meter" 1502209457
+altitude_m,location=biron_france altitude=205.326232,altitude\ description="altitude in meter" 1502209458
+altitude_m,location=biron_france altitude=205.220223,altitude\ description="altitude in meter" 1502209459
+altitude_m,location=biron_france altitude=205.113726,altitude\ description="altitude in meter" 1502209460
+altitude_m,location=biron_france altitude=205.255703,altitude\ description="altitude in meter" 1502209461
+altitude_m,location=biron_france altitude=205.171716,altitude\ description="altitude in meter" 1502209462
+altitude_m,location=biron_france altitude=204.933788,altitude\ description="altitude in meter" 1502209463
+altitude_m,location=biron_france altitude=204.736768,altitude\ description="altitude in meter" 1502209464
+altitude_m,location=biron_france altitude=204.467145,altitude\ description="altitude in meter" 1502209465
+altitude_m,location=biron_france altitude=204.203887,altitude\ description="altitude in meter" 1502209466
+altitude_m,location=biron_france altitude=203.750727,altitude\ description="altitude in meter" 1502209467
+altitude_m,location=biron_france altitude=203.345044,altitude\ description="altitude in meter" 1502209468
+altitude_m,location=biron_france altitude=202.619374,altitude\ description="altitude in meter" 1502209469
+altitude_m,location=biron_france altitude=202.059234,altitude\ description="altitude in meter" 1502209470
+altitude_m,location=biron_france altitude=202.059234,altitude\ description="altitude in meter" 1502209471
+altitude_m,location=biron_france altitude=201.569456,altitude\ description="altitude in meter" 1502209472
+altitude_m,location=biron_france altitude=201.011012,altitude\ description="altitude in meter" 1502209473
+altitude_m,location=biron_france altitude=200.114941,altitude\ description="altitude in meter" 1502209474
+altitude_m,location=biron_france altitude=199.267049,altitude\ description="altitude in meter" 1502209475
+altitude_m,location=biron_france altitude=198.629527,altitude\ description="altitude in meter" 1502209476
+altitude_m,location=biron_france altitude=197.891292,altitude\ description="altitude in meter" 1502209477
+altitude_m,location=biron_france altitude=197.148497,altitude\ description="altitude in meter" 1502209478
+altitude_m,location=biron_france altitude=196.475003,altitude\ description="altitude in meter" 1502209479
+altitude_m,location=biron_france altitude=195.791403,altitude\ description="altitude in meter" 1502209480
+altitude_m,location=biron_france altitude=195.121901,altitude\ description="altitude in meter" 1502209481
+altitude_m,location=biron_france altitude=194.258021,altitude\ description="altitude in meter" 1502209482
+altitude_m,location=biron_france altitude=193.400931,altitude\ description="altitude in meter" 1502209483
+altitude_m,location=biron_france altitude=192.679903,altitude\ description="altitude in meter" 1502209484
+altitude_m,location=biron_france altitude=191.540414,altitude\ description="altitude in meter" 1502209485
+altitude_m,location=biron_france altitude=190.467219,altitude\ description="altitude in meter" 1502209486
+altitude_m,location=biron_france altitude=189.737122,altitude\ description="altitude in meter" 1502209487
+altitude_m,location=biron_france altitude=188.902253,altitude\ description="altitude in meter" 1502209488
+altitude_m,location=biron_france altitude=188.451299,altitude\ description="altitude in meter" 1502209489
+altitude_m,location=biron_france altitude=188.083851,altitude\ description="altitude in meter" 1502209490
+altitude_m,location=biron_france altitude=188.223552,altitude\ description="altitude in meter" 1502209491
+altitude_m,location=biron_france altitude=188.820326,altitude\ description="altitude in meter" 1502209492
+altitude_m,location=biron_france altitude=189.151536,altitude\ description="altitude in meter" 1502209493
+altitude_m,location=biron_france altitude=189.283024,altitude\ description="altitude in meter" 1502209494
+altitude_m,location=biron_france altitude=189.141220,altitude\ description="altitude in meter" 1502209495
+altitude_m,location=biron_france altitude=189.666698,altitude\ description="altitude in meter" 1502209496
+altitude_m,location=biron_france altitude=189.875607,altitude\ description="altitude in meter" 1502209497
+altitude_m,location=biron_france altitude=190.011308,altitude\ description="altitude in meter" 1502209498
+altitude_m,location=biron_france altitude=190.011308,altitude\ description="altitude in meter" 1502209499
+altitude_m,location=biron_france altitude=190.427830,altitude\ description="altitude in meter" 1502209500
+altitude_m,location=biron_france altitude=190.899055,altitude\ description="altitude in meter" 1502209501
+altitude_m,location=biron_france altitude=191.554597,altitude\ description="altitude in meter" 1502209502
+altitude_m,location=biron_france altitude=192.359531,altitude\ description="altitude in meter" 1502209503
+altitude_m,location=biron_france altitude=192.595207,altitude\ description="altitude in meter" 1502209504
+altitude_m,location=biron_france altitude=192.814967,altitude\ description="altitude in meter" 1502209505
+altitude_m,location=biron_france altitude=192.028936,altitude\ description="altitude in meter" 1502209506
+altitude_m,location=biron_france altitude=190.767502,altitude\ description="altitude in meter" 1502209507
+altitude_m,location=biron_france altitude=189.930306,altitude\ description="altitude in meter" 1502209508
+altitude_m,location=biron_france altitude=189.050757,altitude\ description="altitude in meter" 1502209509
+altitude_m,location=biron_france altitude=188.508325,altitude\ description="altitude in meter" 1502209510
+altitude_m,location=biron_france altitude=187.871400,altitude\ description="altitude in meter" 1502209511
+altitude_m,location=biron_france altitude=186.775441,altitude\ description="altitude in meter" 1502209512
+altitude_m,location=biron_france altitude=186.177622,altitude\ description="altitude in meter" 1502209513
+altitude_m,location=biron_france altitude=185.022819,altitude\ description="altitude in meter" 1502209514
+altitude_m,location=biron_france altitude=183.899782,altitude\ description="altitude in meter" 1502209515
+altitude_m,location=biron_france altitude=183.042081,altitude\ description="altitude in meter" 1502209516
+altitude_m,location=biron_france altitude=181.328815,altitude\ description="altitude in meter" 1502209517
+altitude_m,location=biron_france altitude=180.303213,altitude\ description="altitude in meter" 1502209518
+altitude_m,location=biron_france altitude=178.831827,altitude\ description="altitude in meter" 1502209519
+altitude_m,location=biron_france altitude=178.242162,altitude\ description="altitude in meter" 1502209520
+altitude_m,location=biron_france altitude=177.249959,altitude\ description="altitude in meter" 1502209521
+altitude_m,location=biron_france altitude=176.430162,altitude\ description="altitude in meter" 1502209522
+altitude_m,location=biron_france altitude=175.496933,altitude\ description="altitude in meter" 1502209523
+altitude_m,location=biron_france altitude=174.468397,altitude\ description="altitude in meter" 1502209524
+altitude_m,location=biron_france altitude=173.607643,altitude\ description="altitude in meter" 1502209525
+altitude_m,location=biron_france altitude=173.607643,altitude\ description="altitude in meter" 1502209526
+altitude_m,location=biron_france altitude=173.860274,altitude\ description="altitude in meter" 1502209527
+altitude_m,location=biron_france altitude=174.193141,altitude\ description="altitude in meter" 1502209528
+altitude_m,location=biron_france altitude=174.197596,altitude\ description="altitude in meter" 1502209529
+altitude_m,location=biron_france altitude=174.517176,altitude\ description="altitude in meter" 1502209530
+altitude_m,location=biron_france altitude=174.517176,altitude\ description="altitude in meter" 1502209530
+altitude_m,location=biron_france altitude=175.032019,altitude\ description="altitude in meter" 1502209531
