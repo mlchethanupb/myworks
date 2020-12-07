@@ -25,13 +25,13 @@ class W_MAC_Env(gym.Env):
     #nx.draw_networkx(self.graph)
    
     logging.basicConfig(
-        filename='wmac.log',
+        filename='wmac_0712_T1.log',
         filemode='w', 
         format='%(levelname)s:%(message)s', 
         level=logging.DEBUG
       )
 
-    logging.debug("___Init____")
+    logging.debug("___Init____0712_T2")
     self.__initialize_rewards()
     self.__reset_stat_variables()
     self.__reset_visualization_variables()
@@ -81,13 +81,13 @@ class W_MAC_Env(gym.Env):
         no_transmit = False
     
     if isdone == False and no_transmit == True:
-      reward -= self.COLLISION_REWARD / 2
+      reward -= self.COLLISION_REWARD / 20
 
     if isdone == True:
         queue_empty = True
         for node in self.graph.nodes:
             if len(self.queues[node]) > 0:
-                reward -= self.MAX_REWARD*10*self.total_nodes
+                reward -= self.MAX_REWARD*self.total_nodes
                 #print("Punishing when done even if packets remain")
                 logging.info("Punishing when done even if packets remain")
                 queue_empty = False
@@ -96,10 +96,10 @@ class W_MAC_Env(gym.Env):
         if queue_empty == True and self.packet_lost == 0:
           #print("Hurray !!! All packets transmitted successfully")
           logging.info("Hurray !!! All packets transmitted successfully")
-          reward += self.MAX_REWARD*self.total_nodes
+          #reward += self.MAX_REWARD*self.total_nodes
 
 
-    logging.info("nxt_state_arr: %s, reward: %s, isdone: %s", nxt_state_arr, reward, isdone)
+    #logging.info("nxt_state_arr: %s, reward: %s, isdone: %s", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
 
 
@@ -146,7 +146,7 @@ class W_MAC_Env(gym.Env):
   
   def __initialize_rewards(self):
     ### Rewards
-    self.MAX_REWARD = 20*(self.total_nodes + 1)
+    self.MAX_REWARD = (self.total_nodes)
     self.COLLISION_REWARD = 10*self.total_nodes
     self.PATH_REWARD = 1 * self.total_nodes
     self.ATTACK_NODE_REWARD = 15 * self.total_nodes
@@ -181,7 +181,7 @@ class W_MAC_Env(gym.Env):
     
     self.attack_nodes = []
     
-    for i in range(1):
+    for i in range(0):
       a_node = random.randrange(0,self.total_nodes)
       while (a_node in self.attack_nodes):
         a_node = random.randrange(0,self.total_nodes)
@@ -476,7 +476,9 @@ class W_MAC_Env(gym.Env):
         #logging.debug("queue_size_list %s", queue_size_list)
 
         return queue_size_list
-  
+
+  #--------------------------------------------------------------------------------------------
+
   def __get_valid_action_sublist(self, actions, node_list, qs_list):
         
         valid_act_sublist = []
@@ -605,23 +607,24 @@ class W_MAC_Env(gym.Env):
                   self.__vis_update_src_dest(node,packet_to_send.dest)
                 
                   self.packet_delivered +=1
-                  hopcount_reward = self.HOP_COUNT_MULT * packet_to_send.get_hop_count()
+                  hopcount_reward = 0#self.HOP_COUNT_MULT * packet_to_send.get_hop_count()
                   reward2 += (self.MAX_REWARD) - hopcount_reward
 
               else:
 
-                  reward2 += (self.COLLISION_REWARD/10) - packet_to_send.get_hop_count()
-  
-                  path_reward = self.__is_in_shortest_path(node, packet_to_send, nxt_hop)
+                  #reward2 += (self.COLLISION_REWARD/10) - packet_to_send.get_hop_count()
+                  reward2 -= packet_to_send.get_hop_count()
+
+                  path_reward = 0 #self.__is_in_shortest_path(node, packet_to_send, nxt_hop)
                   reward2 += path_reward ## path reward is in negative
-                  logging.debug("Packet added to queue of next_hop: %s",nxt_hop)
+                  #logging.debug("With SRHC Packet added to queue of next_hop: %s",nxt_hop)
                   ### successful transmission, add the packet to the queue.
                   packet_to_send.update_hop_count()
                   self.queues[nxt_hop].insert(0, packet_to_send)
                                                
         else:
           ## Queue length 0. Agent should not take action.
-          reward2 -= self.COLLISION_REWARD / 2
+          reward2 -= self.COLLISION_REWARD / 20
     
     #print("reward1", reward1, "reward2", reward2)
     reward = (1) * reward1 + (1) * reward2
