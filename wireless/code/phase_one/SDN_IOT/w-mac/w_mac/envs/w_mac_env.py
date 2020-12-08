@@ -81,13 +81,13 @@ class W_MAC_Env(gym.Env):
         no_transmit = False
     
     if isdone == False and no_transmit == True:
-      reward -= self.COLLISION_REWARD / 2
+      reward -= self.COLLISION_REWARD / 20
 
     if isdone == True:
         queue_empty = True
         for node in self.graph.nodes:
             if len(self.queues[node]) > 0:
-                reward -= self.MAX_REWARD*10*self.total_nodes
+                reward -= self.MAX_REWARD*self.total_nodes
                 #print("Punishing when done even if packets remain")
                 logging.info("Punishing when done even if packets remain")
                 queue_empty = False
@@ -96,10 +96,10 @@ class W_MAC_Env(gym.Env):
         if queue_empty == True and self.packet_lost == 0:
           #print("Hurray !!! All packets transmitted successfully")
           logging.info("Hurray !!! All packets transmitted successfully")
-          reward += self.MAX_REWARD*self.total_nodes
+          #reward += self.MAX_REWARD*self.total_nodes
 
 
-    logging.info("nxt_state_arr: %s, reward: %s, isdone: %s", nxt_state_arr, reward, isdone)
+    #logging.info("nxt_state_arr: %s, reward: %s, isdone: %s", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
 
 
@@ -146,11 +146,9 @@ class W_MAC_Env(gym.Env):
   
   def __initialize_rewards(self):
     ### Rewards
-    self.MAX_REWARD = 20*(self.total_nodes + 1)
+    self.MAX_REWARD = (self.total_nodes)
     self.COLLISION_REWARD = 10*self.total_nodes
-    self.PATH_REWARD = 1 * self.total_nodes
     self.ATTACK_NODE_REWARD = 15 * self.total_nodes
-    self.HOP_COUNT_MULT = 10
 
   #--------------------------------------------------------------------------------------------
 
@@ -468,28 +466,17 @@ class W_MAC_Env(gym.Env):
 
   #--------------------------------------------------------------------------------------------
 
+  """
+    Retrun list of queue sizes of each node.  
+  """
   def __get_queue_sizes(self):
         
         queue_size_list = []
         for node in self.graph.nodes:
               queue_size_list.append(len(self.queues[node]))
-        #logging.debug("queue_size_list %s", queue_size_list)
 
         return queue_size_list
-  
-  def __get_valid_action_sublist(self, actions, node_list, qs_list):
-        
-        valid_act_sublist = []
-        for i_node in node_list:
-            i_index = self.__get_index(i_node)
-            if (actions[i_index] in range(self.total_nodes)) and (qs_list[i_index] > 0):
-                valid_act_sublist.append(1)
-            else:
-                valid_act_sublist.append(0)
-        #logging.debug("actions: %s, node_list %s, valid_act_sublist : %s, queue_size_list : %s", 
-        #                actions, node_list, valid_act_sublist, qs_list)
 
-        return valid_act_sublist
 
   #--------------------------------------------------------------------------------------------
 
@@ -561,18 +548,7 @@ class W_MAC_Env(gym.Env):
                     domain_key = domain ## domain_key is used to check the hidden terminal problem
                     break
 
-            ### actions for other nodes in the nexthop collision domain
-            """action_sublist = []
-            for i_node in node_list:
-                i_index = self.__get_index(i_node)
-                action_sublist.append(actions[i_index])
-
-
-            num_nodes_transmitting = 0
-            for tmp_action in action_sublist:
-                if (tmp_action in range(self.total_nodes)):
-                    num_nodes_transmitting += 1"""
-            
+            ### get valid actions for nodes in the nexthop collision domain
             valid_act_sublist = self.__get_valid_action_sublist(actions, node_list, qs_list)
 
             num_nodes_transmitting = 0
@@ -584,6 +560,8 @@ class W_MAC_Env(gym.Env):
                 logging.debug('Packet loss due to collision')
                 self.packet_lost += 1
                 reward2 -= self.COLLISION_REWARD
+
+
                 logging.debug("node: %s, index: %s ,next_hop: %s, domain_list: %s, nexthop in domain: %s, next_hop_node_list: %s",
                           node, index, nxt_hop, domain_list, domain_key, node_list)
                 logging.debug("actions: %s, valid_action_sublist: %s", actions, valid_act_sublist)
@@ -592,6 +570,8 @@ class W_MAC_Env(gym.Env):
                 logging.debug('Packet loss due to hidden terminal problem')
                 reward2 -= self.COLLISION_REWARD
                 self.packet_lost += 1
+
+
                 logging.debug("node: %s, index: %s ,next_hop: %s, domain_list: %s, nexthop in domain: %s, next_hop_node_list: %s",
                           node, index, nxt_hop, domain_list, domain_key, node_list)
                 logging.debug("actions: %s, valid_action_sublist: %s", actions, valid_act_sublist)
@@ -605,29 +585,22 @@ class W_MAC_Env(gym.Env):
                   self.__vis_update_src_dest(node,packet_to_send.dest)
                 
                   self.packet_delivered +=1
-                  hopcount_reward = self.HOP_COUNT_MULT * packet_to_send.get_hop_count()
-                  reward2 += (self.MAX_REWARD) - hopcount_reward
+                  reward2 += (self.MAX_REWARD)
 
               else:
 
-                  reward2 += (self.COLLISION_REWARD/10) - packet_to_send.get_hop_count()
-  
-                  path_reward = self.__is_in_shortest_path(node, packet_to_send, nxt_hop)
-                  reward2 += path_reward ## path reward is in negative
-                  logging.debug("Packet added to queue of next_hop: %s",nxt_hop)
+                  reward2 -= packet_to_send.get_hop_count()
+
+                  #logging.debug("Packet added to queue of next_hop: %s",nxt_hop)
                   ### successful transmission, add the packet to the queue.
                   packet_to_send.update_hop_count()
                   self.queues[nxt_hop].insert(0, packet_to_send)
                                                
         else:
           ## Queue length 0. Agent should not take action.
-          reward2 -= self.COLLISION_REWARD / 2
+          reward2 -= self.COLLISION_REWARD / 20
     
-    #print("reward1", reward1, "reward2", reward2)
     reward = (1) * reward1 + (1) * reward2
-
-    #print('packets delivered ',self.packet_delivered)
-    #print('packet_lost ', self.packet_lost)
 
     return reward
 
@@ -650,17 +623,6 @@ class W_MAC_Env(gym.Env):
       if( nxt_hop in h_values): ## Next hop is in other collision domain. 
         if(domain_key != h_key): ## Its not same as the source collision domain
          
-          """h_action = []
-          for i_node in h_values:
-                h_action.append(actions[self.__get_index(i_node)])
-          #logging.debug("h_values : %s ",h_values)
-          #logging.debug("h_action : %s ",h_action)
-
-          num_nodes_transmitting = 0
-          for tmp_action in h_action:
-                if (tmp_action in range(self.total_nodes)):
-                    num_nodes_transmitting += 1"""
-          
           h_action = self.__get_valid_action_sublist(actions,h_values,qs_list)
 
           num_nodes_transmitting = 0
@@ -672,58 +634,6 @@ class W_MAC_Env(gym.Env):
                 ret_val = True
                   
     return ret_val
-
-  #--------------------------------------------------------------------------------------------
-
-  def __is_in_shortest_path(self, src, packet_to_send, nxt_hop):
-    
-    path_reward = 0
-
-    src_in_domains = self.node_in_domains[src]
-    #print("src_in_domains", src_in_domains)
-
-    dest = packet_to_send.dest
-    dest_in_domains = self.node_in_domains[dest]
-    #print("dest_in_domains", dest_in_domains)
-
-    nxthop_in_domains = self.node_in_domains[nxt_hop]
-    #print("nxthop_in_domains", nxthop_in_domains)
-
-    ### source and destination are in same collision domain, but agent did not choose the destination. 
-    if src_in_domains == dest_in_domains:
-      path_reward -= self.PATH_REWARD
-    ### destination in different domain but the next hop is in same domain as that of source
-    ### (looping in same domain) punish the agent
-    elif src_in_domains == nxthop_in_domains:
-      path_reward -= self.PATH_REWARD
-
-    else:
-
-      ### destination domain is part of next hop domains. 
-      ### i.e nexthop is the intermediate node between destination and source
-      ### example: src = [1] dest = [2] nxthop = [1, 2]
-      ### positive reward to agent
-      for dmn_id in dest_in_domains:
-          if dmn_id in nxthop_in_domains:
-                #print("Four")
-                path_reward += self.PATH_REWARD
-                break
-    
-      ### destination is part of source domain but next hop is not
-      ### ex: src = [1,2] dest = [1], next_hop = [2]
-      ### Program Logic: 
-      ### if dest_domain is part of src_domain, then nxthop_domain should be part of dest_domain
-      ### else, agent is choosing the wrong path. 
-      """
-      for dmn_id in dest_in_domains:
-          if dmn_id in src_in_domains:
-              for nh_dmn_id in nxthop_in_domains:
-                    if nh_dmn_id not in dest_in_domains:
-                      path_reward -= self.PATH_REWARD
-                      break
-      """                     
-    #print("path_reward:",path_reward)
-    return path_reward
 
   #--------------------------------------------------------------------------------------------
 
@@ -760,4 +670,22 @@ class W_MAC_Env(gym.Env):
               #logging.debug("Node: %s, index: %s, Action: %s, action_list: %s, mapped action:%s",node,index,actions[index],action_list,valid_actions)
 
         return valid_actions
+
+  #--------------------------------------------------------------------------------------------
+
+  """ Check actions in the given node list and return boolean value for each node
+          1 - not wait and node has packet to send. 
+          0 - wait or node queue is empty
+  """
+  def __get_valid_action_sublist(self, actions, node_list, qs_list):
+        
+        valid_act_sublist = []
+        for i_node in node_list:
+            i_index = self.__get_index(i_node)
+            if (actions[i_index] in range(self.total_nodes)) and (qs_list[i_index] > 0):
+                valid_act_sublist.append(1)
+            else:
+                valid_act_sublist.append(0)
+
+        return valid_act_sublist
 
