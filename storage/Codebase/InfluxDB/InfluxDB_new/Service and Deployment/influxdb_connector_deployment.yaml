@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: influxdb-connector
+  name: influxdb-connector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb-connector
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: influxdb-connector
+    spec:
+      nodeName: pg-aicon-storage-3
+      containers:
+      - image: connector:dev
+        name: influxdb-connector
+        env:
+        - name: INFLUXDB_HOST
+          value: influxdbnew
+        - name: OPCUA_SERVER
+          value: digitaltwinnew
+        volumeMounts:
+         - name: csv-volume
+           mountPath: /app/csv/
+      volumes:
+        - name: csv-volume
+          hostPath:
+            path: /tmp/
+            type: Directory
+      restartPolicy: Always

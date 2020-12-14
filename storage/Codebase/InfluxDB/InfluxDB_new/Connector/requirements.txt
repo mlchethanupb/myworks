@@ -1,0 +1,5 @@
+prometheus_client
+influxdb
+requests
+opcua
+cryptography

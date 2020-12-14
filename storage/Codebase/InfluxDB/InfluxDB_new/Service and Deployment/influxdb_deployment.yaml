@@ -1,0 +1,25 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdbnew
+  labels:
+    app: influxdbnew
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdbnew
+  template:
+    metadata:
+      labels:
+        app: influxdbnew
+    spec:
+      nodeName: pg-aicon-storage-3
+      containers:
+      - image: influxdb:dev
+        name: influxdbnew
+        ports:
+        - containerPort: 8086
+        - containerPort: 9273
+      restartPolicy: Always
