@@ -630,7 +630,7 @@ class W_MAC_Env(gym.Env):
                 if ( tmp_action == 1 ):
                     num_nodes_transmitting += 1 
 
-          if num_nodes_transmitting > 0:
+          if num_nodes_transmitting > 1:
                 ret_val = True
                   
     return ret_val
