@@ -70,7 +70,7 @@ class WirelessEnv(MultiAgentEnv):
         self.__reset_queue() 
 
         obs =  self.__get_obs_dict()
-
+        #logging.info("Observation : %s", obs)
         return obs
 
 
@@ -118,6 +118,8 @@ class WirelessEnv(MultiAgentEnv):
         done["__all__"] = alldone
         # print(obs)
         # print(self.observation_space)
+        #logging.info("Observation : %s", obs)
+        #logging.info("reward : %s, done : %s", rew, done)
         return obs, rew, done, info
 
     #--------------------------------------------------------------------------------------------
@@ -156,7 +158,7 @@ class WirelessEnv(MultiAgentEnv):
     
     def __initialize_rewards(self):
         ### Rewards
-        self.MAX_REWARD = (self.total_nodes)
+        self.MAX_REWARD = 10*(self.total_nodes)
         self.COLLISION_REWARD = 10*self.total_nodes
         self.ATTACK_NODE_REWARD = 15 * self.total_nodes
 
@@ -582,7 +584,6 @@ class WirelessEnv(MultiAgentEnv):
             ### Transmit when node is not defect node
             if (actions[index] in range(self.total_nodes)) and valid_next_hop == True:
                 
-                
                 queue = self.queues[node]
 
                 if(len(queue)):
@@ -651,6 +652,11 @@ class WirelessEnv(MultiAgentEnv):
                 else:
                     ## Queue length 0. Agent should not take action.
                     reward2 -= self.COLLISION_REWARD / 20
+            
+            elif(actions[index] == self.total_nodes):
+                #logging.info("wait")
+                reward2 -= self.COLLISION_REWARD / 20 
+
         
         reward = (1) * reward1 + (1) * reward2
 
@@ -682,7 +688,7 @@ class WirelessEnv(MultiAgentEnv):
                             if ( tmp_action == 1 ):
                                 num_nodes_transmitting += 1 
 
-                    if num_nodes_transmitting > 0:
+                    if num_nodes_transmitting > 1:
                             ret_val = True
                         
         return ret_val

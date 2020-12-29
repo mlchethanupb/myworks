@@ -39,29 +39,32 @@ def setup_and_train():
     # Define configuration with hyperparam and training details
     config={
                 "log_level": "WARN",
-                "num_workers": 3,
+                "num_workers": 4,
                 "num_cpus_for_driver": 1,
-                "num_cpus_per_worker": 1,
-                "num_sgd_iter": 10,
-                "train_batch_size": 128,
+                "num_cpus_per_worker": 3,
+                "num_gpus": 0,
+                "train_batch_size": 200,
+                "batch_mode": "truncate_episodes",
+                "num_envs_per_worker": 1,
                 "no_done_at_end": True,
                 "lr": 5e-3,
-                "model":{"fcnet_hiddens": [8, 8]},
                 "multiagent": {
                     "policies": policy_graphs,
                     "policy_mapping_fn": policy_mapping_fn,
+                    "count_steps_by": "agent_steps",
                 },
                 "env": "WirelessEnv"}
 
     # Define experiment details
-    exp_name = 'my_exp'
+    exp_name = 'wmac_marl'
     exp_dict = {
             'name': exp_name,
             'run_or_experiment': 'PPO',
             "stop": {
-                "training_iteration": 100
+                "training_iteration": 1500
             },
             'checkpoint_freq': 20,
+            "local_dir":"logs/",
             "config": config,
         }
 
