@@ -96,7 +96,7 @@ class W_MAC_Env(gym.Env):
         if queue_empty == True and self.packet_lost == 0:
           #print("Hurray !!! All packets transmitted successfully")
           logging.info("Hurray !!! All packets transmitted successfully")
-          #reward += self.MAX_REWARD*self.total_nodes
+          reward += self.MAX_REWARD*self.total_nodes
 
 
     #logging.info("nxt_state_arr: %s, reward: %s, isdone: %s", nxt_state_arr, reward, isdone)
