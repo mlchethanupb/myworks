@@ -25,8 +25,7 @@ if __name__ == '__main__':
     """Larger network"""
     # data = [(0,2),(0,1),(0,3),(1,2),(1,3),(2,3),(2,4),(3,4),(5,2),(5,3),(5,4),(5,6),(6,7),(6,8),(7,8),(8,9),(9,10),(4,10)]#(4,6),(5,10),(6,10),(9,6),(8,10)]
     """Smaller netowrk"""
-    # data = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3),
-    # (2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]
+    # data = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]
     # defaultdict(<type 'list'>, {})
 
     parser = argparse.ArgumentParser(
@@ -44,6 +43,7 @@ if __name__ == '__main__':
 
     data = args.graph
     data = ast.literal_eval(data)
+    print("data of graph", data)
 
     total_train_timesteps = args.total_train_timesteps
     eval_episodes = args.eval_episodes
@@ -57,8 +57,8 @@ if __name__ == '__main__':
             G.add_edge(k, vv)
     nx.draw_networkx(G)
 
-    env = gym.make('wmac-graphpavitra-v0', graph=G)
-    check_env(env)
+    env = gym.make('wmac-graphpavitratest-v0', graph=G)
+    # check_env(env)
     env2 = dsdv(env, G)
 
     class TensorboardCallback(BaseCallback):
@@ -128,19 +128,17 @@ if __name__ == '__main__':
         #             callback=TensorboardCallback())
 
         obs = env.reset()
+        # print("initial observatin")
         # create new queuesize function
         # attack_nodes = env.__reset_attack_nodes()
 
         count = 0
         while count < eval_episodes:
 
-            queue_size = env.q_size()
-            print("queue_size", queue_size)
-            print("obs", obs)
+            queue_size = env.get_queue_size()
+            # print("queue_size", queue_size)
+            # print("later obs", obs)
             action = env2.predict(obs, queue_size)
-            print(action)
-            #
-
             obs, rewards, done, info = env.step(action)
             env.render()
             count = count + 1
