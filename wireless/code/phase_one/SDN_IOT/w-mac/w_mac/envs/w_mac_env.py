@@ -12,8 +12,11 @@ from IPython.display import clear_output
 import time
 from collections import defaultdict
 import logging
+from w_mac.baseline.Routing_Table import Routing_info
+from w_mac.baseline.Updated_RTable import Updated_Routing_info
+from w_mac.baseline.DSDV_Agent import dsdv
 
-  
+
 class W_MAC_Env(gym.Env):
   metadata = {'render.modes': ['human']}
 
@@ -497,6 +500,7 @@ class W_MAC_Env(gym.Env):
 
   """
 
+
   def __perform_actions(self, actions):
 
     reward1 = 0
@@ -507,12 +511,26 @@ class W_MAC_Env(gym.Env):
 
     """ Reward for attacked node as a next hop """
     ### Next hop in same domain is valid_next_hop
+
+    ####Routing table information######
+    # dic = {}
+    # for nodes in self.graph.nodes():
+    #   dic[nodes] = {}
+    #   self.routing_table = dic
+
+    # for i in self.routing_table.keys():
+    #         self.routing_table[i].update({'destination': [], 'hop_count': [],
+    #                                       'next_hop': [], 'id_num': []})
+
     for node in self.graph.nodes:
 
       index = self.__get_index(node)
       nxt_hop = actions[index]
+      #self.routing_table[node]['next_hop'] = nxt_hop
+
     
       domain_list = self.node_in_domains[node]
+      
 
       valid_next_hop = True
       
