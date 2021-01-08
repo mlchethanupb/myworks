@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE
 import shutil
 import time
 import json
-import kube_apis
+import kube_api
 
 
 #Uploading Squid pod initially
