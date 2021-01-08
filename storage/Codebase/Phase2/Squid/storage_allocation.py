@@ -25,8 +25,10 @@ while check_loop<1:
     c_name=c_name.replace('\n', '')
     squid_disk=str(subprocess.check_output("kubectl exec -ti " + str(c_name)+ " -- /bin/sh -c 'du -sh / 2>/dev/null |sed 's/[^0-9]//g'|cut -c-1,-2,-3'", shell=True))
     current_usage=squid_disk.replace('\r\n','')
+    if current_usage=="":
+        current_usage=0
+    current_usage=int(current_usage)
     print('current disk usage is:',current_usage)
-
 
 
     ######update pvc with new storage 
@@ -41,7 +43,7 @@ while check_loop<1:
     print('Current storage limit is',s_limit)
     fin.close()
 
-    if (int(s_limit)-int(current_usage)<=2):
+    if (int(s_limit)-current_usage<=2):
         check_loop=1
         #squid storage demand prediction with ml model, according to which squid pvc will  be patched
     
