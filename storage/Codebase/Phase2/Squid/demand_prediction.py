@@ -26,7 +26,7 @@ def storage_demand(start_time):
 
     current_request_rate=str(subprocess.check_output("kubectl exec -ti " + str(c_name)+ " -- /bin/sh -c 'squidclient -h localhost cache_object://localhost/ mgr:info| grep 'Average HTTP requests per minute since start:'| cut -f2 -d':''", shell=True))
     current_request=subprocess.check_output("kubectl exec -ti " + str(c_name)+ " -- /bin/sh -c 'squidclient -h localhost cache_object://localhost/ mgr:info| grep 'received'| cut -f2 -d':'|head -n1 '", shell=True)
-    new_request=ingestion_rate*(update_interval/60) #after 1 hr total reqest
+    new_request=(ingestion_rate*update_interval)/60 #after 1 hr total reqest
     print('new request',new_request)
     print('current request is:',current_request)
     total_request=int(current_request)+new_request
