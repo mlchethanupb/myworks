@@ -21,7 +21,8 @@ INFLUXDB_METRICS_PORT = os.environ.get('INFLUXDB_METRICS_PORTNUM', 9273)
 INFLUXDB_DB = os.environ.get('INFLUXDB_DB', 'data')
 METRICS_USER = os.environ.get('METRICS_USER', 'foo')
 METRICS_PASS = os.environ.get('METRICS_PASS', 'bar')
-CSV_FILE = os.environ.get('CSV_FILE', 'data.csv')
+CSV_FILE = os.environ.get('CSV_FILE', datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv')
+
 
 #CRITICAL-50, ERROR-40,WARNING-30,INFO-20,DEBUG-10,NOTSET-0
 DEBUG_MODE = os.getenv('DEBUG_MODE', 'INFO')
@@ -51,7 +52,7 @@ def main():
 
     opcua_client = Client("opc.tcp://{}:{}/freeopcua/server/".format(OPCUA_SERVER, OPCUA_PORT))
 
-    cols = ["request_datetime","msg_size","request_time_ms","request_ret","cpu_usage_active","disk_used_percent","mem_available_percent","influxdb_memstats_sys","influxdb_memstats_heap_inuse","influxdb_shard_diskBytes","influxdb_shard_writeBytes","influxdb_database_numSeries","influxdb_httpd_writeReqBytes","influxdb_httpd_writeReqDurationNs","influxdb_httpd_writeReq","influxdb_httpd_writeReqActive"]
+    cols = ["request_datetime","msg_size","request_time_ms","request_ret","cpu_usage_active","disk_used_percent","mem_available_percent","influxdb_memstats_sys","influxdb_memstats_heap_inuse","influxdb_shard_diskBytes","influxdb_diskBytes","influxdb_shard_writeBytes","influxdb_database_numSeries","influxdb_httpd_writeReqBytes","influxdb_httpd_writeReqDurationNs","influxdb_httpd_writeReq","influxdb_httpd_writeReqActive"]
     with open("./csv/" + CSV_FILE, mode='w+', newline="") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=cols, extrasaction='ignore')
         writer.writeheader()
@@ -128,13 +129,16 @@ def main():
                 if sample[0] == "influxdb_memstats_heap_inuse":
                     influxdb_metrics['influxdb_memstats_heap_inuse'] = sample[2]
                     continue
-                if sample[0] == "influxdb_shard_diskBytes" and sample[1]['database'] == '_internal':
+                if sample[0] == "influxdb_shard_diskBytes" and sample[1]['database'] == INFLUXDB_DB:
                     influxdb_metrics['influxdb_shard_diskBytes'] = sample[2]
                     continue
-                if sample[0] == "influxdb_shard_writeBytes" and sample[1]['database'] == '_internal':
+                if sample[0] == "filecount_size_bytes" and sample[1]['directory'] == '/var/lib/influxdb':
+                    influxdb_metrics['influxdb_diskBytes'] = sample[2]
+                    continue
+                if sample[0] == "influxdb_shard_writeBytes" and sample[1]['database'] == INFLUXDB_DB:
                     influxdb_metrics['influxdb_shard_writeBytes'] = sample[2]
                     continue
-                if sample[0] == "influxdb_database_numSeries" and sample[1]['database'] == '_internal':
+                if sample[0] == "influxdb_database_numSeries" and sample[1]['database'] == INFLUXDB_DB:
                     influxdb_metrics['influxdb_database_numSeries'] = sample[2]
                     continue
                 if sample[0] == "influxdb_httpd_writeReqBytes":
