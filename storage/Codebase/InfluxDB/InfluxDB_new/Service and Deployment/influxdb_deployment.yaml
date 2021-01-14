@@ -22,4 +22,12 @@ spec:
         ports:
         - containerPort: 8086
         - containerPort: 9273
+        volumeMounts:
+        - name: influxdbnew-vol
+          mountPath: /var/lib/influxdb
+        resources: {}
+      volumes:
+      - name: influxdbnew-vol
+        persistentVolumeClaim:
+          claimName: gluster1
       restartPolicy: Always
