@@ -11,8 +11,10 @@ import matplotlib.pyplot as plt
 from IPython.display import clear_output
 import time
 from collections import defaultdict
-from Routing_Table import Routing_info
-from Updated_RTable import Updated_Routing_info
+#from Routing_Table import Routing_info
+#from Updated_RTable import Updated_Routing_info
+from w_mac.baseline.Routing_Table import Routing_info
+from w_mac.baseline.Updated_RTable import Updated_Routing_info
 
 """Baseline routing protocol DSDV"""
 
@@ -92,7 +94,7 @@ class dsdv():
                             self.routing_table[nodes]['hop_count'] = nbr_hc
                             self.routing_table[nodes]['id_num'] = self_id
 
-        self.Broadcast_NbrTable()
+        #self.Broadcast_NbrTable()
 
         print("Final Routing table", self.routing_table)
 
@@ -131,6 +133,7 @@ class dsdv():
 
         # while (self.queue_empty):
         # print("queues are not empty")
+        
         for self.src_node in self.graph.nodes():
             if self.src_node not in self.attack_nodes:
                 if (len(self.rtable_info_queue[self.src_node]) != 0):
@@ -222,6 +225,7 @@ class dsdv():
         self.actions = list(self.graph.nodes)
         # print("actions before returning", self.actions)
         max_queue_size = max(self.queue_size)
+
         if max_queue_size > 0:
             index_of_large_queue = np.argmax(self.queue_size)
             # print("index_of_large_queue", index_of_large_queue)

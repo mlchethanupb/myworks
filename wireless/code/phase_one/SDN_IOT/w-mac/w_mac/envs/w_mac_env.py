@@ -70,11 +70,35 @@ class W_MAC_Env(gym.Env):
     #logging.debug("mapped actions: %s",actions)
     reward = 0
 
-    reward = self.__perform_actions(actions)
+    # reward = self.__perform_actions(actions)
+    # for i in self.graph.nodes:
+    #   queue = self.queues[i]
+    #   if(len(queue)):   
+    #     max_queue_size = self.__get_queue_sizes()     
+    #     reward2 = dsdv.tdma(self)
+    #     print(reward2)
+
     
-    next_state = self.__frame_next_state()
-    nxt_state_arr = np.array(next_state)
-    
+    print("calling predict function - 1")
+    self.destinations_list_with_anode = []
+    self.queue_size = []
+    self.destinations_list_with_anode = self.__frame_next_state()
+    self.queue_size = self.__get_queue_sizes
+    # last number is attack node info
+    self.attack_node = ([self.destinations_list_with_anode[-1]])
+    self.destinations_list = self.destinations_list_with_anode[:-1]
+    print("self.destinations_list", self.destinations_list)
+
+    dsdv.create_routing_table(self, self.attack_node)
+    self.actions = dsdv.tdma(self)
+    self.valid_action_list = dsdv.map_actions()
+    broadcast = dsdv.Broadcast_NbrTable(self)
+
+    #next_state = self.__frame_next_state()
+    #queue_s = self.__get_queue_sizes
+    # nxt_state_arr = np.array(next_state)
+    predict = dsdv.predict(self, self.destinations_list_with_anode, self.queue_size)
+
     isdone = self.__isdone()
     info = {}
 
@@ -499,8 +523,7 @@ class W_MAC_Env(gym.Env):
     -- Positive reward is also reduced with factor of hopcount taken to reach destination.
 
   """
-
-
+ 
   def __perform_actions(self, actions):
 
     reward1 = 0
@@ -508,28 +531,36 @@ class W_MAC_Env(gym.Env):
 
     ## Reset visualization variables  
     self.__reset_visualization_variables()
+    self.node_action_list = self.__read_graph_data()
+    valid_action_list = []
 
     """ Reward for attacked node as a next hop """
     ### Next hop in same domain is valid_next_hop
 
-    ####Routing table information######
-    # dic = {}
-    # for nodes in self.graph.nodes():
-    #   dic[nodes] = {}
-    #   self.routing_table = dic
-
-    # for i in self.routing_table.keys():
-    #         self.routing_table[i].update({'destination': [], 'hop_count': [],
-    #                                       'next_hop': [], 'id_num': []})
-
     for node in self.graph.nodes:
 
       index = self.__get_index(node)
+      self.actions = list(self.graph.nodes)
+
       nxt_hop = actions[index]
-      #self.routing_table[node]['next_hop'] = nxt_hop
+      #nxt_hop = self.routing_table[node]['next_hop']
+
+
+      #next hop from DSDV
+      # nxt_hop = []
+      # new_packet=self.queues[node].pop()
+      # print(new_packet)
+      # new_packet.update_next_hops()
+      # self.queues[nxt_hop].insert(0, packet_to_send)
+
+      #nxt_hop = Routing_info.update_next_hops
+
+     
+
 
     
       domain_list = self.node_in_domains[node]
+      domain_key = []
       
 
       valid_next_hop = True
@@ -558,6 +589,7 @@ class W_MAC_Env(gym.Env):
             packet_to_send = queue.pop()
 
             self.__vis_update_src_nxthop(node,nxt_hop)
+            #domain_list_check = domain_list
 
             ### Find which domain the next hop belongs, so that interference can be checked in that collision domain. 
             for domain in domain_list:
@@ -567,6 +599,7 @@ class W_MAC_Env(gym.Env):
                     break
 
             ### get valid actions for nodes in the nexthop collision domain
+            node_list = list(self.graph.nodes)
             valid_act_sublist = self.__get_valid_action_sublist(actions, node_list, qs_list)
 
             num_nodes_transmitting = 0
@@ -698,6 +731,8 @@ class W_MAC_Env(gym.Env):
   def __get_valid_action_sublist(self, actions, node_list, qs_list):
         
         valid_act_sublist = []
+        #self.node_action_list = self.__read_graph_data()
+        node_list = list(self.graph.nodes)
         for i_node in node_list:
             i_index = self.__get_index(i_node)
             if (actions[i_index] in range(self.total_nodes)) and (qs_list[i_index] > 0):
