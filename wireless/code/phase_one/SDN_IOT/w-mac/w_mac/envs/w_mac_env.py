@@ -63,6 +63,60 @@ class W_MAC_Env(gym.Env):
     return(arr)
 
   #--------------------------------------------------------------------------------------------
+  def broadcast_update(self):
+        # print("calling broadcast update - 6")
+        self.updated_dest = self.routing_table[self.src_node]['destination']
+        self.updated_nh = self.routing_table[self.src_node]['next_hop']
+        self.updated_hc = self.routing_table[self.src_node]['hop_count']
+        self.updated_id = self.routing_table[self.src_node]['id_num']
+        updated_rtable = Updated_Routing_info(
+            self.updated_dest, self.updated_nh, self.updated_hc, self.updated_id)
+        n_nodes_to_bcast = [n for n in self.graph.neighbors(self.src_node)]
+
+        for index_nnode, n_nodes_to_bcast in enumerate(n_nodes_to_bcast):
+            if n_nodes_to_bcast not in self.attack_nodes:
+                self.rtable_info_queue[n_nodes_to_bcast].insert(
+                    0, updated_rtable)
+
+  def queue_length(self):
+        # print("calling q length function - 4")
+
+        # self.queue_empty = False
+        if any(self.rtable_info_queue[node] for node in self.graph.nodes):
+
+            # self.queue_empty = True
+            dsdv.update_table(self)
+        else:
+            print("all queues are empty")
+            # print("\n final routing table", self.routing_table)
+        # return self.queue_empty
+  def Broadcast_NbrTable(self):
+        print("calling broadcast nbr table function - 3")
+        # self.r_table = r_table
+
+        self.rtable_info_queue = {i: []
+                                  for i in self.graph.nodes}
+
+        for src_nodes in self.graph.nodes():
+            if src_nodes not in self.attack_nodes:
+                rtable_dest = self.routing_table[src_nodes]['destination']
+                rtable_nh = self.routing_table[src_nodes]['next_hop']
+                rtable_hc = self.routing_table[src_nodes]['hop_count']
+                rtable_id = self.routing_table[src_nodes]['id_num']
+                rtable_info = Routing_info(
+                    rtable_dest, rtable_nh, rtable_hc, rtable_id)
+                rtable_to_bcast = rtable_info
+
+                # insert this object into queue of neighbor nodes
+                neighbor_nodes = [n for n in self.graph.neighbors(src_nodes)]
+                for idx, nbr_node in enumerate(neighbor_nodes):
+                    if nbr_node not in self.attack_nodes:
+                        self.rtable_info_queue[nbr_node].insert(
+                            0, rtable_to_bcast)
+
+        # print("self.rtable_info_queue", self.rtable_info_queue)
+
+        self.queue_length()
 
   def step(self, rcvd_actions):
     #logging.debug("received action: %s",rcvd_actions)
@@ -83,16 +137,20 @@ class W_MAC_Env(gym.Env):
     self.destinations_list_with_anode = []
     self.queue_size = []
     self.destinations_list_with_anode = self.__frame_next_state()
-    self.queue_size = self.__get_queue_sizes
+    self.queue_size = self.__get_queue_sizes()
     # last number is attack node info
     self.attack_node = ([self.destinations_list_with_anode[-1]])
     self.destinations_list = self.destinations_list_with_anode[:-1]
     print("self.destinations_list", self.destinations_list)
 
     dsdv.create_routing_table(self, self.attack_node)
-    self.actions = dsdv.tdma(self)
-    self.valid_action_list = dsdv.map_actions()
-    broadcast = dsdv.Broadcast_NbrTable(self)
+    dsdv.Broadcast_NbrTable(self)
+    dsdv.update_table(self)
+    #self.actions = dsdv.tdma(self)
+    #self.valid_action_list = dsdv.map_actions(self)
+    
+    broadcast = self.Broadcast_NbrTable(self)
+    
 
     #next_state = self.__frame_next_state()
     #queue_s = self.__get_queue_sizes

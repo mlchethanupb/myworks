@@ -159,16 +159,10 @@ class W_MAC_Env(gym.Env):
     
     self.action_space = spaces.MultiDiscrete(action_space)
     #creating the collision domains
-<<<<<<< HEAD
-    self.collision_domain = collision_domain
-    print('Collision Domain',self.collision_domain) 
-    
-=======
     self.collision_domain = fullrange_wo_dupli
      
     self.common_domain = [2] #nodes common in both range trying to work on this still
 
->>>>>>> f6c5585c4719f618d305fbe10b9cd6029094ab5c
     self.node_in_domains = {}
 
     for key, value in self.collision_domain.items():

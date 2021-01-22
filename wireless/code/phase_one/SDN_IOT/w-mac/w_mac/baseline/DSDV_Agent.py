@@ -94,7 +94,7 @@ class dsdv():
                             self.routing_table[nodes]['hop_count'] = nbr_hc
                             self.routing_table[nodes]['id_num'] = self_id
 
-        #self.Broadcast_NbrTable()
+        self.Broadcast_NbrTable()
 
         print("Final Routing table", self.routing_table)
 
@@ -224,9 +224,9 @@ class dsdv():
         # print("calling tdma - 7")
         self.actions = list(self.graph.nodes)
         # print("actions before returning", self.actions)
-        max_queue_size = max(self.queue_size)
+        self.max_queue_size = max(self.queue_size)
 
-        if max_queue_size > 0:
+        if self.max_queue_size > 0:
             index_of_large_queue = np.argmax(self.queue_size)
             # print("index_of_large_queue", index_of_large_queue)
             node_with_max_queue = self.actions[index_of_large_queue]
