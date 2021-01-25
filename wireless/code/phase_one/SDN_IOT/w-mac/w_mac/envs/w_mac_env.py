@@ -646,9 +646,12 @@ class W_MAC_Env(gym.Env):
           num_nodes_transmitting = 0
           for tmp_action in h_action:
                 if ( tmp_action == 1 ):
-                    num_nodes_transmitting += 1 
+                    num_nodes_transmitting += 1
 
-          if num_nodes_transmitting > 1:
+          # num_nodes_transmitting should be greater than 0(not 1) as we are
+          # have to check if any node is transmitting in the neighbouring collision domain
+          # when a node is transmitting to common intermediate node.
+          if num_nodes_transmitting > 0:
                 ret_val = True
                   
     return ret_val

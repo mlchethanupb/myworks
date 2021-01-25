@@ -669,7 +669,6 @@ class WirelessEnv(MultiAgentEnv):
                             ### successful transmission, add the packet to the queue.
                             packet_to_send.update_hop_count()
                             self.queues[nxt_hop].insert(0, packet_to_send)
-                                                    
                 else:
                     ## Queue length 0. Agent should not take action.
                     #reward2 -= self.OTHER_REWARD
@@ -701,15 +700,19 @@ class WirelessEnv(MultiAgentEnv):
         for h_key,h_values in self.collision_domain_elems.items():
             if( nxt_hop in h_values): ## Next hop is in other collision domain. 
                 if(domain_key != h_key): ## Its not same as the source collision domain
-                
+
                     h_action = self.__get_valid_action_sublist(actions,h_values,qs_list)
-
                     num_nodes_transmitting = 0
-                    for tmp_action in h_action:
-                            if ( tmp_action == 1 ):
-                                num_nodes_transmitting += 1 
 
-                    if num_nodes_transmitting > 1:
+                    for tmp_action in h_action:
+
+                            if ( tmp_action == 1 ):
+                                num_nodes_transmitting += 1
+
+                    # num_nodes_transmitting should be greater than 0(not 1) as we are
+                    # have to check if any node is transmitting in the neighbouring collision domain
+                    # when a node is transmitting to common intermediate node.
+                    if num_nodes_transmitting > 0:
                             ret_val = True
                         
         return ret_val
