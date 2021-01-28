@@ -114,7 +114,8 @@ class WirelessEnv(MultiAgentEnv):
                 #print("Hurray !!! All packets transmitted successfully")
                 logging.info("Hurray !!! All packets transmitted successfully")
                 #reward += self.MAX_REWARD*self.total_nodes
-
+        
+        self.reward = reward #testing - remove later
         for agnt_i in range(self.num_agents):
             rew[agnt_i], done[agnt_i], info[agnt_i] =  reward, self.__is_agent_done(agnt_i), {}
 
@@ -177,6 +178,9 @@ class WirelessEnv(MultiAgentEnv):
         self.counter = 0
         self.end_episode = False
 
+        #for testing
+        self.reward = 0
+
     #--------------------------------------------------------------------------------------------
 
     """ Reset the lists used for visualization """
@@ -204,7 +208,7 @@ class WirelessEnv(MultiAgentEnv):
             
             self.attack_nodes.append(a_node)
         
-        self.attack_nodes = []
+        #self.attack_nodes = []
         logging.info("self.attack_nodes: %s", self.attack_nodes)
 
 
@@ -505,6 +509,20 @@ class WirelessEnv(MultiAgentEnv):
     """
     def get_packet_lost(self):
             return self.packet_lost
+
+    def get_reward(self):
+            return self.reward
+
+    #--------------------------------------------------------------------------------------------
+    
+    """
+        Function to retrieve the number of packets delivered stat.
+
+        Returns - Integer
+
+    """
+    def get_packet_delivered_count(self):
+            return self.packet_delivered
 
     #--------------------------------------------------------------------------------------------
 
