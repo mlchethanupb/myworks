@@ -46,10 +46,10 @@ class dsdv():
         print("self.destinations_list", self.destinations_list)
 
         self.create_routing_table(self.attack_node)
-        self.actions = self.tdma()
-        self.valid_action_list = self.map_actions()
+        #self.actions = self.tdma()
+        #self.valid_action_list = self.map_actions()
 
-        return self.valid_action_list
+        #return self.valid_action_list
 
     def create_routing_table(self, attack_node):
         print("calling create routing table function - 2")

@@ -25,6 +25,11 @@ class W_MAC_Env(gym.Env):
     
     self.graph = graph
     self.total_nodes = len(self.graph.nodes())
+    
+
+    #Each node can do 2 actions {Transmit, Wait}
+    action_space = [2 for i in range(len(self.graph.nodes()))]
+    self.action_space = spaces.MultiDiscrete(action_space)
     #nx.draw_networkx(self.graph)
    
     logging.basicConfig(
@@ -44,7 +49,7 @@ class W_MAC_Env(gym.Env):
     self.__read_graph_data()
     self.__create_action_observation_space()
     self.__reset_queue()
-
+  
   #--------------------------------------------------------------------------------------------
 
   def reset(self):
@@ -63,6 +68,55 @@ class W_MAC_Env(gym.Env):
     return(arr)
 
   #--------------------------------------------------------------------------------------------
+  def create_routing_table(self, attack_node):
+        print("calling create routing table function - 2")
+        self.attack_nodes = attack_node
+        print("self.attack_nodes", self.attack_nodes)
+
+        print('\n------------------------------------------------------\n')
+
+        dic = {}
+        for nodes in self.graph.nodes():
+            dic[nodes] = {}
+            self.routing_table = dic
+        # print('Empty routing table\n', self.routing_table)
+
+        print('\n------------------------------------------------------\n')
+
+        for i in self.routing_table.keys():
+            self.routing_table[i].update({'destination': [], 'hop_count': [],
+                                          'next_hop': [], 'id_num': []})
+        # print("self.routing_table after column insertion", self.routing_table)
+
+        for nodes in self.graph.nodes():
+            if nodes not in self.attack_nodes:
+                nbr_dest = self.routing_table[nodes]['destination']
+                nbr_nh = self.routing_table[nodes]['next_hop']
+                nbr_hc = self.routing_table[nodes]['hop_count']
+                self_id = self.routing_table[nodes]['id_num']
+                self_id.append(nodes)
+
+                for n_nodes in self.graph.nodes():
+                    hop_count = 0
+                    if n_nodes not in self.attack_nodes:
+                        if (nodes, n_nodes) in self.graph.edges:
+                            hop_count += 1
+
+                            nbr_dest.append(n_nodes)
+                            nbr_nh.append(n_nodes)
+                            nbr_hc.append(hop_count)
+
+                            self.routing_table[nodes]['destination'] = nbr_dest
+                            self.routing_table[nodes]['next_hop'] = nbr_nh
+                            self.routing_table[nodes]['hop_count'] = nbr_hc
+                            self.routing_table[nodes]['id_num'] = self_id
+
+        self.Broadcast_NbrTable()
+
+        print("Final Routing table", self.routing_table)
+
+        return self.routing_table
+
   def broadcast_update(self):
         # print("calling broadcast update - 6")
         self.updated_dest = self.routing_table[self.src_node]['destination']
@@ -118,19 +172,12 @@ class W_MAC_Env(gym.Env):
 
         self.queue_length()
 
-  def step(self, rcvd_actions):
+  def step(self, actions):
     #logging.debug("received action: %s",rcvd_actions)
-    actions = self.__map_to_valid_actions(rcvd_actions)
+    #actions = self.actions
     #logging.debug("mapped actions: %s",actions)
-    reward = 0
 
-    # reward = self.__perform_actions(actions)
-    # for i in self.graph.nodes:
-    #   queue = self.queues[i]
-    #   if(len(queue)):   
-    #     max_queue_size = self.__get_queue_sizes()     
-    #     reward2 = dsdv.tdma(self)
-    #     print(reward2)
+    reward = self.__perform_actions(actions)
 
     
     print("calling predict function - 1")
@@ -146,43 +193,58 @@ class W_MAC_Env(gym.Env):
     dsdv.create_routing_table(self, self.attack_node)
     dsdv.Broadcast_NbrTable(self)
     dsdv.update_table(self)
-    #self.actions = dsdv.tdma(self)
-    #self.valid_action_list = dsdv.map_actions(self)
-    
-    broadcast = self.Broadcast_NbrTable(self)
-    
-
-    #next_state = self.__frame_next_state()
-    #queue_s = self.__get_queue_sizes
-    # nxt_state_arr = np.array(next_state)
     predict = dsdv.predict(self, self.destinations_list_with_anode, self.queue_size)
+    
+    
+    ### next state =  dest of next packet to send + attack nodes status
+    next_state = [] #empty list for next_state
+
+    ### Add destination of first packet in the queue. 
+    for node in self.graph.nodes:
+      if len(self.queues[node]):
+        node_queue = self.queues[node]
+        next_state.append(node_queue[len(node_queue)-1].dest)
+      else:
+        next_state.append(self.total_nodes)
+    
+    for node in self.attack_nodes:
+      next_state.append(node)
+
+    nxt_state_arr = np.array(next_state)
+
 
     isdone = self.__isdone()
     info = {}
 
-    no_transmit = True
-    for status in actions:
-      if status != self.total_nodes:
-        no_transmit = False
+    # no_transmit = True
+    # for status in actions:
+    #   if status != self.total_nodes:
+    #     no_transmit = False
     
-    if isdone == False and no_transmit == True:
-      reward -= self.COLLISION_REWARD / 20
+    # if isdone == False and no_transmit == True:
+    #   reward -= self.COLLISION_REWARD / 20
 
-    if isdone == True:
-        queue_empty = True
-        for node in self.graph.nodes:
-            if len(self.queues[node]) > 0:
-                reward -= self.MAX_REWARD*self.total_nodes
-                #print("Punishing when done even if packets remain")
-                logging.info("Punishing when done even if packets remain")
-                queue_empty = False
-                break
+    # if isdone == True:
+    #     queue_empty = True
+    #     for node in self.graph.nodes:
+    #         if len(self.queues[node]) > 0:
+    #             reward -= self.MAX_REWARD*self.total_nodes
+    #             #print("Punishing when done even if packets remain")
+    #             logging.info("Punishing when done even if packets remain")
+    #             queue_empty = False
+    #             break
         
-        if queue_empty == True and self.packet_lost == 0:
-          #print("Hurray !!! All packets transmitted successfully")
-          logging.info("Hurray !!! All packets transmitted successfully")
-          reward += self.MAX_REWARD*self.total_nodes
+    #     if queue_empty == True and self.packet_lost == 0:
+    #       #print("Hurray !!! All packets transmitted successfully")
+    #       logging.info("Hurray !!! All packets transmitted successfully")
+    #       reward += self.MAX_REWARD*self.total_nodes
 
+    actions_list = list(actions)
+    if isdone == False and actions_list.count(1) == 0 :
+      reward -= 1000
+
+
+    print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
 
     #logging.info("nxt_state_arr: %s, reward: %s, isdone: %s", nxt_state_arr, reward, isdone)
     return nxt_state_arr, reward, isdone, info
@@ -398,9 +460,14 @@ class W_MAC_Env(gym.Env):
   def __create_action_observation_space(self):
 
     ## Creating Action space
-    action_space = []
-    for node in self.graph.nodes:
-      action_space.append(len(self.node_action_list[node]))
+    # action_space = []
+    # for node in self.graph.nodes:
+    #   action_space.append(len(self.node_action_list[node]))
+    # self.action_space = spaces.MultiDiscrete(action_space)
+
+    #Each node can do 2 actions {Transmit, Wait}
+    action_space = [2 for i in range(len(self.graph.nodes()))]
+    
     self.action_space = spaces.MultiDiscrete(action_space)
 
     ## Creating observation space 
@@ -583,136 +650,102 @@ class W_MAC_Env(gym.Env):
   """
  
   def __perform_actions(self, actions):
+        
+    reward = 0
 
-    reward1 = 0
-    reward2 = 0
-
-    ## Reset visualization variables  
-    self.__reset_visualization_variables()
-    self.node_action_list = self.__read_graph_data()
-    valid_action_list = []
-
-    """ Reward for attacked node as a next hop """
-    ### Next hop in same domain is valid_next_hop
-
-    for node in self.graph.nodes:
-
-      index = self.__get_index(node)
-      self.actions = list(self.graph.nodes)
-
-      nxt_hop = actions[index]
-      #nxt_hop = self.routing_table[node]['next_hop']
-
-
-      #next hop from DSDV
-      # nxt_hop = []
-      # new_packet=self.queues[node].pop()
-      # print(new_packet)
-      # new_packet.update_next_hops()
-      # self.queues[nxt_hop].insert(0, packet_to_send)
-
-      #nxt_hop = Routing_info.update_next_hops
-
-     
-
-
+    for id, action in enumerate(actions):
     
-      domain_list = self.node_in_domains[node]
-      domain_key = []
-      
+      """
+      1. Get the list of domains the node is associated with.
+      2. If it belongs to only one domain (else part)
+          - Check all the actions of that node and decide accordingly
+      3. If node belongs to multiple domains (if part)
+          - find the value of packet next_hop and check for collosion with that nodes  
+      """
+   
+      if (actions[id] == 1):
+        queue = self.queues[id]
+        qs_list = self.__get_queue_sizes()
+        
+        if len(queue):
 
-      valid_next_hop = True
-      
-      ### Check if next hop defect/attack node
-      if nxt_hop in self.attack_nodes:
+          packet_2_send = queue.pop()
+          domain_list = self.node_in_domains[id]
+          len_domain_list = len(domain_list) 
+          if  len_domain_list > 1 :
+            for key in self.routing_table:
+                    dest = self.routing_table[key]['destination']
+                    nxt_hop = self.routing_table[key]['next_hop']
+                    hop_count = self.routing_table[key]['hop_count']
 
-          reward1 -= self.ATTACK_NODE_REWARD
-          valid_next_hop = False
-
-          if(len(self.queues[node])):
-              logging.debug("Packet lost due to passing to defect node: %s, index: %s, actions: %s",node,index,actions)
+            for itr in range(len_domain_list):
+              if nxt_hop in self.collision_domain[domain_list[itr]]:
+                node_list = self.collision_domain[domain_list[itr]]
+                break
+            
+            action_sublist = [actions[i] for i in node_list]
+            
+            if(action_sublist.count(1) > 1):
+              print("node ", id," transmission collision")
               self.packet_lost += 1
-              packet_to_send = self.queues[node].pop()
-        
-      ### Transmit when node is not defect node
-      if (actions[index] in range(self.total_nodes)) and valid_next_hop == True:
-        
-        
-        queue = self.queues[node]
-
-        if(len(queue)):
-          
-            qs_list = self.__get_queue_sizes()
-            ### Pop the packet from the queue
-            packet_to_send = queue.pop()
-
-            self.__vis_update_src_nxthop(node,nxt_hop)
-            #domain_list_check = domain_list
-
-            ### Find which domain the next hop belongs, so that interference can be checked in that collision domain. 
-            for domain in domain_list:
-                if nxt_hop in self.collision_domain_elems[domain]:
-                    node_list = self.collision_domain_elems[domain]
-                    domain_key = domain ## domain_key is used to check the hidden terminal problem
-                    break
-
-            ### get valid actions for nodes in the nexthop collision domain
-            node_list = list(self.graph.nodes)
-            valid_act_sublist = self.__get_valid_action_sublist(actions, node_list, qs_list)
-
-            num_nodes_transmitting = 0
-            for tmp_action in valid_act_sublist:
-                if (tmp_action == 1):
-                    num_nodes_transmitting += 1
-
-            if num_nodes_transmitting > 1:
-                logging.debug('Packet loss due to collision')
-                self.packet_lost += 1
-                reward2 -= self.COLLISION_REWARD
-
-
-                logging.debug("node: %s, index: %s ,next_hop: %s, domain_list: %s, nexthop in domain: %s, next_hop_node_list: %s",
-                          node, index, nxt_hop, domain_list, domain_key, node_list)
-                logging.debug("actions: %s, valid_action_sublist: %s", actions, valid_act_sublist)
-
-            elif (self.__hidden_terminal_problem(actions, node, domain_key, qs_list)):
-                logging.debug('Packet loss due to hidden terminal problem')
-                reward2 -= self.COLLISION_REWARD
-                self.packet_lost += 1
-
-
-                logging.debug("node: %s, index: %s ,next_hop: %s, domain_list: %s, nexthop in domain: %s, next_hop_node_list: %s",
-                          node, index, nxt_hop, domain_list, domain_key, node_list)
-                logging.debug("actions: %s, valid_action_sublist: %s", actions, valid_act_sublist)
-              
+              reward -= 1000
+            elif (self.hidden_terminal_problem(actions, id, domain_list[0] )):
+              print("node ", id," transmission collision because of hidden terminal problem")
             else:
-              
+              print("node ", id," transmission SUCCESS")
+              reward += 1000
+              self.packet_delivered += 1
 
-              if (nxt_hop == packet_to_send.dest):
-                  logging.debug("Packet reached destination node from source: %s, to destination: %s, with hopcount %s",packet_to_send.src, packet_to_send.dest, packet_to_send.get_hop_count()+1)
-                
-                  self.__vis_update_src_dest(node,packet_to_send.dest)
-                
-                  self.packet_delivered +=1
-                  reward2 += (self.MAX_REWARD)
-
+              # packet_2_send.update_hop_count()
+              if (nxt_hop == dest):
+                print("Packet reached destination")
               else:
+                rcvd_node = nxt_hop
+                packet_2_send.update_nxt_hop(dest)
+                print("Adding packet to the queue of ", rcvd_node)
+                self.queues[rcvd_node].insert(0, packet_2_send)
+          
+          #Node belongs to single domain.
+          else:
+            node_list = list(self.graph.nodes)
+            action_sublist = self.__get_valid_action_sublist(actions, node_list, qs_list)
+            # node_list = self.collision_domain[domain_list[0]]
+            # action_sublist = [actions[i] for i in node_list]
 
-                  reward2 -= packet_to_send.get_hop_count()
+            if (actions[id] == 1):
+              if(action_sublist.count(1) > 1):
+                print("node ", id," transmission collision")
+                reward -= 1000
+                self.packet_lost += 1
+              elif (self.hidden_terminal_problem(actions, id, domain_list[0], packet_2_send )):
+                print("node ", id," transmission collision because of hidden terminal problem")
+                reward -= 1000
+                self.packet_lost += 1
+              else:
+                print("node ", id," transmission SUCCESS")
+                self.packet_delivered += 1
+                reward += 1000
 
-                  #logging.debug("Packet added to queue of next_hop: %s",nxt_hop)
-                  ### successful transmission, add the packet to the queue.
-                  packet_to_send.update_hop_count()
-                  self.queues[nxt_hop].insert(0, packet_to_send)
-                                               
+                packet_2_send.update_hop_count()
+                if (packet_2_send.nxt_hop == packet_2_send.dest):
+                  print("Packet reached destination")
+                else:
+                  rcvd_node = packet_2_send.nxt_hop
+                  packet_2_send.update_nxt_hop(packet_2_send.dest)
+                  print("Adding packet to the queue of ", rcvd_node)
+                  self.queues[rcvd_node].insert(0, packet_2_send)
+
         else:
-          ## Queue length 0. Agent should not take action.
-          reward2 -= self.COLLISION_REWARD / 20
-    
-    reward = (1) * reward1 + (1) * reward2
+          print("Action taken on empty queue")
+          reward -= 1000
+      else:
+            print("node", id , "waiting to send")
+            ...
+    print('final reward', reward)
+    print('packets delivered ',self.packet_delivered)
+    print('packet_lost ', self.packet_lost)
 
     return reward
-
   #--------------------------------------------------------------------------------------------
 
   """
