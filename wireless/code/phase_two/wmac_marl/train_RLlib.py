@@ -42,14 +42,14 @@ def setup_and_train():
     # Define configuration with hyperparam and training details
     config={
                 "log_level": "ERROR",
-                "num_workers": 4,
+                "num_workers": 6,
                 "num_cpus_for_driver": 4,
-                "num_cpus_per_worker": 3,
+                "num_cpus_per_worker": 2,
                 "num_gpus": 0,
                 "num_envs_per_worker": 1,
                 "no_done_at_end": True,
                 "seed":10,
-                "gamma": tune.uniform(0.9, 0.99),
+                "gamma": tune.uniform(0.98, 0.99),
                 #"lr": grid_search([1e-3, 3e-4]),
                 #"lambda": 0.95,
                 #"explore": True,
@@ -68,24 +68,24 @@ def setup_and_train():
                 # with a value function, see https://arxiv.org/pdf/1506.02438.pdf.
                 "use_gae": True,
                 # The GAE (lambda) parameter.
-                "lambda": tune.uniform(0.9, 1.0),
+                "lambda": tune.uniform(0.94, 0.96),
                 # Initial coefficient for KL divergence.
                 "kl_coeff": 0.2,
                 # Size of batches collected from each worker.
                 "rollout_fragment_length": 256,
                 # Number of timesteps collected for each SGD round. This defines the size
                 # of each SGD epoch.
-                "train_batch_size": tune.grid_search([2048, 4096]),
+                "train_batch_size": tune.grid_search([4096, 2048]),
                 # Total SGD batch size across all devices for SGD. This defines the
                 # minibatch size within each epoch.
-                "sgd_minibatch_size": tune.grid_search([32, 64]),
+                "sgd_minibatch_size": tune.grid_search([64, 32]),
                 # Whether to shuffle sequences in the batch when training (recommended).
                 "shuffle_sequences": True,
                 # Number of SGD iterations in each outer loop (i.e., number of epochs to
                 # execute per train batch).
-                "num_sgd_iter": tune.grid_search([5, 10]),
+                "num_sgd_iter": tune.grid_search([30, 10]),
                 # Stepsize of SGD.
-                "lr": tune.loguniform(1e-6, 1e-4),
+                "lr": tune.loguniform(3e-5, 6e-5),
                 # Learning rate schedule.
                 "lr_schedule": None,
                 # Share layers for value function. If you set this to True, it's important
@@ -95,20 +95,20 @@ def setup_and_train():
                 # you set vf_share_layers: True.
                 "vf_loss_coeff": 1.0,
                 # Coefficient of the entropy regularizer.
-                "entropy_coeff": tune.uniform(0.0,0.001),
+                "entropy_coeff": tune.grid_search([0.1, 0.01]),
                 # Decay schedule for the entropy regularizer.
                 "entropy_coeff_schedule": None,
                 # PPO clip parameter.
-                "clip_param": tune.choice([0.1, 0.2, 0.3]),
+                "clip_param": tune.grid_search([0.3, 0.2]),
                 # Clip param for the value function. Note that this is sensitive to the
                 # scale of the rewards. If your expected V is large, increase this.
-                "vf_clip_param": tune.choice([100.0, 200.0, 300.0]),
+                "vf_clip_param": tune.grid_search([300, 150]),
                 # If specified, clip the global norm of gradients by this amount.
                 "grad_clip": None,
                 # Target value for KL divergence.
                 "kl_target": 0.01,
                 # Whether to rollout "complete_episodes" or "truncate_episodes".
-                "batch_mode": tune.grid_search(["truncate_episodes", "complete_episodes"]),
+                "batch_mode":  "complete_episodes", 
                 # Which observation filter to apply to the observation.
                 "observation_filter": "NoFilter",
                 # Uses the sync samples optimizer instead of the multi-gpu one. This is
@@ -129,11 +129,13 @@ def setup_and_train():
 }
 
     asha_scheduler = AsyncHyperBandScheduler(
-        time_attr='training_iteration',
+        time_attr='timesteps_total',
         metric='episode_reward_mean',
         mode='max',
-        max_t=500,
-        grace_period=100)
+        max_t=3200000,
+        grace_period=500000,
+        reduction_factor=2,
+        brackets=3)
 
     # Define experiment details
     exp_name = 'wmac_marl'
@@ -142,7 +144,7 @@ def setup_and_train():
             'run_or_experiment': 'PPO',
             "stop": {
                 "training_iteration": 1500,
-                "timesteps_total": 3000000,
+                "timesteps_total": 3200000,
             },
             'checkpoint_freq': 200,
             "local_dir":"logs/",
@@ -150,6 +152,9 @@ def setup_and_train():
             "num_samples":1,
             "scheduler":asha_scheduler,
             "config": config,
+            "checkpoint_at_end":True,
+            "checkpoint_score_attr":"episode_reward_mean",
+            "keep_checkpoints_num":2,
         }
 
 

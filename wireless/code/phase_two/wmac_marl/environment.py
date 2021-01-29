@@ -78,7 +78,7 @@ class WirelessEnv(MultiAgentEnv):
 
     def step(self, action_dict):
         obs, rew, done, info = {}, {}, {}, {}
-        logging.debug("received action: %s",action_dict)
+        #logging.debug("received action: %s",action_dict)
 
         action_list = self.__action_dict_to_list(action_dict)
 
@@ -121,8 +121,10 @@ class WirelessEnv(MultiAgentEnv):
 
         done["__all__"] = alldone
 
-        logging.info("Observation : %s", obs)
-        logging.info("reward , done : %s: %s", reward, done)
+        logging.info("Observation : %s", obs[0])
+        logging.info("reward : %s", reward)
+        logging.info("done : %s", done)
+
 
         return obs, rew, done, info
 
@@ -723,9 +725,8 @@ class WirelessEnv(MultiAgentEnv):
                     num_nodes_transmitting = 0
 
                     for tmp_action in h_action:
-
-                            if ( tmp_action == 1 ):
-                                num_nodes_transmitting += 1
+                        if (tmp_action == 1) and (index != self.__get_index(h_values[h_action.index(tmp_action)])):
+                            num_nodes_transmitting += 1
 
                     # num_nodes_transmitting should be greater than 0(not 1) as we are
                     # have to check if any node is transmitting in the neighbouring collision domain
