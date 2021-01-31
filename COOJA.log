@@ -1,0 +1,32 @@
+[08:15:23 - AWT-EventQueue-0] [Cooja.java:2865] [INFO] - External tools default settings: /external_tools_linux_64.config
+[08:15:23 - AWT-EventQueue-0] [Cooja.java:2895] [INFO] - External tools user settings: /upb/users/c/chethan/profiles/unix/cs/.cooja.user.properties
+[08:15:35 - Thread-0] [Simulation.java:420] [INFO] - Simulation random seed: 123456
+[08:15:38 - AWT-EventQueue-0] [Simulation.java:420] [INFO] - Simulation random seed: 123456
+[08:15:47 - AWT-EventQueue-0] [CompileContiki.java:140] [INFO] - > make aodv.sky TARGET=sky 
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:15:59 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:16:00 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:16:00 - Thread-0] [MspMote.java:235] [INFO] - Loading firmware from: /upb/users/c/chethan/profiles/unix/cs/nes_sec/project/AODV/aodv.sky
+[08:16:00 - Thread-0] [Visualizer.java:256] [INFO] - Registered external visualizer: org.contikios.cooja.plugins.skins.DGRMVisualizerSkin
+[08:16:00 - Thread-0] [TimeLine.java:567] [INFO] - Zoom level: 500.0 microseconds/pixel 
+[08:16:13 - Thread-2] [Simulation.java:252] [INFO] - Simulation main loop started, system time: 1580368573549
+[08:17:09 - Thread-2] [Simulation.java:311] [INFO] - Simulation main loop stopped, system time: 1580368629429	Duration: 55880 ms	Simulated time 54883 ms	Ratio 0.9821581961345741
+[08:20:05 - Thread-3] [Simulation.java:252] [INFO] - Simulation main loop started, system time: 1580368805716
+[08:20:25 - Thread-3] [Simulation.java:311] [INFO] - Simulation main loop stopped, system time: 1580368825264	Duration: 19548 ms	Simulated time 74426 ms	Ratio 3.8073460200532026
+[08:22:51 - AWT-EventQueue-0] [Cooja.java:2647] [INFO] - Save command cancelled by user...
