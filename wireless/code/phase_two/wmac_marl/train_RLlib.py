@@ -1,5 +1,6 @@
 import ray
 from ray import tune
+import numpy as np
 from ray.tune import grid_search
 from ray.rllib.agents.registry import get_agent_class
 from ray.rllib.models import ModelCatalog
@@ -7,6 +8,9 @@ from ray.tune import run_experiments
 from ray.tune.registry import register_env
 from ray.rllib.agents.ppo import PPOTrainer
 from ray.tune.schedulers import AsyncHyperBandScheduler
+#from ray.tune.suggest.bayesopt import BayesOptSearch
+from ray.tune.suggest.ax import AxSearch
+
 
 # Import environment definition
 from environment import WirelessEnv
@@ -49,74 +53,32 @@ def setup_and_train():
                 "num_envs_per_worker": 1,
                 "no_done_at_end": True,
                 "seed":10,
-                "gamma": tune.uniform(0.98, 0.99),
-                #"lr": grid_search([1e-3, 3e-4]),
-                #"lambda": 0.95,
-                #"explore": True,
-                #"exploration_config": {
-                #    "type": "EpsilonGreedy",
-                #    "initial_epsilon": 1.0,
-                #    "final_epsilon": 0.08,
-                #    "epsilon_timesteps": 950000, # Timesteps over which to anneal epsilon.
-                #},
+                "gamma": 0.9392979332914239,
 
 #---------------------------------------------------------------------------------------
-                # Should use a critic as a baseline (otherwise don't use value baseline;
-                # required for using GAE).
+
                 "use_critic": True,
-                # If true, use the Generalized Advantage Estimator (GAE)
-                # with a value function, see https://arxiv.org/pdf/1506.02438.pdf.
                 "use_gae": True,
-                # The GAE (lambda) parameter.
-                "lambda": tune.uniform(0.94, 0.96),
-                # Initial coefficient for KL divergence.
+                "lambda": 0.9844457867596674,
                 "kl_coeff": 0.2,
-                # Size of batches collected from each worker.
-                "rollout_fragment_length": 256,
-                # Number of timesteps collected for each SGD round. This defines the size
-                # of each SGD epoch.
-                "train_batch_size": tune.grid_search([4096, 2048]),
-                # Total SGD batch size across all devices for SGD. This defines the
-                # minibatch size within each epoch.
-                "sgd_minibatch_size": tune.grid_search([64, 32]),
-                # Whether to shuffle sequences in the batch when training (recommended).
+                "rollout_fragment_length": 200,
+                "train_batch_size": 2048,
+                "sgd_minibatch_size": 128,
                 "shuffle_sequences": True,
-                # Number of SGD iterations in each outer loop (i.e., number of epochs to
-                # execute per train batch).
-                "num_sgd_iter": tune.grid_search([30, 10]),
-                # Stepsize of SGD.
-                "lr": tune.loguniform(3e-5, 6e-5),
-                # Learning rate schedule.
+                "num_sgd_iter": 6,
+                "lr": 4.304049744289648e-05,
                 "lr_schedule": None,
-                # Share layers for value function. If you set this to True, it's important
-                # to tune vf_loss_coeff.
                 "vf_share_layers": False,
-                # Coefficient of the value function loss. IMPORTANT: you must tune this if
-                # you set vf_share_layers: True.
                 "vf_loss_coeff": 1.0,
-                # Coefficient of the entropy regularizer.
-                "entropy_coeff": tune.grid_search([0.1, 0.01]),
-                # Decay schedule for the entropy regularizer.
+                "entropy_coeff": 0.05427902707123386,
                 "entropy_coeff_schedule": None,
-                # PPO clip parameter.
-                "clip_param": tune.grid_search([0.3, 0.2]),
-                # Clip param for the value function. Note that this is sensitive to the
-                # scale of the rewards. If your expected V is large, increase this.
-                "vf_clip_param": tune.grid_search([300, 150]),
-                # If specified, clip the global norm of gradients by this amount.
+                "clip_param": 0.1,
+                "vf_clip_param": 300,
                 "grad_clip": None,
-                # Target value for KL divergence.
                 "kl_target": 0.01,
-                # Whether to rollout "complete_episodes" or "truncate_episodes".
-                "batch_mode":  "complete_episodes", 
-                # Which observation filter to apply to the observation.
+                "batch_mode": "truncate_episodes",
                 "observation_filter": "NoFilter",
-                # Uses the sync samples optimizer instead of the multi-gpu one. This is
-                # usually slower, but you might want to try it if you run into issues with
-                # the default optimizer.
                 "simple_optimizer": False,
-                # Whether to fake GPUs (using CPUs).
-                # Set this to True for debugging on non-GPU machines (set `num_gpus` > 0).
                 "_fake_gpus": False,
 #---------------------------------------------------------------------------------------
                 "multiagent": {
@@ -132,29 +94,32 @@ def setup_and_train():
         time_attr='timesteps_total',
         metric='episode_reward_mean',
         mode='max',
-        max_t=3200000,
-        grace_period=500000,
+        max_t=120,
+        grace_period=50,
         reduction_factor=2,
-        brackets=3)
+        brackets=2)
 
+    #bayesopt = BayesOptSearch(metric="episode_reward_mean", mode="max")
+    #ax_search = AxSearch(metric="episode_reward_mean", mode="max")
     # Define experiment details
     exp_name = 'wmac_marl'
     exp_dict = {
             'name': exp_name,
             'run_or_experiment': 'PPO',
             "stop": {
-                "training_iteration": 1500,
-                "timesteps_total": 3200000,
+                #"training_iteration": 1500,
+                "timesteps_total": 120,
             },
-            'checkpoint_freq': 200,
+            'checkpoint_freq': 10,
             "local_dir":"logs/",
             "verbose": 1,
             "num_samples":1,
+            #"search_alg":ax_search,
             "scheduler":asha_scheduler,
             "config": config,
             "checkpoint_at_end":True,
             "checkpoint_score_attr":"episode_reward_mean",
-            "keep_checkpoints_num":2,
+            "keep_checkpoints_num":1,
         }
 
 
@@ -163,6 +128,31 @@ def setup_and_train():
     ray.init()
     analysis = tune.run(**exp_dict)
     print("Best configuration is ",analysis.get_best_config(metric="episode_reward_mean", mode = "max"))
+
+    checkpoints = analysis.get_trial_checkpoints_paths(trial=analysis.get_best_trial('episode_reward_mean', mode= "max"), metric='episode_reward_mean')
+
+    print(checkpoints[0][0])
+    agent = PPOTrainer(env=env_name,config=config)
+    agent.restore(checkpoints[0][0])
+
+    i = 0
+    packet_delivered = []
+    for itr in range(50000):
+        episode_reward = 0
+        done = {}
+        obs = single_env.reset()
+        while (i < 100):
+            actions = {}
+            for i in range(num_agents):
+                actions[i] = agent.compute_action(obs[i], policy_id = 'agent-' + str(i)) 
+            obs, reward, done, info = single_env.step(actions)
+            i = i+1
+            if done['__all__']:
+                packet_delivered.append(single_env.get_packet_delivered_count())
+                if itr % 500 == 0:
+                    print("pckt delivered mean after ", itr," episodes:", np.mean(packet_delivered))
+                break
+    print("final packt delivered mean :", np.mean(packet_delivered))
 
 
 if __name__=='__main__':
