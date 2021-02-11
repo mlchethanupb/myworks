@@ -135,18 +135,16 @@ def setup_and_train():
     agent = PPOTrainer(env=env_name,config=config)
     agent.restore(checkpoints[0][0])
 
-    i = 0
     packet_delivered = []
     for itr in range(50000):
         episode_reward = 0
         done = {}
         obs = single_env.reset()
-        while (i < 100):
+        while (1):
             actions = {}
             for i in range(num_agents):
                 actions[i] = agent.compute_action(obs[i], policy_id = 'agent-' + str(i)) 
             obs, reward, done, info = single_env.step(actions)
-            i = i+1
             if done['__all__']:
                 packet_delivered.append(single_env.get_packet_delivered_count())
                 if itr % 500 == 0:

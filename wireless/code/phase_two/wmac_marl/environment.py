@@ -459,7 +459,7 @@ class WirelessEnv(MultiAgentEnv):
             self.counter += 1
                     
         isdone = False
-        if queue_empty or counter_exceeded or self.end_episode:
+        if queue_empty or counter_exceeded: # or self.end_episode:
             isdone = True
             logging.info('packets delivered %s ',self.packet_delivered)
             logging.info('packet_lost %s', self.packet_lost)
