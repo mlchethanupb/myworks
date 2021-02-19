@@ -31,6 +31,9 @@ class W_MAC_Env(gym.Env):
     action_space = [2 for i in range(len(self.graph.nodes()))]
     self.action_space = spaces.MultiDiscrete(action_space)
     #nx.draw_networkx(self.graph)
+    self.routing_table = {}
+    
+
    
     logging.basicConfig(
         filename='wmac.log',
@@ -49,6 +52,9 @@ class W_MAC_Env(gym.Env):
     self.__read_graph_data()
     self.__create_action_observation_space()
     self.__reset_queue()
+    self.create_routing_table(self.attack_nodes)
+    self.Broadcast_NbrTable()
+    #self.update_table()
   
   #--------------------------------------------------------------------------------------------
 
@@ -190,10 +196,8 @@ class W_MAC_Env(gym.Env):
     self.destinations_list = self.destinations_list_with_anode[:-1]
     print("self.destinations_list", self.destinations_list)
 
-    dsdv.create_routing_table(self, self.attack_node)
-    dsdv.Broadcast_NbrTable(self)
-    dsdv.update_table(self)
-    predict = dsdv.predict(self, self.destinations_list_with_anode, self.queue_size)
+    
+    #predict = dsdv.predict(self.destinations_list_with_anode, self.queue_size)
     
     
     ### next state =  dest of next packet to send + attack nodes status
@@ -678,18 +682,18 @@ class W_MAC_Env(gym.Env):
                     nxt_hop = self.routing_table[key]['next_hop']
                     hop_count = self.routing_table[key]['hop_count']
 
-            for itr in range(len_domain_list):
-              if nxt_hop in self.collision_domain[domain_list[itr]]:
-                node_list = self.collision_domain[domain_list[itr]]
-                break
-            
+            # for itr in range(len_domain_list):
+            #   if nxt_hop in self.collision_domain[domain_list[itr]]:
+            #     node_list = self.collision_domain[domain_list[itr]]
+            #     break
+            node_list = list(self.graph.nodes)
             action_sublist = [actions[i] for i in node_list]
             
             if(action_sublist.count(1) > 1):
               print("node ", id," transmission collision")
               self.packet_lost += 1
               reward -= 1000
-            elif (self.hidden_terminal_problem(actions, id, domain_list[0] )):
+            elif (self.hidden_terminal_problem(actions, id, domain_list[0], qs_list )):
               print("node ", id," transmission collision because of hidden terminal problem")
             else:
               print("node ", id," transmission SUCCESS")
@@ -699,16 +703,20 @@ class W_MAC_Env(gym.Env):
               # packet_2_send.update_hop_count()
               if (nxt_hop == dest):
                 print("Packet reached destination")
-              else:
-                rcvd_node = nxt_hop
-                packet_2_send.update_nxt_hop(dest)
-                print("Adding packet to the queue of ", rcvd_node)
-                self.queues[rcvd_node].insert(0, packet_2_send)
+              # else:
+              #   rcvd_node = nxt_hop
+              #   packet_2_send.update_nxt_hop(dest)
+              #   print("Adding packet to the queue of ", rcvd_node)
+              #   self.queues[rcvd_node].insert(0, packet_2_send)
           
           #Node belongs to single domain.
           else:
             node_list = list(self.graph.nodes)
             action_sublist = self.__get_valid_action_sublist(actions, node_list, qs_list)
+            for key in self.routing_table:
+                    dest = self.routing_table[key]['destination']
+                    nxt_hop = self.routing_table[key]['next_hop']
+                    hop_count = self.routing_table[key]['hop_count']
             # node_list = self.collision_domain[domain_list[0]]
             # action_sublist = [actions[i] for i in node_list]
 
@@ -717,7 +725,7 @@ class W_MAC_Env(gym.Env):
                 print("node ", id," transmission collision")
                 reward -= 1000
                 self.packet_lost += 1
-              elif (self.hidden_terminal_problem(actions, id, domain_list[0], packet_2_send )):
+              elif (self.hidden_terminal_problem(actions, id, domain_list[0], qs_list )):
                 print("node ", id," transmission collision because of hidden terminal problem")
                 reward -= 1000
                 self.packet_lost += 1
@@ -727,13 +735,13 @@ class W_MAC_Env(gym.Env):
                 reward += 1000
 
                 packet_2_send.update_hop_count()
-                if (packet_2_send.nxt_hop == packet_2_send.dest):
+                if (nxt_hop == packet_2_send.dest):
                   print("Packet reached destination")
-                else:
-                  rcvd_node = packet_2_send.nxt_hop
-                  packet_2_send.update_nxt_hop(packet_2_send.dest)
-                  print("Adding packet to the queue of ", rcvd_node)
-                  self.queues[rcvd_node].insert(0, packet_2_send)
+                #else:
+                  # rcvd_node = nxt_hop
+                  # packet_2_send.update_nxt_hop(packet_2_send.dest)
+                  # print("Adding packet to the queue of ", rcvd_node)
+                  # self.queues[rcvd_node].insert(0, packet_2_send)
 
         else:
           print("Action taken on empty queue")
@@ -754,7 +762,7 @@ class W_MAC_Env(gym.Env):
     Retruns "True" or "False"
 
   """
-  def __hidden_terminal_problem(self, actions, source, domain_key, qs_list):
+  def hidden_terminal_problem(self, actions, source, domain_key, qs_list):
     #special case - Hidden terminal problem
     ret_val = False
     
