@@ -11,13 +11,13 @@ import matplotlib.pyplot as plt
 from IPython.display import clear_output
 import time
 from collections import defaultdict
-from Routing_Table import Routing_info
-from Updated_RTable import Updated_Routing_info
+from w_mac.baseline.Routing_Table import Routing_info
+from w_mac.baseline.Updated_RTable import Updated_Routing_info
 
 """Baseline routing protocol DSDV"""
 
 
-class dsdv_wqueue():
+class dsdv_RRTDMA():
 
     def __init__(self, env: gym.Env, graph: nx.Graph):
         # super(dsdv, self).__init__(env)
@@ -25,13 +25,14 @@ class dsdv_wqueue():
 
         nx.draw_networkx(self.graph)
         self.total_nodes = len(self.graph.nodes())
+        self.tdma_index = self.total_nodes
 
     """ This will return the action required for the W_MAC_Env"""
     """Ex - actions = [2,1,2,3,4,5] nodes = [0,1,2,3,4,5] - only 0th node will be transmitting the packet"""
 
     def predict(self, state, queue_size):
 
-        print("calling predict function - 1")
+        # print("calling predict function - 1")
         self.destinations_list_with_anode = []
         self.queue_size = []
 
@@ -41,20 +42,22 @@ class dsdv_wqueue():
         # last number is attack node info
         self.attack_node = [self.destinations_list_with_anode[-1]]
         self.destinations_list = self.destinations_list_with_anode[:-1]
-        print("self.destinations_list", self.destinations_list)
+
+        # print("self.destinations_list from agent", self.destinations_list)
 
         self.create_routing_table(self.attack_node)
         self.actions = self.tdma()
+        self.tdma_index = self.tdma_index + 1
         self.valid_action_list = self.map_actions()
 
         return self.valid_action_list
 
     def create_routing_table(self, attack_node):
-        print("calling create routing table function - 2")
+        # print("calling create routing table function - 2")
         self.attack_nodes = attack_node
-        print("self.attack_nodes", self.attack_nodes)
+        # print("self.attack_nodes", self.attack_nodes)
 
-        print('\n------------------------------------------------------\n')
+        # print('\n------------------------------------------------------\n')
 
         dic = {}
         for nodes in self.graph.nodes():
@@ -62,7 +65,7 @@ class dsdv_wqueue():
             self.routing_table = dic
         # print('Empty routing table\n', self.routing_table)
 
-        print('\n------------------------------------------------------\n')
+        # print('\n------------------------------------------------------\n')
 
         for i in self.routing_table.keys():
             self.routing_table[i].update({'destination': [], 'hop_count': [],
@@ -94,13 +97,9 @@ class dsdv_wqueue():
 
         self.Broadcast_NbrTable()
 
-        print("Final Routing table", self.routing_table)
-
         return self.routing_table
 
     def Broadcast_NbrTable(self):
-        print("calling broadcast nbr table function - 3")
-        # self.r_table = r_table
 
         self.rtable_info_queue = {i: []
                                   for i in self.graph.nodes}
@@ -122,15 +121,9 @@ class dsdv_wqueue():
                         self.rtable_info_queue[nbr_node].insert(
                             0, rtable_to_bcast)
 
-        # print("self.rtable_info_queue", self.rtable_info_queue)
-
         self.queue_length()
 
     def update_table(self):
-        # print("if any of the  not empty calling update table function - 5")
-
-        # while (self.queue_empty):
-        # print("queues are not empty")
         for self.src_node in self.graph.nodes():
             if self.src_node not in self.attack_nodes:
                 if (len(self.rtable_info_queue[self.src_node]) != 0):
@@ -207,8 +200,9 @@ class dsdv_wqueue():
             # self.queue_empty = True
             self.update_table()
         else:
-            print("all queues are empty")
+            # print("all queues are empty")
             # print("\n final routing table", self.routing_table)
+            ...
         # return self.queue_empty
 
     """Allocating timeslot to each node to transmit based on the queue size. The larger the queue size, higher the priority"""
@@ -217,16 +211,14 @@ class dsdv_wqueue():
         if destination of packet in 0 node is 1, then respective next hop is 1 """
 
     def tdma(self):
-
-        # print("calling tdma - 7")
         self.actions = list(self.graph.nodes)
-        # print("actions before returning", self.actions)
+        self.tdma_index = self.tdma_index % self.total_nodes
         max_queue_size = max(self.queue_size)
-        if max_queue_size > 0:
-            index_of_large_queue = np.argmax(self.queue_size)
-            # print("index_of_large_queue", index_of_large_queue)
+        if True:
+
+            # index_of_large_queue = np.argmax(self.queue_size)
+            index_of_large_queue = self.tdma_index
             node_with_max_queue = self.actions[index_of_large_queue]
-            # print("node_with_max_queue", node_with_max_queue)
 
         # now fetch the destination information for this node from state info
 
@@ -251,16 +243,9 @@ class dsdv_wqueue():
                                         self.actions[index_of_large_queue] = next_hop_found
                                         break
 
-        # else:
-        #     print("send wait condition to all nodes")
-        #     self.actions
-
-        print("actions returned by dsdv", self.actions)
-
         return self.actions
 
     def read_graph(self):
-        # print("read graph - 9")
         collision_domain = {}
 
         dict_index = 0
@@ -294,8 +279,6 @@ class dsdv_wqueue():
                             else:
                                 domain_list2 = [i, j]
 
-            # print("domain_list1",domain_list1)
-            # print("domain_list2",domain_list2)
             if len(domain_list1):
                 dict_index += 1
                 collision_domain[dict_index] = domain_list1
@@ -331,7 +314,6 @@ class dsdv_wqueue():
 
         # creating the collision domains
         self.collision_domain_elems = fullrange_wo_dupli
-        # print("self.collision_domain_elems", self.collision_domain_elems)
 
         # Find all the domains a node belong too.
         self.node_in_domains = {}
@@ -341,7 +323,6 @@ class dsdv_wqueue():
                     self.node_in_domains[value[i]] = [key]
                 else:
                     self.node_in_domains[value[i]].append(key)
-        # print("self.node_in_domains : ", self.node_in_domains)
 
         """Create list of all the valid actions for each node"""
         self.node_action_list = {i: [] for i in self.graph.nodes(data=False)}
@@ -359,30 +340,18 @@ class dsdv_wqueue():
             sorted_list = sorted(value)
             self.node_action_list[key] = sorted_list
 
-        # print("self.node_action_list", self.node_action_list)
-
-        # self.map_actions(node_action_list)
-
         return self.node_action_list
 
     def map_actions(self):
-        # print("mapp actions - 8")
         valid_action_list = []
         self.node_action_list = self.read_graph()
 
         for node in self.graph.nodes:
-            # print("action rcvd from tdma", self.actions)
             action_list = self.node_action_list[node]
-            # print("action_list of a node", action_list, node)
             index = self.__get_index(node)
-            # print("index of node", index, node)
-            # print("self.actions", self.actions)
             next_hop = self.actions[index]
-            # print("next_hop", next_hop)
             mapped_action = action_list.index(next_hop)
-            # print("mapped_action", mapped_action)
             valid_action_list.append(mapped_action)
-            print("valid_action_list aftr mapping", valid_action_list)
         return valid_action_list
 
     def __get_index(self, node):

@@ -15,9 +15,12 @@ import matplotlib as plt
 import networkx as nx
 import tensorflow as tf
 import argparse
-from DSDV_Agent import dsdv
+from DSDV_Agent import dsdv_wqueue
+from DSDV_probability import dsdv_probability
+from DSDV_RoundRobinTDMA import dsdv_RRTDMA
 from w_mac.envs.w_mac_env import W_MAC_Env
 import ast
+import numpy as np
 
 if __name__ == '__main__':
 
@@ -31,13 +34,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='FlowSim experiment specification.')
     parser.add_argument('--agent', type=str, nargs='?', const=1,
-                        default='A2C', help='Whether to use A2C, PPO, DSDV')
+                        default='PPO2', help='Whether to use A2C, PPO2, dsdv_wqueue, dsdv_RRTDMA, dsdv_prob')
     parser.add_argument('--total_train_timesteps', type=int,  nargs='?',
-                        const=1, default=10, help='Number of training steps for the agent')
+                        const=1, default=1000000, help='Number of training steps for the agent')
     parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=1000,
                         help='Maximum number of episodes for final (deterministic) evaluation')
     parser.add_argument('--graph', type=str, nargs='?', const=1,
-                        default='[(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
+                        default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
 
     args = parser.parse_args()
 
@@ -57,9 +60,11 @@ if __name__ == '__main__':
             G.add_edge(k, vv)
     nx.draw_networkx(G)
 
-    env = gym.make('wmac-graphpavitratest-v0', graph=G)
+    env = gym.make('wmac-graph-v0', graph=G)
     # check_env(env)
-    env2 = dsdv(env, G)
+    dsdv_prob_env = dsdv_probability(env, G)
+    dsdv_wqueue_env = dsdv_wqueue(env, G)
+    dsdv_RRTDMA_env = dsdv_RRTDMA(env, G)
 
     class TensorboardCallback(BaseCallback):
         """
@@ -122,31 +127,87 @@ if __name__ == '__main__':
                 env.render()
                 break
 
-    elif args.agent == 'dsdv':
-        # model = dsdv(env, G)
-        # model.learn(total_timesteps=total_train_timesteps,
-        #             callback=TensorboardCallback())
+    elif args.agent == 'dsdv_wqueue':
 
-        obs = env.reset()
-        # print("initial observatin")
-        # create new queuesize function
-        # attack_nodes = env.__reset_attack_nodes()
+        rewards = 0
+        timesteps_list = []
+        packet_lost = []
+        packet_delivered_list = []
+        succ_trans_list = []
+        for i in range(10000):
+            obs = env.reset()
+            timestep = 0
+            done = False
+            # queue_size = env.get_queue_sizes()
+            while done != True:
+                timestep += 1
+                queue_size = env.get_queue_sizes()
+                action = dsdv_wqueue_env.predict(obs, queue_size)
+                obs, rewards, done, info = env.step(action)
+                packet_loss = env.get_packet_lost()
+                packet_delivered = env.get_packet_delivered()
+                succ_trans = env.get_succ_trans()
+            timesteps_list.append(timestep)
+            packet_lost.append(packet_loss)
+            packet_delivered_list.append(packet_delivered)
+            succ_trans_list.append(succ_trans)
+        print(np.mean(timesteps_list))
+        print(np.mean(packet_lost))
+        print(np.mean(packet_delivered_list))
+        print(np.mean(succ_trans_list))
 
-        count = 0
-        while count < eval_episodes:
+    elif args.agent == 'dsdv_RRTDMA':
 
-            queue_size = env.get_queue_size()
-            # print("queue_size", queue_size)
-            # print("later obs", obs)
-            action = env2.predict(obs, queue_size)
-            obs, rewards, done, info = env.step(action)
-            env.render()
-            count = count + 1
-            time.sleep(3)
-            clear_output(wait=True)
-            if done:
-                env.render()
-                break
+        rewards = 0
+        timesteps_list = []
+        packet_lost = []
+        packet_delivered_list = []
+        for i in range(10000):
+            obs = env.reset()
+            timestep = 0
+            done = False
+            # queue_size = env.get_queue_sizes()
+            while done != True:
+                timestep += 1
+                queue_size = env.get_queue_sizes()
+                action = dsdv_RRTDMA_env.predict(obs, queue_size)
+                obs, rewards, done, info = env.step(action)
+                packet_loss = env.get_packet_lost()
+                packet_delivered = env.get_packet_delivered()
+            timesteps_list.append(timestep)
+            packet_lost.append(packet_loss)
+            packet_delivered_list.append(packet_delivered)
+        print(np.mean(timesteps_list))
+        print(np.mean(packet_lost))
+        print(np.mean(packet_delivered_list))
+
+    elif args.agent == 'dsdv_prob':
+        rewards = 0
+        timesteps_list = []
+        packet_lost = []
+        packet_delivered_list = []
+        succ_trans_list = []
+        for i in range(10000):
+            obs = env.reset()
+            timestep = 0
+            done = False
+            # queue_size = env.get_queue_sizes()
+            while done != True:
+                timestep += 1
+                queue_size = env.get_queue_sizes()
+                action = dsdv_prob_env.predict(obs, queue_size, rewards)
+                obs, rewards, done, info = env.step(action)
+                packet_loss = env.get_packet_lost()
+                packet_delivered = env.get_packet_delivered()
+                succ_trans = env.get_succ_trans()
+            timesteps_list.append(timestep)
+            packet_lost.append(packet_loss)
+            packet_delivered_list.append(packet_delivered)
+            succ_trans_list.append(succ_trans)
+        print(np.mean(timesteps_list))
+        print(np.mean(packet_lost))
+        print(np.mean(packet_delivered_list))
+        print(np.mean(succ_trans_list))
 
     else:
         raise ValueError('Unknown agent.')
