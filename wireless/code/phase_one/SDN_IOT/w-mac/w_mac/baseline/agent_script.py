@@ -134,10 +134,11 @@ if __name__ == '__main__':
             packet_lost.append(pkt_lost)
             packet_delivered_list.append(packet_delivered)
             succ_trans_list.append(succ_trans)
-        print(np.mean(timesteps_list))
-        print(np.mean(packet_lost))
-        print(np.mean(packet_delivered_list))
-        print(np.mean(succ_trans_list))
+        print("Mean timesteps taken to transfer all the packets in the network", np.mean(
+            timesteps_list))
+        print("Mean packet lost", np.mean(packet_lost))
+        print("Mean packets delivered", np.mean(packet_delivered_list))
+        print("Mean successfull transmissions", np.mean(succ_trans_list))
 
     # BASELINE 1: DSDV routing protocol with weighted queue based TDMA
     elif args.agent == 'dsdv_wqueue':
@@ -162,10 +163,11 @@ if __name__ == '__main__':
             packet_lost.append(packet_loss)
             packet_delivered_list.append(packet_delivered)
             succ_trans_list.append(succ_trans)
-        print(np.mean(timesteps_list))
-        print(np.mean(packet_lost))
-        print(np.mean(packet_delivered_list))
-        print(np.mean(succ_trans_list))
+        print("Mean timesteps taken to transfer all the packets in the network", np.mean(
+            timesteps_list))
+        print("Mean packet lost", np.mean(packet_lost))
+        print("Mean packets delivered", np.mean(packet_delivered_list))
+        print("Mean successfull transmissions", np.mean(succ_trans_list))
 
     # BASELINE 2: DSDV routing protocol with round robin TDMA
     elif args.agent == 'dsdv_RRTDMA':
@@ -173,6 +175,7 @@ if __name__ == '__main__':
         timesteps_list = []
         packet_lost = []
         packet_delivered_list = []
+        succ_trans_list = []
         for i in range(eval_episodes):
             obs = env.reset()
             timestep = 0
@@ -184,12 +187,16 @@ if __name__ == '__main__':
                 obs, rewards, done, info = env.step(action)
                 packet_loss = env.get_packet_lost()
                 packet_delivered = env.get_packet_delivered()
+                succ_trans = env.get_succ_trans()
             timesteps_list.append(timestep)
             packet_lost.append(packet_loss)
             packet_delivered_list.append(packet_delivered)
-        print(np.mean(timesteps_list))
-        print(np.mean(packet_lost))
-        print(np.mean(packet_delivered_list))
+            succ_trans_list.append(succ_trans)
+        print("Mean timesteps taken to transfer all the packets in the network", np.mean(
+            timesteps_list))
+        print("Mean packet lost", np.mean(packet_lost))
+        print("Mean packets delivered", np.mean(packet_delivered_list))
+        print("Mean successfull transmissions", np.mean(succ_trans_list))
 
     # BASELINE 3: DSDV routing protocol with probability based TDMA
     elif args.agent == 'dsdv_prob':
@@ -214,10 +221,11 @@ if __name__ == '__main__':
             packet_lost.append(packet_loss)
             packet_delivered_list.append(packet_delivered)
             succ_trans_list.append(succ_trans)
-        print(np.mean(timesteps_list))
-        print(np.mean(packet_lost))
-        print(np.mean(packet_delivered_list))
-        print(np.mean(succ_trans_list))
+        print("Mean timesteps taken to transfer all the packets in the network", np.mean(
+            timesteps_list))
+        print("Mean packet lost", np.mean(packet_lost))
+        print("Mean packets delivered", np.mean(packet_delivered_list))
+        print("Mean successfull transmissions", np.mean(succ_trans_list))
 
     else:
         raise ValueError('Unknown agent.')
