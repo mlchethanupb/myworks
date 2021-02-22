@@ -175,6 +175,7 @@ class WirelessEnv(MultiAgentEnv):
     """ Reset the variables used to measure the stats """
 
     def __reset_stat_variables(self):
+        self.succ_transmission = 0
         self.packet_delivered = 0
         self.packet_lost = 0
         self.counter = 0
@@ -463,6 +464,7 @@ class WirelessEnv(MultiAgentEnv):
             isdone = True
             logging.info('packets delivered %s ',self.packet_delivered)
             logging.info('packet_lost %s', self.packet_lost)
+            logging.info("Successfull transmission %s",self.succ_transmission)
             #print('packets delivered',self.packet_delivered)
             #print('packet_lost', self.packet_lost)
         return isdone
@@ -515,6 +517,8 @@ class WirelessEnv(MultiAgentEnv):
     def get_reward(self):
             return self.reward
 
+    def get_succ_transmissions(self):
+            return self.succ_transmission
     #--------------------------------------------------------------------------------------------
     
     """
@@ -671,7 +675,7 @@ class WirelessEnv(MultiAgentEnv):
                         break
                     
                     else:
-                    
+                        self.succ_transmission += 1
 
                         if (nxt_hop == packet_to_send.dest):
                             logging.debug("Packet reached destination node from source: %s, to destination: %s, with hopcount %s",packet_to_send.src, packet_to_send.dest, packet_to_send.get_hop_count()+1)
