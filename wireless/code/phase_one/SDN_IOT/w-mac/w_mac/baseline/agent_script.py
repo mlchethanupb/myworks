@@ -1,4 +1,8 @@
 import os
+import matplotlib as plt
+import networkx as nx
+import tensorflow as tf
+import argparse
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import make_vec_env
 from stable_baselines import A2C, PPO2
@@ -9,18 +13,15 @@ from copy import deepcopy
 from ray import tune
 from stable_baselines.common.callbacks import BaseCallback
 import gym
-import w_mac
+import ast
+import numpy as np
 from collections import defaultdict
-import matplotlib as plt
-import networkx as nx
-import tensorflow as tf
-import argparse
+import w_mac
 from DSDV_Agent import dsdv_wqueue
 from DSDV_probability import dsdv_probability
 from DSDV_RoundRobinTDMA import dsdv_RRTDMA
 from w_mac.envs.w_mac_env import W_MAC_Env
-import ast
-import numpy as np
+
 
 if __name__ == '__main__':
 
@@ -30,14 +31,14 @@ if __name__ == '__main__':
     """Smaller netowrk"""
     # data = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]
     # defaultdict(<type 'list'>, {})
-
+    """ Experiment details"""
     parser = argparse.ArgumentParser(
-        description='FlowSim experiment specification.')
+        description='Transmitting packets in wireless network.')
     parser.add_argument('--agent', type=str, nargs='?', const=1,
                         default='PPO2', help='Whether to use A2C, PPO2, dsdv_wqueue, dsdv_RRTDMA, dsdv_prob')
     parser.add_argument('--total_train_timesteps', type=int,  nargs='?',
-                        const=1, default=1000000, help='Number of training steps for the agent')
-    parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=1000,
+                        const=1, default=1500000, help='Number of training steps for the agent')
+    parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=10000,
                         help='Maximum number of episodes for final (deterministic) evaluation')
     parser.add_argument('--graph', type=str, nargs='?', const=1,
                         default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
@@ -51,6 +52,7 @@ if __name__ == '__main__':
     total_train_timesteps = args.total_train_timesteps
     eval_episodes = args.eval_episodes
 
+    # Create a network graph
     for node, dest in data:
         d[node].append(dest)
 
@@ -90,6 +92,8 @@ if __name__ == '__main__':
             self.locals['writer'].add_summary(summary, self.num_timesteps)
             return True
 
+    # Different agent's training and evaluation
+    # Default agent is PPO2. To try new agents ->Ex: python agent_script.py --agent A2C
     if args.agent == 'A2C' or args.agent == 'PPO2':
 
         if args.agent == 'A2C':
@@ -97,48 +101,55 @@ if __name__ == '__main__':
                         tensorboard_log="./a2c_tensorboard/")
             model.learn(total_timesteps=total_train_timesteps,
                         callback=TensorboardCallback())
-            model.save("a2c_wmac")
+            model.save("a2c_wmac_small")
 
-            model = A2C.load("a2c_wmac")
+            model = A2C.load("a2c_wmac_small")
 
         else:
-            model = PPO2(MlpPolicy, env, verbose=1,
-                         tensorboard_log="./PPO2_tensorboard/")
+            model = PPO2(MlpPolicy, env, verbose=1, gamma=0.99, n_steps=2048, nminibatches=32, learning_rate=2.5e-4, lam=0.95, noptepochs=10, ent_coef=0.01, cliprange=0.2,
+                         tensorboard_log="./PPO2_tensorboard/", seed=8, n_cpu_tf_sess=1)
             model.learn(total_timesteps=total_train_timesteps,
                         callback=TensorboardCallback())
 
-            model.save("PPO2_wmac")
+            model.save("PPO2_wmac_small")
 
-            model = PPO2.load("PPO2_wmac")
+            model = PPO2.load("PPO2_wmac_small")
 
-        print("entering into reset")
-
-        obs = env.reset()
-
-        count = 0
-        while count < eval_episodes:
-            action, _states = model.predict(obs)
-            obs, rewards, done, info = env.step(action)
-            env.render()
-            count = count + 1
-            time.sleep(3)
-            clear_output(wait=True)
-            if done:
-                env.render()
-                break
-
-    elif args.agent == 'dsdv_wqueue':
-
-        rewards = 0
         timesteps_list = []
         packet_lost = []
         packet_delivered_list = []
         succ_trans_list = []
-        for i in range(10000):
+        for i in range(eval_episodes):
             obs = env.reset()
             timestep = 0
             done = False
-            # queue_size = env.get_queue_sizes()
+            while done != True:
+                timestep += 1
+                action, _states = model.predict(obs)
+                obs, rewards, done, info = env.step(action)
+                pkt_lost = env.get_packet_lost()
+                packet_delivered = env.get_packet_delivered()
+                succ_trans = env.get_succ_trans()
+            timesteps_list.append(timestep)
+            packet_lost.append(pkt_lost)
+            packet_delivered_list.append(packet_delivered)
+            succ_trans_list.append(succ_trans)
+        print(np.mean(timesteps_list))
+        print(np.mean(packet_lost))
+        print(np.mean(packet_delivered_list))
+        print(np.mean(succ_trans_list))
+
+    # BASELINE 1: DSDV routing protocol with weighted queue based TDMA
+    elif args.agent == 'dsdv_wqueue':
+
+        timesteps_list = []
+        packet_lost = []
+        packet_delivered_list = []
+        succ_trans_list = []
+        for i in range(eval_episodes):
+            obs = env.reset()
+            timestep = 0
+            done = False
             while done != True:
                 timestep += 1
                 queue_size = env.get_queue_sizes()
@@ -156,17 +167,16 @@ if __name__ == '__main__':
         print(np.mean(packet_delivered_list))
         print(np.mean(succ_trans_list))
 
+    # BASELINE 2: DSDV routing protocol with round robin TDMA
     elif args.agent == 'dsdv_RRTDMA':
 
-        rewards = 0
         timesteps_list = []
         packet_lost = []
         packet_delivered_list = []
-        for i in range(10000):
+        for i in range(eval_episodes):
             obs = env.reset()
             timestep = 0
             done = False
-            # queue_size = env.get_queue_sizes()
             while done != True:
                 timestep += 1
                 queue_size = env.get_queue_sizes()
@@ -181,17 +191,17 @@ if __name__ == '__main__':
         print(np.mean(packet_lost))
         print(np.mean(packet_delivered_list))
 
+    # BASELINE 3: DSDV routing protocol with probability based TDMA
     elif args.agent == 'dsdv_prob':
         rewards = 0
         timesteps_list = []
         packet_lost = []
         packet_delivered_list = []
         succ_trans_list = []
-        for i in range(10000):
+        for i in range(eval_episodes):
             obs = env.reset()
             timestep = 0
             done = False
-            # queue_size = env.get_queue_sizes()
             while done != True:
                 timestep += 1
                 queue_size = env.get_queue_sizes()
