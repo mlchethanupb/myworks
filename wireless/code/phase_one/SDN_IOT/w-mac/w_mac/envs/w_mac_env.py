@@ -37,14 +37,8 @@ class W_MAC_Env(gym.Env):
 
         #nx.draw_networkx(self.graph)
         self.routing_table = {}
-        self.destinations_list_with_anode = []
-        self.queue_size = []
-        self.destinations_list_with_anode = self.__frame_next_state()
-        self.queue_size = self.__get_queue_sizes()
-        # last number is attack node info
-        self.attack_node = ([self.destinations_list_with_anode[-1]])
-        self.destinations_list = self.destinations_list_with_anode[:-1]
-        print("self.destinations_list", self.destinations_list)
+        
+        
 
 
         self.probablity_based_actions = self.probablity__actions()
@@ -213,6 +207,15 @@ class W_MAC_Env(gym.Env):
             self.probability = self.probability + \
                 (self.probability * reward * 0.1)
 
+        self.destinations_list_with_anode = []
+        self.queue_size = []
+        self.queue_size = self.get_queue_sizes()
+        self.destinations_list_with_anode = self.__frame_next_state()
+        
+        # last number is attack node info
+        self.attack_node = ([self.destinations_list_with_anode[-1]])
+        self.destinations_list = self.destinations_list_with_anode[:-1]
+        print("self.destinations_list", self.destinations_list)
     
     
         ### next state =  dest of next packet to send + attack nodes status
@@ -290,6 +293,20 @@ class W_MAC_Env(gym.Env):
         return(arr)
 
     # --------------------------------------------------------------------------------------------
+    """
+    Retrun list of queue sizes of each node.  
+  """
+
+    def get_queue_sizes(self):
+
+        queue_size_list = []
+        for node in self.graph.nodes:
+            queue_size_list.append(len(self.queues[node]))
+
+        return queue_size_list
+
+    # --------------------------------------------------------------------------------------------
+
 
     # def step(self, rcvd_actions):
     #     #logging.debug("received action: %s",rcvd_actions)
