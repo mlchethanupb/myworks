@@ -19,7 +19,7 @@ from w_mac.baseline.Updated_RTable import Updated_Routing_info
 """Baseline routing protocol DSDV"""
 
 
-class dsdv():
+class dsdv_wqueue():
 
     def __init__(self, env: gym.Env, graph: nx.Graph):
         # super(dsdv, self).__init__(env)

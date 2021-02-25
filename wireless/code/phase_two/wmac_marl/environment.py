@@ -17,6 +17,7 @@ class WirelessEnv(MultiAgentEnv):
         #data = [(0,2),(0,1),(0,3),(1,2),(1,3),(2,3),(2,4),(3,4),(5,2),(5,3),(5,4),(5,6),(6,7),(6,8),(7,8),(8,9),(9,10),(4,10)]#(4,6),(5,10),(6,10),(9,6),(8,10)]
         """Smaller netowrk"""
         data = [(0,2),(0,1),(0,3),(1,2),(1,3),(2,3),(2,4),(3,4),(5,2),(5,3),(5,4)]
+        #data = [(0,1),(0,2),(1,2),(0,3),(1,3),(2,3)]
         # defaultdict(<type 'list'>, {})
         for node, dest in data:
             d[node].append(dest)
@@ -49,8 +50,9 @@ class WirelessEnv(MultiAgentEnv):
 
         self.__reset_attack_nodes()
         self.__read_graph_data()
-        self.__create_action_observation_space()
         self.__reset_queue()
+        self.__create_action_observation_space()
+        
 
         #self.observation_space = gym.spaces.Box(low=0, high=800, shape=(1,))
         #self.action_space = gym.spaces.Box(low=0, high=1, shape=(1,))
@@ -76,12 +78,12 @@ class WirelessEnv(MultiAgentEnv):
 
     def step(self, action_dict):
         obs, rew, done, info = {}, {}, {}, {}
-        logging.debug("received action: %s",action_dict)
+        #logging.debug("received action: %s",action_dict)
 
         action_list = self.__action_dict_to_list(action_dict)
 
         actions = self.__map_to_valid_actions(action_list)
-        #logging.debug("mapped actions: %s",actions)
+        logging.info("mapped actions: %s",actions)
 
         reward = self.__perform_actions(actions)
 
@@ -95,13 +97,14 @@ class WirelessEnv(MultiAgentEnv):
                 no_transmit = False
         
         if alldone == False and no_transmit == True:
-            reward -= self.COLLISION_REWARD / 20
+            reward = self.OTHER_REWARD
+            ...
 
-        if alldone == True:
+        if alldone == True and self.end_episode == False:
             queue_empty = True
             for node in self.graph.nodes:
                 if len(self.queues[node]) > 0:
-                    reward -= self.MAX_REWARD*self.total_nodes
+                    reward = (-self.MAX_REWARD)*100*self.total_nodes
                     #print("Punishing when done even if packets remain")
                     logging.info("Punishing when done even if packets remain")
                     queue_empty = False
@@ -111,15 +114,18 @@ class WirelessEnv(MultiAgentEnv):
                 #print("Hurray !!! All packets transmitted successfully")
                 logging.info("Hurray !!! All packets transmitted successfully")
                 #reward += self.MAX_REWARD*self.total_nodes
-
+        
+        self.reward = reward #testing - remove later
         for agnt_i in range(self.num_agents):
             rew[agnt_i], done[agnt_i], info[agnt_i] =  reward, self.__is_agent_done(agnt_i), {}
 
         done["__all__"] = alldone
-        # print(obs)
-        # print(self.observation_space)
-        #logging.info("Observation : %s", obs)
-        #logging.info("reward : %s, done : %s", rew, done)
+
+        logging.info("Observation : %s", obs[0])
+        logging.info("reward : %s", reward)
+        logging.info("done : %s", done)
+
+
         return obs, rew, done, info
 
     #--------------------------------------------------------------------------------------------
@@ -157,19 +163,26 @@ class WirelessEnv(MultiAgentEnv):
     """ Create different constant variables used to reward the agent in different scenarios """
     
     def __initialize_rewards(self):
+        self.QUEUE_SIZE = 5
         ### Rewards
-        self.MAX_REWARD = 10*(self.total_nodes)
-        self.COLLISION_REWARD = 10*self.total_nodes
-        self.ATTACK_NODE_REWARD = 15 * self.total_nodes
+        self.MAX_REWARD = 1 
+        self.COLLISION_REWARD = -1 
+        self.ATTACK_NODE_REWARD = -1
+        self.OTHER_REWARD = -0.1
 
     #--------------------------------------------------------------------------------------------
 
     """ Reset the variables used to measure the stats """
 
     def __reset_stat_variables(self):
+        self.succ_transmission = 0
         self.packet_delivered = 0
         self.packet_lost = 0
         self.counter = 0
+        self.end_episode = False
+
+        #for testing
+        self.reward = 0
 
     #--------------------------------------------------------------------------------------------
 
@@ -197,7 +210,8 @@ class WirelessEnv(MultiAgentEnv):
                 a_node = random.randrange(0,self.total_nodes)
             
             self.attack_nodes.append(a_node)
-
+        
+        #self.attack_nodes = []
         logging.info("self.attack_nodes: %s", self.attack_nodes)
 
 
@@ -336,7 +350,9 @@ class WirelessEnv(MultiAgentEnv):
         ## Creating observation space 
         observation_space = []
         for i in range(self.total_nodes):
-            observation_space.append(self.total_nodes+1)
+            observation_space.append(self.total_nodes + 1)
+        for i in range(self.total_nodes):
+            observation_space.append(self.QUEUE_SIZE * self.num_agents)        
         for i in range(len(self.attack_nodes)):
             observation_space.append(self.total_nodes)
         self.observation_space = MultiDiscrete(observation_space)
@@ -380,7 +396,7 @@ class WirelessEnv(MultiAgentEnv):
         ### Add packets to the queue. 
         for node in self.graph.nodes:
             if node not in self.attack_nodes: ## If node is defect node, do not add packets.
-                    for count in range(5):
+                    for count in range(self.QUEUE_SIZE):
                         self.src = node   ## node is the source
                         self.dest = random.randrange(0,self.total_nodes)  ## find random destination
                         while self.src == self.dest or self.dest in self.attack_nodes:
@@ -410,9 +426,13 @@ class WirelessEnv(MultiAgentEnv):
             else:
                 next_state.append(self.total_nodes)
         
+        for node in self.graph.nodes:
+            next_state.append(len(self.queues[node]))
+
         for node in self.attack_nodes:
             next_state.append(node)
-        
+
+        #logging.info("next_state : %s", next_state)
         return (next_state)
 
     #-------------------------------------------------------------------------------------------- 
@@ -440,10 +460,11 @@ class WirelessEnv(MultiAgentEnv):
             self.counter += 1
                     
         isdone = False
-        if queue_empty or counter_exceeded:
+        if queue_empty or counter_exceeded: # or self.end_episode:
             isdone = True
             logging.info('packets delivered %s ',self.packet_delivered)
             logging.info('packet_lost %s', self.packet_lost)
+            logging.info("Successfull transmission %s",self.succ_transmission)
             #print('packets delivered',self.packet_delivered)
             #print('packet_lost', self.packet_lost)
         return isdone
@@ -492,6 +513,22 @@ class WirelessEnv(MultiAgentEnv):
     """
     def get_packet_lost(self):
             return self.packet_lost
+
+    def get_reward(self):
+            return self.reward
+
+    def get_succ_transmissions(self):
+            return self.succ_transmission
+    #--------------------------------------------------------------------------------------------
+    
+    """
+        Function to retrieve the number of packets delivered stat.
+
+        Returns - Integer
+
+    """
+    def get_packet_delivered_count(self):
+            return self.packet_delivered
 
     #--------------------------------------------------------------------------------------------
 
@@ -553,8 +590,7 @@ class WirelessEnv(MultiAgentEnv):
 
     def __perform_actions(self, actions):
 
-        reward1 = 0
-        reward2 = 0
+        reward = 0
 
         ## Reset visualization variables  
         self.__reset_visualization_variables()
@@ -573,13 +609,16 @@ class WirelessEnv(MultiAgentEnv):
             ### Check if next hop defect/attack node
             if nxt_hop in self.attack_nodes:
 
-                reward1 -= self.ATTACK_NODE_REWARD
+                reward = self.ATTACK_NODE_REWARD
                 valid_next_hop = False
 
                 if(len(self.queues[node])):
                     logging.debug("Packet lost due to passing to defect node: %s, index: %s, actions: %s",node,index,actions)
                     self.packet_lost += 1
+                    self.end_episode = True
                     packet_to_send = self.queues[node].pop()
+
+                break       
                 
             ### Transmit when node is not defect node
             if (actions[index] in range(self.total_nodes)) and valid_next_hop == True:
@@ -592,7 +631,7 @@ class WirelessEnv(MultiAgentEnv):
                     ### Pop the packet from the queue
                     packet_to_send = queue.pop()
 
-                    self.__vis_update_src_nxthop(node,nxt_hop)
+                    self.__vis_update_src_nxthop(node,nxt_hop)  
 
                     ### Find which domain the next hop belongs, so that interference can be checked in that collision domain. 
                     for domain in domain_list:
@@ -612,25 +651,31 @@ class WirelessEnv(MultiAgentEnv):
                     if num_nodes_transmitting > 1:
                         logging.debug('Packet loss due to collision')
                         self.packet_lost += 1
-                        reward2 -= self.COLLISION_REWARD
+                        self.end_episode = True
+                        reward = self.COLLISION_REWARD
 
 
                         logging.debug("node: %s, index: %s ,next_hop: %s, domain_list: %s, nexthop in domain: %s, next_hop_node_list: %s",
                                 node, index, nxt_hop, domain_list, domain_key, node_list)
                         logging.debug("actions: %s, valid_action_sublist: %s", actions, valid_act_sublist)
+
+                        break
 
                     elif (self.__hidden_terminal_problem(actions, node, domain_key, qs_list)):
                         logging.debug('Packet loss due to hidden terminal problem')
-                        reward2 -= self.COLLISION_REWARD
+                        reward = self.COLLISION_REWARD
                         self.packet_lost += 1
+                        self.end_episode = True
 
 
                         logging.debug("node: %s, index: %s ,next_hop: %s, domain_list: %s, nexthop in domain: %s, next_hop_node_list: %s",
                                 node, index, nxt_hop, domain_list, domain_key, node_list)
                         logging.debug("actions: %s, valid_action_sublist: %s", actions, valid_act_sublist)
                     
-                    else:
+                        break
                     
+                    else:
+                        self.succ_transmission += 1
 
                         if (nxt_hop == packet_to_send.dest):
                             logging.debug("Packet reached destination node from source: %s, to destination: %s, with hopcount %s",packet_to_send.src, packet_to_send.dest, packet_to_send.get_hop_count()+1)
@@ -638,27 +683,26 @@ class WirelessEnv(MultiAgentEnv):
                             self.__vis_update_src_dest(node,packet_to_send.dest)
                             
                             self.packet_delivered +=1
-                            reward2 += (self.MAX_REWARD)
+                            reward += (self.MAX_REWARD)
 
                         else:
 
-                            reward2 -= packet_to_send.get_hop_count()
+                            reward -= (packet_to_send.get_hop_count())*0.01
 
                             #logging.debug("Packet added to queue of next_hop: %s",nxt_hop)
                             ### successful transmission, add the packet to the queue.
                             packet_to_send.update_hop_count()
                             self.queues[nxt_hop].insert(0, packet_to_send)
-                                                    
                 else:
                     ## Queue length 0. Agent should not take action.
-                    reward2 -= self.COLLISION_REWARD / 20
+                    #reward2 -= self.OTHER_REWARD
+                    ...
             
             elif(actions[index] == self.total_nodes):
                 #logging.info("wait")
-                reward2 -= self.COLLISION_REWARD / 20 
-
+                #reward2 -= self.WAIT_REWARD 
+                ...
         
-        reward = (1) * reward1 + (1) * reward2
 
         return reward
 
@@ -680,15 +724,18 @@ class WirelessEnv(MultiAgentEnv):
         for h_key,h_values in self.collision_domain_elems.items():
             if( nxt_hop in h_values): ## Next hop is in other collision domain. 
                 if(domain_key != h_key): ## Its not same as the source collision domain
-                
+
                     h_action = self.__get_valid_action_sublist(actions,h_values,qs_list)
-
                     num_nodes_transmitting = 0
-                    for tmp_action in h_action:
-                            if ( tmp_action == 1 ):
-                                num_nodes_transmitting += 1 
 
-                    if num_nodes_transmitting > 1:
+                    for tmp_action in h_action:
+                        if (tmp_action == 1) and (index != self.__get_index(h_values[h_action.index(tmp_action)])):
+                            num_nodes_transmitting += 1
+
+                    # num_nodes_transmitting should be greater than 0(not 1) as we are
+                    # have to check if any node is transmitting in the neighbouring collision domain
+                    # when a node is transmitting to common intermediate node.
+                    if num_nodes_transmitting > 0:
                             ret_val = True
                         
         return ret_val
