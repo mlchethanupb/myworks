@@ -15,6 +15,11 @@ import logging
 from w_mac.baseline.Routing_Table import Routing_info
 from w_mac.baseline.Updated_RTable import Updated_Routing_info
 # from w_mac.baseline.DSDV_Agent import dsdv
+import scipy.stats as stats
+import matplotlib
+import matplotlib.pyplot as plt
+from IPython.core.display import Image
+from scipy.stats import norm
 
 
 class W_MAC_Env(gym.Env):
@@ -25,15 +30,27 @@ class W_MAC_Env(gym.Env):
     
         self.graph = graph
         self.total_nodes = len(self.graph.nodes())
-    
 
         #Each node can do 2 actions {Transmit, Wait}
         action_space = [2 for i in range(len(self.graph.nodes()))]
         self.action_space = spaces.MultiDiscrete(action_space)
+
         #nx.draw_networkx(self.graph)
         self.routing_table = {}
-    
+        self.destinations_list_with_anode = []
+        self.queue_size = []
+        self.destinations_list_with_anode = self.__frame_next_state()
+        self.queue_size = self.__get_queue_sizes()
+        # last number is attack node info
+        self.attack_node = ([self.destinations_list_with_anode[-1]])
+        self.destinations_list = self.destinations_list_with_anode[:-1]
+        print("self.destinations_list", self.destinations_list)
 
+
+        self.probablity_based_actions = self.probablity__actions()
+        print("------------SUGGESTED ACTIONS------",self.probablity_based_actions)
+
+       
    
         logging.basicConfig(
         filename='wmac.log',
@@ -183,21 +200,19 @@ class W_MAC_Env(gym.Env):
         #actions = self.actions
         #logging.debug("mapped actions: %s",actions)
 
+        self.prob_min = 0.5  # 1/self.total_nodes
+        self.prob_max = 0.9
+        self.probability = stats.uniform.rvs(size=6,  # Generate 6 nodes in graph
+                                 loc = 0,      # From 0 
+                                 scale=10)     # To 10
+        print("INITIAL PROBABLITY", self.probablity)
+
         reward = self.__perform_actions(actions)
+        
+        if (self.probability > self.prob_min) and (reward < 0):
+            self.probability = self.probability + \
+                (self.probability * reward * 0.1)
 
-    
-        print("calling predict function - 1")
-        self.destinations_list_with_anode = []
-        self.queue_size = []
-        self.destinations_list_with_anode = self.__frame_next_state()
-        self.queue_size = self.__get_queue_sizes()
-        # last number is attack node info
-        self.attack_node = ([self.destinations_list_with_anode[-1]])
-        self.destinations_list = self.destinations_list_with_anode[:-1]
-        print("self.destinations_list", self.destinations_list)
-
-    
-        #predict = dsdv.predict(self.destinations_list_with_anode, self.queue_size)
     
     
         ### next state =  dest of next packet to send + attack nodes status
@@ -247,7 +262,7 @@ class W_MAC_Env(gym.Env):
         if isdone == False and actions_list.count(1) == 0 :
             reward -= 1000
 
-
+        self.probablity__actions()
         print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
 
         """ Sequence of next function calls should not be changed """
@@ -276,46 +291,46 @@ class W_MAC_Env(gym.Env):
 
     # --------------------------------------------------------------------------------------------
 
-    def step(self, rcvd_actions):
-        #logging.debug("received action: %s",rcvd_actions)
-        actions = self.__map_to_valid_actions(rcvd_actions)
-        #logging.debug("mapped actions: %s",actions)
-        # reward = 0
+    # def step(self, rcvd_actions):
+    #     #logging.debug("received action: %s",rcvd_actions)
+    #     actions = self.__map_to_valid_actions(rcvd_actions)
+    #     #logging.debug("mapped actions: %s",actions)
+    #     # reward = 0
 
-        reward = self.__perform_actions(actions)
+    #     reward = self.__perform_actions(actions)
 
-        next_state = self.__frame_next_state()
-        nxt_state_arr = np.array(next_state)
+    #     next_state = self.__frame_next_state()
+    #     nxt_state_arr = np.array(next_state)
 
-        isdone = self.__isdone()
-        info = {}
+    #     isdone = self.__isdone()
+    #     info = {}
 
-        no_transmit = True
-        for status in actions:
-            if status != self.total_nodes:
-                no_transmit = False
+    #     no_transmit = True
+    #     for status in actions:
+    #         if status != self.total_nodes:
+    #             no_transmit = False
 
-        if isdone == False and no_transmit == True:
-            reward = self.COLLISION_REWARD * 0.1
+    #     if isdone == False and no_transmit == True:
+    #         reward = self.COLLISION_REWARD * 0.1
 
-        if isdone == True:
-            queue_empty = True
-            for node in self.graph.nodes:
-                if len(self.queues[node]) > 0:
-                    reward = (-self.MAX_REWARD)*100*self.total_nodes
+    #     if isdone == True:
+    #         queue_empty = True
+    #         for node in self.graph.nodes:
+    #             if len(self.queues[node]) > 0:
+    #                 reward = (-self.MAX_REWARD)*100*self.total_nodes
 
-                    logging.info("Punishing when done even if packets remain")
-                    queue_empty = False
-                    break
+    #                 logging.info("Punishing when done even if packets remain")
+    #                 queue_empty = False
+    #                 break
 
-            if queue_empty == True and self.packet_lost == 0:
-                #print("Hurray !!! All packets transmitted successfully")
-                logging.info("Hurray !!! All packets transmitted successfully")
-                # reward = self.MAX_REWARD*self.total_nodes
+    #         if queue_empty == True and self.packet_lost == 0:
+    #             #print("Hurray !!! All packets transmitted successfully")
+    #             logging.info("Hurray !!! All packets transmitted successfully")
+    #             # reward = self.MAX_REWARD*self.total_nodes
 
-        logging.info("nxt_state_arr: %s, reward: %s, isdone: %s",
-                     nxt_state_arr, reward, isdone)
-        return nxt_state_arr, reward, isdone, info
+    #     logging.info("nxt_state_arr: %s, reward: %s, isdone: %s",
+    #                  nxt_state_arr, reward, isdone)
+    #     return nxt_state_arr, reward, isdone, info
 
     # --------------------------------------------------------------------------------------------
 
@@ -761,6 +776,52 @@ class W_MAC_Env(gym.Env):
     -- Positive reward is also reduced with factor of hopcount taken to reach destination.
 
   """
+
+    def probablity__actions(self):
+    
+       
+        self.probablity_actions = list(self.graph.nodes)
+       
+        max_queue_size = max(self.queue_size)
+        if True:  # max_queue_size > 0:
+
+            # index_of_large_queue = np.argmax(self.queue_size)
+            index_of_large_queue = self.total_nodes
+
+            # node_with_max_queue = self.actions[index_of_large_queue]
+
+        # now fetch the destination information for this node from state info
+
+            for src, dest in enumerate(self.destinations_list):
+
+                if self.probability > random.uniform(0, 1):
+                    index_of_large_queue = src
+                    # node_with_max_queue = self.actions[index_of_large_queue]
+
+                if index_of_large_queue == src:
+                    dest_to_transmit = dest
+
+        # fetch the routing table of index_of_large_queue
+
+                    for key in self.routing_table:
+                        if key == src:
+
+                            dest_list_to_search = self.routing_table[key]['destination']
+                            next_hop_to_send = self.routing_table[key]['next_hop']
+                            if dest_to_transmit in dest_list_to_search:
+                                index_of_dest = dest_list_to_search.index(
+                                    dest_to_transmit)
+                                for nodes, next_hop in enumerate(next_hop_to_send):
+                                    if nodes == index_of_dest:
+                                        next_hop_found = next_hop_to_send[nodes]
+
+                                        self.probablity_actions[index_of_large_queue] = next_hop_found
+                                        break
+                    
+                    print("Probablity based actions:",self.probablity__actions)
+
+        return self.probablity_actions
+
 
     def __perform_actions(self, actions):
 
