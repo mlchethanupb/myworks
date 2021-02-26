@@ -37,12 +37,30 @@ class W_MAC_Env(gym.Env):
 
         #nx.draw_networkx(self.graph)
         self.routing_table = {}
+        self.destinations_list_with_anode = []
+        # Creating queue for each node
+        self.queues = {i: [] for i in self.graph.nodes}
+        self.queue_size = []
+        self.queue_size = self.get_queue_sizes()
+       
+        self.destinations_list_with_anode = self.__frame_next_state()
+         # last number is attack node info
+        self.attack_node = ([self.destinations_list_with_anode[-1]])
         
+        self.destinations_list = self.destinations_list_with_anode[:-1]
+        print("self.destinations_list", self.destinations_list)
         
 
-
+        self.prob_min = 0.5  # 1/self.total_nodes
+        self.prob_max = 0.9
+        self.probablity = stats.uniform.rvs(size=6,  # Generate 6 nodes in graph
+                                 loc = 0,      # From 0 
+                                 scale=10)     # To 10
+        print("INITIAL PROBABLITY", self.probablity)
+        
         self.probablity_based_actions = self.probablity__actions()
         print("------------SUGGESTED ACTIONS------",self.probablity_based_actions)
+
 
        
    
@@ -63,9 +81,9 @@ class W_MAC_Env(gym.Env):
         self.__read_graph_data()
         self.__create_action_observation_space()
         self.__reset_queue()
-        self.create_routing_table(self.attack_nodes)
+        self.create_routing_table(self.attack_node)
         self.Broadcast_NbrTable()
-        #self.update_table()
+        self.update_table()
   
   #--------------------------------------------------------------------------------------------
 
@@ -88,7 +106,7 @@ class W_MAC_Env(gym.Env):
     def create_routing_table(self, attack_node):
         print("calling create routing table function - 2")
         self.attack_nodes = attack_node
-        print("self.attack_nodes", self.attack_nodes)
+        print("self.attack_node", self.attack_nodes)
 
         print('\n------------------------------------------------------\n')
 
@@ -149,6 +167,64 @@ class W_MAC_Env(gym.Env):
                 self.rtable_info_queue[n_nodes_to_bcast].insert(
                     0, updated_rtable)
 
+    def update_table(self):
+        # print("if any of the  not empty calling update table function - 5")
+
+        # while (self.queue_empty):
+        # print("queues are not empty")
+        
+        for self.src_node in self.graph.nodes():
+            if self.src_node not in self.attack_nodes:
+                if (len(self.rtable_info_queue[self.src_node]) != 0):
+                    rtable_pkt = self.rtable_info_queue[self.src_node].pop(
+                    )
+                    src_dest_list = rtable_pkt.dest
+                    src_nh_list = rtable_pkt.nh
+                    src_hc_list = rtable_pkt.hc
+                    src_id_list = rtable_pkt.id_num
+
+                    original_src_dest = self.routing_table[self.src_node]['destination']
+                    original_src_nh = self.routing_table[self.src_node]['next_hop']
+                    original_src_hc = self.routing_table[self.src_node]['hop_count']
+
+                    for idx, node_to_add in enumerate(src_dest_list):
+                        if node_to_add != self.src_node:
+                            if node_to_add not in original_src_dest:
+                                idx_node_to_add = src_dest_list.index(
+                                    node_to_add)
+                                for index_nh, nh_node in enumerate(src_id_list):
+                                    nh_to_add = nh_node
+                                    hc_to_add = src_hc_list[idx_node_to_add]
+                                    original_src_dest.append(node_to_add)
+                                    original_src_nh.append(nh_to_add)
+                                    original_src_hc.append(hc_to_add + 1)
+                                    self.routing_table[self.src_node]['destination'] = original_src_dest
+                                    self.routing_table[self.src_node]['next_hop'] = original_src_nh
+                                    self.routing_table[self.src_node]['hop_count'] = original_src_hc
+                                    self.broadcast_update()
+
+                            else:  # if all are present check for the hop count
+                                idx_node_to_add = src_dest_list.index(
+                                    node_to_add)
+                                hc_to_add = src_hc_list[idx_node_to_add]
+                                for index_nh, nh_node in enumerate(src_id_list):
+
+                                    nh_to_add = nh_node
+                                    idx_node_to_check = original_src_dest.index(
+                                        node_to_add)
+                                    hc_to_check = original_src_hc[idx_node_to_check]
+
+                                    if (hc_to_add < hc_to_check):
+                                        hc_to_add += 1
+                                        if (hc_to_add < hc_to_check):
+                                            original_src_hc[idx_node_to_check] = hc_to_add
+                                            original_src_nh[idx_node_to_check] = nh_to_add
+                                            self.routing_table[self.src_node]['destination'] = original_src_dest
+                                            self.routing_table[self.src_node]['next_hop'] = original_src_nh
+                                            self.routing_table[self.src_node]['hop_count'] = original_src_hc
+                                            self.broadcast_update()
+        self.queue_length()
+
     def queue_length(self):
         # print("calling q length function - 4")
 
@@ -156,7 +232,7 @@ class W_MAC_Env(gym.Env):
         if any(self.rtable_info_queue[node] for node in self.graph.nodes):
 
             # self.queue_empty = True
-            self.update_table(self)
+            self.update_table()
         else:
             print("all queues are empty")
             # print("\n final routing table", self.routing_table)
@@ -194,28 +270,16 @@ class W_MAC_Env(gym.Env):
         #actions = self.actions
         #logging.debug("mapped actions: %s",actions)
 
-        self.prob_min = 0.5  # 1/self.total_nodes
-        self.prob_max = 0.9
-        self.probability = stats.uniform.rvs(size=6,  # Generate 6 nodes in graph
-                                 loc = 0,      # From 0 
-                                 scale=10)     # To 10
-        print("INITIAL PROBABLITY", self.probablity)
+        
 
         reward = self.__perform_actions(actions)
         
-        if (self.probability > self.prob_min) and (reward < 0):
-            self.probability = self.probability + \
-                (self.probability * reward * 0.1)
+        if (self.probablity > self.prob_min) and (reward < 0):
+            self.probablity = self.probablity + \
+                (self.probablity * reward * 0.1)
+        self.probablity__actions()
 
-        self.destinations_list_with_anode = []
-        self.queue_size = []
-        self.queue_size = self.get_queue_sizes()
-        self.destinations_list_with_anode = self.__frame_next_state()
         
-        # last number is attack node info
-        self.attack_node = ([self.destinations_list_with_anode[-1]])
-        self.destinations_list = self.destinations_list_with_anode[:-1]
-        print("self.destinations_list", self.destinations_list)
     
     
         ### next state =  dest of next packet to send + attack nodes status
@@ -238,34 +302,34 @@ class W_MAC_Env(gym.Env):
         isdone = self.__isdone()
         info = {}
 
-    # no_transmit = True
-    # for status in actions:
-    #   if status != self.total_nodes:
-    #     no_transmit = False
+        no_transmit = True
+        for status in actions:
+            if status != self.total_nodes:
+                no_transmit = False
     
-    # if isdone == False and no_transmit == True:
-    #   reward -= self.COLLISION_REWARD / 20
+        if isdone == False and no_transmit == True:
+                reward -= self.COLLISION_REWARD / 20
 
-    # if isdone == True:
-    #     queue_empty = True
-    #     for node in self.graph.nodes:
-    #         if len(self.queues[node]) > 0:
-    #             reward -= self.MAX_REWARD*self.total_nodes
-    #             #print("Punishing when done even if packets remain")
-    #             logging.info("Punishing when done even if packets remain")
-    #             queue_empty = False
-    #             break
+        if isdone == True:
+            queue_empty = True
+            for node in self.graph.nodes:
+                if len(self.queues[node]) > 0:
+                    reward -= self.MAX_REWARD*self.total_nodes
+                    #print("Punishing when done even if packets remain")
+                    logging.info("Punishing when done even if packets remain")
+                    queue_empty = False
+                    break
         
-    #     if queue_empty == True and self.packet_lost == 0:
-    #       #print("Hurray !!! All packets transmitted successfully")
-    #       logging.info("Hurray !!! All packets transmitted successfully")
-    #       reward += self.MAX_REWARD*self.total_nodes
+            if queue_empty == True and self.packet_lost == 0:
+            #print("Hurray !!! All packets transmitted successfully")
+                logging.info("Hurray !!! All packets transmitted successfully")
+                reward += self.MAX_REWARD*self.total_nodes
 
         actions_list = list(actions)
         if isdone == False and actions_list.count(1) == 0 :
             reward -= 1000
 
-        self.probablity__actions()
+        
         print("nxt_state_arr, reward, isdone", nxt_state_arr, reward, isdone)
 
         """ Sequence of next function calls should not be changed """
@@ -649,6 +713,7 @@ class W_MAC_Env(gym.Env):
     def __frame_next_state(self):
         # next state =  dest of next packet to send + attack nodes status
         next_state = []  # empty list for next_state
+       
 
         # Add destination of first packet in the queue.
         for node in self.graph.nodes:
@@ -658,8 +723,8 @@ class W_MAC_Env(gym.Env):
             else:
                 next_state.append(self.total_nodes)
 
-        for node in self.attack_nodes:
-            next_state.append(node)
+        # for node in self.attack_nodes:
+        #     next_state.append(node)
 
         return (next_state)
 
@@ -795,11 +860,11 @@ class W_MAC_Env(gym.Env):
   """
 
     def probablity__actions(self):
-    
-       
+
         self.probablity_actions = list(self.graph.nodes)
+        
        
-        max_queue_size = max(self.queue_size)
+        #max_queue_size = max(self.queue_size)
         if True:  # max_queue_size > 0:
 
             # index_of_large_queue = np.argmax(self.queue_size)
@@ -811,7 +876,7 @@ class W_MAC_Env(gym.Env):
 
             for src, dest in enumerate(self.destinations_list):
 
-                if self.probability > random.uniform(0, 1):
+                if np.any(self.probablity > random.uniform(0, 1)):
                     index_of_large_queue = src
                     # node_with_max_queue = self.actions[index_of_large_queue]
 
@@ -835,7 +900,7 @@ class W_MAC_Env(gym.Env):
                                         self.probablity_actions[index_of_large_queue] = next_hop_found
                                         break
                     
-                    print("Probablity based actions:",self.probablity__actions)
+                    #print("Probablity based actions:",self.probablity__actions)
 
         return self.probablity_actions
 
