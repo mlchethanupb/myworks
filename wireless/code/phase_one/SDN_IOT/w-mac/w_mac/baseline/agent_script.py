@@ -23,6 +23,33 @@ from DSDV_RoundRobinTDMA import dsdv_RRTDMA
 from w_mac.envs.w_mac_env import W_MAC_Env
 
 
+
+def append_data():
+    packet_loss = env.get_packet_lost()
+    packet_delivered = env.get_packet_delivered()
+    total_trans = env.get_total_transmission()
+    succ_trans = env.get_succ_transmission()
+    total_pkt_sent = env.get_total_packet_sent()
+
+    timesteps_list.append(timestep)
+    packet_lost.append(packet_loss)
+    packet_delivered_list.append(packet_delivered)
+    total_trans_list.append(total_trans)
+    succ_trans_list.append(succ_trans)
+    total_pkt_sent_list.append(total_pkt_sent)
+def calculate_sum():   
+    total_packets_sent_sum = sum(total_pkt_sent_list)
+    total_packets_delivered_sum = sum(packet_delivered_list)
+    total_packets_lost_sum = sum(packet_lost) 
+    total_trans_sum = sum(total_trans_list)
+    total_succ_trans_sum = sum(succ_trans_list)
+    print("Total packets sent for agent", agent, "over evaluation episode",eval_episodes, "are", total_packets_sent_sum)
+    print("Total packets delivered for agent", agent,"over evaluation episode",eval_episodes, "are", total_packets_delivered_sum)
+    print("Total packets lost sum for agent over evaluation episode", agent, "over evaluation episode",eval_episodes, "are", total_packets_lost_sum)
+    print("Total transmissions happened sum for agent", agent, "over evaluation episode",eval_episodes, "are", total_trans_sum)
+    print("Total succ trans sum for agent",agent, "over evaluation episode",eval_episodes, "are", total_succ_trans_sum)
+
+    
 if __name__ == '__main__':
 
     d = defaultdict(list)
@@ -38,13 +65,13 @@ if __name__ == '__main__':
                         default='PPO2', help='Whether to use A2C, PPO2, dsdv_wqueue, dsdv_RRTDMA, dsdv_prob')
     parser.add_argument('--total_train_timesteps', type=int,  nargs='?',
                         const=1, default=1500000, help='Number of training steps for the agent')
-    parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=10000,
+    parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=5,
                         help='Maximum number of episodes for final (deterministic) evaluation')
-    parser.add_argument('--graph', type=str, nargs='?', const=1,
-                        default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
-
+    parser.add_argument('--graph', type=str, nargs='?', const=1, default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
+    
+    
     args = parser.parse_args()
-
+    agent = args.agent
     data = args.graph
     data = ast.literal_eval(data)
     print("data of graph", data)
@@ -107,18 +134,21 @@ if __name__ == '__main__':
 
         else:
             model = PPO2(MlpPolicy, env, verbose=1, gamma=0.99, n_steps=2048, nminibatches=32, learning_rate=2.5e-4, lam=0.95, noptepochs=10, ent_coef=0.01, cliprange=0.2,
-                         tensorboard_log="./PPO2_tensorboard/", seed=8, n_cpu_tf_sess=1)
+                         tensorboard_log="./PPO2_tensorboard_3collision_domain_morenodes/", seed=8, n_cpu_tf_sess=1)
             model.learn(total_timesteps=total_train_timesteps,
                         callback=TensorboardCallback())
 
-            model.save("PPO2_wmac_small")
+            model.save("PPO2_wmac_3collision_domain_morenodes")
 
-            model = PPO2.load("PPO2_wmac_small")
+            model = PPO2.load("PPO2_wmac_3collision_domain_morenodes")
+            # model = PPO2.load("PPO2_wmac_single_domain")
 
         timesteps_list = []
         packet_lost = []
         packet_delivered_list = []
+        total_trans_list = []
         succ_trans_list = []
+        total_pkt_sent_list = []
         for i in range(eval_episodes):
             obs = env.reset()
             timestep = 0
@@ -127,18 +157,12 @@ if __name__ == '__main__':
                 timestep += 1
                 action, _states = model.predict(obs)
                 obs, rewards, done, info = env.step(action)
-                pkt_lost = env.get_packet_lost()
-                packet_delivered = env.get_packet_delivered()
-                succ_trans = env.get_succ_trans()
-            timesteps_list.append(timestep)
-            packet_lost.append(pkt_lost)
-            packet_delivered_list.append(packet_delivered)
-            succ_trans_list.append(succ_trans)
+            
+            append_data()
+        calculate_sum()
         print("Mean timesteps taken to transfer all the packets in the network", np.mean(
             timesteps_list))
-        print("Mean packet lost", np.mean(packet_lost))
-        print("Mean packets delivered", np.mean(packet_delivered_list))
-        print("Mean successfull transmissions", np.mean(succ_trans_list))
+        
 
     # BASELINE 1: DSDV routing protocol with weighted queue based TDMA
     elif args.agent == 'dsdv_wqueue':
@@ -146,28 +170,31 @@ if __name__ == '__main__':
         timesteps_list = []
         packet_lost = []
         packet_delivered_list = []
+        total_trans_list = []
         succ_trans_list = []
+        total_pkt_sent_list = []
         for i in range(eval_episodes):
             obs = env.reset()
+            destinations_list_with_anode = obs
+            attack_node = [destinations_list_with_anode[-1]]
+            routing_table = dsdv_wqueue_env.create_routing_table(attack_node)
             timestep = 0
             done = False
             while done != True:
                 timestep += 1
                 queue_size = env.get_queue_sizes()
-                action = dsdv_wqueue_env.predict(obs, queue_size)
+                action = dsdv_wqueue_env.predict(obs, queue_size, routing_table)
                 obs, rewards, done, info = env.step(action)
-                packet_loss = env.get_packet_lost()
-                packet_delivered = env.get_packet_delivered()
-                succ_trans = env.get_succ_trans()
-            timesteps_list.append(timestep)
-            packet_lost.append(packet_loss)
-            packet_delivered_list.append(packet_delivered)
-            succ_trans_list.append(succ_trans)
+
+            
+            append_data()
+        calculate_sum()
         print("Mean timesteps taken to transfer all the packets in the network", np.mean(
             timesteps_list))
-        print("Mean packet lost", np.mean(packet_lost))
-        print("Mean packets delivered", np.mean(packet_delivered_list))
-        print("Mean successfull transmissions", np.mean(succ_trans_list))
+        
+
+        
+        
 
     # BASELINE 2: DSDV routing protocol with round robin TDMA
     elif args.agent == 'dsdv_RRTDMA':
@@ -175,28 +202,27 @@ if __name__ == '__main__':
         timesteps_list = []
         packet_lost = []
         packet_delivered_list = []
+        total_trans_list = []
         succ_trans_list = []
+        total_pkt_sent_list = []
         for i in range(eval_episodes):
             obs = env.reset()
+            destinations_list_with_anode = obs
+            attack_node = [destinations_list_with_anode[-1]]
+            routing_table = dsdv_wqueue_env.create_routing_table(attack_node)
             timestep = 0
             done = False
             while done != True:
                 timestep += 1
                 queue_size = env.get_queue_sizes()
-                action = dsdv_RRTDMA_env.predict(obs, queue_size)
+                action = dsdv_RRTDMA_env.predict(obs, queue_size, routing_table)
                 obs, rewards, done, info = env.step(action)
-                packet_loss = env.get_packet_lost()
-                packet_delivered = env.get_packet_delivered()
-                succ_trans = env.get_succ_trans()
-            timesteps_list.append(timestep)
-            packet_lost.append(packet_loss)
-            packet_delivered_list.append(packet_delivered)
-            succ_trans_list.append(succ_trans)
+           
+            append_data()
+        calculate_sum()
         print("Mean timesteps taken to transfer all the packets in the network", np.mean(
             timesteps_list))
-        print("Mean packet lost", np.mean(packet_lost))
-        print("Mean packets delivered", np.mean(packet_delivered_list))
-        print("Mean successfull transmissions", np.mean(succ_trans_list))
+        
 
     # BASELINE 3: DSDV routing protocol with probability based TDMA
     elif args.agent == 'dsdv_prob':
@@ -204,28 +230,30 @@ if __name__ == '__main__':
         timesteps_list = []
         packet_lost = []
         packet_delivered_list = []
+        total_trans_list = []
         succ_trans_list = []
+        total_pkt_sent_list = []
         for i in range(eval_episodes):
             obs = env.reset()
+            destinations_list_with_anode = obs
+            attack_node = [destinations_list_with_anode[-1]]
+            routing_table = dsdv_wqueue_env.create_routing_table(attack_node)
             timestep = 0
             done = False
             while done != True:
                 timestep += 1
                 queue_size = env.get_queue_sizes()
-                action = dsdv_prob_env.predict(obs, queue_size, rewards)
+                action = dsdv_prob_env.predict(obs, queue_size, rewards, routing_table)
                 obs, rewards, done, info = env.step(action)
-                packet_loss = env.get_packet_lost()
-                packet_delivered = env.get_packet_delivered()
-                succ_trans = env.get_succ_trans()
-            timesteps_list.append(timestep)
-            packet_lost.append(packet_loss)
-            packet_delivered_list.append(packet_delivered)
-            succ_trans_list.append(succ_trans)
+           
+            append_data()
+        calculate_sum()
+       
         print("Mean timesteps taken to transfer all the packets in the network", np.mean(
             timesteps_list))
-        print("Mean packet lost", np.mean(packet_lost))
-        print("Mean packets delivered", np.mean(packet_delivered_list))
-        print("Mean successfull transmissions", np.mean(succ_trans_list))
+        
+        
 
     else:
         raise ValueError('Unknown agent.')
+

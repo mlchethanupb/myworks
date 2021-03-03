@@ -30,22 +30,17 @@ class dsdv_RRTDMA():
     """ This will return the action required for the W_MAC_Env"""
     """Ex - actions = [2,1,2,3,4,5] nodes = [0,1,2,3,4,5] - only 0th node will be transmitting the packet"""
 
-    def predict(self, state, queue_size):
+    def predict(self, state, queue_size, routing_table):
 
-        # print("calling predict function - 1")
         self.destinations_list_with_anode = []
         self.queue_size = []
 
         self.destinations_list_with_anode = state
 
         self.queue_size = queue_size
-        # last number is attack node info
-        self.attack_node = [self.destinations_list_with_anode[-1]]
         self.destinations_list = self.destinations_list_with_anode[:-1]
 
-        # print("self.destinations_list from agent", self.destinations_list)
-
-        self.create_routing_table(self.attack_node)
+        self.routing_table = routing_table
         self.actions = self.tdma()
         self.tdma_index = self.tdma_index + 1
         self.valid_action_list = self.map_actions()
@@ -53,7 +48,6 @@ class dsdv_RRTDMA():
         return self.valid_action_list
 
     def create_routing_table(self, attack_node):
-        # print("calling create routing table function - 2")
         self.attack_nodes = attack_node
         # print("self.attack_nodes", self.attack_nodes)
 
@@ -177,7 +171,7 @@ class dsdv_RRTDMA():
         self.queue_length()
 
     def broadcast_update(self):
-        # print("calling broadcast update - 6")
+        
         self.updated_dest = self.routing_table[self.src_node]['destination']
         self.updated_nh = self.routing_table[self.src_node]['next_hop']
         self.updated_hc = self.routing_table[self.src_node]['hop_count']
@@ -192,12 +186,12 @@ class dsdv_RRTDMA():
                     0, updated_rtable)
 
     def queue_length(self):
-        # print("calling q length function - 4")
+        
 
-        # self.queue_empty = False
+        
         if any(self.rtable_info_queue[node] for node in self.graph.nodes):
 
-            # self.queue_empty = True
+            
             self.update_table()
         else:
             # print("all queues are empty")

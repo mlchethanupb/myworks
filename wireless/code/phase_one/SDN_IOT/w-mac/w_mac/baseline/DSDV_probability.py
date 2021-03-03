@@ -33,28 +33,24 @@ class dsdv_probability():
     """ This will return the action required for the W_MAC_Env"""
     """Ex - actions = [2,1,2,3,4,5] nodes = [0,1,2,3,4,5] - only 0th node will be transmitting the packet"""
 
-    def predict(self, state, queue_size, reward):
+    def predict(self, state, queue_size, reward, routing_table):
 
-        # print("calling predict function - 1")
-        # print("reward from env", reward)
         self.destinations_list_with_anode = []
         self.queue_size = []
-        # print("self.probability before if", self.probability)
+
         if (self.probability > self.prob_min) and (reward < 0):
             self.probability = self.probability + \
                 (self.probability * reward * 0.1)
-        # print("self.probability before after if", self.probability)
+
 
         self.destinations_list_with_anode = state
 
         self.queue_size = queue_size
-        # last number is attack node info
-        self.attack_node = [self.destinations_list_with_anode[-1]]
+        # self.attack_node = [self.destinations_list_with_anode[-1]]
         self.destinations_list = self.destinations_list_with_anode[:-1]
 
-        # print("self.destinations_list from agent", self.destinations_list)
-
-        self.create_routing_table(self.attack_node)
+        # self.create_routing_table(self.attack_node)
+        self.routing_table = routing_table
         self.actions = self.tdma()
         # self.tdma_index = self.tdma_index + 1
         self.valid_action_list = self.map_actions()
@@ -62,9 +58,7 @@ class dsdv_probability():
         return self.valid_action_list
 
     def create_routing_table(self, attack_node):
-        # print("calling create routing table function - 2")
         self.attack_nodes = attack_node
-        # print("self.attack_nodes", self.attack_nodes)
 
         # print('\n------------------------------------------------------\n')
 
@@ -72,7 +66,6 @@ class dsdv_probability():
         for nodes in self.graph.nodes():
             dic[nodes] = {}
             self.routing_table = dic
-        # print('Empty routing table\n', self.routing_table)
 
         # print('\n------------------------------------------------------\n')
 
