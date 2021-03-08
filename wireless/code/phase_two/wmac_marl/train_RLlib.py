@@ -1,6 +1,8 @@
 import ray
 from ray import tune
 import numpy as np
+import networkx as nx
+
 from ray.tune import grid_search
 from ray.rllib.agents.registry import get_agent_class
 from ray.rllib.models import ModelCatalog
@@ -10,6 +12,7 @@ from ray.rllib.agents.ppo import PPOTrainer
 from ray.tune.schedulers import AsyncHyperBandScheduler
 #from ray.tune.suggest.bayesopt import BayesOptSearch
 from ray.tune.suggest.ax import AxSearch
+from collections import defaultdict
 
 
 # Import environment definition
@@ -19,10 +22,28 @@ from customcallback import PacketDeliveredCountCallback
 # Driver code for training
 def setup_and_train():
 
+    d = defaultdict(list)
+    """Larger network"""
+    #data = [(0,2),(0,1),(0,3),(1,2),(1,3),(2,3),(2,4),(3,4),(5,2),(5,3),(5,4),(5,6),(6,7),(6,8),(7,8),(8,9),(9,10),(4,10)]#(4,6),(5,10),(6,10),(9,6),(8,10)]
+    """Smaller netowrk"""
+    data = [(0,2),(0,1),(0,3),(1,2),(1,3),(2,3),(2,4),(3,4),(5,2),(5,3),(5,4)]
+
+    #data = [(0,1),(0,2),(1,2),(0,3),(1,3),(2,3)]
+    # defaultdict(<type 'list'>, {})
+    for node, dest in data:
+        d[node].append(dest)
+
+    G = nx.Graph()
+    for k,v in d.items():
+        for vv in v:
+            G.add_edge(k,vv)
+
+    #nx.draw_networkx(G)
+
     # Create a single environment and register it
     def env_creator(_):
-        return WirelessEnv()
-    single_env = WirelessEnv()
+        return WirelessEnv(G, False)
+    single_env = WirelessEnv(G, False)
     env_name = "WirelessEnv"
     register_env(env_name, env_creator)
 
