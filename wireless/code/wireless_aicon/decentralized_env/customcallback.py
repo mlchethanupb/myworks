@@ -20,19 +20,14 @@ class PacketDeliveredCountCallback(DefaultCallbacks):
     def on_episode_start(self, worker: RolloutWorker, base_env: BaseEnv,
                          policies: Dict[str, Policy],
                          episode: MultiAgentEpisode, **kwargs):
-        episode.user_data["custom_reward"] = []
-
+        pass
     def on_episode_step(self, worker: RolloutWorker, base_env: BaseEnv,
                         episode: MultiAgentEpisode, **kwargs):
-        custom_reward = abs(base_env.get_unwrapped()[0].get_reward())
-        episode.user_data["custom_reward"].append(custom_reward)
+        pass
 
     def on_episode_end(self, worker: RolloutWorker, base_env: BaseEnv,
                        policies: Dict[str, Policy], episode: MultiAgentEpisode,
                        **kwargs):
-        custom_reward_mean = np.mean(episode.user_data["custom_reward"])
-        episode.custom_metrics["custom_reward"] = custom_reward_mean
-        episode.hist_data["custom_reward"] = episode.user_data["custom_reward"]
         episode.custom_metrics["packet_delivered"] = (base_env.get_unwrapped()[0].get_packet_delivered_count())
 
     

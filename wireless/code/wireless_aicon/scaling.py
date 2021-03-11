@@ -1,5 +1,6 @@
 import argparse
 import gym
+import w_mac
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -9,9 +10,8 @@ from ray import tune
 from ray.tune.registry import register_env
 
 from collections import defaultdict
-#from centralized_env.w_mac.envs.w_mac_env import W_MAC_Env as W_MAC_Env
+from w_mac.envs.w_mac_env import W_MAC_Env
 from decentralized_env.environment import WirelessEnv
-from decentralized_env.customcallback import PacketDeliveredCountCallback
 
 
 
@@ -51,8 +51,7 @@ def get_centralized_config(graph: nx.Graph):
 
     config={
                 "seed":10,
-                "env": "decentalized_env",
-                "callbacks": PacketDeliveredCountCallback,
+                "env": "centalized_env",
                 "framework": "torch" if args.torch else "tf"
     }
 
@@ -84,12 +83,12 @@ def get_decentralized_config(graph: nx.Graph):
 
     config={
                 "seed":10,
+                "no_done_at_end": True,
                 "multiagent": {
                     "policies": policy_graphs,
                     "policy_mapping_fn": policy_mapping_fn,
                 },
                 "env": "decentalized_env",
-                "callbacks": PacketDeliveredCountCallback,
                 "framework": "torch" if args.torch else "tf"
     }
 
@@ -108,7 +107,6 @@ def get_exp_dict(config):
             "local_dir":"logs/",
             "verbose": 1,
             "num_samples":1,
-            #"search_alg":ax_search,
             "config": config,
             "checkpoint_at_end":True,
             "checkpoint_score_attr":"episode_reward_mean",
@@ -117,23 +115,26 @@ def get_exp_dict(config):
 
         return exp_dict
 
+def train_model(exp_dict):
+    analysis = tune.run(**exp_dict)
+    print("Best configuration is ",analysis.get_best_config(metric="episode_reward_mean", mode = "max"))
+
 if __name__ == "__main__":
 
-    import os, sys
-    sys.path.insert(0,"/home/oc/Momo/Studies/SS2020/Project/repo/pg-aicon/wireless/code/wireless_aicon/")
-
     args = parser.parse_args()
+
     for list_itr in all_graphs:
+        ray.init()
         graph = create_graph(list_itr)
-        nx.draw_networkx(graph)
-        plt.show()
-    """
-    ray.init()
-
+        config = get_centralized_config(graph)
+        exp_dict = get_exp_dict(config)
+        train_model(exp_dict)
+        ray.shutdown()
     
-    exp_dict = get_exp_dict(config)
-
-    results = tune.run(**exp_dict)
-
-    ray.shutdown()
-    """
+    for list_itr in all_graphs:
+        ray.init()
+        graph = create_graph(list_itr)
+        config = get_decentralized_config(graph)
+        exp_dict = get_exp_dict(config)
+        train_model(exp_dict)
+        ray.shutdown()

@@ -188,7 +188,7 @@ class W_MAC_Env(gym.Env):
     self.attack_nodes - "List" of attack nodes
   """
 
-    def reset_attack_nodes(self):
+    def __reset_attack_nodes(self):
 
         self.attack_nodes = []
 
