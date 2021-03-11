@@ -18,7 +18,7 @@ from decentralized_env.environment import WirelessEnv
 parser = argparse.ArgumentParser()
 parser.add_argument("--run", type=str, default="PPO")
 parser.add_argument("--torch", action="store_true")
-parser.add_argument("--stop-timesteps", type=int, default=100000)
+parser.add_argument("--stop_timesteps", type=int, default=500000)
 parser.add_argument('--graph', type=str, nargs='?', const=1, default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
 
 all_graphs = [ 
@@ -101,7 +101,7 @@ def get_exp_dict(config):
             'name': exp_name,
             'run_or_experiment': 'PPO',
             "stop": {
-                "timesteps_total": 1000,
+                "timesteps_total": args.stop_timesteps,
             },
             'checkpoint_freq': 10,
             "local_dir":"logs/",

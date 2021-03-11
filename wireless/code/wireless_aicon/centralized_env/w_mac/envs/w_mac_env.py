@@ -27,13 +27,14 @@ class W_MAC_Env(gym.Env):
         self.total_nodes = len(self.graph.nodes())
         # nx.draw_networkx(self.graph)
 
+        """
         logging.basicConfig(
             filename='wmac.log',
             filemode='w',
             format='%(levelname)s:%(message)s',
             level=logging.DEBUG
         )
-
+        """
         logging.debug("___Init____")
         self.__initialize_rewards()
         self.__reset_stat_variables()
