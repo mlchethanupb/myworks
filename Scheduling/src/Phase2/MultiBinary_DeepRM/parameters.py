@@ -107,7 +107,7 @@ class Parameters:
                      'color': 'blue', 'yerrcolor': 'blue', 'title': 'ACKTR Slowdown agent'}
         self.ACKTR_Ctime = {'agent': ACKTR, 'save_path': 'job_scheduling_ACKTR_Ctime', 'log_dir': "workspace/MultiBinary/tensor_ACKTR_Ctime/",
                      'color': 'red', 'yerrcolor': 'brown', 'title': 'ACKTR Completion time agent'}
-        # Common for both MB and discrete
+                     
         self.random = {'agent': None, 'save_path': None, 'log_dir': None,
                        'color': 'Yellow', 'yerrcolor': 'Gold', 'marker': "D", 'title': 'Random agent'}
         self.SJF = {'agent': None, 'save_path': None, 'log_dir': None,
@@ -115,25 +115,5 @@ class Parameters:
         self.Packer = {'agent': None, 'save_path': None, 'log_dir': None,
                        'color': 'lime', 'yerrcolor': 'teal', 'marker': "^", 'title': 'Packer agent'}
         self.objective = self.A2C_Slowdown
-
-        self.model_save_path = 'workspace/Discrete/hyperParamModels/'
-        self.model_save_path_MB = 'workspace/MultiBinary/hyperParamModels/'
-
-        # Discrete
-        self.DQN_SL = {'agent': DQN, 'save_path': 'job_scheduling_DQN_SL',
-                          'log_dir': "workspace/Discrete/tensor_DQN_SL/", 'color': 'Red', 'yerrcolor': 'Brown', 'title': 'DQN SL agent'}
-        self.A2C_Slowdown_Disc = {'agent': A2C, 'save_path': 'job_scheduling_A2C_Slowdown',
-                             'log_dir': "workspace/Discrete/tensor_A2C_Slowdown/", 'color': 'SkyBlue', 'yerrcolor': 'Blue',  'marker': "s", 'title': 'A2C Slowdown agent'}
-        self.PPO2_Slowdown_Disc = {'agent': PPO2, 'save_path': 'job_scheduling_PPO2_Slowdown', 'log_dir': "workspace/Discrete/tensor_PPO2_Slowdown/",
-                     'color': 'Green', 'yerrcolor': 'DarkGreen', 'marker': "x", 'title': 'PPO2 Slowdown agent'}
-        
-        self.model_training_iterations = 100
-
-        self.tensorBoard_DQN_Logs = 'workspace/Discrete/tensorBoardLogs/'
-        self.tensorBoard_MB_Logs = 'workspace/MultiBinary/tensorBoardLogs/'
-
-        self.localhost = '0.0.0.0'
-
-        self.figure_path = 'workspace/Discrete/output/'
 
         self.figure_extension = '.png'
