@@ -168,6 +168,8 @@ class WirelessEnv(MultiAgentEnv):
         self.total_packets = self.QUEUE_SIZE * (self.total_nodes-1)
         #for testing
         self.reward = 0
+        self.hop_count_list = []
+        self.hop_count_list.clear()
 
     #--------------------------------------------------------------------------------------------
 
@@ -551,6 +553,18 @@ class WirelessEnv(MultiAgentEnv):
     def get_packet_delivered_count(self):
             return self.packet_delivered
 
+    # --------------------------------------------------------------------------------------------
+
+    """
+    Function to retrieve average hopcount.
+
+    Returns - Integer
+
+    """
+
+    def get_avg_hopcount(self):
+        return np.mean(self.hop_count_list)
+        
     #--------------------------------------------------------------------------------------------
 
     """
@@ -705,6 +719,7 @@ class WirelessEnv(MultiAgentEnv):
                             
                             self.__vis_update_src_dest(node,packet_to_send.dest)
                             
+                            self.hop_count_list.append(packet_to_send.get_hop_count()+1)
                             self.packet_delivered +=1
                             reward += (self.MAX_REWARD)
 

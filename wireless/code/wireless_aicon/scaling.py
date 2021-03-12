@@ -51,6 +51,11 @@ def get_centralized_config(graph: nx.Graph):
 
     config={
                 "seed":10,
+                "num_workers": 6,
+                "num_cpus_for_driver": 4,
+                "num_cpus_per_worker": 2,
+                "num_gpus": 0,
+                "num_envs_per_worker": 1,
                 "env": "centalized_env",
                 "framework": "torch" if args.torch else "tf"
     }
@@ -83,6 +88,11 @@ def get_decentralized_config(graph: nx.Graph):
 
     config={
                 "seed":10,
+                "num_workers": 6,
+                "num_cpus_for_driver": 4,
+                "num_cpus_per_worker": 2,
+                "num_gpus": 0,
+                "num_envs_per_worker": 1,
                 "no_done_at_end": True,
                 "multiagent": {
                     "policies": policy_graphs,
@@ -95,13 +105,18 @@ def get_decentralized_config(graph: nx.Graph):
     return config
 
 
-def get_exp_dict(config):
+def get_exp_dict(config, centralized_flag):
         exp_name = 'scaling'
+
+        total_timesteps = args.stop_timesteps
+        if centralized_flag == False:
+            total_timesteps = args.stop_timesteps * 2
+        
         exp_dict = {
             'name': exp_name,
             'run_or_experiment': 'PPO',
             "stop": {
-                "timesteps_total": args.stop_timesteps,
+                "timesteps_total": total_timesteps,
             },
             'checkpoint_freq': 10,
             "local_dir":"logs/",
@@ -127,7 +142,7 @@ if __name__ == "__main__":
         ray.init()
         graph = create_graph(list_itr)
         config = get_centralized_config(graph)
-        exp_dict = get_exp_dict(config)
+        exp_dict = get_exp_dict(config, True)
         train_model(exp_dict)
         ray.shutdown()
     
@@ -135,6 +150,6 @@ if __name__ == "__main__":
         ray.init()
         graph = create_graph(list_itr)
         config = get_decentralized_config(graph)
-        exp_dict = get_exp_dict(config)
+        exp_dict = get_exp_dict(config, False)
         train_model(exp_dict)
         ray.shutdown()

@@ -171,6 +171,8 @@ class W_MAC_Env(gym.Env):
         self.counter = 0
         self.total_transmission = 0
         self.succ_transmission = 0
+        self.hop_count_list = []
+        self.hop_count_list.clear()
 
     # --------------------------------------------------------------------------------------------
 
@@ -503,6 +505,17 @@ class W_MAC_Env(gym.Env):
     def get_packet_delivered(self):
         return self.packet_delivered
 
+    # --------------------------------------------------------------------------------------------
+
+    """
+    Function to retrieve average hopcount.
+
+    Returns - Integer
+
+    """
+
+    def get_avg_hopcount(self):
+        return np.mean(self.hop_count_list)
     
     # --------------------------------------------------------------------------------------------
 
@@ -689,6 +702,7 @@ class W_MAC_Env(gym.Env):
                                 node, packet_to_send.dest)
 
                             self.packet_delivered += 1
+                            self.hop_count_list.append(packet_to_send.get_hop_count()+1)
                             reward += (self.MAX_REWARD)
                             
                             self.succ_transmission += 1
