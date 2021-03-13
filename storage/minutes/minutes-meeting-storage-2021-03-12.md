@@ -15,7 +15,7 @@ End: 12:23
 
 ## Status of Last Action Points
 
-*	Implementation of stable ingestion rate (rate per minute) for kafka to improve the performance of storage allocator.
+*	Implementation of stable ingestion rate (per minute) for kafka to improve the performance of storage allocator.
 * Generic ML model for InfluxDB.
 
 ## Discussed Issues
