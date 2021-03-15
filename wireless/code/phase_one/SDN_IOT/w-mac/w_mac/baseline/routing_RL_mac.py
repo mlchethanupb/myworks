@@ -582,7 +582,7 @@ class W_MAC_Env(gym.Env):
     for node in self.graph.nodes:
       if len(self.queues[node]):
         node_queue = self.queues[node]
-        next_state.append(node_queue[len(node_queue)-1].dest)
+        next_state.append(node_queue[len(node_queue)-1].dest) #next_hop
       else:
         next_state.append(self.total_nodes)
     
