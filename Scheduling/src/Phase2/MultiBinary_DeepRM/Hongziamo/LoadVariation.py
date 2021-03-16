@@ -29,7 +29,6 @@ import pg_network
 import other_agents
 from datetime import datetime
 # import randomAgent
-import run_performance
 import warnings
 import json
 from statistics import mean
