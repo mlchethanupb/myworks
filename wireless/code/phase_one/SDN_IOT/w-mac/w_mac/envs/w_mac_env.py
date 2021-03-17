@@ -38,7 +38,7 @@ class W_MAC_Env(gym.Env):
     # print("INITIAL PROBABILTY DISTRIBUTION", self.probability_space)
     #nx.draw_networkx(self.graph)
     self.routing_table = {}
-    self.threshold_probability = 6
+    self.threshold_probability = 7
     
 
    
@@ -244,14 +244,13 @@ class W_MAC_Env(gym.Env):
         self.queue_length()
 
   def step(self, actions):
-    #logging.debug("received action: %s",rcvd_actions)
-    #actions = self.actions
-    #logging.debug("mapped actions: %s",actions)
+    
 
     reward = self.__perform_actions(actions)
+    #actions =list(actions)
 
     
-    ### next state =  dest of next packet to send + attack nodes status
+    ### next state =  next hop of next packet to send + attack nodes status
     next_state = [] #empty list for next_state
 
     next_state = self.__frame_next_state()
@@ -262,21 +261,23 @@ class W_MAC_Env(gym.Env):
     info = {}
 
     no_transmit = True
-    for status in actions:
+    for id,action in enumerate(actions):
       #if status != self.total_nodes:
-      if np.any(status >= self.threshold_probability):
+      if np.any(actions[id] >= self.threshold_probability):
         no_transmit = False
         reward+=self.MAX_REWARD*self.total_nodes
-    #for id, action in enumerate(actions):
-    if isdone == False and no_transmit == True:
-      reward -= self.COLLISION_REWARD / 20
-      #actions[id] = actions[id] + 1
+      else:
+        actions[id]+=1
+    
+      if isdone == False and no_transmit == True:
+        reward = self.COLLISION_REWARD * 0.1
+        actions[id] = actions[id] + 1
 
     if isdone == True:
         queue_empty = True
         for node in self.graph.nodes:
             if len(self.queues[node]) > 0:
-                reward -= self.MAX_REWARD*self.total_nodes
+                reward = (-self.MAX_REWARD)*100*self.total_nodes
                 #print("Punishing when done even if packets remain")
                 logging.info("Punishing when done even if packets remain")
                 queue_empty = False
@@ -734,39 +735,42 @@ class W_MAC_Env(gym.Env):
     reward = 0
     actions_list = list(actions)
     print("ACTION LIST",actions_list)
-    #max_token = max(actions)
-    #print(actions)
-    #print("maximum number of token =",max_token)
+    # max_token = max(actions)
+    # print(actions)
+    # print("maximum number of token =",max_token)
     
 
     for node in self.graph.nodes():
           
       for id,action in enumerate(actions):
+        print("actions for node",node,actions)
              
         #print(enumerate(actions))
-        #print("Node", id, "have" ,action ,"token" )
-        queue = self.queues[node]
+        #print("Node", id, "have" ,action ,"token",actions[id] )
+        
         num_nodes_transmitting = 0
     
         """
-        1. Get the list of domains the node is associated with.
-        2. If it belongs to only one domain (else part)
+          1. Get the list of domains the node is associated with.
+          2. If it belongs to only one domain (else part)
           - Check all the actions of that node and decide accordingly
-        3. If node belongs to multiple domains (if part)
+          3. If node belongs to multiple domains (if part)
           - find the value of packet next_hop and check for collosion with that nodes  
-        """
+          """
    
-        #if (actions[id] == max_token):
+        
         if ( actions[id] >= self.threshold_probability ):
+          #if (actions[id] == max_token):
           num_nodes_transmitting += 1
           domain_list = self.node_in_domains[node]
+          
           for key in self.routing_table:
             if(key == node):
               dest = self.routing_table[key]['destination']
               nxt_hop = self.routing_table[key]['next_hop']
           valid_next_hop = True
 
-            # Check if next hop defect/attack node
+          # Check if next hop defect/attack node
           if nxt_hop in self.attack_nodes:
 
             reward = self.ATTACK_NODE_REWARD
@@ -777,60 +781,29 @@ class W_MAC_Env(gym.Env):
               self.packet_lost += 1
               packet_to_send = self.queues[node].pop()
               self.collision_occurred = True
-              #self.total_transmission += 1
+              
               break
 
-          #if ( max_token >= self.threshold_probability ):
-          #print("Node",id,"wants to send with token",max_token)
-          #print(actions[id])
-          #buffer_value = self.threshold_probability-actions[id]
-          #queue = self.queues[id]
+          
+          queue = self.queues[node]
         
-
-          qs_list = self.__get_queue_sizes()
-        
-          if len(self.queues[id]):
-
-            packet_2_send = self.queues[id].pop()
+          if (len(queue)):
+            qs_list = self.__get_queue_sizes()
+            packet_2_send = queue.pop()
             self.__vis_update_src_nxthop(node, nxt_hop)
             node_list = []
-            # domain_list = self.node_in_domains[id]
-            # len_domain_list = len(domain_list) 
-            # if  len_domain_list > 1 :
             
-
-            # for itr in range(len_domain_list):
-            #   if nxt_hop in self.collision_domain[domain_list[itr]]:
-            #     node_list = self.collision_domain[domain_list[itr]]
-            #     break
             for domain in domain_list:
               if nxt_hop in self.collision_domain_elems[domain]:
                 node_list = self.collision_domain_elems[domain]
                 domain_key = domain  # domain_key is used to check the hidden terminal problem
                 break
-            
-              #node_list = list(self.graph.nodes)
-              #node_list = list(actions)
-            #valid_act_sublist = self.__get_valid_action_sublist(actions, node_list, qs_list)
-            # valid_act_sublist = list(actions)
-            # print("Valid actions",valid_act_sublist)
-            
-              # if(action_sublist.count(actions[id] > self.threshold_probability) > 1):
-              # #if(action_sublist.count(max_token)>1):
-              # #if (action_sublist < self.threshold_probability):
-              #   print("node ", id," transmission collision")
-              #   self.packet_lost += 1
-              #   reward = self.COLLISION_REWARD
-              #   #actions[id]-=1
-            
-            # for tmp_action in actions:
-            #     if (tmp_action.count(tmp_action[id] >= self.threshold_probability) > 1):
-                  
 
-            if num_nodes_transmitting > 1:
+            if num_nodes_transmitting > 2:
 
                 self.packet_lost += 1
                 reward = self.COLLISION_REWARD
+                print("more nodes are transmiting at same time")
 
                 logging.debug("node: %s, index: %s ,next_hop: %s, domain_list: %s, nexthop in domain: %s, next_hop_node_list: %s",
                                       node, id, nxt_hop, domain_list, domain_key, node_list)
@@ -839,9 +812,7 @@ class W_MAC_Env(gym.Env):
                 self.collision_occurred = True
                         
                 break
-            # elif (nxt_hop in self.attack_nodes):
-            #       print("Transmitting to attack node found")
-            #       reward = self.ATTACK_NODE_REWARD
+           
             elif (self.hidden_terminal_problem(actions, id, domain_list[0], qs_list )):
                 reward = self.COLLISION_REWARD
                 self.packet_lost += 1
@@ -864,7 +835,7 @@ class W_MAC_Env(gym.Env):
                   desti_packet_index=dest.index(desti_packet)
                   nexxt = nxt_hop[desti_packet_index]
                   if(nexxt == desti_packet):
-                    print("node ", id," transmission SUCCESS with token number",action)
+                    print("node ", node," transmission SUCCESS with token number",action)
                     reward += self.MAX_REWARD
                     #actions[id]+=1
                     self.packet_delivered += 1
@@ -889,19 +860,20 @@ class W_MAC_Env(gym.Env):
               #   print("Adding packet to the queue of ", rcvd_node)
               #   self.queues[rcvd_node].insert(0, packet_2_send)
           else:
-            print("Action taken on empty queue")
-            
+            print("Action taken on empty queue for node",node)
+            #reward=self.COLLISION_REWARD*0.1
             #print(id,"need to increse tokens")
             #actions[id]+=1
             #reward = self.COLLISION_REWARD/20
         else:
-            #actions[id]+=1
-            print("node", id , "waiting to send")
-            reward-=self.COLLISION_REWARD
+            
+            #print("node", id , "need to increase token")
+            actions[id]+=1
+            reward=self.COLLISION_REWARD*0.1
             #print("punishing for less tokens",id,"=",actions[id])
-      else:
+      #else:
         #actions[id]+=1
-        ...
+        #...
     print('final reward', reward)
     print('packets delivered ',self.packet_delivered)
     print('packet_lost ', self.packet_lost)
