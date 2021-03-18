@@ -1,6 +1,6 @@
 # File for parameters.
 import job_distribution
-from stable_baselines import A2C, PPO2, DQN, ACKTR
+from stable_baselines import A2C, PPO2, ACKTR
 import math
 
 
@@ -40,7 +40,6 @@ class Parameters:
         assert self.backlog_size % self.time_horizon == 0
         # penalty for delaying things in the current work screen
         self.penalty = -1
-        # supervised learning mimic policy
         self.verbose = 0 # set to 1 for printing actions taken wrt each timestep
         self.batch_size = 10
         # random number seed
@@ -103,7 +102,7 @@ class Parameters:
                      'color': 'blue', 'yerrcolor': 'blue', 'title': 'ACKTR Slowdown agent'}
         self.ACKTR_Ctime = {'agent': ACKTR, 'save_path': 'job_scheduling_ACKTR_Ctime', 'log_dir': "workspace/MultiBinary/tensor_ACKTR_Ctime/",
                      'color': 'red', 'yerrcolor': 'brown', 'title': 'ACKTR Completion time agent'}
-        # Common for both MB and discrete
+                     
         self.random = {'agent': None, 'save_path': None, 'log_dir': None,
                        'color': 'Yellow', 'yerrcolor': 'Gold', 'marker': "D", 'title': 'Random agent'}
         self.SJF = {'agent': None, 'save_path': None, 'log_dir': None,

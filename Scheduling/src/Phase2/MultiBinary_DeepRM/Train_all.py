@@ -53,8 +53,8 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
 
 if __name__ == '__main__':
   pa = parameters.Parameters()
-  # models to be trained
-  models = [pa.random, pa.SJF, pa.Packer, pa.PPO2_Ctime]
+  # models to be trained, pa.PPO2_Slowdown and pa.PPO2_Ctime can also be included
+  models = [pa.random, pa.SJF, pa.Packer, pa.A2C_Slowdown, pa.A2C_Ctime]
   pa.new_job_rate = 0.4
   env_slowdowns = []
   env_ctimes = []

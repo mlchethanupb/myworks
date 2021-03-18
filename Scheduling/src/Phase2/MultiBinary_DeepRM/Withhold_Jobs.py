@@ -59,7 +59,7 @@ def len_generated_jobs(x, y):
 if __name__ == '__main__':
     pa = parameters.Parameters()
     pa.new_job_rate = 0.6
-    pa.objective = pa.PPO2_Slowdown     
+    pa.objective = pa.A2C_Slowdown     
     job_sequence_len, job_sequence_size = job_distribution.generate_sequence_work(
             pa, seed=42)
     env = gym.make('MB_DeepRM-v0', pa=pa)

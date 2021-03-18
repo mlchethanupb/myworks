@@ -13,6 +13,7 @@ from collections import defaultdict
 import numpy
 import json
 
+
 def read_from_file():
     with open('Hongziamo/loadresults.json') as json_file:
         data = json.load(json_file)

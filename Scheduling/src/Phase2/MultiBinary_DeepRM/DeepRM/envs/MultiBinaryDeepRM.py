@@ -40,8 +40,8 @@ class Env(gym.Env):
                     np.sum(self.nw_size_seqs[:, i] * self.nw_len_seqs) / \
                     float(pa.res_slot) / \
                     float(len(self.nw_len_seqs))
-                print("Load on # " + str(i) +
-                      " resource dimension is " + str(self.workload[i]))
+                # print("Load on # " + str(i) +
+                #       " resource dimension is " + str(self.workload[i]))
             self.pa.cluster_load = np.sum(self.workload)
             print("Cluster Load is :", self.pa.cluster_load)
             self.nw_len_seqs = np.reshape(self.nw_len_seqs,

@@ -11,6 +11,7 @@ from stable_baselines.common import make_vec_env
 import other_agents
 from statistics import mean
 
+
 # labeling the bar graph
 def autolabel(rects, deviation):
     for rect in rects:
@@ -46,8 +47,7 @@ def run_episodes(model, pa, env):
                     elif pa.objective == pa.SJF:
                         act = other_agents.get_sjf_action(env.machine, env.job_slot)
                     elif pa.objective == pa.Packer:
-                        act = other_agents.get_packer_action(
-                            env.machine, env.job_slot)
+                        act = other_agents.get_packer_action(env.machine, env.job_slot)
                     action = []
                     for i in range(len(env.job_slot.slot)):
                         if act == i:
