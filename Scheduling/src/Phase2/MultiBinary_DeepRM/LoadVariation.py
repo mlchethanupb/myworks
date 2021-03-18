@@ -19,11 +19,13 @@ def read_from_file():
         dict = json.loads(data)
     return dict
 
+
 if __name__ == '__main__':
     pa = parameters.Parameters()
     models = [pa.A2C_Slowdown, pa.PPO2_Slowdown, pa.SJF, pa.Packer, pa.random, pa.Hongzimao]
     y_slowdown_readings = []
-    new_job_rates = [ 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] 
+    new_job_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] 
+    # run for different values of cluster loads by varying new_job_rates
     for i in range(len(models)):
         pa.objective = models[i]
         log_dir = models[i]['log_dir']
@@ -70,6 +72,7 @@ if __name__ == '__main__':
 
         y_slowdown_readings.append(Job_arrival_rate_slowdown)
 
+    # plot cluster load variation results in graph
     fig = plt.figure()
     res = defaultdict(list)
     {res[key].append(sub[key]) for sub in load_occupied for key in sub}

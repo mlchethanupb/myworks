@@ -28,6 +28,7 @@ def run_episodes(model, pa, env):
     withheld_jobs = []
     allocated_jobs = []
     completion_time_list = []
+    print("Executing the ",pa.objective, " agent for the load ", pa.cluster_load)
     for episode in range(pa.num_episode):
         cumulated_episode_reward = 0
         cumulated_job_slowdown = []
@@ -149,4 +150,4 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
     fig.savefig('workspace/MultiBinary/Performances.png')
-    print( "Job rate:", pa.new_job_rate, ",Simulation length: ", pa.simu_len, ", Cluster load: ", pa.cluster_load)
+    print(",Simulation length: ", pa.simu_len, ", Cluster load: ", pa.cluster_load)

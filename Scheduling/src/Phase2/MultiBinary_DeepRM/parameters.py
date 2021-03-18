@@ -41,7 +41,7 @@ class Parameters:
         # penalty for delaying things in the current work screen
         self.penalty = -1
         # supervised learning mimic policy
-        self.verbose = 0
+        self.verbose = 0 # set to 1 for printing actions taken wrt each timestep
         self.batch_size = 10
         # random number seed
         self.random_seed = 42
