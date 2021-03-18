@@ -6,6 +6,10 @@ This readme will help helps an ordinary user (non developer) to execute and get 
 
 ## Environment Setup 
 
+### `make application_update`
+
+This will update the list of prerequisite packages.
+
 ### `make install_miniconda`
 
 This will download and install miniconda 3.
@@ -17,6 +21,10 @@ Restart your shell and run this command to upgrade all prerequisties for minicon
 ### `make pip_files`
 
 This will install all the basic services like gym and the required environments.
+
+### `make lasagne_theano`
+
+This will install Lasagne and theano packages.
 
 ### `make raytune`
 
@@ -73,4 +81,4 @@ This command will generate the performance results.
 
 ### `make run-Withhold_Jobs`
 
-This command will generate the graph for Withheld Jobs ( performacne gain of trained agents is because of the fact that they are able to hold larger jobs even if resources are available).
+This command will generate the graph for Withheld Jobs ( performance gain of trained agents is because of the fact that they are able to hold larger jobs even if resources are available).
