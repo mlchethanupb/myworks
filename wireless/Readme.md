@@ -51,13 +51,13 @@ The performance of trained RL agents is compared with the baselines. The baselin
 ### Successful Transmission Rate
 Capability of the agent to identify the collision-free time slot to transfer the packet.
 <p align="center">
-<img src="images/Successfull_Transmission_Final.pdf" alt="Percentage of packet delivered to destination" width="300"/>
+<img src="images/Successfull_Transmission_Final.svg" alt="Percentage of packet delivered to destination" width="500"/>
 </p>
 
 ### Packet Delivery Rate
 Transferring the packets from source to destination.
 <p align="center">
-<img src="images/Packet_Delivered_Final.pdf" alt="Percentage of packet delivered to destination" width="300"/>
+<img src="images/Packet_Delivered_Final.svg" alt="Percentage of packet delivered to destination" width="500"/>
 </p>
 
 ### Time-steps for all packets
@@ -68,7 +68,7 @@ the time steps for every transmission which can lead to packet loss or packet tr
 ### Time-steps for fixed packets delivery
 Total time taken for the agent to transfer fixed number of packets in the network to respective destinations. This metric includes only time steps for successful packet delivery.
 <p align="center">
-<img src="images/Timesteps_Fixed_PD.pdf" alt="Percentage of packet delivered to destination" width="300"/>
+<img src="images/Timesteps_Fixed_PD.svg" alt="Percentage of packet delivered to destination" width="500"/>
 </p>
 
 
