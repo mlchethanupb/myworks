@@ -14,55 +14,53 @@ what is the problem and what is the solution
 * RL also dynamically avoids a defect node in the network while transmitting the packet.
 * We have merged the concept of dynamically allocating the time slot and defect node avoidance from the other paper. -->
 
-In wireless networks to have the packets delivered to destination the nodes need to consider the interference caused by other nodes, hidden terminal problem and the accurate routing path by avoiding defect nodes. To achieve this we use Deep Reinforcement Learning (DRL) technique. The DRL agent would observe the environment and assign transmit or wait action to each of the node in the network and minimizes packet collision. Also it will allocate valid next hop in the routing path. The above ideas are based on research papers [Deep-Reinforcement Learning Multiple Access for Heterogeneous Wireless Networks](https://ieeexplore.ieee.org/document/8422168) and [Deep-Reinforcement-Learning-Based QoS-Aware Secure Routing for SDN-IoT](https://ieeexplore.ieee.org/document/8935210). 
+In our work, we mainly aim to evaluate Reinforcement Learning algorithms to route the packets in the network to there respective destination by minimizing the loss of packets due some of important challenges such as signal interference, defect nodes in the network and hidden terminal problem that occur in most of the wireless communication networks. The above ideas are based on research papers [Deep-Reinforcement Learning Multiple Access for Heterogeneous Wireless Networks](https://ieeexplore.ieee.org/document/8422168) and [Deep-Reinforcement-Learning-Based QoS-Aware Secure Routing for SDN-IoT](https://ieeexplore.ieee.org/document/8935210). 
+
+## Solution Approaches
+We have three different environments to measure the performance of RL agent
+* Centralized agent with no routing - The agent gives the action to transmit or wait
+* Centralized agent with routing - Agent gives the routing information along with the transmit or wait
+* Decentralized agent with routing - Agent gives the routing information along with the transmit or wait
+
+## Environment Setup
+
+### Install Conda
+Install Anaconda (version 4.9.2)
+
+### Create environment to run the project
+`conda env create -f environment.yml` this will install all the prerequisits and creates an environment needed to execute the project
+
+### Train the different agents for centralized approaches
+`python training_script.py --agent='PPO2_MAC_routing` will use PPO2 for the centralized network with MAC and routing
+`python training_script.py --agent='A2C_MAC_routing` will use A2C for the centralized network with MAC and routing
+`python training_script.py --agent='PPO2_MAC` will use PPO2 for the centralized network with MAC alone
+
+### To evaluate the performance of agents
+`python eval_script.py` will evaluate the performance of PPO2_MAC_routing agent
+
+### To generate the box-plots to analyse the performance
+`python box.py` generates the box plot for all the agent's performance on different metrics considered
+
+## Results and Observations
 
 
 
 
-## Implementation of the environment
-This is an implementation of Reinforcement Learning environment for transmitting a multiple packets at a time in wireless network with multiple collision domains and defect node. The main objective of the agent is to transfer the packets present in packet queue of each of the nodes in the network to it's destination.
 
-## Network Topology
-Small network with 6 nodes and 2 collision domains.
+
+
+
+
+
+<!--## Environment Setup
+We have conducted our experiments on a network topology shown in below figure.  It involves 6 nodes and 2 collision domains. Nodes (0, 1, 2, 3) are in collision domain 1, and nodes (2, 3, 4, 5) are in collision domain 2. All the nodes within collision domain 1 are connected to each other, similarly in collision domain 2. Nodes 2 and 3 will act as an intermediate node between the nodes which are not reachable from collision domain 1to collision domain 2. Defect node is chosen randomly for each episode and each node has the packet queue of size 5.
 
 <p align="center">
 <img src="images/Network Topology_Small.png" alt="Small Network Topology" width="500"/>
-</p>
-
-Large network with 11 nodes and 6 collision domains.
-
-<p align="center">
-<img src="images/Network Topology_Large.png" alt="Large Network Topology" width="500"/>
-</p>
-
-
-## Action Space
-* Next hop of each node within range and Transmit/Wait (T/W) status.
-* Action space for 6 nodes network
-   * MultiDiscrete ( [4, 4, 6, 6, 4, 4] )
-   * Example [1, 1, 2, 3, 4, 5] = [T, W, W, W, W, W]
+</p>-->
 
 
 
-## Observation Space
-* Destination of a packet at each node
-* Defect node 
-* State space for 6 nodes network
-   * MultiDiscrete ( [7, 7, 7, 7, 7, 7, 6] )
-
-## Rewards
-The rewards to agent are given by considering the two criterias to transmit the packet.
-1. The agent has to deliver the packet by avoiding collision of packets.
-2. The agent has to select a routing path without a defect node.
-
-
-## RL Agent
-* A2C
-
-## Environment Installation
-1. Open `pg-aicon/wireless/code/phase_one/SDN_IOT/w-mac` run command `pip install -e .`.
-1. To train agent open `../w-mac/agents/` run cells in  `agent_train.ipynb`.
-1. To test the model created open `../w-mac/agents/` run cells in `test.ipynb`.
 
 
 
@@ -78,38 +76,38 @@ Therefore, collision domain1 includes switches [0, 1, 2, 3] and collision domain
 
 The network topology can be changed by updating graph connection data = [(0,1),(0,2),(0,3),(1,2),(1,3),(2,3),(2,4),(3,4),(5,2),(5,3),(5,4)] in `agents.ipynb`
 
-## Development Setup
+<!--## Development Setup
 The environment is developed using Python 3.7.9
 Tensorflow 1.15.0
-Libraries used - `gym = 0.17.3, networkx = 2.5, matplotlib = 3.3.2, stable_baselines = 2.10.1`
+Libraries used - `gym = 0.17.3, networkx = 2.5, matplotlib = 3.3.2, stable_baselines = 2.10.1`-->
 
 
 
-## Results and Observations
-The trained agent has significantly reduced the packet loss by learning to avoid collision and defect nodes while routing the packets to destination in wireless networks with multiple collision domains. The expected result of having 0 packet loss was not achieved and larger network significantly increased the packet losses.
+<!--## Results and Observations
+The trained agent has significantly reduced the packet loss by learning to avoid collision and defect nodes while routing the packets to destination in wireless networks with multiple collision domains. The expected result of having 0 packet loss was not achieved and larger network significantly increased the packet losses.-->
 
 
-The below graph shows the performance of A2C over the 400000 timesteps for smaller network.
+<!--The below graph shows the performance of A2C over the 400000 timesteps for smaller network.
 ###### Reward Convergence Graph
 <p align="center">
 <img src="images/Reward convergence graph_small.PNG" alt="Reward Convergence Graph" width="500"/>
-</p>
+</p>-->
 
-###### Packet Loss Graph
+<!--###### Packet Loss Graph
 <p align="center">
 <img src="images/Packet loss graph_small.PNG" alt="Packet Loss Graph" width="500"/>
-</p>
+</p>-->
 
-The below graph shows the performance of A2C over the 10000000 timesteps for larger network.
+<!--The below graph shows the performance of A2C over the 10000000 timesteps for larger network.
 ###### Reward Convergence Graph
 <p align="center">
 <img src="images/Reward Convergence graph_large.PNG" alt="Reward Convergence Graph" width="500"/>
-</p>
+</p>-->
 
-###### Packet Loss Graph
+<!--###### Packet Loss Graph
 <p align="center">
 <img src="images/Packet loss graph_large.PNG" alt="Packet Loss Graph" width="500"/>
-</p>
+</p>-->
 
 
 
