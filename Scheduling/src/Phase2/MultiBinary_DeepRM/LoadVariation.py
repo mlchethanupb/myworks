@@ -1,4 +1,4 @@
-#File for Load variation.
+# File for Load variation.
 from DeepRM.envs.MultiBinaryDeepRM import Env
 import gym
 import matplotlib.pyplot as plt
@@ -15,7 +15,8 @@ import json
 
 
 def read_from_file():
-    with open('Hongziamo/loadresults.json') as json_file:
+    # Specify the path for DeepRM trained agents results
+    with open('../Discrete_DeepRM/loadresults.json') as json_file:
         data = json.load(json_file)
         dict = json.loads(data)
     return dict
@@ -23,9 +24,10 @@ def read_from_file():
 
 if __name__ == '__main__':
     pa = parameters.Parameters()
-    models = [pa.A2C_Slowdown, pa.PPO2_Slowdown, pa.SJF, pa.Packer, pa.random, pa.Hongzimao]
+    models = [pa.A2C_Slowdown, pa.PPO2_Slowdown,
+              pa.SJF, pa.Packer, pa.random, pa.Hongzimao]
     y_slowdown_readings = []
-    new_job_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] 
+    new_job_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     # run for different values of cluster loads by varying new_job_rates
     for i in range(len(models)):
         pa.objective = models[i]
@@ -36,7 +38,7 @@ if __name__ == '__main__':
         Job_arrival_rate_completion_time = []
         load_occupied = []
         for rate in new_job_rates:
-            pa.new_job_rate = rate 
+            pa.new_job_rate = rate
             cluster_values = {}
             cluster_values['simu_len'] = pa.simu_len
             cluster_values['new_job_rate'] = pa.new_job_rate
@@ -52,7 +54,7 @@ if __name__ == '__main__':
             if models[i]['save_path'] != None:
                 save_path = log_dir + models[i]['save_path']
                 model = models[i]['agent'].load(save_path, env1)
-            
+
             if models[i] == pa.Hongzimao:
                 hong_dict = read_from_file()
                 for j in range(len(hong_dict['new_job_rate'])):
@@ -87,4 +89,3 @@ if __name__ == '__main__':
     plt.grid()
     plt.show()
     fig.savefig('workspace/MultiBinary/ClusterLoadVariation.png')
-    
