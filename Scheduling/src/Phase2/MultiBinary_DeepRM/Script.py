@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.cbook import flatten
 import parameters
 import job_distribution
-from stable_baselines import PPO2, A2C, ACKTR
+from stable_baselines import PPO2, A2C
 from stable_baselines.common import make_vec_env
 import other_agents
 from statistics import mean

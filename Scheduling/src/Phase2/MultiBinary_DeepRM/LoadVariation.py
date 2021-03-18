@@ -83,4 +83,4 @@ if __name__ == '__main__':
     plt.grid()
     plt.show()
     fig.savefig('workspace/MultiBinary/ClusterLoadVariation.png')
-    # print(" Job units(total) for various loads: ", load_occupied)
+    
