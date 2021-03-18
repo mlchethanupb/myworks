@@ -4,32 +4,15 @@ import networkx as nx
 import numpy as np
 import random
 
-from collections import defaultdict
 from gym.spaces import Discrete, MultiDiscrete, Tuple, Box
 from packet import Packet
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 
 class WirelessEnv(MultiAgentEnv):
-    def __init__(self, return_agent_actions = False, part=False):
+    def __init__(self, graph: nx.Graph, train_env, return_agent_actions = False, part=False):
 
-        d = defaultdict(list)
-        """Larger network"""
-        #data = [(0,2),(0,1),(0,3),(1,2),(1,3),(2,3),(2,4),(3,4),(5,2),(5,3),(5,4),(5,6),(6,7),(6,8),(7,8),(8,9),(9,10),(4,10)]#(4,6),(5,10),(6,10),(9,6),(8,10)]
-        """Smaller netowrk"""
-        data = [(0,2),(0,1),(0,3),(1,2),(1,3),(2,3),(2,4),(3,4),(5,2),(5,3),(5,4)]
-        #data = [(0,1),(0,2),(1,2),(0,3),(1,3),(2,3)]
-        # defaultdict(<type 'list'>, {})
-        for node, dest in data:
-            d[node].append(dest)
-
-        G = nx.Graph()
-        for k,v in d.items():
-            for vv in v:
-                G.add_edge(k,vv)
-        
-        #nx.draw_networkx(G)
-
-        self.graph = G
+        self.train_env_flag = train_env
+        self.graph = graph
         self.total_nodes = len(self.graph.nodes())
 
         logging.basicConfig(
@@ -175,12 +158,14 @@ class WirelessEnv(MultiAgentEnv):
     """ Reset the variables used to measure the stats """
 
     def __reset_stat_variables(self):
-        self.succ_transmission = 0
+        
         self.packet_delivered = 0
         self.packet_lost = 0
         self.counter = 0
         self.end_episode = False
-
+        self.succ_transmission = 0
+        self.total_transmission = 0
+        self.total_packets = self.QUEUE_SIZE * (self.total_nodes-1)
         #for testing
         self.reward = 0
 
@@ -460,7 +445,13 @@ class WirelessEnv(MultiAgentEnv):
             self.counter += 1
                     
         isdone = False
-        if queue_empty or counter_exceeded: # or self.end_episode:
+        done_condition = True
+        if self.train_env_flag:
+            done_condition = queue_empty or counter_exceeded or self.end_episode
+        else:
+            done_condition = queue_empty or counter_exceeded
+
+        if done_condition:
             isdone = True
             logging.info('packets delivered %s ',self.packet_delivered)
             logging.info('packet_lost %s', self.packet_lost)
@@ -514,11 +505,41 @@ class WirelessEnv(MultiAgentEnv):
     def get_packet_lost(self):
             return self.packet_lost
 
+    """
+        Function to retrieve the episode reward.
+
+        Returns - Integer
+
+    """
     def get_reward(self):
             return self.reward
 
+    """
+        Function to retrieve the number of successful transmission.
+
+        Returns - Integer
+
+    """
     def get_succ_transmissions(self):
             return self.succ_transmission
+
+    """
+        Function to retrieve the total transmission.
+
+        Returns - Integer
+
+    """
+    def get_total_transmissions(self):
+            return self.total_transmission
+
+    """
+        Function to retrieve the total packet.
+
+        Returns - Integer
+
+    """
+    def get_total_packets(self):
+            return self.total_packets
     #--------------------------------------------------------------------------------------------
     
     """
@@ -617,6 +638,7 @@ class WirelessEnv(MultiAgentEnv):
                     self.packet_lost += 1
                     self.end_episode = True
                     packet_to_send = self.queues[node].pop()
+                    self.total_transmission += 1
 
                 break       
                 
@@ -630,6 +652,7 @@ class WirelessEnv(MultiAgentEnv):
                     qs_list = self.__get_queue_sizes()
                     ### Pop the packet from the queue
                     packet_to_send = queue.pop()
+                    self.total_transmission += 1
 
                     self.__vis_update_src_nxthop(node,nxt_hop)  
 

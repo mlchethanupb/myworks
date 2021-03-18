@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
 ENV LC_ALL C.UTF-8
 
 # install required python libs
-RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade pip==20.3.4
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 

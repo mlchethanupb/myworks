@@ -31,32 +31,30 @@ class dsdv_wqueue():
     """ This will return the action required for the W_MAC_Env"""
     """Ex - actions = [2,1,2,3,4,5] nodes = [0,1,2,3,4,5] - only 0th node will be transmitting the packet"""
 
-    def predict(self, state, queue_size):
+    def predict(self, state, queue_size, routing_table):
 
-        print("calling predict function - 1")
         self.destinations_list_with_anode = []
         self.queue_size = []
 
         self.destinations_list_with_anode = state
 
         self.queue_size = queue_size
-        # last number is attack node info
-        self.attack_node = [self.destinations_list_with_anode[-1]]
         self.destinations_list = self.destinations_list_with_anode[:-1]
-        print("self.destinations_list", self.destinations_list)
 
-        self.create_routing_table(self.attack_node)
-        #self.actions = self.tdma()
-        #self.valid_action_list = self.map_actions()
+
+        self.routing_table = routing_table
+        self.actions = self.tdma()
+        self.valid_action_list = self.map_actions()
+
 
         #return self.valid_action_list
 
     def create_routing_table(self, attack_node):
-        print("calling create routing table function - 2")
+        
         self.attack_nodes = attack_node
-        print("self.attack_nodes", self.attack_nodes)
+        # print("self.attack_nodes", self.attack_nodes)
 
-        print('\n------------------------------------------------------\n')
+        # print('\n------------------------------------------------------\n')
 
         dic = {}
         for nodes in self.graph.nodes():
@@ -64,7 +62,7 @@ class dsdv_wqueue():
             self.routing_table = dic
         # print('Empty routing table\n', self.routing_table)
 
-        print('\n------------------------------------------------------\n')
+        # print('\n------------------------------------------------------\n')
 
         for i in self.routing_table.keys():
             self.routing_table[i].update({'destination': [], 'hop_count': [],
@@ -96,12 +94,12 @@ class dsdv_wqueue():
 
         self.Broadcast_NbrTable()
 
-        print("Final Routing table", self.routing_table)
+        # print("Final Routing table", self.routing_table)
 
         return self.routing_table
 
     def Broadcast_NbrTable(self):
-        print("calling broadcast nbr table function - 3")
+        # print("calling broadcast nbr table function - 3")
         # self.r_table = r_table
 
         self.rtable_info_queue = {i: []
@@ -129,10 +127,12 @@ class dsdv_wqueue():
         self.queue_length()
 
     def update_table(self):
+
         # print("if any of the  not empty calling update table function - 5")
 
         # while (self.queue_empty):
         # print("queues are not empty")
+
         
         for self.src_node in self.graph.nodes():
             if self.src_node not in self.attack_nodes:
@@ -187,7 +187,6 @@ class dsdv_wqueue():
         self.queue_length()
 
     def broadcast_update(self):
-        # print("calling broadcast update - 6")
         self.updated_dest = self.routing_table[self.src_node]['destination']
         self.updated_nh = self.routing_table[self.src_node]['next_hop']
         self.updated_hc = self.routing_table[self.src_node]['hop_count']
@@ -202,17 +201,15 @@ class dsdv_wqueue():
                     0, updated_rtable)
 
     def queue_length(self):
-        # print("calling q length function - 4")
-
-        # self.queue_empty = False
+        
         if any(self.rtable_info_queue[node] for node in self.graph.nodes):
 
-            # self.queue_empty = True
             self.update_table()
         else:
-            print("all queues are empty")
+            # print("all queues are empty")
             # print("\n final routing table", self.routing_table)
-        # return self.queue_empty
+            ...
+        
 
     """Allocating timeslot to each node to transmit based on the queue size. The larger the queue size, higher the priority"""
     """Find the next hop for the respective destination"""
@@ -221,7 +218,6 @@ class dsdv_wqueue():
 
     def tdma(self):
 
-        # print("calling tdma - 7")
         self.actions = list(self.graph.nodes)
         # print("actions before returning", self.actions)
         self.max_queue_size = max(self.queue_size)
@@ -255,16 +251,15 @@ class dsdv_wqueue():
                                         self.actions[index_of_large_queue] = next_hop_found
                                         break
 
-        # else:
+        else:
         #     print("send wait condition to all nodes")
-        #     self.actions
+            ...
 
-        print("actions returned by dsdv", self.actions)
+        # print("actions returned by dsdv", self.actions)
 
         return self.actions
 
     def read_graph(self):
-        # print("read graph - 9")
         collision_domain = {}
 
         dict_index = 0
@@ -370,7 +365,6 @@ class dsdv_wqueue():
         return self.node_action_list
 
     def map_actions(self):
-        # print("mapp actions - 8")
         valid_action_list = []
         self.node_action_list = self.read_graph()
 
@@ -386,7 +380,7 @@ class dsdv_wqueue():
             mapped_action = action_list.index(next_hop)
             # print("mapped_action", mapped_action)
             valid_action_list.append(mapped_action)
-            print("valid_action_list aftr mapping", valid_action_list)
+            # print("valid_action_list aftr mapping", valid_action_list)
         return valid_action_list
 
     def __get_index(self, node):
@@ -395,3 +389,4 @@ class dsdv_wqueue():
         index = node_list.index(node)
 
         return index
+

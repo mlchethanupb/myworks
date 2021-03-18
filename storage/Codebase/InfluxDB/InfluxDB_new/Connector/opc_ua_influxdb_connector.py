@@ -11,9 +11,9 @@ import os, sys, signal, logging
 import csv
 from datetime import datetime
 
+
 OPCUA_SERVER = os.environ.get('OPCUA_SERVER', os.getenv('DIGITALTWIN_SERVICE_HOST', 'digitaltwin'))
 OPCUA_PORT = os.environ.get('OPCUA_PORT', '4840')
-SLEEP_DURATION = os.environ.get('SLEEP_DURATION', 5) 
 INSTANCE_NAME = os.environ.get('INSTANCE_NAME', os.uname()[1])
 INFLUXDB_HOST = os.environ.get('INFLUXDB_HOST', os.getenv('INFLUXDB_SERVICE_HOST', 'influxdb'))
 INFLUXDB_PORT = os.environ.get('INFLUXDB_PORTNUM', 8086)
@@ -21,7 +21,7 @@ INFLUXDB_METRICS_PORT = os.environ.get('INFLUXDB_METRICS_PORTNUM', 9273)
 INFLUXDB_DB = os.environ.get('INFLUXDB_DB', 'data')
 METRICS_USER = os.environ.get('METRICS_USER', 'foo')
 METRICS_PASS = os.environ.get('METRICS_PASS', 'bar')
-CSV_FILE = os.environ.get('CSV_FILE', datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv')
+CSV_FILE = os.environ.get('CSV_FILE', 'data.csv')
 
 
 #CRITICAL-50, ERROR-40,WARNING-30,INFO-20,DEBUG-10,NOTSET-0
@@ -52,7 +52,7 @@ def main():
 
     opcua_client = Client("opc.tcp://{}:{}/freeopcua/server/".format(OPCUA_SERVER, OPCUA_PORT))
 
-    cols = ["request_datetime","msg_size","request_time_ms","request_ret","cpu_usage_active","disk_used_percent","mem_available_percent","influxdb_memstats_sys","influxdb_memstats_heap_inuse","influxdb_shard_diskBytes","influxdb_diskBytes","influxdb_shard_writeBytes","influxdb_database_numSeries","influxdb_httpd_writeReqBytes","influxdb_httpd_writeReqDurationNs","influxdb_httpd_writeReq","influxdb_httpd_writeReqActive"]
+    cols = ["count","request_datetime","msg_size","request_time_ms","request_ret","cpu_usage_active","disk_used_percent","mem_available_percent","influxdb_memstats_sys","influxdb_memstats_heap_inuse","influxdb_shard_diskBytes","influxdb_diskBytes","influxdb_shard_writeBytes","influxdb_database_numSeries","influxdb_httpd_writeReqBytes","influxdb_httpd_writeReqDurationNs","influxdb_httpd_writeReq","influxdb_httpd_writeReqActive","total_time"]
     with open("./csv/" + CSV_FILE, mode='w+', newline="") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=cols, extrasaction='ignore')
         writer.writeheader()
@@ -67,11 +67,29 @@ def main():
         sys.exit(1)
 
     logger.setLevel(DEBUG_MODE)
+    count = 1
+    influxdb_metrics={}
+    total_time=0
+    SLEEP_DURATION=10
     while True:
         try:
             logger.info('Connected to OPC UA server %s:%s' % (OPCUA_SERVER, OPCUA_PORT))
+            if SLEEP_DURATION == 10:
+                SLEEP_DURATION = os.environ.get('SLEEP_DURATION', 5) 
+            if SLEEP_DURATION == 5:
+                SLEEP_DURATION = os.environ.get('SLEEP_DURATION', 10) 
+
+
+
+            
 
             request_datetime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            if influxdb_metrics:
+                previous_datetime=datetime.strptime(influxdb_metrics['request_datetime'],'%Y-%m-%dT%H:%M:%S.%fZ')
+                request_time=datetime.strptime(request_datetime,'%Y-%m-%dT%H:%M:%S.%fZ')
+                differ_time=request_time - previous_datetime
+                differ_time=differ_time.total_seconds()
+                total_time=influxdb_metrics['total_time'] + differ_time
             json_body = [
                 {
                   "measurement": "imms",
@@ -103,12 +121,14 @@ def main():
             request_time = time.time() - start
             logger.debug("Request completed in {0:.0f}ms".format(request_time))
             msg_size = int(sys.getsizeof(json_body))
-
             influxdb_metrics = {}
+            influxdb_metrics['count'] = count
+            count = count + 1
             influxdb_metrics['request_datetime'] = request_datetime
             influxdb_metrics['msg_size'] = msg_size
             influxdb_metrics['request_time_ms'] = request_time
             influxdb_metrics['request_ret'] = request_ret
+            influxdb_metrics['total_time'] = total_time
 
             metrics = requests.get("http://" + INFLUXDB_HOST + ":" + str(INFLUXDB_METRICS_PORT) + "/metrics", auth=requests.auth.HTTPBasicAuth(METRICS_USER, METRICS_PASS)).text
 
@@ -157,7 +177,13 @@ def main():
             with open("./csv/" + CSV_FILE, mode='a+', newline="") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=cols, extrasaction='ignore')
                 writer.writerow(influxdb_metrics)
+            if SLEEP_DURATION == 9:
+                SLEEP_DURATION=10
+            if SLEEP_DURATION == 10:
+                SLEEP_DURATION=9
             time.sleep(SLEEP_DURATION)
+            
+
 
         except Exception as e:
             logger.error(e)

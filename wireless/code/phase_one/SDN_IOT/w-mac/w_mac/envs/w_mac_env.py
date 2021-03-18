@@ -323,6 +323,10 @@ class W_MAC_Env(gym.Env):
 
     """  
     Create the action space and observation space variables for gym environment ###
+
+=======
+
+
     Preconditions -- Should be called only after 
                   __reset_attack_nodes() and __read_graph_data()
     """
@@ -349,6 +353,8 @@ class W_MAC_Env(gym.Env):
 
     """
     Create queue for each node and assign packets with different destination. ###
+
+
     Precondition -- Should be called only after __reset_attack_nodes() 
     """
 
@@ -376,6 +382,8 @@ class W_MAC_Env(gym.Env):
     """  
     Frame the "state/observation list" with destination of first packet in each node queue
     and the attack node
+
+
     Precondition -- Should be called after __reset_queue() and __reset_attack_nodes()
     Returns - "List"    
     """
@@ -401,6 +409,7 @@ class W_MAC_Env(gym.Env):
 
     """ 
     Checks if all the queues are empty or if the counter has exceeded value (avoid loops). ###
+
     Returns "True" or "False"
     """
 
@@ -448,12 +457,40 @@ class W_MAC_Env(gym.Env):
     """
     Function to retrieve the number of packets lost stat.
     Returns - Integer
+
     """
 
     def get_packet_lost(self):
         return self.packet_lost
 
     
+
+    # --------------------------------------------------------------------------------------------
+
+    """
+    Function to retrieve total number of transmission stat.
+
+    Returns - Integer
+
+    """
+
+    def get_total_transmission(self):
+        return self.total_transmission
+
+
+    # --------------------------------------------------------------------------------------------
+
+    """
+    Function to retrieve total number of successfull transmission stat.
+
+    Returns - Integer
+
+    """
+
+    def get_succ_transmission(self):
+        return self.succ_transmission    
+
+
     # --------------------------------------------------------------------------------------------
 
     """
@@ -490,7 +527,9 @@ class W_MAC_Env(gym.Env):
 
     """
     Function to retrieve the total number of packets sent stat.
+
     Returns - Integer
+
     """
 
     def get_total_packet_sent(self):
