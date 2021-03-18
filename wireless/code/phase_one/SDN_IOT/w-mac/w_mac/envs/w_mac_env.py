@@ -184,7 +184,6 @@ class W_MAC_Env(gym.Env):
 
     """  
     Randomly assign nodes as attack nodes
-
     self.attack_nodes - "List" of attack nodes
   """
 
@@ -209,10 +208,8 @@ class W_MAC_Env(gym.Env):
   
    1. self.collision_domain_elems -- Different collosion domains and elements in the 
       (type - Dictionary)            respective collision domain
-
    2. self.node_in_domains -- Each node as keys and in values the respective 
       (type - Dictionary)     collision domain they belong to 
-
    3. self.node_action_list -- Each node as keys and repective valid next hops as values.
       (type - Dictionary)      Used mainly to define action space and map the recieved actions 
                                from agent to respective node. 
@@ -327,6 +324,9 @@ class W_MAC_Env(gym.Env):
     """  
     Create the action space and observation space variables for gym environment ###
 
+=======
+
+
     Preconditions -- Should be called only after 
                   __reset_attack_nodes() and __read_graph_data()
     """
@@ -353,6 +353,7 @@ class W_MAC_Env(gym.Env):
 
     """
     Create queue for each node and assign packets with different destination. ###
+
 
     Precondition -- Should be called only after __reset_attack_nodes() 
     """
@@ -381,6 +382,7 @@ class W_MAC_Env(gym.Env):
     """  
     Frame the "state/observation list" with destination of first packet in each node queue
     and the attack node
+
 
     Precondition -- Should be called after __reset_queue() and __reset_attack_nodes()
     Returns - "List"    
@@ -438,10 +440,8 @@ class W_MAC_Env(gym.Env):
     # --------------------------------------------------------------------------------------------
     """ 
     Find the index of the node in the action list. 
-
     As the node positions is not in sorted order, it is necessary to find the right index to determine 
     the repective action in action list. 
-
     Returns - Integer
     """
 
@@ -456,7 +456,6 @@ class W_MAC_Env(gym.Env):
 
     """
     Function to retrieve the number of packets lost stat.
-
     Returns - Integer
 
     """
@@ -465,6 +464,7 @@ class W_MAC_Env(gym.Env):
         return self.packet_lost
 
     
+
     # --------------------------------------------------------------------------------------------
 
     """
@@ -490,13 +490,33 @@ class W_MAC_Env(gym.Env):
     def get_succ_transmission(self):
         return self.succ_transmission    
 
+
+    # --------------------------------------------------------------------------------------------
+
+    """
+    Function to retrieve total number of transmission stat.
+    Returns - Integer
+    """
+
+    def get_total_transmission(self):
+        return self.total_transmission
+
+
+    # --------------------------------------------------------------------------------------------
+
+    """
+    Function to retrieve total number of successfull transmission stat.
+    Returns - Integer
+    """
+
+    def get_succ_transmission(self):
+        return self.succ_transmission    
+
     # --------------------------------------------------------------------------------------------
 
     """
     Function to retrieve the number of packets delivered stat.
-
     Returns - Integer
-
     """
 
     def get_packet_delivered(self):
@@ -560,17 +580,13 @@ class W_MAC_Env(gym.Env):
     """
     Receives the action_list and transfers packet from one node to other based on the wireless 
     transmission rules. 
-
     -- Negative reward are given for packet loss with following scenarios 
-
       1. Two nodes transmitting in same collision domain results in packet loss
       2. Two nodes of different collision domain transferring to intermediate nodes 
          results in packet loss (Hidden terminal problem)
       3. Packet transmitted to the defect node is also lost. 
-
     -- Positive reward is given when packet reachs the destination
     -- Positive reward is also reduced with factor of hopcount taken to reach destination.
-
   """
 
     def __perform_actions(self, actions):
@@ -718,7 +734,6 @@ class W_MAC_Env(gym.Env):
     Checks whether the packet transmitted by the "source" is lost due to hidden terminal problem.
     
     Retruns "True" or "False"
-
   """
 
     def __hidden_terminal_problem(self, actions, source, domain_key, qs_list):
@@ -752,10 +767,8 @@ class W_MAC_Env(gym.Env):
 
     """
     Maps the valid actions for the repective nodes from the recieved actions of the agent. 
-
     For example: If the collision domain as elements [3,4,5,9]; interpretation for agent
                  will be[0,1,2,3]. 
-
         With node "5" as source. The respective mapping is as follows:
                  0: Next hop is 3 
                  1: Next hop is 4
