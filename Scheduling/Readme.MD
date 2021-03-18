@@ -38,7 +38,7 @@ We have two different action spaces for two different environments.
 * Select one or more jobs from the job slots at each timestep.
 
 **Multi-Binary Action Space :**
-* Size of action space =  Number of job slots + 1.
+* Size of action space =  Number of job slots.
 * Select subset of jobs from the job slots at each timestep.
 
 ## Reward Function :
