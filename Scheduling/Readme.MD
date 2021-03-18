@@ -73,7 +73,7 @@ clearly indicate that the trained agents performed better than that of heuristic
 
 ###### Performance Graph for Multi-binary Environment
 <p align="center">
-<img src="src/Phase2/MultiBinary_DeepRM/workspace/MultiBinary/Performances.png" alt="Performance Graph Multi-binary Environment" width="500"/>
+<img src="src/Phase2/MultiBinary_DeepRM/workspace/MultiBinary/Performance.png" alt="Performance Graph Multi-binary Environment" width="500"/>
 </p>
 
 
