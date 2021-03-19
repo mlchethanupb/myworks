@@ -41,17 +41,15 @@ class Env(gym.Env):
 
     def step(self, a):
         status = None
+        final_status = 'MoveOn'
         done = False
-        reward = 0
         info = {}
         info['Withheld Job'] = []
         info['Allocated Job'] = []
         # iterate over valid actions
         for act in range(len(a)):
-            if (a[act] == 1) or (1 not in a and self.pa.objective['agent'] == None) or (a.all() == 0 and self.pa.objective['agent'] != None):
-                if (self.pa.objective['agent'] != None and (a.all() == 0 or act == self.pa.job_wait_queue or self.job_slot.slot[act] is None)):
-                    status = 'MoveOn'
-                elif (self.pa.objective['agent'] == None and (1 not in a or act == self.pa.job_wait_queue or self.job_slot.slot[act] is None)):
+            if (a[act] == 1) or (1 not in a):
+                if 1 not in a or act == self.pa.job_wait_queue or self.job_slot.slot[act] is None:
                     status = 'MoveOn'
                 else:
                     allocated = self.machine.allocate_job(
@@ -63,49 +61,9 @@ class Env(gym.Env):
                                 self.job_slot.slot[act])
                     else:
                         status = 'Allocate'
+                        final_status = 'Allocate'
 
-                if status == 'MoveOn':
-                    self.curr_time += 1
-                    self.machine.time_proceed(self.curr_time)
-
-                    if self.end == "no_new_job":  # end of new job sequence
-                        if self.seq_idx >= self.pa.simu_len:
-                            done = True
-                    elif self.end == "all_done":
-                        # Done is true if no jobs are running in th machine + no job in the waiting queue and
-                        # no jobs in the backlog
-                        if self.seq_idx >= self.pa.simu_len and len(self.machine.running_job) == 0 and \
-                                all(s is None for s in self.job_slot.slot) and \
-                                all(s is None for s in self.job_backlog.backlog):
-                            done = True
-
-                    if not done:
-                        if self.seq_idx < self.pa.simu_len:  # otherwise, end of new job sequence, i.e. no new jobs
-                            new_job = self.get_new_job_from_seq(
-                                self.seq_no, self.seq_idx)
-                            self.seq_idx += 1
-                            if new_job.len > 0:
-                                add_to_backlog = True
-                                # If the job slot is empty then only put the new job in the job slot/waiting queue
-                                # If the job slot is not empty then the job will go in the job backlog
-                                for i in range(self.pa.job_wait_queue):
-                                    # put in new visible job slots
-                                    if self.job_slot.slot[i] is None:
-                                        self.job_slot.slot[i] = new_job
-                                        self.job_record.record[new_job.id] = new_job
-                                        add_to_backlog = False
-                                        break
-
-                                if add_to_backlog:
-                                    if self.job_backlog.curr_size < self.pa.backlog_size:
-                                        self.job_backlog.backlog[self.job_backlog.curr_size] = new_job
-                                        self.job_backlog.curr_size += 1
-                                        self.job_record.record[new_job.id] = new_job
-                                    else:  # abort, backlog full
-                                        print("Backlog full.")
-                    reward = reward + self.get_reward()
-
-                elif status == 'Allocate':
+                if status == 'Allocate':
                     info['Allocated Job'].append(self.job_slot.slot[act])
 
                     self.job_record.record[self.job_slot.slot[act].id] = self.job_slot.slot[act]
@@ -120,6 +78,47 @@ class Env(gym.Env):
                         self.job_backlog.backlog[-1] = None
                         self.job_backlog.curr_size -= 1
 
+        if final_status == 'MoveOn':
+            self.curr_time += 1
+            self.machine.time_proceed(self.curr_time)
+
+            if self.end == "no_new_job":  # end of new job sequence
+                if self.seq_idx >= self.pa.simu_len:
+                    done = True
+            elif self.end == "all_done":
+                # Done is true if no jobs are running in th machine + no job in the waiting queue and
+                # no jobs in the backlog
+                if self.seq_idx >= self.pa.simu_len and len(self.machine.running_job) == 0 and \
+                        all(s is None for s in self.job_slot.slot) and \
+                        all(s is None for s in self.job_backlog.backlog):
+                    done = True
+
+            if not done:
+                if self.seq_idx < self.pa.simu_len:  # otherwise, end of new job sequence, i.e. no new jobs
+                    new_job = self.get_new_job_from_seq(
+                        self.seq_no, self.seq_idx)
+                    self.seq_idx += 1
+                    if new_job.len > 0:
+                        add_to_backlog = True
+                        # If the job slot is empty then only put the new job in the job slot/waiting queue
+                        # If the job slot is not empty then the job will go in the job backlog
+                        for i in range(self.pa.job_wait_queue):
+                            # put in new visible job slots
+                            if self.job_slot.slot[i] is None:
+                                self.job_slot.slot[i] = new_job
+                                self.job_record.record[new_job.id] = new_job
+                                add_to_backlog = False
+                                break
+
+                        if add_to_backlog:
+                            if self.job_backlog.curr_size < self.pa.backlog_size:
+                                self.job_backlog.backlog[self.job_backlog.curr_size] = new_job
+                                self.job_backlog.curr_size += 1
+                                self.job_record.record[new_job.id] = new_job
+                            else:  # abort, backlog full
+                                print("Backlog full.")
+
+        reward = self.get_reward()
         ob = self.observe()
         if done:
             self.seq_idx = 0
@@ -139,6 +138,15 @@ class Env(gym.Env):
 
         # The resource profile of jobs in the job slot queue/waiting queue/M
         for i in self.job_slot.slot:
+            resource_profile = np.zeros(
+                (self.pa.time_horizon, self.pa.num_resources))
+            if i is not None:
+                for len in range(i.len):
+                    resource_profile[len] = i.resource_requirement
+
+            ob.append(resource_profile)
+
+        for i in self.job_backlog.backlog:
             resource_profile = np.zeros(
                 (self.pa.time_horizon, self.pa.num_resources))
             if i is not None:

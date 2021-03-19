@@ -63,8 +63,12 @@ class Parameters:
             self.num_resources, self.max_job_size, self.max_job_len, self.job_small_chance)
         self.A2C_Ctime = {'agent': A2C, 'save_path': 'job_scheduling_A2C_Ctime',
                           'log_dir': "workspace/MultiBinary/tensor_A2C_Ctime/", 'color': 'Red', 'yerrcolor': 'Brown', 'title': 'A2C Ctime agent'}
+        self.Tuned_A2C_Ctime = {'agent': A2C, 'save_path': 'job_scheduling_A2C_Ctime',
+                                'log_dir': "workspace/MultiBinary/tensor_A2C_Ctime/", 'color': 'Orange', 'yerrcolor': 'Red', 'title': 'Tuned A2C Ctime agent'}
         self.A2C_Slowdown = {'agent': A2C, 'save_path': 'job_scheduling_A2C_Slowdown',
                              'log_dir': "workspace/MultiBinary/tensor_A2C_Slowdown/", 'color': 'SkyBlue', 'yerrcolor': 'Blue', 'title': 'A2C Slowdown agent'}
+        self.Tuned_A2C_Slowdown = {'agent': A2C, 'save_path': 'job_scheduling_A2C_Slowdown',
+                                   'log_dir': "workspace/MultiBinary/tensor_A2C_Slowdown/", 'color': 'Blue', 'yerrcolor': 'Purple', 'title': 'Tuned A2C Slowdown agent'}
         self.PPO2 = {'agent': PPO2, 'save_path': 'job_scheduling_PPO2', 'log_dir': "workspace/MultiBinary/tensor_PPO2/",
                      'color': 'Green', 'yerrcolor': 'DarkGreen', 'title': 'PPO2 agent'}
         self.random = {'agent': None, 'save_path': None, 'log_dir': None,
@@ -83,6 +87,7 @@ class Parameters:
                             'title': 'Packer', 'load': None}
 
         self.model_save_path = 'workspace/Discrete/hyperParamModels/'
+        self.model_save_path_MB = 'workspace/MultiBinary/hyperParamModels/'
 
         # DQN
         self.DQN_SL = {'agent': 'DQN', 'save_path': self.model_save_path + "job_scheduling_" + "DQN" + "_" + self.objective_slowdown,
@@ -121,6 +126,7 @@ class Parameters:
         self.model_training_iterations = 100
 
         self.tensorBoard_DQN_Logs = 'workspace/Discrete/tensorBoardLogs/'
+        self.tensorBoard_MB_Logs = 'workspace/MultiBinary/tensorBoardLogs/'
 
         self.localhost = '0.0.0.0'
 

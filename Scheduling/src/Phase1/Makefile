@@ -69,6 +69,7 @@ run-stableBaseLine_Models_Training:
 	
 run-raytune:
 	python3 raytuneAllAgents.py
+	python3 raytuneAllAgentsMB.py
    
 loadvariation:
 	python3 LoadVariation.py
