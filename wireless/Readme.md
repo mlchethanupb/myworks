@@ -153,11 +153,15 @@ This section is to evaluate the performance of centralized and decentralized age
 Increase in number of nodes increases state-space and action space for centralized agents compared to decentralized agents.
 The metric considered for evaluation of two agents is value function explained variation (VF-EV).
 <p align="center">
-<img src="images/vf_centralized.svg" alt="Time steps taken to successfully transmit 15 packets" width="500"/>
+<img src="images/vf_centralized.svg" alt="VF centralized" width="500"/>
 </p>
 
 <p align="center">
-<img src="images/vf_decentralized.svg" alt="Time steps taken to successfully transmit 15 packets" width="500"/>
+<img src="images/vf_decentralized.svg" alt=" VF decentralized" width="500"/>
+</p>
+
+<p align="center">
+<img src="images/6_nodes.svg" alt="Network topology with 6 nodes" width="250"/> <img src="images/8_nodes.svg" alt="Network topology with 8 nodes" width="250"/> <img src="images/9_nodes.svg" alt="Network topology with 9 nodes" width="250"/>
 </p>
 
 
