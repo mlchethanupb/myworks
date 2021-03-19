@@ -5,16 +5,14 @@ import argparse
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import make_vec_env
 from stable_baselines import A2C, PPO2
-from stable_baselines.common.env_checker import check_env
-from IPython.display import clear_output
 import time
 from copy import deepcopy
 from ray import tune
 from stable_baselines.common.callbacks import BaseCallback
-import gym
 import ast
 import numpy as np
 from collections import defaultdict
+
 from centralized_env.with_routing.w_mac_env import W_MAC_Env
 from centralized_env.without_routing.MAC_RL_env import MAC_RL
 
@@ -33,7 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('--agent', type=str, nargs='?', const=1,
                         default='PPO2_MAC_routing', help='Whether to use A2C_MAC_routing, PPO2_MAC_routing, PPO2_MAC')
     parser.add_argument('--total_train_timesteps', type=int,  nargs='?',
-                        const=1, default=1500000, help='Number of training steps for the agent')
+                        const=1, default=15, help='Number of training steps for the agent')
     parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=50000,
                         help='Maximum number of episodes for final (deterministic) evaluation')
     parser.add_argument('--graph', type=str, nargs='?', const=1,
@@ -113,3 +111,6 @@ if __name__ == '__main__':
                         callback=TensorboardCallback())
 
             model.save("PPO2_RL_MAC")
+    
+    else:
+        raise ValueError('Unknown agent.')

@@ -1,15 +1,9 @@
 
 import os
-import matplotlib as plt
 import networkx as nx
-import tensorflow as tf
 import argparse
-from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import make_vec_env
 from stable_baselines import A2C, PPO2
-from stable_baselines.common.env_checker import check_env
-from stable_baselines.common.callbacks import BaseCallback
-import gym
 import ast
 import numpy as np
 from collections import defaultdict
@@ -46,7 +40,7 @@ def testing_agent(agent, eval_episodes):
     eval_episodes = eval_episodes
     if agent == 'A2C_MAC_routing' or agent == 'PPO2_MAC_routing':
         if agent == 'A2C_MAC_routing':
-            model = A2C.load("A2C_MAC_Routing_last.zip")
+            model = A2C.load("saved_models/A2C_MAC_Routing_last.zip")
 
         elif agent == 'PPO2_MAC_routing':
             model = PPO2.load("saved_models/PPO2_MAC_Routing_last.zip")
@@ -70,7 +64,6 @@ def testing_agent(agent, eval_episodes):
         calculate_sum()
 
     elif agent == 'PPO2_MAC':
-        print("entering RL_MAC")
         
         model = PPO2.load("saved_models/PPO2_RL_MAC_FINAL.zip")  
         
@@ -95,7 +88,6 @@ def testing_agent(agent, eval_episodes):
 
     elif agent == 'dsdv_wqueue': 
 
-        print("entering into dsdv wqueue")
         for i in range(eval_episodes):
             obs = env.reset()
             destinations_list_with_anode = obs
@@ -120,7 +112,6 @@ def testing_agent(agent, eval_episodes):
         calculate_sum()
 
     elif agent == 'dsdv_RRTDMA':
-        print("entering RRTDMA")
         for i in range(eval_episodes):
             obs = env.reset()
             destinations_list_with_anode = obs
@@ -177,18 +168,11 @@ def append_data(env_eval, timestep, ts_pd_count):
     env_to_eval = env_eval
     packet_loss = env_to_eval.get_packet_lost()
     packet_delivered = env_to_eval.get_packet_delivered()
-
-    # print("packet_delivered", packet_delivered)
-
-    total_trans = env_to_eval.get_total_transmission()
-    # print("total_trans",total_trans)
+    total_trans = env_to_eval.get_total_transmission()    
     succ_trans = env_to_eval.get_succ_transmission()
-    total_pkt_sent = env_to_eval.get_total_packet_sent()
-    # print("total_pkt_sent", total_pkt_sent)
-
+    total_pkt_sent = env_to_eval.get_total_packet_sent()    
     packet_loss_percentage = (packet_loss/total_pkt_sent) * 100
     packet_delivered_percentage = (packet_delivered/total_pkt_sent) * 100
-    # print("packet_delivered_percentage", packet_delivered_percentage)
     succ_trans_percentage = (succ_trans/total_trans) * 100
 
     # calculate percentage and append
@@ -221,7 +205,7 @@ if __name__ == '__main__':
                         default='PPO2_MAC_routing', help='Whether to use PPO2_MAC_routing, A2C_MAC_routing, PPO2_MAC, dsdv_wqueue, dsdv_RRTDMA')
     parser.add_argument('--total_train_timesteps', type=int,  nargs='?',
                         const=1, default=1500000, help='Number of training steps for the agent')
-    parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=50000,
+    parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=5,
                         help='Maximum number of episodes for final (deterministic) evaluation')
     parser.add_argument('--graph', type=str, nargs='?', const=1,
                         default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
