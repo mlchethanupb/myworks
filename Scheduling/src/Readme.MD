@@ -28,4 +28,5 @@ representation of the observation space. Summarized backlog information also add
 * Redesigned logic for cluster load calculation.
 
 *For a detailed overview [Employing_Reinforcement_Learning_Algorithms_to_solve_Cluster_Scheduling_Problem](https://github.com/CN-UPB/pg-aicon/blob/master/Scheduling/documentation/Employing_Reinforcement_Learning_Algorithms_to_solve_Cluster_Scheduling_Problem.pdf) report can be referred*
-*Execution steps are specified in the folders phase1 and phase2.*
+
+*Execution steps are specified in the folders [MakeFile](https://github.com/CN-UPB/pg-aicon/blob/master/Scheduling/src/Phase2/Readme.MD) phase1 and phase2.*
