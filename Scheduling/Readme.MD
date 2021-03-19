@@ -94,12 +94,13 @@ clearly indicate that the trained agents performed better than that of heuristic
 
 ## Phase 2 -- Enhancements 
 
-1) Performance improvements using raytune with diff parameters for both the environment.
-2) Comparing discrete environment Vs multi-binary environment.
-3) Evaluate Performance subjected to varying load.
-4) Enhanced Workload determination.
-5) Train Multiple agents.
-6) Compare results with [paper](https://people.csail.mit.edu/alizadeh/papers/deeprm-hotnets16.pdf).
+1) Performance improvements using raytune with different parameters for both the environment.
+2) Comparing Discrete environment Vs Multi-Binary environment.
+3) Modified [observation space](https://github.com/CN-UPB/pg-aicon/blob/master/Scheduling/documentation/Employing_Reinforcement_Learning_Algorithms_to_solve_Cluster_Scheduling_Problem.pdf) for improved performance.
+4) Evaluate performance subjected to varying load.
+5) Enhanced Workload determination.
+6) Train multiple agents.
+7) Compare results with [paper](https://people.csail.mit.edu/alizadeh/papers/deeprm-hotnets16.pdf).
 
 ## Input :
 
