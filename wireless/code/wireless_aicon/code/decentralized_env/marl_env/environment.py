@@ -5,7 +5,7 @@ import numpy as np
 import random
 
 from gym.spaces import Discrete, MultiDiscrete, Tuple, Box
-from decentralized_env.env.packet import Packet
+from decentralized_env.marl_env.packet import Packet
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 
 class WirelessEnv(MultiAgentEnv):

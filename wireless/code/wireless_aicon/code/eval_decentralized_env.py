@@ -8,8 +8,8 @@ from collections import defaultdict
 from ray.tune.registry import register_env
 
 
-from decentralized_env.env.environment import WirelessEnv
-from decentralized_env.env.customcallback import PacketDeliveredCountCallback
+from decentralized_env.marl_env.environment import WirelessEnv
+from decentralized_env.marl_env.customcallback import PacketDeliveredCountCallback
 
 
 packet_delivered = []
@@ -66,8 +66,8 @@ def setup_and_test(agent, eval_episodes):
     # Define configuration with hyperparam and training details
     config={
                     "log_level": "ERROR",
-                    "num_workers": 1,
-                    "num_cpus_for_driver": 1,
+                    "num_workers": 6,
+                    "num_cpus_for_driver": 4,
                     "num_cpus_per_worker": 2,
                     "num_gpus": 0,
                     "num_envs_per_worker": 1,

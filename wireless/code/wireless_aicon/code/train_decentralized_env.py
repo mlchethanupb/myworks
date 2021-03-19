@@ -11,8 +11,8 @@ from collections import defaultdict
 
 
 # Import environment definition
-from decentralized_env.env.environment import WirelessEnv
-from decentralized_env.env.customcallback import PacketDeliveredCountCallback
+from decentralized_env.marl_env.environment import WirelessEnv
+from decentralized_env.marl_env.customcallback import PacketDeliveredCountCallback
 
 # Driver code for training
 def setup_and_train():
@@ -151,7 +151,7 @@ def setup_and_train():
     agent.restore(checkpoints[0][0])
 
     packet_delivered = []
-    for itr in range(50000):
+    for itr in range(5000):
         episode_reward = 0
         done = {}
         obs = single_env.reset()
