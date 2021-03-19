@@ -88,7 +88,7 @@ def test_random_agent(graph,agent,eval_episodes):
                 #     print("Successfull transmission mean after ", itr," episodes:", np.mean(succ_trans))
                 #     print("Total transmission mean after ", itr," episodes:", np.mean(total_trans))
                 #     print("Total timesteps mean after ", itr," episodes:", np.mean(timesteps_list))
-                # break
+                break
 
     print("final packt delivered in % :", packet_delivered)
     print("final packt lost in % :", pac_lost)
