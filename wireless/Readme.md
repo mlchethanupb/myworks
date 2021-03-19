@@ -152,25 +152,25 @@ RL Variants are performing better than baseline variants as they are capable of 
 This section is to evaluate the performance of centralized and decentralized agents over increase in number of nodes.
 Increase in number of nodes increases state-space and action space for centralized agents compared to decentralized agents.
 The metric considered for evaluation of two agents is value function explained variation (VF-EV).
-<p align="center">
-<img src="images/vf_centralized.svg" alt="VF centralized" width="500"/>
-</p>
-
-<p align="center">
-<img src="images/vf_decentralized.svg" alt=" VF decentralized" width="500"/>
-</p>
 
 <p align="center">
 <img src="images/6_nodes.svg" alt="Network topology with 6 nodes" width="250"/> <img src="images/8_nodes.svg" alt="Network topology with 8 nodes" width="250"/> <img src="images/9_nodes.svg" alt="Network topology with 9 nodes" width="250"/>
 </p>
 
+The above graphs shows the different networks used to evaluate the behaviour of centralized and decentralized agent with increase in number of nodes.
 
+<p align="center">
+<img src="images/vf_centralized.svg" alt="Time steps taken to successfully transmit 15 packets" width="500"/>
+</p>
 
+Figure above shows the VF-EV for the centralized agent with 6(orange),8(gray) and 9(light blue) nodes. We can observe that with increase in number of nodes, time taken for convergence has also been increased. In figure, the orange line representing network with 6 nodes, value has converged around 4 million time-steps and 6 million in case of 9 nodes (light blue line).
 
+<p align="center">
+<img src="images/vf_decentralized.svg" alt="Time steps taken to successfully transmit 15 packets" width="500"/>
+</p>
 
-
-
-
+The graph above shows shows the VF-EV values for only one agent in the decentralized setup. As we can observe, behaviour of this agent has been converged well within in 1.5 million time-steps for all the networks. Also, there is only slight increase with increase in the number of nodes in network. 
+With these results we can infer that decentralized agents are easily scalable when compared to that of centralized agents.
 
 
 
