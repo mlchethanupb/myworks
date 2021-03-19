@@ -1,4 +1,4 @@
-# Wireless transmission in a network with multiple collison domains and defect nodes
+# Wireless transmission in a network with multiple collison domains and defect nodes with reinforcement learning
 
 **Advisor**: [Haitham Afifi](https://github.com/haithamafifi)
 
