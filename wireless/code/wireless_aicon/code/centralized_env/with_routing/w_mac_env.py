@@ -1,11 +1,12 @@
 import gym
-from gym.spaces import MultiDiscrete
+from gym.spaces import MultiDiscrete, Tuple, Box
 import networkx as nx
 import numpy as np
 import random
 import matplotlib.pyplot as plt
 import logging
 from centralized_env.with_routing.packet import Packet
+
 
 class W_MAC_Env(gym.Env):
     metadata = {'render.modes': ['human']}
@@ -17,14 +18,13 @@ class W_MAC_Env(gym.Env):
         self.total_nodes = len(self.graph.nodes())
         # nx.draw_networkx(self.graph)
 
-        """
         logging.basicConfig(
             filename='wmac.log',
             filemode='w',
             format='%(levelname)s:%(message)s',
             level=logging.DEBUG
         )
-        """
+
         logging.debug("___Init____")
         self.__initialize_rewards()
         self.__reset_stat_variables()
@@ -76,7 +76,7 @@ class W_MAC_Env(gym.Env):
                 no_transmit = False
 
         if isdone == False and no_transmit == True:
-            reward = self.COLLISION_REWARD * 0.1
+            reward = self.EMPTY_ACTION_REWARD
 
         if isdone == True:
             queue_empty = True
@@ -101,7 +101,6 @@ class W_MAC_Env(gym.Env):
 
     def render(self, mode='human'):
 
-        # @todo: Check for correctness - list is required
         nodes = self.node_in_domains
 
         for i in self.graph.nodes:
@@ -141,14 +140,15 @@ class W_MAC_Env(gym.Env):
 
     # --------------------------------------------------------------------------------------------
 
-    """ Create different constant variables used to reward the agent in different scenarios """
+    """ Create different constant variables used to reward the agent in different scenarios and queue-size """
 
     def __initialize_rewards(self):
         # Rewards
-        self.MAX_REWARD = 1  # (self.total_nodes)
-        self.COLLISION_REWARD = -1  # 10*self.total_nodes
-        self.ATTACK_NODE_REWARD = -1  # 15 * self.total_nodes
+        self.MAX_REWARD = 1
+        self.COLLISION_REWARD = -1
+        self.ATTACK_NODE_REWARD = -1
         self.QUEUE_SIZE = 5
+        self.EMPTY_ACTION_REWARD = -1
 
     # --------------------------------------------------------------------------------------------
 
@@ -161,8 +161,6 @@ class W_MAC_Env(gym.Env):
         self.counter = 0
         self.total_transmission = 0
         self.succ_transmission = 0
-        self.hop_count_list = []
-        self.hop_count_list.clear()
 
     # --------------------------------------------------------------------------------------------
 
@@ -179,7 +177,7 @@ class W_MAC_Env(gym.Env):
     Randomly assign nodes as attack nodes
 
     self.attack_nodes - "List" of attack nodes
-  """
+    """
 
     def __reset_attack_nodes(self):
 
@@ -193,23 +191,22 @@ class W_MAC_Env(gym.Env):
             self.attack_nodes.append(a_node)
 
         logging.info("self.attack_nodes: %s", self.attack_nodes)
-        
 
     # --------------------------------------------------------------------------------------------
 
     """  
-   Read the network graph of the experiment and obtain the following values ###
+    Read the network graph of the experiment and obtain the following values ###
   
-   1. self.collision_domain_elems -- Different collosion domains and elements in the 
+    1. self.collision_domain_elems -- Different collosion domains and elements in the 
       (type - Dictionary)            respective collision domain
 
-   2. self.node_in_domains -- Each node as keys and in values the respective 
+    2. self.node_in_domains -- Each node as keys and in values the respective 
       (type - Dictionary)     collision domain they belong to 
 
-   3. self.node_action_list -- Each node as keys and repective valid next hops as values.
+    3. self.node_action_list -- Each node as keys and repective valid next hops as values.
       (type - Dictionary)      Used mainly to define action space and map the recieved actions 
                                from agent to respective node. 
-  """
+    """
 
     def __read_graph_data(self):
 
@@ -284,7 +281,7 @@ class W_MAC_Env(gym.Env):
         logging.debug("self.collision_domain_elems: %s",
                       self.collision_domain_elems)
         print("self.collision_domain_elems: %s",
-                      self.collision_domain_elems)
+              self.collision_domain_elems)
         # Find all the domains a node belong too.
         self.node_in_domains = {}
         for key, value in self.collision_domain_elems.items():
@@ -330,12 +327,16 @@ class W_MAC_Env(gym.Env):
         action_space = []
         for node in self.graph.nodes:
             action_space.append(len(self.node_action_list[node]))
-        self.action_space = MultiDiscrete(action_space)
+        self.action_space = spaces.MultiDiscrete(action_space)
 
         # Creating observation space
         observation_space = []
         for i in range(self.total_nodes):
             observation_space.append(self.total_nodes+1)
+
+        for i in range(self.total_nodes):
+            observation_space.append(self.QUEUE_SIZE * (self.total_nodes - 1))
+
         for i in range(len(self.attack_nodes)):
             observation_space.append(self.total_nodes)
         self.observation_space = MultiDiscrete(observation_space)
@@ -390,6 +391,9 @@ class W_MAC_Env(gym.Env):
                 next_state.append(node_queue[len(node_queue)-1].dest)
             else:
                 next_state.append(self.total_nodes)
+
+        for node in self.graph.nodes:
+            next_state.append(len(self.queues[node]))
 
         for node in self.attack_nodes:
             next_state.append(node)
@@ -457,7 +461,6 @@ class W_MAC_Env(gym.Env):
     def get_packet_lost(self):
         return self.packet_lost
 
-    
     # --------------------------------------------------------------------------------------------
 
     """
@@ -470,7 +473,6 @@ class W_MAC_Env(gym.Env):
     def get_total_transmission(self):
         return self.total_transmission
 
-
     # --------------------------------------------------------------------------------------------
 
     """
@@ -481,7 +483,7 @@ class W_MAC_Env(gym.Env):
     """
 
     def get_succ_transmission(self):
-        return self.succ_transmission    
+        return self.succ_transmission
 
     # --------------------------------------------------------------------------------------------
 
@@ -495,18 +497,6 @@ class W_MAC_Env(gym.Env):
     def get_packet_delivered(self):
         return self.packet_delivered
 
-    # --------------------------------------------------------------------------------------------
-
-    """
-    Function to retrieve average hopcount.
-
-    Returns - Integer
-
-    """
-
-    def get_avg_hopcount(self):
-        return np.mean(self.hop_count_list)
-    
     # --------------------------------------------------------------------------------------------
 
     """
@@ -583,8 +573,6 @@ class W_MAC_Env(gym.Env):
         # reward2 = 0
         reward = 0
 
-       
-
         # Reset visualization variables
         self.__reset_visualization_variables()
 
@@ -636,8 +624,7 @@ class W_MAC_Env(gym.Env):
                     # Pop the packet from the queue
                     packet_to_send = queue.pop()
                     self.total_transmission += 1
-            
-        
+
                     self.__vis_update_src_nxthop(node, nxt_hop)
 
                     # Find which domain the next hop belongs, so that interference can be checked in that collision domain.
@@ -666,7 +653,7 @@ class W_MAC_Env(gym.Env):
                         logging.debug(
                             "actions: %s, valid_action_sublist: %s", actions, valid_act_sublist)
                         self.collision_occurred = True
-                        
+
                         break
 
                     elif (self.__hidden_terminal_problem(actions, node, domain_key, qs_list)):
@@ -679,7 +666,7 @@ class W_MAC_Env(gym.Env):
                         logging.debug(
                             "actions: %s, valid_action_sublist: %s", actions, valid_act_sublist)
                         self.collision_occurred = True
-                        
+
                         break
 
                     else:
@@ -692,9 +679,8 @@ class W_MAC_Env(gym.Env):
                                 node, packet_to_send.dest)
 
                             self.packet_delivered += 1
-                            self.hop_count_list.append(packet_to_send.get_hop_count()+1)
                             reward += (self.MAX_REWARD)
-                            
+
                             self.succ_transmission += 1
 
                         else:
@@ -706,7 +692,7 @@ class W_MAC_Env(gym.Env):
                             # successful transmission, add the packet to the queue.
                             packet_to_send.update_hop_count()
                             self.queues[nxt_hop].insert(0, packet_to_send)
-                            
+
                             self.succ_transmission += 1
 
                 else:
