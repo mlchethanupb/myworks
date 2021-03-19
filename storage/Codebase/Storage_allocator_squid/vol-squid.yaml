@@ -1,0 +1,10 @@
+apiVersion: storage.k8s.io/v1beta1
+kind: StorageClass
+metadata:
+  name: squid03
+provisioner: kubernetes.io/glusterfs
+parameters:
+  resturl: "http://10.36.0.1:8080"
+  restuser: "admin"
+  restuserkey: "My Secret"
+allowVolumeExpansion: true
