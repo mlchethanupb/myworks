@@ -1,1 +1,0 @@
-This CDU runs the Prometheus time series database.
