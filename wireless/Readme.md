@@ -152,7 +152,13 @@ RL Variants are performing better than baseline variants as they are capable of 
 This section is to evaluate the performance of centralized and decentralized agents over increase in number of nodes.
 Increase in number of nodes increases state-space and action space for centralized agents compared to decentralized agents.
 The metric considered for evaluation of two agents is value function explained variation (VF-EV).
+<p align="center">
+<img src="images/vf_centralized.svg" alt="Time steps taken to successfully transmit 15 packets" width="500"/>
+</p>
 
+<p align="center">
+<img src="images/vf_decentralized.svg" alt="Time steps taken to successfully transmit 15 packets" width="500"/>
+</p>
 
 
 
