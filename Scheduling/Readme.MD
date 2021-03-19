@@ -95,7 +95,7 @@ clearly indicate that the trained agents performed better than that of heuristic
 ## Phase 2 -- Enhancements 
 
 1) Performance improvements using raytune with diff parameters for both the environment.
-2) Comparing discrete environment Vs multi discrete environment.
+2) Comparing discrete environment Vs multi-binary environment.
 3) Evaluate Performance subjected to varying load.
 4) Enhanced Workload determination.
 5) Train Multiple agents.
