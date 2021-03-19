@@ -29,4 +29,5 @@ representation of the observation space. Summarized backlog information also add
 
 *For a detailed overview [Employing_Reinforcement_Learning_Algorithms_to_solve_Cluster_Scheduling_Problem](https://github.com/CN-UPB/pg-aicon/blob/master/Scheduling/documentation/Employing_Reinforcement_Learning_Algorithms_to_solve_Cluster_Scheduling_Problem.pdf) report can be referred.*
 
-*Execution steps are specified in [MakeFile](https://github.com/CN-UPB/pg-aicon/blob/master/Scheduling/src/Phase2/Readme.MD).*
+*Execution steps are specified in (https://github.com/CN-UPB/pg-aicon/blob/master/Scheduling/src/Phase1/Readme.MD) for Phase - 1 
+and (https://github.com/CN-UPB/pg-aicon/blob/master/Scheduling/src/Phase2/Readme.MD) for Phase - 2.*
