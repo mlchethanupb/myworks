@@ -55,9 +55,9 @@ We have implemented three different RL based solution approaches
 ## Reward
 
 ##### Centralized and Decentralized RL agent with routing
-* Successfull packet transmission = 1, Packet loss due to defect node, hidden terminal problem or collision reward is -1. Packet travelling via multi-hop path reward is -(0.1 × hopcounts). If an episode terminates even though queues at any node in the network has packets to transmit,then reward is = -(Number of nodes × 100 ). If all the nodes are idle reward = -1
+* Successfull packet transmission = 1, Packet loss due to defect node, hidden terminal problem or collision reward is -1. Packet travelling via multi-hop path reward is -(0.1 × hopcounts). If an episode terminates even though queues at any node in the network has packets to transmit, then reward is = -(Number of nodes × 100 ). If all the nodes are idle reward = -1
 
-Reward for centralized RL agent with no routing is similar except the reward due to defect node. As next-hop in this approach will not have defect node.
+Reward for centralized RL agent with no routing is similar except the negative reward due to defect node. As next-hop in this approach will not have defect node.
 
 ## Environment Setup
 
