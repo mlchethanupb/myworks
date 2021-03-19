@@ -9,7 +9,7 @@ from ray.tune.registry import register_env
 from collections import defaultdict
 
 from centralized_env.with_routing.w_mac_env import W_MAC_Env
-from decentralized_env.env.environment import WirelessEnv
+from decentralized_env.marl_env.environment import WirelessEnv
 
 
 
@@ -18,18 +18,15 @@ parser.add_argument("--run", type=str, default="PPO")
 parser.add_argument("--torch", action="store_true")
 parser.add_argument("--stop_timesteps", type=int, default=500000)
 parser.add_argument('--graph', type=str, nargs='?', const=1, default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
-#[ (0,1), (0,2), (0,3), (1,2), (1,3), (2,3), (2,4), (3,4), (5,2), (5,3), (5,4)],
-"""
-    [ (0,1), (0,2), (0,3), (0,4), (1,2), (1,3), (1,4), (2,3), (2,4), 
-      (3,4), (3,5), (3,6), (3,7), (4,5), (4,6), (4,7), 
-      (5,6), (5,7), (6,7) ],
-"""
-all_graphs = [ 
 
-    [  (0,1), (0,2), (0,3), (0,4), (0,5), (1,2), (1,3), (1,4), (1,5),
-       (2,3), (2,4), (2,5), (3,4), (3,5), (3,6), (3,7), (3,8),
-       (4,5), (4,6), (4,7), (4,8), (5,6), (5,7), (5,8), (6,7),
-       (6,8), (7,8) ]
+
+all_graphs = [
+    [ (0,1), (0,2), (0,3), (1,2), (1,3), (2,3), (2,4), (3,4), (5,2), (5,3), (5,4)],
+    [ (0,1), (0,2), (0,3), (0,4), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4), (3,5),
+      (3,6), (3,7), (4,5), (4,6), (4,7), (5,6), (5,7), (6,7) ],
+    [ (0,1), (0,2), (0,3), (0,4), (0,5), (1,2), (1,3), (1,4), (1,5), (2,3),(2,4),
+      (2,5), (3,4), (3,5), (3,6), (3,7), (3,8), (4,5), (4,6), (4,7), (4,8), (5,6),
+      (5,7), (5,8), (6,7), (6,8), (7,8) ]
 ]
 
 def create_graph(graph_list):
@@ -45,7 +42,6 @@ def create_graph(graph_list):
         for vv in v:
             G.add_edge(k,vv)
 
-    #nx.draw_networkx(G)
     return G
 
 def get_centralized_config(graph: nx.Graph):
@@ -115,7 +111,7 @@ def get_exp_dict(config, centralized_flag):
 
         total_timesteps = args.stop_timesteps 
         if centralized_flag == False:
-            total_timesteps = args.stop_timesteps
+            total_timesteps = args.stop_timesteps * 1.2
         
         exp_dict = {
             'name': exp_name,
@@ -142,10 +138,11 @@ def train_model(exp_dict):
 if __name__ == "__main__":
 
     args = parser.parse_args()
-    """
+
     for list_itr in all_graphs:
         graph = create_graph(list_itr)
-    
+        nx.draw_networkx(graph)
+        plt.show()
 
     for list_itr in all_graphs:
         ray.init()
@@ -154,7 +151,7 @@ if __name__ == "__main__":
         exp_dict = get_exp_dict(config, True)
         train_model(exp_dict)
         ray.shutdown()
-    """
+
     for list_itr in all_graphs:
         ray.init()
         graph = create_graph(list_itr)
