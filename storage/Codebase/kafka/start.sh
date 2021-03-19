@@ -9,3 +9,4 @@ printf "\ninter.broker.listener.name=EXTERNAL" >> /kafka_2.12-2.2.0/config/serve
 nohup bin/zookeeper-server-start.sh config/zookeeper.properties </dev/null >/dev/null 2>&1 &
 zookeeperpid=$!
 bin/kafka-server-start.sh config/server.properties
+rm -rf /tmp/kafka-logs

@@ -11,8 +11,10 @@ import matplotlib.pyplot as plt
 from IPython.display import clear_output
 import time
 from collections import defaultdict
-from Routing_Table import Routing_info
-from Updated_RTable import Updated_Routing_info
+#from Routing_Table import Routing_info
+#from Updated_RTable import Updated_Routing_info
+from w_mac.baseline.Routing_Table import Routing_info
+from w_mac.baseline.Updated_RTable import Updated_Routing_info
 
 """Baseline routing protocol DSDV"""
 
@@ -39,11 +41,13 @@ class dsdv_wqueue():
         self.queue_size = queue_size
         self.destinations_list = self.destinations_list_with_anode[:-1]
 
+
         self.routing_table = routing_table
         self.actions = self.tdma()
         self.valid_action_list = self.map_actions()
 
-        return self.valid_action_list
+
+        #return self.valid_action_list
 
     def create_routing_table(self, attack_node):
         
@@ -123,6 +127,12 @@ class dsdv_wqueue():
         self.queue_length()
 
     def update_table(self):
+
+        # print("if any of the  not empty calling update table function - 5")
+
+        # while (self.queue_empty):
+        # print("queues are not empty")
+
         
         for self.src_node in self.graph.nodes():
             if self.src_node not in self.attack_nodes:
@@ -210,8 +220,9 @@ class dsdv_wqueue():
 
         self.actions = list(self.graph.nodes)
         # print("actions before returning", self.actions)
-        max_queue_size = max(self.queue_size)
-        if max_queue_size > 0:
+        self.max_queue_size = max(self.queue_size)
+
+        if self.max_queue_size > 0:
             index_of_large_queue = np.argmax(self.queue_size)
             # print("index_of_large_queue", index_of_large_queue)
             node_with_max_queue = self.actions[index_of_large_queue]

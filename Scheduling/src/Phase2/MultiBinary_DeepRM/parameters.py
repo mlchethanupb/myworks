@@ -1,6 +1,6 @@
 # File for parameters.
 import job_distribution
-from stable_baselines import A2C, PPO2, DQN, ACKTR
+from stable_baselines import A2C, PPO2, ACKTR
 import math
 
 
@@ -40,8 +40,7 @@ class Parameters:
         assert self.backlog_size % self.time_horizon == 0
         # penalty for delaying things in the current work screen
         self.penalty = -1
-        # supervised learning mimic policy
-        self.verbose = 1
+        self.verbose = 0 # set to 1 for printing actions taken wrt each timestep
         self.batch_size = 10
         # random number seed
         self.random_seed = 42
@@ -84,17 +83,13 @@ class Parameters:
         self.rms_eps = 1e-9           # for rms prop
 
         self.unseen = False  # change random seed to generate unseen example
-        # Job objective
-        self.objective_slowdown = "Job_Slowdown"
+        
+        self.dist = job_distribution.Dist(self.num_res, self.max_job_size, self.max_job_len)
 
-        self.objective_Ctime = "Job_Completion_Time"
-
-        self.objective_disc = self.objective_slowdown
-        self.dist = job_distribution.Dist(
-            self.num_res, self.max_job_size, self.max_job_len)
+        # MB
         self.Hongzimao = {'agent': None, 'save_path': None,
-                          'log_dir': None, 'color': 'Purple', 'yerrcolor': 'Violet', 'marker': "P", 'title': 'Hongzimao agent'}    
-        # MB    
+                          'log_dir': None, 'color': 'Purple', 'yerrcolor': 'Violet', 'marker': "P", 'title': 'DeepRM'}    
+            
         self.A2C_Ctime = {'agent': A2C, 'save_path': 'job_scheduling_A2C_Ctime',
                           'log_dir': "workspace/MultiBinary/tensor_A2C_Ctime/", 'color': 'Red', 'yerrcolor': 'Brown', 'title': 'A2C Ctime agent'}
         self.A2C_Slowdown = {'agent': A2C, 'save_path': 'job_scheduling_A2C_Slowdown',
@@ -114,6 +109,7 @@ class Parameters:
                     'color': 'pink', 'yerrcolor': 'Hotpink', 'marker': "o", 'title': 'SJF agent'}
         self.Packer = {'agent': None, 'save_path': None, 'log_dir': None,
                        'color': 'lime', 'yerrcolor': 'teal', 'marker': "^", 'title': 'Packer agent'}
+
         self.objective = self.A2C_Slowdown
 
         self.figure_extension = '.png'

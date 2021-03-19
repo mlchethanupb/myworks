@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 from matplotlib.cbook import flatten
 import parameters
 import job_distribution
-from stable_baselines import PPO2, A2C, ACKTR
+from stable_baselines import PPO2, A2C
 from stable_baselines.common import make_vec_env
 import other_agents
 from statistics import mean
+
 
 # labeling the bar graph
 def autolabel(rects, deviation):
@@ -28,6 +29,7 @@ def run_episodes(model, pa, env):
     withheld_jobs = []
     allocated_jobs = []
     completion_time_list = []
+    print("Executing the ",pa.objective, " agent for the load ", pa.cluster_load)
     for episode in range(pa.num_episode):
         cumulated_episode_reward = 0
         cumulated_job_slowdown = []
@@ -45,8 +47,7 @@ def run_episodes(model, pa, env):
                     elif pa.objective == pa.SJF:
                         act = other_agents.get_sjf_action(env.machine, env.job_slot)
                     elif pa.objective == pa.Packer:
-                        act = other_agents.get_packer_action(
-                            env.machine, env.job_slot)
+                        act = other_agents.get_packer_action(env.machine, env.job_slot)
                     action = []
                     for i in range(len(env.job_slot.slot)):
                         if act == i:
@@ -149,4 +150,4 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
     fig.savefig('workspace/MultiBinary/Performances.png')
-    print( "Job rate:", pa.new_job_rate, ",Simulation length: ", pa.simu_len, ", Cluster load: ", pa.cluster_load)
+    print(",Simulation length: ", pa.simu_len, ", Cluster load: ", pa.cluster_load)
