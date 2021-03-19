@@ -205,13 +205,13 @@ if __name__ == '__main__':
     parser.add_argument('--agent', type=str, nargs='?', const=1, default='A2C',
                         help='Whether to use A2C, PPO2, DQN or TRPO')
     parser.add_argument('--total_train_timesteps', type=int,  nargs='?',
-                        const=1, default=2500, help='Number of training steps for the agent')
+                        const=1, default=25000, help='Number of training steps for the agent')
     parser.add_argument('--report_interval', type=int, nargs='?', const=1, default=1000,
                         help='Interval between reportings from callback (in timesteps)')
     parser.add_argument('--ray_eval_episodes', type=int, nargs='?', const=1, default=1,
                         help='Maximum number of episodes for final (deterministic) evaluation')
     parser.add_argument('--ray_tune_samples', type=int, nargs='?', const=1,
-                        default=12, help='Number of trials for hyperparameter optimization')
+                        default=100, help='Number of trials for hyperparameter optimization')
     parser.add_argument('--ray_cpus', type=int, nargs='?', const=1, default=12,
                         help='Number of cpus ray tune will use for the optimization')
     
