@@ -327,7 +327,7 @@ class W_MAC_Env(gym.Env):
         action_space = []
         for node in self.graph.nodes:
             action_space.append(len(self.node_action_list[node]))
-        self.action_space = spaces.MultiDiscrete(action_space)
+        self.action_space = MultiDiscrete(action_space)
 
         # Creating observation space
         observation_space = []
