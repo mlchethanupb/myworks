@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (f63a961c)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: digitaltwin
+  name: digitaltwin
+spec:
+  ports:
+  - name: "4840"
+    port: 4840
+    targetPort: 4840
+  selector:
+    io.kompose.service: digitaltwin
+  type: LoadBalancer
+status:
+  loadBalancer: {}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (f63a961c)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: digitaltwin
+  name: digitaltwin
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.19.0 (f63a961c)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: digitaltwin
+    spec:
+      nodeName: pg-aicon-storage-2
+      containers:
+      - env:
+        - name: DT_WEB_LISTEN
+          value: 0.0.0.0
+        - name: DT_WEB_PORT
+          value: "15001"
+        - name: OPCUA_HOST
+          value: 0.0.0.0
+        - name: OPCUA_PORT
+          value: "4840"
+        image: digitaltwin:dev
+        name: digitaltwin
+        ports:
+        - containerPort: 4840
+        resources: {}
+      restartPolicy: Always
+status: {}
