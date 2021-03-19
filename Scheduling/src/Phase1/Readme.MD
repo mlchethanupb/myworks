@@ -1,6 +1,6 @@
 # How to execute the project DeepRL.
 
-This readme will help helps an ordinary user(non developer) to execute and get the results with a single command.
+This readme will help helps an ordinary user (non developer) to execute and get the results with a single command.
 
 # Makefile commands
 
@@ -25,34 +25,19 @@ This will install raytune and required prerequisties.
 This will help clean the cache in the project.
 
 
-After completing the pre-setup using the above commands, you can execute the following commands to get the results of the discrete action space.
-
-
-### `make run-script`
-
-This command will run the DeepRl script for generating required graphs.
+After completing the pre-setup using the above commands, you can execute the following commands to train discrete environment agents.
 
 ### `make run-stableBaseLine_Models_Training`
 
 This command will run the training for the DeepRl agents.
 
-### `make run-raytune`
 
-This command will run the hyperparameter optimization.
+On the other hand, once the pre-setup is complete, the following commands can be executed to train Multi-Binary environment agents.
 
-### `make loadvariation`
-
-This command will generate the graphs for loadvariations.
-
-
-On the other hand, once the pre-setup is complete, the following commands can be executed to generate results for multiple binary action space.
-
-
-We need to train the agents and save their respective models by running the command mentioned below,
 
 ### `make train-models`
 
-Once the agents is trained , their models will be saved in zip files.For evaluating the performance of various agents and plotting it in bar graph run,
+Once the agents is trained , their models will be saved in zip files. Below commands are used to generate all the results.
 
 ### `make run-script `
 
@@ -66,7 +51,9 @@ For different job lengths, we check behavior to see if all jobs are the same by 
 
 For different job lengths, we compare the slowdown by following command,
 
-### `make run-job-tradeoff`
+### `make run-raytune`
+
+This command will run the hyperparameter optimization for both environments.
 
 
 Happy Coding :)
