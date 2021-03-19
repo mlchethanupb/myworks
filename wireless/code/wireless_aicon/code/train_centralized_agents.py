@@ -1,5 +1,4 @@
 import os
-import matplotlib as plt
 import networkx as nx
 import tensorflow as tf
 import argparse
@@ -16,12 +15,8 @@ import gym
 import ast
 import numpy as np
 from collections import defaultdict
-import w_mac
-from DSDV_Agent import dsdv_wqueue
-from DSDV_probability import dsdv_probability
-from DSDV_RoundRobinTDMA import dsdv_RRTDMA
-from w_mac.envs.w_mac_env import W_MAC_Env
-from MAC_RL_env import MAC_RL
+from centralized_env.with_routing.w_mac_env import W_MAC_Env
+from centralized_env.without_routing.MAC_RL_env import MAC_RL
 
 
 if __name__ == '__main__':
@@ -63,10 +58,10 @@ if __name__ == '__main__':
             G.add_edge(k, vv)
     nx.draw_networkx(G)
 
-    env = gym.make('wmac-graph-v0', graph=G)
-    env_MAC_RL = MAC_RL(G)
+    env = W_MAC_Env(G) # Environment for routing and MAC
+    env_MAC_RL = MAC_RL(G) #Environment only for MAC
 
-    # check_env(env)
+    
 
     class TensorboardCallback(BaseCallback):
         """
