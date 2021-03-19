@@ -19,6 +19,7 @@ total_trans = []
 timesteps_list = []
 ts_pd_list = []
 
+
 def time_steps():
     
     return timesteps_list
@@ -36,9 +37,10 @@ def succ_transmission():
 def ts_pd():
     return ts_pd_list
 
-def setup_and_test(agent, eval_episodes):
-
-    #checkpoint_path = "/home/aicon/pavitra/Project_AICON/pg_aicon_new/pg-aicon/wireless/code/phase_two/wmac_marl/logs/wmac_marl/PPO_WirelessEnv_fa061_00000_0_num_sgd_iter=6_2021-02-03_23-34-28/checkpoint_4167/checkpoint-4167"
+def setup_and_test(graph, agent, eval_episodes):
+    G = graph
+    
+    checkpoint_path = "./saved_models/checkpoint_4167/checkpoint-4167"
 
     # Create a single environment and register it
     def env_creator(_):
@@ -166,14 +168,14 @@ def setup_and_test(agent, eval_episodes):
                 succ_trans.append(total_succ_trans_percentage)
                 total_trans.append(total_transmissions)
                 
-                if itr % 5000 == 0:
-                    print("packet delivered mean after ", itr," episodes:", np.mean(packet_delivered))
-                    print("packet lost mean after ", itr," episodes:", np.mean(pac_lost))
-                    print("Successfull transmission mean after ", itr," episodes:", np.mean(succ_trans))
-                    print("Total transmission mean after ", itr," episodes:", np.mean(total_trans))
-                    print("Total timesteps mean after ", itr," episodes:", np.mean(timesteps_list))
+                # if itr % 5000 == 0:
+                #     print("packet delivered mean after ", itr," episodes:", np.mean(packet_delivered))
+                #     print("packet lost mean after ", itr," episodes:", np.mean(pac_lost))
+                #     print("Successfull transmission mean after ", itr," episodes:", np.mean(succ_trans))
+                #     print("Total transmission mean after ", itr," episodes:", np.mean(total_trans))
+                #     print("Total timesteps mean after ", itr," episodes:", np.mean(timesteps_list))
                     
-                break
+                # break
     print("final packt delivered MARL in % :", packet_delivered)
     print("final packt lost in MARL % :", pac_lost)
     print("final successful transmission MARL in % :", succ_trans)
@@ -189,14 +191,11 @@ if __name__=='__main__':
                         default='MARL', help='agent to test MARL')
     parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=50000,
                         help='Maximum number of episodes for final (deterministic) evaluation')
-    parser.add_argument('--checkpoint', type=str, nargs='?', const=1,
-                        default='./saved_models/checkpoint_4167/checkpoint-4167', help='Checkpoint of the saved model')
     parser.add_argument('--graph', type=str, nargs='?', const=1, default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
 
     args = parser.parse_args()
     agent = args.agent  
     eval_episodes = args.eval_episodes
-    checkpoint_path = args.checkpoint
 
     d = defaultdict(list)
     graph_data = args.graph
@@ -213,4 +212,4 @@ if __name__=='__main__':
         
     #nx.draw_networkx(G)
 
-    setup_and_test(agent, eval_episodes)
+    setup_and_test(G, agent, eval_episodes)

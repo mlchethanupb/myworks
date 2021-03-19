@@ -31,9 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('--agent', type=str, nargs='?', const=1,
                         default='PPO2_MAC_routing', help='Whether to use A2C_MAC_routing, PPO2_MAC_routing, PPO2_MAC')
     parser.add_argument('--total_train_timesteps', type=int,  nargs='?',
-                        const=1, default=15, help='Number of training steps for the agent')
-    parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=50000,
-                        help='Maximum number of episodes for final (deterministic) evaluation')
+                        const=1, default=1500000, help='Number of training steps for the agent')
     parser.add_argument('--graph', type=str, nargs='?', const=1,
                         default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
 
@@ -44,7 +42,7 @@ if __name__ == '__main__':
     # print("data of graph", data)
 
     total_train_timesteps = args.total_train_timesteps
-    eval_episodes = args.eval_episodes
+   
 
     # Create a network graph
     for node, dest in data:

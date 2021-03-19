@@ -22,6 +22,22 @@ succ_trans_list = []
 total_pkt_sent_list = []
 ts_pd_list = []
 
+
+
+d = defaultdict(list)
+data = [(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]
+
+
+for node, dest in data:
+    d[node].append(dest)
+
+G = nx.Graph()
+for k, v in d.items():
+    for vv in v:
+        G.add_edge(k, vv)
+
+
+
 def reset_lists():
     # reset lists
     timesteps_list.clear()
@@ -33,7 +49,13 @@ def reset_lists():
     ts_pd_list.clear()
 
 "Evaluate the performance of all the agents"
-def testing_agent(agent, eval_episodes):
+def testing_agent(graph, agent, eval_episodes):
+    G= graph
+    env = W_MAC_Env(G)
+    dsdv_wqueue_env = dsdv_wqueue(env, G)
+    dsdv_RRTDMA_env = dsdv_RRTDMA(env, G)
+    env_RL_MAC = MAC_RL(G)
+
     reset_lists()
 
     agent = agent
@@ -53,7 +75,7 @@ def testing_agent(agent, eval_episodes):
             done = False
             while done != True:
                 timestep += 1
-                action, _states = model.predict(obs)
+                action, _states = model.predict(obs, deterministic=True)
                 obs, rewards, done, info = env.step(action)
                 pkt_delivered_count = env.get_packet_delivered()
                 if pkt_delivered_count > pkt_del_old and pkt_delivered_count <= 15:
@@ -76,7 +98,7 @@ def testing_agent(agent, eval_episodes):
             done = False
             while done != True:
                 timestep += 1
-                action, _states = model.predict(obs)
+                action, _states = model.predict(obs, deterministic=True)
                 obs, rewards, done, info = env_RL_MAC.step(action)
                 pkt_delivered_count = env_RL_MAC.get_packet_delivered()
                 if pkt_delivered_count > pkt_del_old and pkt_delivered_count <= 15:
@@ -203,9 +225,7 @@ if __name__ == '__main__':
         description='Transmitting packets in wireless network.')
     parser.add_argument('--agent', type=str, nargs='?', const=1,
                         default='PPO2_MAC_routing', help='Whether to use PPO2_MAC_routing, A2C_MAC_routing, PPO2_MAC, dsdv_wqueue, dsdv_RRTDMA')
-    parser.add_argument('--total_train_timesteps', type=int,  nargs='?',
-                        const=1, default=1500000, help='Number of training steps for the agent')
-    parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=5,
+    parser.add_argument('--eval_episodes', type=int,  nargs='?', const=1, default=5000,
                         help='Maximum number of episodes for final (deterministic) evaluation')
     parser.add_argument('--graph', type=str, nargs='?', const=1,
                         default='[(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]', help='Pass a networkx graph or \'default\'')
@@ -216,7 +236,6 @@ if __name__ == '__main__':
     graph_data = ast.literal_eval(graph_data)
     print("data of graph", graph_data)
 
-    total_train_timesteps = args.total_train_timesteps
     eval_episodes = args.eval_episodes
 
     d = defaultdict(list)
@@ -229,11 +248,6 @@ if __name__ == '__main__':
     for k, v in d.items():
         for vv in v:
             G.add_edge(k, vv)
-    # nx.draw_networkx(G)
 
-    env = W_MAC_Env(G)
-    dsdv_wqueue_env = dsdv_wqueue(env, G)
-    dsdv_RRTDMA_env = dsdv_RRTDMA(env, G)
-    env_RL_MAC = MAC_RL(G)
 
-    testing_agent(agent, eval_episodes)
+    testing_agent(G, agent, eval_episodes)

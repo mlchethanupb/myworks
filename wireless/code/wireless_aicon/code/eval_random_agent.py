@@ -3,7 +3,7 @@ import argparse
 import numpy as np
 import networkx as nx
 from collections import defaultdict
-from decentralized_env.env.environment import WirelessEnv
+from decentralized_env.marl_env.environment import WirelessEnv
 
 packet_delivered = []
 pac_lost = []
@@ -28,7 +28,7 @@ def succ_transmission():
 def ts_pd():
     return ts_pd_list
 
-def get_actions():
+def get_actions(env):
     action_dict = {}
     for i in range(env.num_agents):
         act_space = env.get_agent_action_space(i)
@@ -44,7 +44,10 @@ def reset_lists():
     timesteps_list.clear()
     ts_pd_list.clear()
 
-def test_random_agent(agent,eval_episodes):
+def test_random_agent(graph,agent,eval_episodes):
+    G= graph
+    env = WirelessEnv(G, False)
+    num_agents = env.num_agents
     print("entered random agent")
     reset_lists()
     for itr in range(eval_episodes):
@@ -55,7 +58,7 @@ def test_random_agent(agent,eval_episodes):
         pkt_del_old = 0
         while (1):
             timesteps += 1
-            obs, reward, done, info = env.step(get_actions())
+            obs, reward, done, info = env.step(get_actions(env))
             pkt_delivered_count = env.get_packet_delivered_count()
             if pkt_delivered_count > pkt_del_old and pkt_delivered_count <= 15:
                 pkt_del_old = pkt_delivered_count
@@ -79,13 +82,13 @@ def test_random_agent(agent,eval_episodes):
                 succ_trans.append(total_succ_trans_percentage)
                 total_trans.append(total_transmissions)
 
-                if itr % 5000 == 0:
-                    print("packet delivered mean after ", itr," episodes:", np.mean(packet_delivered))
-                    print("packet lost mean after ", itr," episodes:", np.mean(pac_lost))
-                    print("Successfull transmission mean after ", itr," episodes:", np.mean(succ_trans))
-                    print("Total transmission mean after ", itr," episodes:", np.mean(total_trans))
-                    print("Total timesteps mean after ", itr," episodes:", np.mean(timesteps_list))
-                break
+                # if itr % 5000 == 0:
+                #     print("packet delivered mean after ", itr," episodes:", np.mean(packet_delivered))
+                #     print("packet lost mean after ", itr," episodes:", np.mean(pac_lost))
+                #     print("Successfull transmission mean after ", itr," episodes:", np.mean(succ_trans))
+                #     print("Total transmission mean after ", itr," episodes:", np.mean(total_trans))
+                #     print("Total timesteps mean after ", itr," episodes:", np.mean(timesteps_list))
+                # break
 
     print("final packt delivered in % :", packet_delivered)
     print("final packt lost in % :", pac_lost)
@@ -119,9 +122,8 @@ if __name__=='__main__':
         for vv in v:
             G.add_edge(k,vv)
 
-    env = WirelessEnv(G, False)
-    num_agents = env.num_agents
 
-    test_random_agent(agent,eval_episodes)
+
+    test_random_agent(G, agent,eval_episodes)
 
 
