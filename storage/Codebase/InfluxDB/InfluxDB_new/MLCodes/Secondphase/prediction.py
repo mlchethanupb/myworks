@@ -30,16 +30,16 @@ import math
 # In[2]:
 
 
-def make_prediction(df,total_request, total_runtime):
+def make_prediction(df,count,total_runtime):
     regr1 = SVR(kernel = 'rbf',gamma=0.1, C=1e4)
     regr2 = SVR(kernel = 'rbf',gamma=0.1, C=1e4)
     S1= df.iloc[:,4:6].values
     t1 = df['influxdb_memstats_sys']
     #training first model to predict squid memory usage 
     regr1.fit(S1, t1)
-    predict1= [[total_request,total_runtime]]
+    predict1= [[count, total_runtime]]
     #df = df.append({'Request_Rate/(Min)': new_req_rate, 'Total_Time(s)':total_runt regressor1.fit(S1, t1)ime}, ignore_index=True)
-    Squid_mem=regr1.predict(predict1)
+    Influx_write=regr1.predict(predict1)
     
     #training second model to predict squid disk usage 
     S2= df.iloc[:,14:17].values
@@ -47,7 +47,7 @@ def make_prediction(df,total_request, total_runtime):
     
     regr2.fit(S2, t2)
     
-    predict2= [[Squid_mem,total_request,total_runtime]]
+    predict2= [[Influx_write]]
     
     influxdb_disk=int(regr2.predict(predict2)) / 1024
     return influxdb_disk
