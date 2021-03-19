@@ -174,8 +174,7 @@ def setup_and_test(graph, agent, eval_episodes):
                 #     print("Successfull transmission mean after ", itr," episodes:", np.mean(succ_trans))
                 #     print("Total transmission mean after ", itr," episodes:", np.mean(total_trans))
                 #     print("Total timesteps mean after ", itr," episodes:", np.mean(timesteps_list))
-                    
-                # break
+                break
     print("final packt delivered MARL in % :", packet_delivered)
     print("final packt lost in MARL % :", pac_lost)
     print("final successful transmission MARL in % :", succ_trans)
