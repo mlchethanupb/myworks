@@ -48,11 +48,7 @@ To measure the performance of trained RL agents, we have considered metrics such
 The performance of trained RL agents is compared with the baselines. The baselines which uses Destination Sequenced Distance Vector (DSDV) routing protocol and Time-Division Multiple Access (TDMA) MAC protocol. The baseline DSDV priority based round-robin allocates the time slot based on weight of the queue at each node and DSDV round-robin variant assigns the timeslot in round-robin fashion.
 
 
-### Successful Transmission Rate
-Capability of the agent to identify the collision-free time slot to transfer the packet.
-<p align="center">
-<img src="images/Successfull_Transmission_Final.svg" alt="Percentage of packet delivered to destination" width="500"/>
-</p>
+
 
 ### Packet Delivery Rate
 Transferring the packets from source to destination.
@@ -60,15 +56,24 @@ Transferring the packets from source to destination.
 <img src="images/Packet_Delivered_Final.svg" alt="Percentage of packet delivered to destination" width="500"/>
 </p>
 
+### Successful Transmission Rate
+Capability of the agent to identify the collision-free time slot to transfer the packet.
+<p align="center">
+<img src="images/Successfull_Transmission_Final.svg" alt="Percentage of successfull transmissionsn" width="500"/>
+</p>
+
 ### Time-steps for all packets
 Total time taken for the agent to transfer all the packets in the network to respective destinations. This metric includes
 the time steps for every transmission which can lead to packet loss or packet transmission to next-hop or to destination.
+<p align="center">
+<img src="images/Total_timesteps.svg" alt="Total time steps taken to transmit all the packets" width="500"/>
+</p>
 
 
 ### Time-steps for fixed packets delivery
 Total time taken for the agent to transfer fixed number of packets in the network to respective destinations. This metric includes only time steps for successful packet delivery.
 <p align="center">
-<img src="images/Timesteps_Fixed_PD.svg" alt="Percentage of packet delivered to destination" width="500"/>
+<img src="images/Timesteps_Fixed_PD.svg" alt="Time steps taken to successfully transmit 15 packets" width="500"/>
 </p>
 
 
