@@ -41,8 +41,9 @@ pip_files:
 	pip install numpy --upgrade	
 	pip install stable-baselines
 	pip install SQLAlchemy
-	pip install -e .
-	
+	cd $(prefix_discrete) ; pip install -e . 
+	cd $(prefix_multibinary) ; pip install -e.
+
 raytune:
 	pip install ax-platform 
 	pip install ray
@@ -93,37 +94,38 @@ run-job-tradeoff:
 # Discrete Environment 
 
 run-train:
-	python3 $(prefix_discrete)train.py
+	cd $(prefix_discrete) ; python3 train.py 
+	cd $(prefix_discrete) ; python3 train.py --objective=Job_Completion_Time
 
 run-raytune_discrete:
-	python3 $(prefix_discrete)raytune_discrete.py
+	cd $(prefix_discrete) ; python3 raytune_discrete.py
 
 run-load_Variation_json:
-	python3 $(prefix_discrete)load_Variation_json.py
+	cd $(prefix_discrete) ; python3 load_Variation_json.py
 
 run-load_Variation_Discrete:
-	python3 $(prefix_discrete)load_Variation_Discrete.py
+	cd $(prefix_discrete) ; python3 load_Variation_Discrete.py
 
 run-run:
-	python3 $(prefix_discrete)run.py
+	cd $(prefix_discrete) ; python3 run.py
 
 run-Withheld_Jobs_Discrete:
-	python3 $(prefix_discrete)Withheld_Jobs_Discrete.py
+	cd $(prefix_discrete) ; python3 Withheld_Jobs_Discrete.py
 
 run-job_generation:
-	python3 $(prefix_discrete)job_generation.py
+	cd $(prefix_discrete) ; python3 job_generation.py
 
 
 #Multibinary 
 
 run-Train_all:
-	python3 $(prefix_multibinary)Train_all.py
+	cd $(prefix_multibinary) ; python3 Train_all.py
 
 run-LoadVariation:
-	python3 $(prefix_multibinary)LoadVariation.py
+	cd $(prefix_multibinary) ; python3 LoadVariation.py
 
 run-Script:
-	python3 $(prefix_multibinary)Script.py
+	cd $(prefix_multibinary) ; python3 Script.py
 
 run-Withhold_Jobs:
-	python3 $(prefix_multibinary)Withhold_Jobs.py
+	cd $(prefix_multibinary) ; python3 Withhold_Jobs.py
