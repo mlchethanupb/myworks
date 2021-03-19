@@ -10,6 +10,7 @@ import time
 import json
 from datetime import timezone 
 import math
+import demand_prediction
 
 #Uploads Kafka and relevant pods initially
 
@@ -79,8 +80,6 @@ while check_loop<1:
     #If disk usage excceds threshhold, predict storage demand for a future time 
 
     if (int(s_limit)-current_usage<=270):  
-        import demand_prediction
- 
         demand=demand_prediction.storage_demand()
         demand=math.ceil(demand)
         demand=str(demand)+'Mi'
