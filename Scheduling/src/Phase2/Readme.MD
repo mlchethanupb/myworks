@@ -41,10 +41,6 @@ After completing the pre-setup using the above commands, you can execute the fol
 
 This command will train all the agents.
 
-### `make run-raytune_discrete`
-
-This command will tune the hyperparameters of the specified models.
-
 ### `make run-load_Variation_json`
 
 This command will generate the results for [DeepRM](https://people.csail.mit.edu/alizadeh/papers/deeprm-hotnets16.pdf) .
@@ -65,6 +61,9 @@ This command will generate the graph for Withheld Jobs ( performacne gain of tra
 
 This command will generate graph to help you understand how workload is calculated and how the jobs are generated.
 
+### `make run-raytune_discrete`
+
+This command will tune the hyperparameters of the specified models.
 
 ## Steps to perform for Multi-Binary Environment
 ### `make run-Train_all`
