@@ -1,1 +1,1 @@
-The final copy of the code is in wireless_aicon folder
+The final copy of the submission code is in wireless_aicon folder
