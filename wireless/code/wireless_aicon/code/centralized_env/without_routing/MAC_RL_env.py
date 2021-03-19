@@ -5,18 +5,16 @@ from gym.spaces import MultiDiscrete, Tuple, Box
 import networkx as nx
 import numpy as np
 import random
-import w_mac
-from packet_MAC_RL import Packet_MAC_RL
 import matplotlib.pyplot as plt
-from IPython.display import clear_output
-import time
 from collections import defaultdict
 import logging
-from stable_baselines import PPO2
-from Routing_Table import Routing_info
-from Updated_RTable import Updated_Routing_info
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import make_vec_env
+from stable_baselines import PPO2
+from centralized_env.without_routing.packet_MAC_RL import Packet_MAC_RL
+from centralized_env.without_routing.Routing_Table import Routing_info
+from centralized_env.without_routing.Updated_RTable import Updated_Routing_info
+
 
 
 class MAC_RL(gym.Env):

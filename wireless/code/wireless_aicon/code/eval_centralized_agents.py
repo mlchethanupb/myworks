@@ -8,21 +8,16 @@ from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import make_vec_env
 from stable_baselines import A2C, PPO2
 from stable_baselines.common.env_checker import check_env
-from IPython.display import clear_output
-import time
-from copy import deepcopy
-from ray import tune
 from stable_baselines.common.callbacks import BaseCallback
 import gym
 import ast
 import numpy as np
 from collections import defaultdict
-import w_mac
-from DSDV_Agent import dsdv_wqueue
-from DSDV_probability import dsdv_probability
-from DSDV_RoundRobinTDMA import dsdv_RRTDMA
-from w_mac.envs.w_mac_env import W_MAC_Env
-from MAC_RL_env import MAC_RL
+
+from centralized_env.baseline.DSDV_Priority_Based_RR import dsdv_wqueue
+from centralized_env.baseline.DSDV_RR import dsdv_RRTDMA
+from centralized_env.with_routing.w_mac_env import W_MAC_Env
+from centralized_env.without_routing.MAC_RL_env import MAC_RL
 
 
 timesteps_list = []
@@ -32,28 +27,6 @@ total_trans_list = []
 succ_trans_list = []
 total_pkt_sent_list = []
 ts_pd_list = []
-
-d = defaultdict(list)
-
-
-data = [(0, 2), (0, 1), (0, 3), (1, 2), (1, 3), (2, 3),
-        (2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]
-
-for node, dest in data:
-    d[node].append(dest)
-
-G = nx.Graph()
-for k, v in d.items():
-    for vv in v:
-        G.add_edge(k, vv)
-# nx.draw_networkx(G)
-
-env = gym.make('wmac-graph-v0', graph=G)
-dsdv_prob_env = dsdv_probability(env, G)
-dsdv_wqueue_env = dsdv_wqueue(env, G)
-dsdv_RRTDMA_env = dsdv_RRTDMA(env, G)
-env_RL_MAC = MAC_RL(G)
-
 
 def reset_lists():
     # reset lists
@@ -76,7 +49,7 @@ def testing_agent(agent, eval_episodes):
             model = A2C.load("A2C_MAC_Routing_last.zip")
 
         elif agent == 'PPO2_MAC_routing':
-            model = PPO2.load("PPO2_MAC_Routing_last.zip")
+            model = PPO2.load("saved_models/PPO2_MAC_Routing_last.zip")
 
         for i in range(eval_episodes):
             obs = env.reset()
@@ -99,7 +72,7 @@ def testing_agent(agent, eval_episodes):
     elif agent == 'PPO2_MAC':
         print("entering RL_MAC")
         
-        model = PPO2.load("PPO2_RL_MAC_FINAL.zip")  
+        model = PPO2.load("saved_models/PPO2_RL_MAC_FINAL.zip")  
         
 
         for i in range(eval_episodes):
@@ -240,12 +213,7 @@ def calculate_sum():
 
 if __name__ == '__main__':
 
-    d = defaultdict(list)
-    """Larger network"""
-    # data = [(0,2),(0,1),(0,3),(1,2),(1,3),(2,3),(2,4),(3,4),(5,2),(5,3),(5,4),(5,6),(6,7),(6,8),(7,8),(8,9),(9,10),(4,10)]#(4,6),(5,10),(6,10),(9,6),(8,10)]
-    """Smaller netowrk"""
-    # data = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3),(2, 4), (3, 4), (5, 2), (5, 3), (5, 4)]
-    # defaultdict(<type 'list'>, {})
+
     """ Experiment details"""
     parser = argparse.ArgumentParser(
         description='Transmitting packets in wireless network.')
@@ -260,14 +228,16 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     agent = args.agent
-    data = args.graph
-    data = ast.literal_eval(data)
-    print("data of graph", data)
+    graph_data = args.graph
+    graph_data = ast.literal_eval(graph_data)
+    print("data of graph", graph_data)
 
     total_train_timesteps = args.total_train_timesteps
     eval_episodes = args.eval_episodes
 
-    # Create a network graph
+    d = defaultdict(list)
+    data = graph_data
+
     for node, dest in data:
         d[node].append(dest)
 
@@ -275,6 +245,11 @@ if __name__ == '__main__':
     for k, v in d.items():
         for vv in v:
             G.add_edge(k, vv)
-    nx.draw_networkx(G)
+    # nx.draw_networkx(G)
 
-    testing_agent(G, agent, eval_episods)
+    env = W_MAC_Env(G)
+    dsdv_wqueue_env = dsdv_wqueue(env, G)
+    dsdv_RRTDMA_env = dsdv_RRTDMA(env, G)
+    env_RL_MAC = MAC_RL(G)
+
+    testing_agent(agent, eval_episodes)
