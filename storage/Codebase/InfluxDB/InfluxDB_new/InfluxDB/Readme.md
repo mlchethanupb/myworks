@@ -1,5 +1,5 @@
 
-# Apache Kafka
+# InfluxDB
 A containerised version of InfluxDB.
 
 ## Setup
