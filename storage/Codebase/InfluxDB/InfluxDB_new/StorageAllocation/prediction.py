@@ -35,7 +35,7 @@ def make_prediction(df,count,total_runtime):
     #regr2 = SVR(kernel = 'rbf',gamma=0.1, C=1e4)
     df2=df
     S1= df.iloc[:,4:6].values
-    t1 = df['influxdb_memstats_sys']
+    t1 = df['influxdb_Write/mb']
      
     #regr1.fit(S1, t1)
     regressor1 = SVR(kernel = 'rbf',C=1e4, gamma=0.1)
