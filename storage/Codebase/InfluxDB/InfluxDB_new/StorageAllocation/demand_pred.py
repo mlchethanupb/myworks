@@ -34,9 +34,9 @@ def storage_demand():
     pod_runtime=(pod_runtime.total_seconds()/60)
     total_runtime=pod_runtime+(update_interval/60)
     # --------------
-    Storage demand prediction for new request rate
+    #Storage demand prediction for new request rate
 
-    df = pd.read_csv("hit_miss_all.csv")
+    
    
     # -------------------
     subprocess.check_output("sshpass -p 'resu' scp pg-aicon-storage-5:/tmp/data.csv .", shell=True)
@@ -44,7 +44,7 @@ def storage_demand():
    
     filename="data.csv"
     df = pd.read_csv(filename)
-    total_request=int(df['influxdb_httpd_writeReq'].max())
+    #total_request=int(df['influxdb_httpd_writeReq'].max())
     df['request_datetime']=pd.to_datetime(df['request_datetime'])
     md_number=df['request_datetime'].count()/2
    
@@ -57,10 +57,7 @@ def storage_demand():
    
    #df contains data for different ingestion rates
     df2=df
-    total_request = 162
    #total_runtime=total_runtime*60
-    total_runtime = 750
     influxdb_disk=make_prediction(df,total_request,total_runtime)
-    print(influxdb_disk)
-    
+    return influxdb_disk
 storage_demand()
