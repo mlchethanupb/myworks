@@ -32,7 +32,16 @@ while check_loop<1:
     print('current disk usage is:',current_usage)
 
 
+    ######update pvc with new storage 
 
+    #fin = open("influx-Deployment_only.yaml", "r+")
+    #for line in fin:
+    #    if 'storage:' in line:
+          #  a=line
+            #a=a[14:]
+           # s_limit=a[:-3]
+            #s_limit='2Gi'
+    #fin.close()
     size_current=subprocess.check_output("kubectl exec -ti " + str(c_name)+ " -- /bin/sh -c 'df -m' |grep /var/lib/influxdb | awk '{print $2'}",shell=True)
     print('Current storage limit is',size_current)
 
@@ -44,6 +53,7 @@ while check_loop<1:
         demand=demand_pred.storage_demand()
 	demand=int(size_current) + int(demand)
         demand=str(demand)+ 'Mi'
+        print(demand)
         print('New storage demand according to Ml model is:',demand)
         subprocess.check_output('kubectl patch pvc gluster1 -p \'{"spec":{"resources":{"requests":{"storage":"'+demand+'"}}}}\'', shell=True)
 	print('Storage added successfully')
