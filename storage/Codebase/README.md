@@ -9,14 +9,14 @@ Setup the testbed with Kubernetes and GlusterFS by following the provided instru
 The implementation of Kafka VNF is designed in such a way where Digitatwin continuously mimics machine states as messages. OPC UA client fetches those messages
 from Digitaltwin and publishes them to Kafka topic. The overall system is distributed where Kafka is running on a worker node and Digitaltwin and OPC UA is running on another worker node of kubernetes cluster. The implementation can be done by following the steps below.
 * Build docker image for Digitaltwin, OPC UA Kafka Connector and kafka using ``docker build -t 'image name':tag .`` command.
-* Run ``kubectl apply -f 'file name'`` to deploy the application on kubernetes. Necessary files (docker image, kubernetes servive and deployment) can be found on particular folders inside ``Codebase``. For example, using the following commands ``Kafka`` application can be deployed successfully on kubernetes.
+* Run ``kubectl apply -f 'file name'`` to deploy the application on kubernetes. Necessary files (docker image, kubernetes service and deployment) can be found in particular folders inside ``Codebase``. For example, using the following commands ``Kafka`` application can be deployed successfully on kubernetes.
 ```
 docker build -t kafka:dev .
 ```
 ```
 kubectl apply -f kafka-deployment.yaml
 ```
-* The Kafka application contains single broker with single topic( ``dt-imms-opcua-0``) and single partition(``dt-imms-opcua-0-0``). However, the topics has some configurations which can be applied by using the following command.
+* The Kafka application contains single broker with single topic(``dt-imms-opcua-0``) and single partition(``dt-imms-opcua-0-0``). However, the topics has some configurations which can be applied by using the following command.
 ```
 docker exec -ti 'container id' /bin/sh -c "./bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic dt-imms-opcua-0 --config retention.bytes=62914560"
 ```
@@ -49,7 +49,7 @@ python3 dtServer.py
 
 
 #### Storage Allocator 
-* For kafka build docker images for the applications (Kafka, OPC UA and Digitaltwin) on different worker node. While building docker image for OPC UA instead of ``opcua_kafka_connector.py`` use ``opcua_storage_allocator.py``. After that start the allocator(path ``Codebase/Storage_allocator_kafka``) by running the following command. Deployment files is provided respective application folder (e.g, Kafka, Squid, etc.) 
+* For kafka build docker images for the applications(Kafka, OPC UA and Digitaltwin) on different worker node. While building docker image for OPC UA instead of ``opcua_kafka_connector.py`` use ``opcua_storage_allocator.py``. After that, start the allocator(path ``Codebase/Storage_allocator_kafka``) by running the following command. Deployment files is provided in respective application folder(e.g, Kafka, Squid, etc.).
 ```
 python3 storage_allocation.py
 ```
@@ -61,7 +61,7 @@ python3 storage_allocation.py
 * Build docker image ``http_server:s`` for pythons's ``SimpleHTTPServer`` and run the following command to start the container.
 
 ```
-docker run -ti --rm -p 8000:8000 http_server:s
+docker run -ti --rm -p 4842:4842 http_server:s
 ```
-* Wait some time (5 minutes for current configuration) as squid needs some time to create all cache directories. Finally run ``request.sh`` to send continuous request in squid. 
+* Wait some time (5 minutes for current configuration) as squid needs some time to create all cache directories. Finally run ``./request.sh`` to send continuous request in squid. 
 
