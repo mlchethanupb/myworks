@@ -32,7 +32,7 @@ os.system("kubectl exec -ti " + str(c_name)+ " -- /bin/sh -c './bin/kafka-topics
 os.system("kubectl exec -ti " + str(c_name)+ " -- /bin/sh -c './bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic dt-imms-opcua-0 --config cleanup.policy=delete'")
 
 
-time.sleep(60)
+time.sleep(150)
 
 check_loop=0
 while check_loop<1:
@@ -82,18 +82,18 @@ while check_loop<1:
     print('Current storage limit is',s_limit)
     fin.close()
 
-    #If disk usage excceds threshhold, predict storage demand for a future time
+    #If disk usage exceeds threshold, predict storage demand for a future time
     if (int(s_limit)-current_usage<=70):
         
-        demand=demand_prediction_kafka.storage_demand()
+        demand=demand_prediction_kafka.storage_demand(pod_start_time)
         demand=math.ceil(demand)
         demand=str(demand)+'Mi'
         print('New storage demand according to ML model is:',demand)
 
-        ##if demand is less than current usage don't change
+        ##If demand is less than current usage don't change
         if (demand<s_limit):
             print("No need to update volume") 
-            #let the storage increase meanwhile
+            #Let the storage increase meanwhile
             time.sleep(200)
         else:
             subprocess.check_output('kubectl patch pvc kafkasfc -p \'{"spec":{"resources":{"requests":{"storage":"'+demand+'"}}}}\'', shell=True)
@@ -170,7 +170,7 @@ while check_loop<1:
     if (int(s_limit_sq)-current_usage_sq<=190):
         os.system("rm -rf squidIngestion.txt")
      
-        demand_sq=demand_prediction.storage_demand()
+        demand_sq=demand_prediction.storage_demand(pod_start_time_sq)
         demand_sq=math.ceil(demand_sq)
         demand_sq=str(demand_sq)+'Mi'
         print('New storage demand according to ML model is:',demand_sq)
@@ -202,7 +202,7 @@ while check_loop<1:
 
             subprocess.check_output("kubectl apply -f pvc-squid.yaml", shell=True)
             
-            #let the storage increase meanwhile
+            #Let the storage increase meanwhile
             time.sleep(100)
         os.system("rm -rf squidIngestion.txt")
 
