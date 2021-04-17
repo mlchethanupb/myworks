@@ -60,4 +60,4 @@ def storage_demand():
    #total_runtime=total_runtime*60
     influxdb_disk=make_prediction(df,total_request,total_runtime)
     return influxdb_disk
-storage_demand()
+
