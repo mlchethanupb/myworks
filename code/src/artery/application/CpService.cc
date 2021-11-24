@@ -212,6 +212,7 @@ vanetza::asn1::Cam createCooperativeAwarenessMessage_cp(const VehicleDataProvide
 {
     EV<<"Creating cooperative awareness message: "<< genDeltaTime<< endl;
 	vanetza::asn1::Cam message;
+	vanetza::asn1::Cpm cp_message;
 
 	ItsPduHeader_t& header = (*message).header;
 	header.protocolVersion = 1;

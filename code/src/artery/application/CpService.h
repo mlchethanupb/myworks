@@ -11,6 +11,7 @@
 #include "artery/utility/Channel.h"
 #include "artery/utility/Geometry.h"
 #include <vanetza/asn1/cam.hpp>
+#include <vanetza/asn1/cpm.hpp>
 #include <vanetza/btp/data_interface.hpp>
 #include <vanetza/units/angle.hpp>
 #include <vanetza/units/velocity.hpp>
