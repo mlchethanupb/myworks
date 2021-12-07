@@ -4,7 +4,7 @@
 * Licensed under GPLv2, see COPYING file for detailed license and warranty terms.
 */
 
-#include "artery/application/CaObject.h"
+//#include "artery/application/CaObject.h"
 #include "artery/application/CpObject.h"
 #include "artery/application/CpService.h"
 #include "artery/application/Asn1PacketVisitor.h"
@@ -20,6 +20,8 @@
 #include <vanetza/dcc/transmit_rate_control.hpp>
 #include <vanetza/facilities/cam_functions.hpp>
 #include <chrono>
+
+// #define COMPILE_CODE
 
 namespace artery
 {
@@ -107,7 +109,9 @@ void CpService::trigger()
 
 void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::UpPacket> packet)
 {
-	Enter_Method("indicate");
+
+#ifdef COMPILE_CODE
+	Enter_Method("indicate")
 
 	Asn1PacketVisitor<vanetza::asn1::Cam> visitor;
 	const vanetza::asn1::Cam* cam = boost::apply_visitor(visitor, *packet);
@@ -118,6 +122,8 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 		emit(scSignalCamReceived, &obj);
 		mLocalDynamicMap->updateAwareness(obj);
 	}
+#endif
+
 }
 
 void CpService::checkTriggeringConditions(const SimTime& T_now)
@@ -183,6 +189,7 @@ void CpService::sendCam(const SimTime& T_now)
 	request.gn.traffic_class.tc_id(static_cast<unsigned>(dcc::Profile::DP2));
 	request.gn.communication_profile = geonet::CommunicationProfile::ITS_G5;
 
+#ifdef COMPILE_CODE
 	CpObject obj(std::move(cam));
 	emit(scSignalCamSent, &obj);
 
@@ -191,6 +198,8 @@ void CpService::sendCam(const SimTime& T_now)
 	std::unique_ptr<convertible::byte_buffer> buffer { new CamByteBuffer(obj.shared_ptr()) };
 	payload->layer(OsiLayer::Application) = std::move(buffer);
 	this->request(request, std::move(payload));
+#endif
+
 }
 
 SimTime CpService::genCamDcc()

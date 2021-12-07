@@ -9,50 +9,50 @@ using namespace vanetza::asn1;
 
 Register_Abstract_Class(CpObject)
 
-CpObject::CpObject(Cam&& cam) :
-    m_cam_wrapper(std::make_shared<Cam>(std::move(cam)))
+CpObject::CpObject(Cpm&& cpm) :
+    m_cpm_wrapper(std::make_shared<Cpm>(std::move(cpm)))
 {
 }
 
-CpObject& CpObject::operator=(Cam&& cam)
+CpObject& CpObject::operator=(Cpm&& cpm)
 {
-    m_cam_wrapper = std::make_shared<Cam>(std::move(cam));
+    m_cpm_wrapper = std::make_shared<Cpm>(std::move(cpm));
     return *this;
 }
 
-CpObject::CpObject(const Cam& cam) :
-    m_cam_wrapper(std::make_shared<Cam>(cam))
+CpObject::CpObject(const Cpm& cpm) :
+    m_cpm_wrapper(std::make_shared<Cpm>(cpm))
 {
 }
 
-CpObject& CpObject::operator=(const Cam& cam)
+CpObject& CpObject::operator=(const Cpm& cpm)
 {
-    m_cam_wrapper = std::make_shared<Cam>(cam);
+    m_cpm_wrapper = std::make_shared<Cpm>(cpm);
     return *this;
 }
 
-CpObject::CpObject(const std::shared_ptr<const Cam>& ptr) :
-    m_cam_wrapper(ptr)
+CpObject::CpObject(const std::shared_ptr<const Cpm>& ptr) :
+    m_cpm_wrapper(ptr)
 {
-    assert(m_cam_wrapper);
+    assert(m_cpm_wrapper);
 }
 
-CpObject& CpObject::operator=(const std::shared_ptr<const Cam>& ptr)
+CpObject& CpObject::operator=(const std::shared_ptr<const Cpm>& ptr)
 {
-    m_cam_wrapper = ptr;
-    assert(m_cam_wrapper);
+    m_cpm_wrapper = ptr;
+    assert(m_cpm_wrapper);
     return *this;
 }
 
-std::shared_ptr<const Cam> CpObject::shared_ptr() const
+std::shared_ptr<const Cpm> CpObject::shared_ptr() const
 {
-    assert(m_cam_wrapper);
-    return m_cam_wrapper;
+    assert(m_cpm_wrapper);
+    return m_cpm_wrapper;
 }
 
-const vanetza::asn1::Cam& CpObject::asn1() const
+const vanetza::asn1::Cpm& CpObject::asn1() const
 {
-    return *m_cam_wrapper;
+    return *m_cpm_wrapper;
 }
 
 
@@ -63,8 +63,8 @@ class CpmStationIdResultFilter : public cObjectResultFilter
 protected:
     void receiveSignal(cResultFilter* prev, simtime_t_cref t, cObject* object, cObject* details) override
     {
-        if (auto cam = dynamic_cast<CpObject*>(object)) {
-            const auto id = cam->asn1()->header.stationID;
+        if (auto cpm = dynamic_cast<CpObject*>(object)) {
+            const auto id = cpm->asn1()->header.stationID;
             fire(this, t, id, details);
         }
     }
@@ -78,8 +78,8 @@ class CpmGenerationDeltaTimeResultFilter : public cObjectResultFilter
 protected:
     void receiveSignal(cResultFilter* prev, simtime_t_cref t, cObject* object, cObject* details) override
     {
-        if (auto cam = dynamic_cast<CpObject*>(object)) {
-            const auto genDeltaTime = cam->asn1()->cam.generationDeltaTime;
+        if (auto cpm = dynamic_cast<CpObject*>(object)) {
+            const auto genDeltaTime = cpm->asn1()->cpm.generationDeltaTime;
             fire(this, t, genDeltaTime, details);
         }
     }
