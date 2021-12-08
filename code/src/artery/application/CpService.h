@@ -46,11 +46,11 @@ class CpService : public ItsG5BaseService
 		const Timer* mTimer = nullptr;
 		LocalDynamicMap* mLocalDynamicMap = nullptr;
 
-		omnetpp::SimTime mGenCamMin;
-		omnetpp::SimTime mGenCamMax;
-		omnetpp::SimTime mGenCam;
-		unsigned mGenCamLowDynamicsCounter;
-		unsigned mGenCamLowDynamicsLimit;
+		omnetpp::SimTime mGenCpmMin;
+		omnetpp::SimTime mGenCpmMax;
+		omnetpp::SimTime mGenCpm;
+		//unsigned mGenCamLowDynamicsCounter;
+		//unsigned mGenCamLowDynamicsLimit;
 		Position mLastCamPosition;
 		vanetza::units::Velocity mLastCamSpeed;
 		vanetza::units::Angle mLastCamHeading;
@@ -63,9 +63,12 @@ class CpService : public ItsG5BaseService
 		bool mFixedRate;
 };
 
+#ifdef COMPILE_CODE
+
 vanetza::asn1::Cam createCooperativeAwarenessMessage_cp(const VehicleDataProvider&, uint16_t genDeltaTime);
 void addLowFrequencyContainer_cp(vanetza::asn1::Cam&);
 
+#endif
 } // namespace artery
 
 #endif /* ARTERY_CPSERVICE_H_ */

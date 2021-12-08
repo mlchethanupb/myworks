@@ -63,11 +63,11 @@ SpeedValue_t buildSpeedValue_cp(const vanetza::units::Velocity& v)
 Define_Module(CpService)
 
 CpService::CpService() :
-		mGenCamMin { 100, SIMTIME_MS },
-		mGenCamMax { 1000, SIMTIME_MS },
-		mGenCam(mGenCamMax),
-		mGenCamLowDynamicsCounter(0),
-		mGenCamLowDynamicsLimit(3)
+		mGenCpmMin { 100, SIMTIME_MS },
+		mGenCpmMax { 1000, SIMTIME_MS },
+		mGenCpm(mGenCpmMax)
+		//mGenCamLowDynamicsCounter(0),
+		//mGenCamLowDynamicsLimit(3)
 {
 }
 
@@ -86,8 +86,8 @@ void CpService::initialize()
 	mLastLowCamTimestamp = mLastCamTimestamp - artery::simtime_cast(scLowFrequencyContainerInterval);
 
 	// generation rate boundaries
-	mGenCamMin = par("minInterval");
-	mGenCamMax = par("maxInterval");
+	mGenCpmMin = par("minInterval");
+	mGenCpmMax = par("maxInterval");
 
 	// vehicle dynamics thresholds
 	mHeadingDelta = vanetza::units::Angle { par("headingDelta").doubleValue() * vanetza::units::degree };
@@ -129,24 +129,26 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 void CpService::checkTriggeringConditions(const SimTime& T_now)
 {
 	// provide variables named like in EN 302 637-2 V1.3.2 (section 6.1.3)
-	SimTime& T_GenCam = mGenCam;
-	const SimTime& T_GenCamMin = mGenCamMin;
-	const SimTime& T_GenCamMax = mGenCamMax;
-	const SimTime T_GenCamDcc = mDccRestriction ? genCamDcc() : mGenCamMin;
+	SimTime& T_GenCpm = mGenCpm;
+	const SimTime& T_GenCpmMin = mGenCpmMin;
+	const SimTime& T_GenCpmMax = mGenCpmMax;
+	const SimTime T_GenCpmDcc = mDccRestriction ? genCamDcc() : mGenCpmMin;
 	const SimTime T_elapsed = T_now - mLastCamTimestamp;
 
-	if (T_elapsed >= T_GenCamDcc) {
+	if (T_elapsed >= T_GenCpmDcc) {
 		if (mFixedRate) {
 			sendCam(T_now);
 		} else if (checkHeadingDelta() || checkPositionDelta() || checkSpeedDelta()) {
 			sendCam(T_now);
-			T_GenCam = std::min(T_elapsed, T_GenCamMax); /*< if middleware update interval is too long */
-			mGenCamLowDynamicsCounter = 0;
-		} else if (T_elapsed >= T_GenCam) {
+			T_GenCpm = std::min(T_elapsed, T_GenCpmMax); /*< if middleware update interval is too long */
+			//mGenCamLowDynamicsCounter = 0;
+		} else if (T_elapsed >= T_GenCpm) {
 			sendCam(T_now);
+			#ifdef REMOVE_CODE
 			if (++mGenCamLowDynamicsCounter >= mGenCamLowDynamicsLimit) {
-				T_GenCam = T_GenCamMax;
+				T_GenCpm = T_GenCpmMax;
 			}
+			#endif
 		}
 	}
 }
@@ -168,6 +170,8 @@ bool CpService::checkSpeedDelta() const
 
 void CpService::sendCam(const SimTime& T_now)
 {
+
+#ifdef COMPILE_CODE
 	uint16_t genDeltaTimeMod = countTaiMilliseconds(mTimer->getTimeFor(mVehicleDataProvider->updated()));
 	auto cam = createCooperativeAwarenessMessage_cp(*mVehicleDataProvider, genDeltaTimeMod);
 
@@ -189,7 +193,7 @@ void CpService::sendCam(const SimTime& T_now)
 	request.gn.traffic_class.tc_id(static_cast<unsigned>(dcc::Profile::DP2));
 	request.gn.communication_profile = geonet::CommunicationProfile::ITS_G5;
 
-#ifdef COMPILE_CODE
+
 	CpObject obj(std::move(cam));
 	emit(scSignalCamSent, &obj);
 
@@ -214,8 +218,10 @@ SimTime CpService::genCamDcc()
 	static const vanetza::dcc::TransmissionLite ca_tx(vanetza::dcc::Profile::DP2, 0);
 	vanetza::Clock::duration delay = trc->delay(ca_tx);
 	SimTime dcc { std::chrono::duration_cast<std::chrono::milliseconds>(delay).count(), SIMTIME_MS };
-	return std::min(mGenCamMax, std::max(mGenCamMin, dcc));
+	return std::min(mGenCpmMax, std::max(mGenCpmMin, dcc));
 }
+
+#ifdef COMPILE_CODE
 
 vanetza::asn1::Cam createCooperativeAwarenessMessage_cp(const VehicleDataProvider& vdp, uint16_t genDeltaTime)
 {
@@ -301,5 +307,7 @@ void addLowFrequencyContainer_cp(vanetza::asn1::Cam& message)
 		throw cRuntimeError("Invalid Low Frequency CAM: %s", error.c_str());
 	}
 }
+
+#endif
 
 } // namespace artery
