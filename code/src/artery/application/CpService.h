@@ -10,6 +10,7 @@
 #include "artery/application/ItsG5BaseService.h"
 #include "artery/utility/Channel.h"
 #include "artery/utility/Geometry.h"
+#include "artery/envmod/LocalEnvironmentModel.h"
 #include <vanetza/asn1/cam.hpp>
 #include <vanetza/asn1/cpm.hpp>
 #include <vanetza/btp/data_interface.hpp>
@@ -26,6 +27,7 @@ class VehicleDataProvider;
 
 class CpService : public ItsG5BaseService
 {
+
 	public:
 		CpService();
 		void initialize() override;
@@ -33,18 +35,38 @@ class CpService : public ItsG5BaseService
 		void trigger() override;
 
 	private:
-		void checkTriggeringConditions(const omnetpp::SimTime&);
-		bool checkHeadingDelta() const;
-		bool checkPositionDelta() const;
-		bool checkSpeedDelta() const;
-		void sendCam(const omnetpp::SimTime&);
-		omnetpp::SimTime genCamDcc();
+		omnetpp::SimTime mGenCpmMin;
+		omnetpp::SimTime mGenCpmMax;
+		omnetpp::SimTime mGenCpm;
+
+		omnetpp::SimTime mLastCpmTimestamp;
+		omnetpp::SimTime mLastSenrInfoCntnrTimestamp;
 
 		ChannelNumber mPrimaryChannel = channel::CCH;
 		const NetworkInterfaceTable* mNetworkInterfaceTable = nullptr;
 		const VehicleDataProvider* mVehicleDataProvider = nullptr;
 		const Timer* mTimer = nullptr;
 		LocalDynamicMap* mLocalDynamicMap = nullptr;
+
+	void generateCPM(const omnetpp::SimTime&);
+	void sendCpm(const omnetpp::SimTime&);
+	bool generatePerceivedObjectsCntnr(vanetza::asn1::Cpm&);
+	bool generateSensorInfoCntnr(vanetza::asn1::Cpm&);
+	bool generateStnAndMgmtCntnr(vanetza::asn1::Cpm&);
+	void generateMgmtCntnr(vanetza::asn1::Cpm&);
+	void generateStnCntnr(vanetza::asn1::Cpm&);
+
+#ifdef REMOVE_CODE
+
+
+	private:
+		void checkTriggeringConditions(const omnetpp::SimTime&);
+		bool checkHeadingDelta() const;
+		bool checkPositionDelta() const;
+		bool checkSpeedDelta() const;
+		omnetpp::SimTime genCamDcc();
+
+
 
 		omnetpp::SimTime mGenCpmMin;
 		omnetpp::SimTime mGenCpmMax;
@@ -55,15 +77,16 @@ class CpService : public ItsG5BaseService
 		vanetza::units::Velocity mLastCamSpeed;
 		vanetza::units::Angle mLastCamHeading;
 		omnetpp::SimTime mLastCamTimestamp;
-		omnetpp::SimTime mLastLowCamTimestamp;
+		
 		vanetza::units::Angle mHeadingDelta;
 		vanetza::units::Length mPositionDelta;
 		vanetza::units::Velocity mSpeedDelta;
 		bool mDccRestriction;
 		bool mFixedRate;
+#endif
 };
 
-#ifdef COMPILE_CODE
+#ifdef REMOVE_CODE
 
 vanetza::asn1::Cam createCooperativeAwarenessMessage_cp(const VehicleDataProvider&, uint16_t genDeltaTime);
 void addLowFrequencyContainer_cp(vanetza::asn1::Cam&);

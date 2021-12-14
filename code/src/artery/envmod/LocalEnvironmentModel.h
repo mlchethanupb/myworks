@@ -99,6 +99,7 @@ public:
      * Get all currently seen objects by any local sensor
      */
     const TrackedObjects& allObjects() const { return mObjects; }
+    const std::vector<Sensor*> allSensors() const { return mSensors; }
 
 private:
     void initializeSensors();

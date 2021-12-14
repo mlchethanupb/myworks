@@ -23,6 +23,7 @@ constexpr ItsAid RLT = 138;
 constexpr ItsAid IVI = 139;
 constexpr ItsAid TLC = 140;
 constexpr ItsAid GN_MGMT = 141;
+constexpr ItsAid CP = 639;
 constexpr ItsAid IPV6_ROUTING = 270549118;
 
 } // namespace aid

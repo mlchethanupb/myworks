@@ -34,9 +34,9 @@ auto decidegree_cp = vanetza::units::degree * boost::units::si::deci;
 auto degree_per_second_cp = vanetza::units::degree / vanetza::units::si::second;
 auto centimeter_per_second_cp = vanetza::units::si::meter_per_second * boost::units::si::centi;
 
-static const simsignal_t scSignalCamReceived = cComponent::registerSignal("CamReceived");
-static const simsignal_t scSignalCamSent = cComponent::registerSignal("CamSent");
-static const auto scLowFrequencyContainerInterval = std::chrono::milliseconds(500);
+static const simsignal_t scSignalCpmReceived = cComponent::registerSignal("CpmReceived");
+static const simsignal_t scSignalCpmSent = cComponent::registerSignal("CpmSent");
+static const auto scSnsrInfoContainerInterval = std::chrono::milliseconds(1000);
 
 template<typename T, typename U>
 long round(const boost::units::quantity<T>& q, const U& u)
@@ -71,6 +71,9 @@ CpService::CpService() :
 {
 }
 
+
+
+
 void CpService::initialize()
 {
 	ItsG5BaseService::initialize();
@@ -80,15 +83,19 @@ void CpService::initialize()
 	mLocalDynamicMap = &getFacilities().get_mutable<artery::LocalDynamicMap>();
 
 	// avoid unreasonable high elapsed time values for newly inserted vehicles
-	mLastCamTimestamp = simTime();
+	mLastCpmTimestamp = simTime();
 
-	// first generated CAM shall include the low frequency container
-	mLastLowCamTimestamp = mLastCamTimestamp - artery::simtime_cast(scLowFrequencyContainerInterval);
+	// first generated CPM shall include the sensor information container
+	mLastSenrInfoCntnrTimestamp = mLastCpmTimestamp - artery::simtime_cast(scSnsrInfoContainerInterval);
 
 	// generation rate boundaries
 	mGenCpmMin = par("minInterval");
 	mGenCpmMax = par("maxInterval");
 
+	// look up primary channel for CA
+	ChannelNumber mPrimaryChannel = getFacilities().get_const<MultiChannelPolicy>().primaryChannel(vanetza::aid::CP);
+
+#ifdef REMOVE_CODE
 	// vehicle dynamics thresholds
 	mHeadingDelta = vanetza::units::Angle { par("headingDelta").doubleValue() * vanetza::units::degree };
 	mPositionDelta = par("positionDelta").doubleValue() * vanetza::units::si::meter;
@@ -96,15 +103,14 @@ void CpService::initialize()
 
 	mDccRestriction = par("withDccRestriction");
 	mFixedRate = par("fixedRate");
+#endif
 
-	// look up primary channel for CA
-	ChannelNumber mPrimaryChannel = getFacilities().get_const<MultiChannelPolicy>().primaryChannel(vanetza::aid::CA);
 }
 
 void CpService::trigger()
 {
 	Enter_Method("trigger");
-	checkTriggeringConditions(simTime());
+	generateCPM(simTime());
 }
 
 void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::UpPacket> packet)
@@ -126,8 +132,91 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 
 }
 
+void CpService::generateCPM(const omnetpp::SimTime& T_now) {
+
+	// provide variables named like in TR 103 562 V0.0.16 (section 4.3.4)
+	SimTime& T_GenCpm = mGenCpm;
+	const SimTime& T_GenCpmMin = mGenCpmMin;
+	const SimTime& T_GenCpmMax = mGenCpmMax;
+	const SimTime T_elapsed = T_now - mLastCpmTimestamp;
+
+	//@todo: cross check the behaviour with CA implementaion
+	mLastSenrInfoCntnrTimestamp = T_now;
+
+	if (T_elapsed >= T_GenCpm) {
+		sendCpm(T_now);			
+	}
+}
+
+void CpService::sendCpm(const SimTime& T_now) {
+
+	EV<<"Generating collective perception message: "<< endl;
+
+	vanetza::asn1::Cpm cpm_msg;
+
+	ItsPduHeader_t& header = (*cpm_msg).header;
+	header.protocolVersion = 1;
+	header.messageID = ItsPduHeader__messageID_cpm;
+	header.stationID = mVehicleDataProvider->station_id();
+
+	CollectivePerceptionMessage_t& cpm = (*cpm_msg).cpm;
+
+	uint16_t genDeltaTime = countTaiMilliseconds(mTimer->getTimeFor(mVehicleDataProvider->updated()));
+	cpm.generationDeltaTime = genDeltaTime * GenerationDeltaTime_oneMilliSec;
+
+
+	if( generatePerceivedObjectsCntnr(cpm_msg) || generateSensorInfoCntnr(cpm_msg) ) {
+		generateStnAndMgmtCntnr(cpm_msg);
+	} 
+
+	using namespace vanetza;
+	btp::DataRequestB request;
+	request.destination_port = btp::ports::CPM;
+	request.gn.its_aid = aid::CP;
+	request.gn.transport_type = geonet::TransportType::SHB;
+	request.gn.maximum_lifetime = geonet::Lifetime { geonet::Lifetime::Base::One_Second, 1 };
+	request.gn.traffic_class.tc_id(static_cast<unsigned>(dcc::Profile::DP2));
+	request.gn.communication_profile = geonet::CommunicationProfile::ITS_G5; //@todo: LTE-V2X ?
+
+
+	CpObject obj(std::move(cpm_msg));
+	emit(scSignalCpmSent, &obj);
+
+	using CpmByteBuffer = convertible::byte_buffer_impl<asn1::Cpm>;
+	std::unique_ptr<geonet::DownPacket> payload { new geonet::DownPacket() };
+	std::unique_ptr<convertible::byte_buffer> buffer { new CpmByteBuffer(obj.shared_ptr()) };
+	payload->layer(OsiLayer::Application) = std::move(buffer);
+	this->request(request, std::move(payload));
+}
+
+bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg){
+	return true;
+}
+
+bool CpService::generateSensorInfoCntnr(vanetza::asn1::Cpm& cpm_msg){
+	return true;
+}
+
+bool CpService::generateStnAndMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
+
+	return true;
+}
+
+void CpService::generateMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
+
+}
+
+void CpService::generateStnCntnr(vanetza::asn1::Cpm& cpm_msg){
+
+//StationDataContainer &stndata = 
+
+}
+
+#ifdef REMOVE_CODE
+
 void CpService::checkTriggeringConditions(const SimTime& T_now)
 {
+
 	// provide variables named like in EN 302 637-2 V1.3.2 (section 6.1.3)
 	SimTime& T_GenCpm = mGenCpm;
 	const SimTime& T_GenCpmMin = mGenCpmMin;
@@ -144,11 +233,11 @@ void CpService::checkTriggeringConditions(const SimTime& T_now)
 			//mGenCamLowDynamicsCounter = 0;
 		} else if (T_elapsed >= T_GenCpm) {
 			sendCam(T_now);
-			#ifdef REMOVE_CODE
+			
 			if (++mGenCamLowDynamicsCounter >= mGenCamLowDynamicsLimit) {
 				T_GenCpm = T_GenCpmMax;
 			}
-			#endif
+		
 		}
 	}
 }
@@ -171,7 +260,6 @@ bool CpService::checkSpeedDelta() const
 void CpService::sendCam(const SimTime& T_now)
 {
 
-#ifdef COMPILE_CODE
 	uint16_t genDeltaTimeMod = countTaiMilliseconds(mTimer->getTimeFor(mVehicleDataProvider->updated()));
 	auto cam = createCooperativeAwarenessMessage_cp(*mVehicleDataProvider, genDeltaTimeMod);
 
@@ -202,7 +290,6 @@ void CpService::sendCam(const SimTime& T_now)
 	std::unique_ptr<convertible::byte_buffer> buffer { new CamByteBuffer(obj.shared_ptr()) };
 	payload->layer(OsiLayer::Application) = std::move(buffer);
 	this->request(request, std::move(payload));
-#endif
 
 }
 
@@ -221,7 +308,6 @@ SimTime CpService::genCamDcc()
 	return std::min(mGenCpmMax, std::max(mGenCpmMin, dcc));
 }
 
-#ifdef COMPILE_CODE
 
 vanetza::asn1::Cam createCooperativeAwarenessMessage_cp(const VehicleDataProvider& vdp, uint16_t genDeltaTime)
 {
