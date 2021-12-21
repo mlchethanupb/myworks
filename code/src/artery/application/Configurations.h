@@ -29,6 +29,11 @@ namespace config {
         return std::round(v.value());
     }
 
+    /*
+       Note:
+       "inline" keyword indicates that the definiton of the function is same in all the files 
+       it is used. Do not use construct which changes function defintion based on files it is used.     
+    */
     inline SpeedValue_t buildSpeedValue(const vanetza::units::Velocity& v)
     {
         static const vanetza::units::Velocity lower { 0.0 * boost::units::si::meter_per_second };

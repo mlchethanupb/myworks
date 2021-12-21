@@ -45,9 +45,6 @@ CpService::CpService() :
 {
 }
 
-
-
-
 void CpService::initialize()
 {
 	ItsG5BaseService::initialize();
