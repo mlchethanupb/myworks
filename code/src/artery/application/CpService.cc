@@ -7,6 +7,7 @@
 //#include "artery/application/CaObject.h"
 #include "artery/application/CpObject.h"
 #include "artery/application/CpService.h"
+#include "artery/application/Configurations.h"
 #include "artery/application/Asn1PacketVisitor.h"
 #include "artery/application/MultiChannelPolicy.h"
 #include "artery/application/VehicleDataProvider.h"
@@ -28,37 +29,10 @@ namespace artery
 
 using namespace omnetpp;
 
-/*Defined in Caservice.cc*/
-auto microdegree_cp = vanetza::units::degree * boost::units::si::micro;
-auto decidegree_cp = vanetza::units::degree * boost::units::si::deci;
-auto degree_per_second_cp = vanetza::units::degree / vanetza::units::si::second;
-auto centimeter_per_second_cp = vanetza::units::si::meter_per_second * boost::units::si::centi;
 
 static const simsignal_t scSignalCpmReceived = cComponent::registerSignal("CpmReceived");
 static const simsignal_t scSignalCpmSent = cComponent::registerSignal("CpmSent");
 static const auto scSnsrInfoContainerInterval = std::chrono::milliseconds(1000);
-
-template<typename T, typename U>
-long round(const boost::units::quantity<T>& q, const U& u)
-{
-	boost::units::quantity<U> v { q };
-	return std::round(v.value());
-}
-
-SpeedValue_t buildSpeedValue_cp(const vanetza::units::Velocity& v)
-{
-	static const vanetza::units::Velocity lower { 0.0 * boost::units::si::meter_per_second };
-	static const vanetza::units::Velocity upper { 163.82 * boost::units::si::meter_per_second };
-
-	SpeedValue_t speed = SpeedValue_unavailable;
-	if (v >= upper) {
-		speed = 16382; // see CDD A.74 (TS 102 894 v1.2.1)
-	} else if (v >= lower) {
-		speed = round(v, centimeter_per_second_cp) * SpeedValue_oneCentimeterPerSec;
-	}
-	return speed;
-}
-
 
 Define_Module(CpService)
 
@@ -199,6 +173,19 @@ bool CpService::generateSensorInfoCntnr(vanetza::asn1::Cpm& cpm_msg){
 
 bool CpService::generateStnAndMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 
+	if( vanetza::geonet::StationType::Passenger_Car == mVehicleDataProvider->getStationType()){
+		generateCarStnCntnr(cpm_msg);
+	}else if(vanetza::geonet::StationType::RSU == mVehicleDataProvider->getStationType()){
+		// add check to see if ITS-S disseminate the MAP-message
+		
+		// assemble the originating RSU container
+		generateRSUStnCntnr(cpm_msg);
+	}
+	
+	generateMgmtCntnr(cpm_msg);
+	
+	//steps to handle the segmentation
+
 	return true;
 }
 
@@ -206,11 +193,32 @@ void CpService::generateMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 
 }
 
-void CpService::generateStnCntnr(vanetza::asn1::Cpm& cpm_msg){
+void CpService::generateCarStnCntnr(vanetza::asn1::Cpm& cpm_msg){
 
-//StationDataContainer &stndata = 
+	StationDataContainer_t*& stndata =  (*cpm_msg).cpm.cpmParameters.stationDataContainer;
+	stndata = vanetza::asn1::allocate<StationDataContainer_t>();
+
+	stndata->present = StationDataContainer_PR_originatingVehicleContainer;
+
+	OriginatingVehicleContainer_t& orgvehcntnr = stndata->choice.originatingVehicleContainer;
+	orgvehcntnr.heading.headingValue = artery::config::round(mVehicleDataProvider->heading(), artery::config::decidegree);
+	orgvehcntnr.heading.headingConfidence =  HeadingConfidence_equalOrWithinOneDegree;
+	orgvehcntnr.speed.speedValue = artery::config::buildSpeedValue(mVehicleDataProvider->speed());
+	orgvehcntnr.speed.speedConfidence = SpeedConfidence_equalOrWithinOneCentimeterPerSec * 3;
+	orgvehcntnr.driveDirection = mVehicleDataProvider->speed().value() >= 0.0 ? DriveDirection_forward : DriveDirection_backward;
+
 
 }
+
+void CpService::generateRSUStnCntnr(vanetza::asn1::Cpm& cpm_msg){
+
+	StationDataContainer_t*& stndata =  (*cpm_msg).cpm.cpmParameters.stationDataContainer;
+	stndata = vanetza::asn1::allocate<StationDataContainer_t>();
+
+	
+
+}
+
 
 #ifdef REMOVE_CODE
 

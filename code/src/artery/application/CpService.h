@@ -54,7 +54,9 @@ class CpService : public ItsG5BaseService
 	bool generateSensorInfoCntnr(vanetza::asn1::Cpm&);
 	bool generateStnAndMgmtCntnr(vanetza::asn1::Cpm&);
 	void generateMgmtCntnr(vanetza::asn1::Cpm&);
-	void generateStnCntnr(vanetza::asn1::Cpm&);
+	void generateCarStnCntnr(vanetza::asn1::Cpm&);
+	void generateRSUStnCntnr(vanetza::asn1::Cpm&);
+
 
 #ifdef REMOVE_CODE
 
