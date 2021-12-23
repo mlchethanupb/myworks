@@ -86,21 +86,20 @@ void CpService::trigger()
 
 void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::UpPacket> packet)
 {
+	Enter_Method("indicate");
 
-#ifdef COMPILE_CODE
-	Enter_Method("indicate")
+	EV<<"CPM message received"<< endl;
 
-	Asn1PacketVisitor<vanetza::asn1::Cam> visitor;
-	const vanetza::asn1::Cam* cam = boost::apply_visitor(visitor, *packet);
-	if (cam && cam->validate()) {
+	Asn1PacketVisitor<vanetza::asn1::Cpm> visitor;
+	const vanetza::asn1::Cpm* cpm = boost::apply_visitor(visitor, *packet);
+	if (cpm && cpm->validate()) {
 
-		//should be changed to cpobject
-		CaObject obj = visitor.shared_wrapper;
-		emit(scSignalCamReceived, &obj);
-		mLocalDynamicMap->updateAwareness(obj);
+		CpObject obj = visitor.shared_wrapper;
+		emit(scSignalCpmReceived, &obj);
+
+		const vanetza::asn1::Cpm& cpm_msg = obj.asn1();
+		retrieveCPMmessage(cpm_msg);
 	}
-#endif
-
 }
 
 void CpService::generateCPM(const omnetpp::SimTime& T_now) {
@@ -121,7 +120,9 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 
 void CpService::sendCpm(const SimTime& T_now) {
 
-	EV<<"Generating collective perception message: "<< endl;
+	EV<<"MLC -- Generating collective perception message: "<< endl;
+	std::cout <<"MLC -- Generating collective perception message: "<< endl;
+
 
 	vanetza::asn1::Cpm cpm_msg;
 
@@ -151,7 +152,7 @@ void CpService::sendCpm(const SimTime& T_now) {
 
 
 	CpObject obj(std::move(cpm_msg));
-	emit(scSignalCpmSent, &obj);
+	//emit(scSignalCpmSent, &obj);
 
 	using CpmByteBuffer = convertible::byte_buffer_impl<asn1::Cpm>;
 	std::unique_ptr<geonet::DownPacket> payload { new geonet::DownPacket() };
@@ -172,6 +173,7 @@ bool CpService::generateStnAndMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 
 	if( vanetza::geonet::StationType::Passenger_Car == mVehicleDataProvider->getStationType()){
 		generateCarStnCntnr(cpm_msg);
+
 	}else if(vanetza::geonet::StationType::RSU == mVehicleDataProvider->getStationType()){
 		// add check to see if ITS-S disseminate the MAP-message
 		
@@ -182,12 +184,22 @@ bool CpService::generateStnAndMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 	generateMgmtCntnr(cpm_msg);
 	
 	//steps to handle the segmentation
-
 	return true;
 }
 
 void CpService::generateMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 
+	CpmManagementContainer_t& mngmtCntnr = (*cpm_msg).cpm.cpmParameters.managementContainer;
+	
+	mngmtCntnr.stationType = static_cast<StationType_t>(mVehicleDataProvider->getStationType());
+
+	mngmtCntnr.referencePosition.altitude.altitudeValue = AltitudeValue_unavailable;
+	mngmtCntnr.referencePosition.altitude.altitudeConfidence = AltitudeConfidence_unavailable;
+	mngmtCntnr.referencePosition.longitude = artery::config::round(mVehicleDataProvider->longitude(), artery::config::microdegree) * Longitude_oneMicrodegreeEast;
+	mngmtCntnr.referencePosition.latitude = artery::config::round(mVehicleDataProvider->latitude(), artery::config::microdegree) * Latitude_oneMicrodegreeNorth;
+	mngmtCntnr.referencePosition.positionConfidenceEllipse.semiMajorOrientation = HeadingValue_unavailable;
+	mngmtCntnr.referencePosition.positionConfidenceEllipse.semiMajorConfidence = SemiAxisLength_unavailable;
+	mngmtCntnr.referencePosition.positionConfidenceEllipse.semiMinorConfidence = SemiAxisLength_unavailable;
 }
 
 void CpService::generateCarStnCntnr(vanetza::asn1::Cpm& cpm_msg){
@@ -203,8 +215,6 @@ void CpService::generateCarStnCntnr(vanetza::asn1::Cpm& cpm_msg){
 	orgvehcntnr.speed.speedValue = artery::config::buildSpeedValue(mVehicleDataProvider->speed());
 	orgvehcntnr.speed.speedConfidence = SpeedConfidence_equalOrWithinOneCentimeterPerSec * 3;
 	orgvehcntnr.driveDirection = mVehicleDataProvider->speed().value() >= 0.0 ? DriveDirection_forward : DriveDirection_backward;
-
-
 }
 
 void CpService::generateRSUStnCntnr(vanetza::asn1::Cpm& cpm_msg){
@@ -212,10 +222,14 @@ void CpService::generateRSUStnCntnr(vanetza::asn1::Cpm& cpm_msg){
 	StationDataContainer_t*& stndata =  (*cpm_msg).cpm.cpmParameters.stationDataContainer;
 	stndata = vanetza::asn1::allocate<StationDataContainer_t>();
 
-	
-
+	stndata->present = StationDataContainer_PR_originatingRSUContainer;
 }
 
+void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
+
+	EV<<" CPM message received, retriving information "<< endl;
+
+}
 
 #ifdef REMOVE_CODE
 

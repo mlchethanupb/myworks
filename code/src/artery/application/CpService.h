@@ -56,7 +56,7 @@ class CpService : public ItsG5BaseService
 	void generateMgmtCntnr(vanetza::asn1::Cpm&);
 	void generateCarStnCntnr(vanetza::asn1::Cpm&);
 	void generateRSUStnCntnr(vanetza::asn1::Cpm&);
-
+	void retrieveCPMmessage(const vanetza::asn1::Cpm&);
 
 #ifdef REMOVE_CODE
 
