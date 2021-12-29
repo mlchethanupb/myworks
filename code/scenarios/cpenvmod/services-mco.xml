@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services>
 	<service type="artery.application.CpService">
-		<listener port="2001" channel="180" />
+		<listener port="2006" channel="180" />
 	</service>
 	<service type="artery.application.ExampleService">
 		<listener port="4711" channel="180" />
