@@ -39,9 +39,9 @@ Define_Module(CpService)
 CpService::CpService() :
 		mGenCpmMin { 100, SIMTIME_MS },
 		mGenCpmMax { 1000, SIMTIME_MS },
-		mGenCpm(mGenCpmMax)
-		//mGenCamLowDynamicsCounter(0),
-		//mGenCamLowDynamicsLimit(3)
+		mGenCpm(mGenCpmMax),
+		mGenCpmLowDynamicsCounter(0),
+		mGenCpmLowDynamicsLimit(3)
 {
 }
 
@@ -52,6 +52,7 @@ void CpService::initialize()
 	mVehicleDataProvider = &getFacilities().get_const<VehicleDataProvider>();
 	mTimer = &getFacilities().get_const<Timer>();
 	mLocalDynamicMap = &getFacilities().get_mutable<artery::LocalDynamicMap>();
+	mLocalEnvironmentModel = &getFacilities().get_mutable<LocalEnvironmentModel>();
 
 	// avoid unreasonable high elapsed time values for newly inserted vehicles
 	mLastCpmTimestamp = simTime();
@@ -66,16 +67,13 @@ void CpService::initialize()
 	// look up primary channel for CA
 	ChannelNumber mPrimaryChannel = getFacilities().get_const<MultiChannelPolicy>().primaryChannel(vanetza::aid::CP);
 
-#ifdef REMOVE_CODE
 	// vehicle dynamics thresholds
 	mHeadingDelta = vanetza::units::Angle { par("headingDelta").doubleValue() * vanetza::units::degree };
 	mPositionDelta = par("positionDelta").doubleValue() * vanetza::units::si::meter;
 	mSpeedDelta = par("speedDelta").doubleValue() * vanetza::units::si::meter_per_second;
 
-	mDccRestriction = par("withDccRestriction");
+	//mDccRestriction = par("withDccRestriction");
 	mFixedRate = par("fixedRate");
-#endif
-
 }
 
 void CpService::trigger()
@@ -103,6 +101,21 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 	}
 }
 
+bool CpService::checkHeadingDelta() const
+{
+	return !vanetza::facilities::similar_heading(mLastCpmHeading, mVehicleDataProvider->heading(), mHeadingDelta);
+}
+
+bool CpService::checkPositionDelta() const
+{
+	return (distance(mLastCpmPosition, mVehicleDataProvider->position()) > mPositionDelta);
+}
+
+bool CpService::checkSpeedDelta() const
+{
+	return abs(mLastCpmSpeed - mVehicleDataProvider->speed()) > mSpeedDelta;
+}
+
 void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 
 	// provide variables named like in TR 103 562 V0.0.16 (section 4.3.4)
@@ -111,11 +124,22 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 	const SimTime& T_GenCpmMax = mGenCpmMax;
 	const SimTime T_elapsed = T_now - mLastCpmTimestamp;
 
-	//@todo: cross check the behaviour with CA implementaion
-	mLastSenrInfoCntnrTimestamp = T_now;
-
 	if (T_elapsed >= T_GenCpm) {
 		sendCpm(T_now);			
+	}
+	if (T_elapsed >= T_GenCpmMax) { //T_GenCpmDcc to be used??
+		if (mFixedRate) {
+			sendCpm(T_now);
+		} else if (checkHeadingDelta() || checkPositionDelta() || checkSpeedDelta()) {
+			sendCpm(T_now);
+			T_GenCpm = std::min(T_elapsed, T_GenCpmMax); /*< if middleware update interval is too long */
+			mGenCpmLowDynamicsCounter = 0;
+		} else if (T_elapsed >= T_GenCpm) {
+			sendCpm(T_now);
+			if (++mGenCpmLowDynamicsCounter >= mGenCpmLowDynamicsLimit) {
+				T_GenCpm = T_GenCpmMax;
+			}
+		}
 	}
 }
 
@@ -125,6 +149,8 @@ void CpService::sendCpm(const SimTime& T_now) {
 	std::cout <<"================================================================ "<< endl;
 	std::cout <<"MLC -- Generating collective perception message: "<< endl;
 
+	bool snsrcntr_prsnt = false;
+	bool prcvdobjcntr_prsnt = false;
 
 	vanetza::asn1::Cpm cpm_msg;
 
@@ -138,8 +164,13 @@ void CpService::sendCpm(const SimTime& T_now) {
 	uint16_t genDeltaTime = countTaiMilliseconds(mTimer->getTimeFor(mVehicleDataProvider->updated()));
 	cpm.generationDeltaTime = genDeltaTime * GenerationDeltaTime_oneMilliSec;
 
+	if(T_now - mLastSenrInfoCntnrTimestamp >= SimTime(1, SIMTIME_S)){
+		snsrcntr_prsnt = generateSensorInfoCntnr(cpm_msg);
+	} 
 
-	if( generatePerceivedObjectsCntnr(cpm_msg) || generateSensorInfoCntnr(cpm_msg) ) {
+	prcvdobjcntr_prsnt = generatePerceivedObjectsCntnr(cpm_msg);
+	
+	if(prcvdobjcntr_prsnt || snsrcntr_prsnt ) {
 		generateStnAndMgmtCntnr(cpm_msg);
 	} 
 
@@ -168,6 +199,12 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg){
 }
 
 bool CpService::generateSensorInfoCntnr(vanetza::asn1::Cpm& cpm_msg){
+
+	SensorInformationContainer_t*& snsrinfo_cntr =  (*cpm_msg).cpm.cpmParameters.sensorInformationContainer;
+	snsrinfo_cntr = nullptr; //vanetza::asn1::allocate<SensorInformationContainer_t>();
+
+	std::vector<Sensor*> sensors = mLocalEnvironmentModel->allSensors();
+
 	return true;
 }
 

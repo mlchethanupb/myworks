@@ -38,25 +38,39 @@ class CpService : public ItsG5BaseService
 		omnetpp::SimTime mGenCpmMin;
 		omnetpp::SimTime mGenCpmMax;
 		omnetpp::SimTime mGenCpm;
-
+		Position mLastCpmPosition;
+		vanetza::units::Velocity mLastCpmSpeed;
+		vanetza::units::Angle mLastCpmHeading;
 		omnetpp::SimTime mLastCpmTimestamp;
 		omnetpp::SimTime mLastSenrInfoCntnrTimestamp;
+		unsigned mGenCpmLowDynamicsCounter;
+		unsigned mGenCpmLowDynamicsLimit;
 
 		ChannelNumber mPrimaryChannel = channel::CCH;
 		const NetworkInterfaceTable* mNetworkInterfaceTable = nullptr;
 		const VehicleDataProvider* mVehicleDataProvider = nullptr;
 		const Timer* mTimer = nullptr;
 		LocalDynamicMap* mLocalDynamicMap = nullptr;
+		LocalEnvironmentModel* mLocalEnvironmentModel=nullptr;
 
-	void generateCPM(const omnetpp::SimTime&);
-	void sendCpm(const omnetpp::SimTime&);
-	bool generatePerceivedObjectsCntnr(vanetza::asn1::Cpm&);
-	bool generateSensorInfoCntnr(vanetza::asn1::Cpm&);
-	bool generateStnAndMgmtCntnr(vanetza::asn1::Cpm&);
-	void generateMgmtCntnr(vanetza::asn1::Cpm&);
-	void generateCarStnCntnr(vanetza::asn1::Cpm&);
-	void generateRSUStnCntnr(vanetza::asn1::Cpm&);
-	void retrieveCPMmessage(const vanetza::asn1::Cpm&);
+		vanetza::units::Angle mHeadingDelta;
+		vanetza::units::Length mPositionDelta;
+		vanetza::units::Velocity mSpeedDelta;
+		bool mFixedRate;
+
+		void checkTriggeringConditions(const omnetpp::SimTime&);
+		bool checkHeadingDelta() const;
+		bool checkPositionDelta() const;
+		bool checkSpeedDelta() const;
+		void generateCPM(const omnetpp::SimTime&);
+		void sendCpm(const omnetpp::SimTime&);
+		bool generatePerceivedObjectsCntnr(vanetza::asn1::Cpm&);
+		bool generateSensorInfoCntnr(vanetza::asn1::Cpm&);
+		bool generateStnAndMgmtCntnr(vanetza::asn1::Cpm&);
+		void generateMgmtCntnr(vanetza::asn1::Cpm&);
+		void generateCarStnCntnr(vanetza::asn1::Cpm&);
+		void generateRSUStnCntnr(vanetza::asn1::Cpm&);
+		void retrieveCPMmessage(const vanetza::asn1::Cpm&);
 
 #ifdef REMOVE_CODE
 
