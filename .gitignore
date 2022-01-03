@@ -9,3 +9,4 @@ build
 
 #Don't include the result folder of the scenarios
 code/scenarios/**/results/
+code/doc
