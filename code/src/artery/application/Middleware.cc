@@ -209,6 +209,7 @@ void Middleware::requestTransmission(const vanetza::btp::DataRequestB& request,
 void Middleware::requestTransmission(const vanetza::btp::DataRequestB& request, std::unique_ptr<vanetza::DownPacket> packet)
 {
     Enter_Method("requestTransmission");
+    //std::cout << "MLC -- Middleware::requestTransmission" << endl;
 
     auto channels = mMultiChannelPolicy->allChannels(request.gn.its_aid);
     if (channels.empty()) {

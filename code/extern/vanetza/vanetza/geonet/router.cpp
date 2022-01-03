@@ -202,6 +202,7 @@ void Router::set_random_seed(std::uint_fast32_t seed)
 
 DataConfirm Router::request(const ShbDataRequest& request, DownPacketPtr payload)
 {
+    //std::cout << "MLC -- vanetza::geonet::router::request " << std::endl;
     DataConfirm result;
     result ^= validate_data_request(request, m_mib);
     result ^= validate_payload(payload, m_mib);
@@ -357,12 +358,14 @@ void Router::indicate(UpPacketPtr packet, const MacAddress& sender, const MacAdd
 
         void operator()(CohesivePacket& packet)
         {
+            std::cout << "CohesivePacket" << std::endl;
             IndicationContextDeserialize ctx(std::move(m_packet), packet, m_link_layer);
             m_router.indicate_basic(ctx);
         }
 
         void operator()(ChunkPacket& packet)
         {
+            //std::cout << "MLC::ChunkPacket" << std::endl;
             IndicationContextCast ctx(std::move(m_packet), packet, m_link_layer);
             m_router.indicate_basic(ctx);
         }
@@ -378,11 +381,20 @@ void Router::indicate(UpPacketPtr packet, const MacAddress& sender, const MacAdd
 
     UpPacket* packet_ptr = packet.get();
     indication_visitor visitor(*this, link_layer, std::move(packet));
-    boost::apply_visitor(visitor, *packet_ptr);
+
+#if 1
+    if(packet_ptr == NULL){
+        std::cout << "packet_ptr is null" << std::endl;
+    }else{
+        boost::apply_visitor(visitor, *packet_ptr);
+    }
+    
+#endif
 }
 
 void Router::indicate_basic(IndicationContextBasic& ctx)
 {
+    //std::cout << "MLC - Router::indicate_basic" << std::endl;
     const BasicHeader* basic = ctx.parse_basic();
     if (!basic) {
         packet_dropped(PacketDropReason::Parse_Basic_Header);
@@ -409,6 +421,7 @@ void Router::indicate_basic(IndicationContextBasic& ctx)
 
 void Router::indicate_common(IndicationContext& ctx, const BasicHeader& basic)
 {
+    //std::cout << "MLC - Router::indicate_common" << std::endl;
     const CommonHeader* common = ctx.parse_common();
     if (!common) {
         packet_dropped(PacketDropReason::Parse_Common_Header);
@@ -526,6 +539,8 @@ void Router::indicate_secured(IndicationContextBasic& ctx, const BasicHeader& ba
 
 void Router::indicate_extended(IndicationContext& ctx, const CommonHeader& common)
 {
+
+    //std::cout << "MLC - Router::indicate_extended" << std::endl;
     struct extended_header_visitor : public boost::static_visitor<bool>
     {
         extended_header_visitor(Router& router, IndicationContext& ctx, const UpPacket& packet) :
@@ -535,6 +550,7 @@ void Router::indicate_extended(IndicationContext& ctx, const CommonHeader& commo
 
         bool operator()(const ShbHeader& shb)
         {
+            //std::cout << "MLC - Router::indicate_extended::operator(Shbheader)" << std::endl;
             DataIndication& indication = m_context.service_primitive();
             indication.transport_type = TransportType::SHB;
             indication.source_position = static_cast<ShortPositionVector>(shb.source_position);
@@ -655,6 +671,7 @@ void Router::execute_itsg5_procedures()
 
 void Router::pass_down(const dcc::DataRequest& request, PduPtr pdu, DownPacketPtr payload)
 {
+    //std::cout << "MLC -- geonet::router::pass_down()" << std::endl;
     assert(pdu);
     assert(payload);
     if (pdu->secured()) {
@@ -691,6 +708,8 @@ void Router::pass_down(const MacAddress& addr, PduPtr pdu, DownPacketPtr payload
 
 void Router::pass_up(const DataIndication& ind, UpPacketPtr packet)
 {
+    //std::cout << "MLC - Router::pass_up, through dispatcher it should call the service::indicate" << std::endl;
+
     TransportInterface* transport = m_transport_ifcs[ind.upper_protocol];
     if (transport != nullptr) {
         transport->indicate(ind, std::move(packet));
@@ -960,6 +979,8 @@ bool Router::outside_sectorial_contention_area(const MacAddress& sender, const M
 
 bool Router::process_extended(const ExtendedPduConstRefs<ShbHeader>& pdu, const UpPacket& packet, const LinkLayer& ll)
 {
+    //std::cout << "MLC - Router::process_extended" << std::endl;
+
     const ShbHeader& shb = pdu.extended();
     const Address& source_addr = shb.source_position.gn_addr;
 

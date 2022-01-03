@@ -183,8 +183,12 @@ void RadioDriver::handleDataIndication(cMessage* packet)
     packet->setControlInfo(indication);
     delete lteControlInfo;
 
-    //indicateData(packet);
-    EV<<" RadioDriver::handleDataIndication"<<endl;
+    std::cout << "-------------------------------------------------------------"<< std::endl;
+    if(packet-> isPacket()){
+        std::cout << "cMessage is a Cpacket" << std::endl;
+    }
+    indicateData(packet);
+    EV<<" MLC -- RadioDriver::handleDataIndication"<<endl;
 }
 
 void RadioDriver::handleDataRequest(cMessage* packet)
@@ -207,7 +211,9 @@ void RadioDriver::handleDataRequest(cMessage* packet)
     if (request->destination_addr == vanetza::cBroadcastMacAddress) {
         lteControlInfo->setDirection(D2D_MULTI);
     }
-    
+
+    std::cout << "MLC - commenting the code which extracts payload" << std::endl;
+    /*
     auto* geonet = omnetpp::check_and_cast<GeoNetPacket*>(packet);
 
     Asn1PacketVisitor<vanetza::asn1::Cam> visitor;
@@ -216,7 +222,7 @@ void RadioDriver::handleDataRequest(cMessage* packet)
         CaObject obj = visitor.shared_wrapper;
         EV << "CAM received ID " << obj.asn1()->header.messageID << endl;
     }
-
+    */
     packet->setControlInfo(lteControlInfo);
     CAMSGenerated = CAMSGenerated+1;
     CAMId = CAMId+1;

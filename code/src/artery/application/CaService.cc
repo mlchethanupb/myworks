@@ -80,10 +80,12 @@ void CaService::trigger()
 void CaService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::UpPacket> packet)
 {
 	Enter_Method("indicate");
+	//std::cout << "MLC - CaService::indicate" << std::endl;
 
 	Asn1PacketVisitor<vanetza::asn1::Cam> visitor;
 	const vanetza::asn1::Cam* cam = boost::apply_visitor(visitor, *packet);
 	if (cam && cam->validate()) {
+		EV << "CAM message received" << endl;
 		CaObject obj = visitor.shared_wrapper;
 		emit(scSignalCamReceived, &obj);
 		mLocalDynamicMap->updateAwareness(obj);
@@ -181,6 +183,9 @@ SimTime CaService::genCamDcc()
 vanetza::asn1::Cam createCooperativeAwarenessMessage(const VehicleDataProvider& vdp, uint16_t genDeltaTime)
 {
     EV<<"Creating cooperative awareness message: "<< genDeltaTime<< endl;
+	std::cout <<"================================================================ "<< endl;
+	std::cout <<"Creating cooperative awareness message:  "<< endl;
+
 	vanetza::asn1::Cam message;
 
 	ItsPduHeader_t& header = (*message).header;

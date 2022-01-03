@@ -87,6 +87,7 @@ void CpService::trigger()
 void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::UpPacket> packet)
 {
 	Enter_Method("indicate");
+	//std::cout << "MLC - CpService::indicate" << std::endl;
 
 	EV<<"CPM message received"<< endl;
 
@@ -95,7 +96,7 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 	if (cpm && cpm->validate()) {
 
 		CpObject obj = visitor.shared_wrapper;
-		emit(scSignalCpmReceived, &obj);
+		//emit(scSignalCpmReceived, &obj);
 
 		const vanetza::asn1::Cpm& cpm_msg = obj.asn1();
 		retrieveCPMmessage(cpm_msg);
@@ -121,6 +122,7 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 void CpService::sendCpm(const SimTime& T_now) {
 
 	EV<<"MLC -- Generating collective perception message: "<< endl;
+	std::cout <<"================================================================ "<< endl;
 	std::cout <<"MLC -- Generating collective perception message: "<< endl;
 
 
@@ -175,15 +177,14 @@ bool CpService::generateStnAndMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 		generateCarStnCntnr(cpm_msg);
 
 	}else if(vanetza::geonet::StationType::RSU == mVehicleDataProvider->getStationType()){
-		// add check to see if ITS-S disseminate the MAP-message
-		
+		// @todo: add check to see if ITS-S disseminate the MAP-message
 		// assemble the originating RSU container
 		generateRSUStnCntnr(cpm_msg);
 	}
 	
 	generateMgmtCntnr(cpm_msg);
 	
-	//steps to handle the segmentation
+	//@todo: steps to handle the segmentation
 	return true;
 }
 
@@ -228,6 +229,7 @@ void CpService::generateRSUStnCntnr(vanetza::asn1::Cpm& cpm_msg){
 void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
 	EV<<" CPM message received, retriving information "<< endl;
+	std::cout <<" CPM message received, retriving information "<< endl;
 
 }
 

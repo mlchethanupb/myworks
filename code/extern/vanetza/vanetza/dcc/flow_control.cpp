@@ -6,7 +6,7 @@
 #include <vanetza/access/interface.hpp>
 #include <vanetza/common/runtime.hpp>
 #include <algorithm>
-
+#include <iostream> //MLC
 namespace vanetza
 {
 namespace dcc
@@ -24,6 +24,8 @@ FlowControl::~FlowControl()
 
 void FlowControl::request(const DataRequest& request, std::unique_ptr<ChunkPacket> packet)
 {
+    //std::cout << "MLC - vaneta::dcc::FlowControl::request()"<<std::endl;
+
     drop_expired();
 
     const TransmissionLite transmission { request.dcc_profile, packet->size() };
@@ -149,6 +151,8 @@ void FlowControl::drop_expired()
 
 void FlowControl::transmit(const DataRequest& request, std::unique_ptr<ChunkPacket> packet)
 {
+    //std::cout << "MLC vanetza::dcc::flowcontrol::transmit()" << std::endl;
+    
     access::DataRequest access_request;
     access_request.source_addr = request.source;
     access_request.destination_addr = request.destination;

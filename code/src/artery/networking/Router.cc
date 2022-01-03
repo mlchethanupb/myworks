@@ -111,22 +111,34 @@ void Router::receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t signal, om
 
 void Router::handleMessage(omnetpp::cMessage* msg)
 {
+    //std::cout << "MLC - message received from lower layers" << std::endl;
+    EV << "MLC - message received from lower layers" << std::endl;
+
     if (msg->getArrivalGate() == mRadioDriverDataIn) {
+        std::cout << "CAM or CPM message received" << std::endl;
+
         auto* packet = omnetpp::check_and_cast<GeoNetPacket*>(msg);
         auto* indication = omnetpp::check_and_cast<GeoNetIndication*>(packet->getControlInfo());
+        
+        if( packet->hasPayload()){
+            std::cout << "payload is not empty" << std::endl;
+        }else{
+            std::cout << "payload is empty" << std::endl;
+        }
+        //check whether first argument is null 
         mRouter->indicate(std::move(*packet).extractPayload(), indication->source, indication->destination);
-
+ 
         // auto payload = boost::create_byte_view(*std::move(*packet).extractPayload(), vanetza::OsiLayer::Application);
 
+        /*
         Asn1PacketVisitor<vanetza::asn1::Cam> visitor;
         const vanetza::asn1::Cam* cam = boost::apply_visitor(visitor, *std::move(*packet).extractPayload());
-        EV << "CAM received ID " << endl;
+        std::cout << "CAM received ID " << endl;
         if (cam && cam->validate()) {
             CaObject obj = visitor.shared_wrapper;
-            EV << "CAM received ID " << obj.asn1()->header.messageID << endl;
+            std::cout << "CAM received ID " << obj.asn1()->header.messageID << endl;
  
-        }
-
+        }*/
     }
     else if (msg->getArrivalGate() == mRadioDriverPropertiesIn)
     {
@@ -158,6 +170,8 @@ void Router::request(const vanetza::btp::DataRequestB& request, std::unique_ptr<
 {
     ASSERT(mRouter);
     Enter_Method("request");
+    EV << "MLC -- Router::request" << endl;
+    //std::cout << "MLC -- Router::request" << endl;
 
     using namespace vanetza;
     btp::HeaderB btp_header;
