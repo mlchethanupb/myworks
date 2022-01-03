@@ -38,13 +38,17 @@ class CpService : public ItsG5BaseService
 		omnetpp::SimTime mGenCpmMin;
 		omnetpp::SimTime mGenCpmMax;
 		omnetpp::SimTime mGenCpm;
-		Position mLastCpmPosition;
-		vanetza::units::Velocity mLastCpmSpeed;
-		vanetza::units::Angle mLastCpmHeading;
 		omnetpp::SimTime mLastCpmTimestamp;
 		omnetpp::SimTime mLastSenrInfoCntnrTimestamp;
 		unsigned mGenCpmLowDynamicsCounter;
 		unsigned mGenCpmLowDynamicsLimit;
+
+		Position mLastCpmPosition;
+		vanetza::units::Velocity mLastCpmSpeed;
+		vanetza::units::Angle mLastCpmHeading;
+		vanetza::units::Angle mHeadingDelta;
+		vanetza::units::Length mPositionDelta;
+		vanetza::units::Velocity mSpeedDelta;
 
 		ChannelNumber mPrimaryChannel = channel::CCH;
 		const NetworkInterfaceTable* mNetworkInterfaceTable = nullptr;
@@ -53,9 +57,7 @@ class CpService : public ItsG5BaseService
 		LocalDynamicMap* mLocalDynamicMap = nullptr;
 		LocalEnvironmentModel* mLocalEnvironmentModel=nullptr;
 
-		vanetza::units::Angle mHeadingDelta;
-		vanetza::units::Length mPositionDelta;
-		vanetza::units::Velocity mSpeedDelta;
+
 		bool mFixedRate;
 
 		void checkTriggeringConditions(const omnetpp::SimTime&);

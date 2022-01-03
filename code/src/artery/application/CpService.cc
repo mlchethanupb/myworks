@@ -166,6 +166,9 @@ void CpService::sendCpm(const SimTime& T_now) {
 
 	if(T_now - mLastSenrInfoCntnrTimestamp >= SimTime(1, SIMTIME_S)){
 		snsrcntr_prsnt = generateSensorInfoCntnr(cpm_msg);
+		if(snsrcntr_prsnt){
+			mLastSenrInfoCntnrTimestamp = T_now;
+		}
 	} 
 
 	prcvdobjcntr_prsnt = generatePerceivedObjectsCntnr(cpm_msg);
