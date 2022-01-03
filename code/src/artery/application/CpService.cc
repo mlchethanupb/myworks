@@ -11,6 +11,7 @@
 #include "artery/application/Asn1PacketVisitor.h"
 #include "artery/application/MultiChannelPolicy.h"
 #include "artery/application/VehicleDataProvider.h"
+#include "artery/envmod/sensor/SensorPosition.h"
 #include "artery/utility/simtime_cast.h"
 #include "veins/base/utils/Coord.h"
 #include <boost/units/cmath.hpp>
@@ -84,10 +85,15 @@ void CpService::trigger()
 
 void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::UpPacket> packet)
 {
+
 	Enter_Method("indicate");
 	//std::cout << "MLC - CpService::indicate" << std::endl;
 
 	EV<<"CPM message received"<< endl;
+
+	if(mSensorsId.empty()){
+		generate_sensorid();
+	}
 
 	Asn1PacketVisitor<vanetza::asn1::Cpm> visitor;
 	const vanetza::asn1::Cpm* cpm = boost::apply_visitor(visitor, *packet);
@@ -149,6 +155,10 @@ void CpService::sendCpm(const SimTime& T_now) {
 	std::cout <<"================================================================ "<< endl;
 	std::cout <<"MLC -- Generating collective perception message: "<< endl;
 
+	if(mSensorsId.empty()){
+		generate_sensorid();
+	}
+
 	bool snsrcntr_prsnt = false;
 	bool prcvdobjcntr_prsnt = false;
 
@@ -201,14 +211,89 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg){
 	return true;
 }
 
-bool CpService::generateSensorInfoCntnr(vanetza::asn1::Cpm& cpm_msg){
-
-	SensorInformationContainer_t*& snsrinfo_cntr =  (*cpm_msg).cpm.cpmParameters.sensorInformationContainer;
-	snsrinfo_cntr = nullptr; //vanetza::asn1::allocate<SensorInformationContainer_t>();
+void CpService::generate_sensorid(){
 
 	std::vector<Sensor*> sensors = mLocalEnvironmentModel->allSensors();
 
-	return true;
+	//Check that at least some sensors are available and that some of them are for perception, i.e., radar.
+    if (sensors.size() == 0 || boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "Radar")) == 0){
+        EV_WARN << "No sensors for local perception currently used along the CP service" << std::endl;
+	}
+
+    for (int i = 0; i < sensors.size(); i++) {
+        mSensorsId.insert(std::pair<Sensor *, Identifier_t>(sensors[i], i));
+		/*
+        if (!mCPSensor && sensors[i]->getSensorCategory() == "CP")
+            mCPSensor = sensors[i];
+
+        if (!mCASensor && sensors[i]->getSensorCategory() == "CA")
+            mCASensor = sensors[i];
+		*/
+    }
+}
+
+void CpService::addsensorinfo(SensorInformationContainer_t *& snsrinfo_cntr, Sensor*& sensor, SensorType_t sensorType){
+
+	if(!snsrinfo_cntr){
+
+		SensorInformation_t* snsr_info =  vanetza::asn1::allocate<SensorInformation_t>();
+
+		snsr_info->sensorID = mSensorsId.at(sensor);
+		snsr_info->type = sensorType;
+		snsr_info->detectionArea.present = DetectionArea_PR_vehicleSensor;
+		
+		VehicleSensor_t& vehicle_snsr =  snsr_info->detectionArea.choice.vehicleSensor;
+
+		std::pair<long, long> positionPair = artery::relativePosition(sensor->position());
+
+		vehicle_snsr.refPointId = 0;
+		vehicle_snsr.xSensorOffset = positionPair.first;
+		vehicle_snsr.ySensorOffset = positionPair.second;
+		
+		//In our case only add 1 vehicle sensor properties for each sensor
+		VehicleSensorProperties_t* vhcleSnsrProp =  vanetza::asn1::allocate<VehicleSensorProperties_t>();
+
+		vhcleSnsrProp->range = sensor->getFieldOfView()->range.value() * Range_oneMeter;
+		const double openingAngleDeg = sensor->getFieldOfView()->angle / boost::units::degree::degrees;
+    	const double sensorPositionDeg = artery::relativeAngle(sensor->position()) / boost::units::degree::degrees;
+
+		 //angle anti-clockwise
+    	vhcleSnsrProp->horizontalOpeningAngleStart = std::fmod(std::fmod((sensorPositionDeg - 0.5 * openingAngleDeg), 
+													 (double) 360) + 360, 360) * CartesianAngleValue_oneDegree;
+    	vhcleSnsrProp->horizontalOpeningAngleEnd = std::fmod(std::fmod((sensorPositionDeg + 0.5 * openingAngleDeg), 
+												   (double) 360) + 360, 360) * CartesianAngleValue_oneDegree;
+
+		int result = ASN_SEQUENCE_ADD(&vehicle_snsr.vehicleSensorPropertyList, vhcleSnsrProp);
+		if (result != 0) {
+			perror("asn_set_add() failed");
+			exit(EXIT_FAILURE);
+		}
+
+		result = ASN_SEQUENCE_ADD(snsrinfo_cntr, snsr_info);
+		if (result != 0) {
+			perror("asn_set_add() failed");
+			exit(EXIT_FAILURE);
+		}
+		
+	}else{
+		EV_WARN << "Sensor Information container is not initialized" << std::endl;
+	}
+
+}
+
+bool CpService::generateSensorInfoCntnr(vanetza::asn1::Cpm& cpm_msg){
+
+	SensorInformationContainer_t*& snsrinfo_cntr =  (*cpm_msg).cpm.cpmParameters.sensorInformationContainer;
+	snsrinfo_cntr = vanetza::asn1::allocate<SensorInformationContainer_t>();
+
+	std::vector<Sensor*> sensors = mLocalEnvironmentModel->allSensors();
+
+    for (int i = 0; i < sensors.size(); i++) {
+        if (sensors[i]->getSensorCategory() == "Radar") {
+            addsensorinfo(snsrinfo_cntr, sensors[i],SensorType_radar);
+        }
+    }
+ 	return true;
 }
 
 bool CpService::generateStnAndMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){

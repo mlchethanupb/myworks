@@ -36,4 +36,29 @@ boost::units::quantity<boost::units::degree::plane_angle> relativeAngle(SensorPo
     return angle;
 }
 
+std::pair<long, long> relativePosition(SensorPosition pos)
+{
+
+    std::pair<long, long> position;
+    switch(pos)
+    {
+        case SensorPosition::FRONT:
+            position = std::make_pair(FRONTMIDX, FRONTMIDY);
+            break;
+
+        case SensorPosition::BACK:
+            position = std::make_pair(BACKMIDX,BACKMIDY);
+            break;
+
+        case SensorPosition::LEFT:
+            position = std::make_pair(LETFTMIDX,LETFTMIDY);
+            break;
+
+        case SensorPosition::RIGHT:
+            position = std::make_pair(RIGHTTMIDX,RIGHTMIDY);
+            break;
+    }
+    return position;
+}
+
 } // namespace artery

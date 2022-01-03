@@ -22,7 +22,17 @@ enum class SensorPosition
     RIGHT
 };
 
+const long FRONTMIDX = 0;
+const long FRONTMIDY = 0;
+const long BACKMIDX = -1;
+const long BACKMIDY = 0;
+const long LETFTMIDX = -0.5;
+const long LETFTMIDY = 0.5;
+const long RIGHTTMIDX = -0.5;
+const long RIGHTMIDY = -0.5;
+
 boost::units::quantity<boost::units::degree::plane_angle> relativeAngle(SensorPosition pos);
+std::pair<long, long> relativePosition(SensorPosition pos);
 
 } // namespace artery
 

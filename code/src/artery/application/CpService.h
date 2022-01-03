@@ -11,6 +11,7 @@
 #include "artery/utility/Channel.h"
 #include "artery/utility/Geometry.h"
 #include "artery/envmod/LocalEnvironmentModel.h"
+#include "artery/envmod/sensor/Sensor.h"
 #include <vanetza/asn1/cam.hpp>
 #include <vanetza/asn1/cpm.hpp>
 #include <vanetza/btp/data_interface.hpp>
@@ -49,6 +50,7 @@ class CpService : public ItsG5BaseService
 		vanetza::units::Angle mHeadingDelta;
 		vanetza::units::Length mPositionDelta;
 		vanetza::units::Velocity mSpeedDelta;
+		bool mFixedRate;
 
 		ChannelNumber mPrimaryChannel = channel::CCH;
 		const NetworkInterfaceTable* mNetworkInterfaceTable = nullptr;
@@ -56,9 +58,10 @@ class CpService : public ItsG5BaseService
 		const Timer* mTimer = nullptr;
 		LocalDynamicMap* mLocalDynamicMap = nullptr;
 		LocalEnvironmentModel* mLocalEnvironmentModel=nullptr;
+		std::map<const Sensor*, Identifier_t> mSensorsId;
 
 
-		bool mFixedRate;
+		
 
 		void checkTriggeringConditions(const omnetpp::SimTime&);
 		bool checkHeadingDelta() const;
@@ -73,6 +76,8 @@ class CpService : public ItsG5BaseService
 		void generateCarStnCntnr(vanetza::asn1::Cpm&);
 		void generateRSUStnCntnr(vanetza::asn1::Cpm&);
 		void retrieveCPMmessage(const vanetza::asn1::Cpm&);
+		void generate_sensorid();
+		void addsensorinfo(SensorInformationContainer_t *&seqSensInfCont, Sensor *&sensor, SensorType_t sensorType);
 
 #ifdef REMOVE_CODE
 
