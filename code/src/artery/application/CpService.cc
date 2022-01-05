@@ -234,7 +234,7 @@ void CpService::generate_sensorid(){
 
 void CpService::addsensorinfo(SensorInformationContainer_t *& snsrinfo_cntr, Sensor*& sensor, SensorType_t sensorType){
 
-	if(!snsrinfo_cntr){
+	if(snsrinfo_cntr){
 
 		SensorInformation_t* snsr_info =  vanetza::asn1::allocate<SensorInformation_t>();
 
