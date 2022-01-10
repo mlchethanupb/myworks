@@ -13,6 +13,7 @@
 #include <inet/common/ModuleAccess.h>
 #include <omnetpp/cxmlelement.h>
 #include <utility>
+#include <artery/envmod/sensor/CamSensor.h>
 
 using namespace omnetpp;
 
@@ -22,6 +23,8 @@ namespace artery
 Define_Module(LocalEnvironmentModel);
 
 static const simsignal_t EnvironmentModelRefreshSignal = cComponent::registerSignal("EnvironmentModel.refresh");
+static const simsignal_t scTimeBetweenUpdates = cComponent::registerSignal("timeBetweenUpdates");
+
 
 LocalEnvironmentModel::LocalEnvironmentModel() :
     mGlobalEnvironmentModel(nullptr)
@@ -67,15 +70,24 @@ void LocalEnvironmentModel::receiveSignal(cComponent*, simsignal_t signal, cObje
 
 void LocalEnvironmentModel::complementObjects(const SensorDetection& detection, const Sensor& sensor)
 {
-   for (auto& detectedObject : detection.objects) {
-      auto foundObject = mObjects.find(detectedObject);
-      if (foundObject != mObjects.end()) {
-         Tracking& tracking = foundObject->second;
-         tracking.tap(&sensor);
-      } else {
-         mObjects.emplace(detectedObject, Tracking { &sensor });
-      }
-   }
+    auto it = detection.numberOfCornersDetected.begin();
+    for (auto& detectedObject : detection.objects) {
+        auto foundObject = mObjects.find(detectedObject);
+        if (foundObject != mObjects.end()) {
+            Tracking& tracking = foundObject->second;
+            if(sensor.getSensorCategory() == "CA" || sensor.getSensorCategory() == "CP"){
+                SimTime lastUpdate = tracking.getTimeSinceLastUpdate();
+                //TODO remove the second condition
+                if(!lastUpdate.isZero()) // && lastUpdate < omnetpp::SimTime(100, SIMTIME_MS)
+                    emit(scTimeBetweenUpdates, lastUpdate);
+            }
+            tracking.updateQuality(&sensor, *it);
+            tracking.tap(&sensor);
+        } else {
+            mObjects.emplace(detectedObject, Tracking { &sensor, *it});
+        }
+        it++;
+    }
 }
 
 void LocalEnvironmentModel::update()
@@ -134,6 +146,11 @@ LocalEnvironmentModel::Tracking::Tracking(const Sensor* sensor)
     mSensors.emplace(sensor, TrackingTime {});
 }
 
+LocalEnvironmentModel::Tracking::Tracking(const Sensor* sensor, const int nbVisiblePoints){
+    mSensors.emplace(sensor, TrackingTime {});
+    mQuality.emplace(sensor, nbVisiblePoints);
+}
+
 bool LocalEnvironmentModel::Tracking::expired() const
 {
     return mSensors.empty();
@@ -165,11 +182,48 @@ void LocalEnvironmentModel::Tracking::tap(const Sensor* sensor)
     }
 }
 
+void LocalEnvironmentModel::Tracking::updateQuality(const Sensor* sensor, int nbCornersDetected){
+    auto found = mQuality.find(sensor);
+    if (found != mQuality.end()) {
+        found->second = nbCornersDetected;
+    } else {
+        mQuality.emplace(sensor, nbCornersDetected);
+    }
+}
+
+SimTime LocalEnvironmentModel::Tracking::getTimeSinceLastUpdate(){
+    SimTime timeElapsedMin = 0;
+
+    for(auto it = this->sensors().begin(); it != this->sensors().end(); it++) {
+        const Sensor* sensor = it->first;
+        const TrackingTime& tracking = it->second;
+        if(sensor->getSensorCategory() == "CA" || sensor->getSensorCategory() == "CP"){
+            SimTime timeElapsed = simTime() - tracking.last();
+            if(timeElapsedMin.isZero() || timeElapsed < timeElapsedMin){
+                timeElapsedMin = timeElapsed;
+            }
+        }
+    }
+    return timeElapsedMin;
+}
+
 
 LocalEnvironmentModel::TrackingTime::TrackingTime() :
    mFirst(simTime()), mLast(simTime())
 {
 }
+
+
+LocalEnvironmentModel::TrackingTime::TrackingTime(omnetpp::SimTime time) :
+        mFirst(time), mLast(time)
+{}
+
+
+void LocalEnvironmentModel::TrackingTime::setLast(omnetpp::SimTime time)
+{
+    mLast = time;
+}
+
 
 void LocalEnvironmentModel::TrackingTime::tap()
 {

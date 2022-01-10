@@ -78,6 +78,7 @@ class CpService : public ItsG5BaseService
 		void retrieveCPMmessage(const vanetza::asn1::Cpm&);
 		void generate_sensorid();
 		void addsensorinfo(SensorInformationContainer_t *&seqSensInfCont, Sensor *&sensor, SensorType_t sensorType);
+		void generate_objlist();
 
 #ifdef REMOVE_CODE
 

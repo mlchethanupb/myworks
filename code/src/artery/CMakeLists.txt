@@ -10,6 +10,8 @@ add_library(core SHARED
     application/DenmObject.cc
     application/DenService.cc
     application/ExampleService.cc
+    application/FilterObjects.cc
+    application/InfoObject.cpp
     application/ItsG5BaseService.cc
     application/ItsG5PromiscuousService.cc
     application/ItsG5Service.cc
@@ -43,8 +45,8 @@ add_library(core SHARED
     networking/VehiclePositionProvider.cc
     nic/ChannelLoadSampler.cc
 	nic/RadioDriver.cc
-nic/RadioDriverBase.cc  
-  nic/ChannelLoadMeasurements.cc
+    nic/RadioDriverBase.cc  
+    nic/ChannelLoadMeasurements.cc
     traci/MobilityBase.cc
     traci/VehicleController.cc
     traci/VehicleType.cc

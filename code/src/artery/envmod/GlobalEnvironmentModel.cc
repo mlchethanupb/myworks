@@ -68,10 +68,14 @@ bool GlobalEnvironmentModel::addVehicle(traci::VehicleController* vehicle)
         auto identity = mIdentityRegistry->lookup<IdentityRegistry::traci>(vehicle->getVehicleId());
         if (identity) {
             id = identity->application;
+        }else{
+            id = rand();
         }
     }
 
     auto insertion = mObjects.insert(std::make_shared<EnvironmentModelObject>(vehicle, id));
+    auto objAdded = getObject(vehicle->getVehicleId());
+    mPVeh[id] = objAdded;
     mTainted |= insertion.second; /*< pending preselector update if insertion took place */
     return insertion.second;
 }
@@ -303,6 +307,12 @@ std::shared_ptr<EnvironmentModelObject> GlobalEnvironmentModel::getObject(const 
 {
     auto found = mObjects.find(objId);
     return found != mObjects.end() ? *found : nullptr;
+}
+
+std::shared_ptr<EnvironmentModelObject> GlobalEnvironmentModel::getObjectFromVehDB(const u_int32_t& vehId)
+{
+    auto found = mPVeh.find(vehId);
+    return found != mPVeh.end() ? found->second : nullptr;
 }
 
 } // namespace artery

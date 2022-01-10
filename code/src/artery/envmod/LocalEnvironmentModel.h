@@ -8,6 +8,7 @@
 #define LOCALENVIRONMENTMODEL_H_
 
 #include <boost/iterator/filter_iterator.hpp>
+#include "artery/envmod/EnvironmentModelObject.h"
 #include <boost/range/iterator_range.hpp>
 #include <omnetpp/clistener.h>
 #include <omnetpp/csimplemodule.h>
@@ -41,7 +42,10 @@ public:
     {
     public:
         TrackingTime();
+        TrackingTime(omnetpp::SimTime time);
+
         void tap();
+        void setLast(omnetpp::SimTime time);
 
         omnetpp::SimTime first() const { return mFirst; }
         omnetpp::SimTime last() const { return mLast; }
@@ -55,22 +59,27 @@ public:
     {
     public:
         using TrackingMap = std::map<const Sensor*, TrackingTime>;
+        using TrackingQuality = std::map<const Sensor*, int>;
 
         Tracking(const Sensor* sensor);
+        Tracking(const Sensor* sensor, int nbVisiblePoints);
 
         bool expired() const;
         void update();
         void tap(const Sensor*);
+        void updateQuality(const Sensor* sensor, int nbCornersDetected);
+        omnetpp::SimTime getTimeSinceLastUpdate();
 
+        const TrackingQuality& getQualityObservation() const {return mQuality;}
         const TrackingMap& sensors() const { return mSensors; }
 
     private:
         TrackingMap mSensors;
+        TrackingQuality mQuality;
     };
 
     using TrackedObjects = std::map<Object, Tracking, std::owner_less<Object>>;
     using TrackedObject = typename TrackedObjects::value_type;
-
 
     LocalEnvironmentModel();
     virtual ~LocalEnvironmentModel() = default;

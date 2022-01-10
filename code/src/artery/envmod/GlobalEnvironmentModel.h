@@ -60,6 +60,8 @@ public:
      */
     std::shared_ptr<EnvironmentModelObject> getObject(const std::string& objId);
 
+    std::shared_ptr<EnvironmentModelObject> getObjectFromVehDB(const u_int32_t& vehId);
+
     /**
      * Returns GSDE of all objects in a sensor area defined by the sensor configuration
      * @param config
@@ -132,9 +134,12 @@ private:
 
     using ObstacleDB = std::map<std::string, std::shared_ptr<EnvironmentModelObstacle>>;
     using ObstacleRtreeValue = std::pair<geometry::Box, std::string>;
+    using VehiclesDB = std::map<unsigned long, std::shared_ptr<EnvironmentModelObject>>;
 
     ObjectDB mObjects;
     ObstacleDB mObstacles;
+    VehiclesDB mPVeh;
+
     boost::geometry::index::rtree<ObstacleRtreeValue, boost::geometry::index::rstar<16>> mObstacleRtree;
     std::unique_ptr<PreselectionMethod> mPreselector;
     IdentityRegistry* mIdentityRegistry;

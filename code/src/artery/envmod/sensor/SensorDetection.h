@@ -23,6 +23,7 @@ struct SensorDetection
     std::list<std::shared_ptr<EnvironmentModelObject>> objects;
     std::list<std::shared_ptr<EnvironmentModelObstacle>> obstacles;
     std::list<Position> visiblePoints; // LOS = one of these points and first of sensorCone
+    std::list<int> numberOfCornersDetected;
 };
 
 } // namespace artery

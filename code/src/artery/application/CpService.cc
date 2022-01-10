@@ -12,6 +12,8 @@
 #include "artery/application/MultiChannelPolicy.h"
 #include "artery/application/VehicleDataProvider.h"
 #include "artery/envmod/sensor/SensorPosition.h"
+#include "artery/envmod/LocalEnvironmentModel.h"
+#include "artery/envmod/EnvironmentModelObject.h"
 #include "artery/utility/simtime_cast.h"
 #include "veins/base/utils/Coord.h"
 #include <boost/units/cmath.hpp>
@@ -180,8 +182,8 @@ void CpService::sendCpm(const SimTime& T_now) {
 			mLastSenrInfoCntnrTimestamp = T_now;
 		}
 	} 
-
-	prcvdobjcntr_prsnt = generatePerceivedObjectsCntnr(cpm_msg);
+	generate_objlist();
+	//prcvdobjcntr_prsnt = generatePerceivedObjectsCntnr(cpm_msg);
 	
 	if(prcvdobjcntr_prsnt || snsrcntr_prsnt ) {
 		generateStnAndMgmtCntnr(cpm_msg);
@@ -208,9 +210,31 @@ void CpService::sendCpm(const SimTime& T_now) {
 }
 
 bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg){
+
+	PerceivedObjectContainer_t*& prcvdobj_cntr =  (*cpm_msg).cpm.cpmParameters.perceivedObjectContainer;
+	prcvdobj_cntr = vanetza::asn1::allocate<PerceivedObjectContainer_t>();
+
+	//funciton to get the object list
+
+	//function to add objects to the prcd object list
+
 	return true;
 }
 
+void CpService::generate_objlist(){
+
+	//get the object list from LocalenvironmentalModel
+	const LocalEnvironmentModel::TrackedObjects& mtrackedobjs = mLocalEnvironmentModel->allObjects();
+	int i=0;
+	for(const LocalEnvironmentModel::TrackedObject& objs : mtrackedobjs){
+		const auto& vd = objs.first.lock()->getVehicleData();
+		std::cout << "station ids: " << ++i << "," << vd.station_id() << std::endl;
+	}
+
+
+	//get the complete list of EnvironmentalModel Object
+
+}
 void CpService::generate_sensorid(){
 
 	std::vector<Sensor*> sensors = mLocalEnvironmentModel->allSensors();
