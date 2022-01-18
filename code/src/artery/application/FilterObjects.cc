@@ -127,8 +127,67 @@ void FilterObjects::changeDeltas(vanetza::units::Angle hd, vanetza::units::Lengt
 }
 
 
-std::size_t FilterObjects::filterObjects(ObjectInfo::ObjectsTrackedMap &objToSend,
-                                  ObjectInfo::ObjectsTrackedMap &prevObjSent, omnetpp::SimTime T_GenCpmDcc,
+ObjectInfo::ObjectsPercievedMap FilterObjects::getallPercievedObjs(){
+
+    ObjectInfo::ObjectsPercievedMap prcvd_objs;
+    //get all the tracked objects from the local environmental model
+    const LocalEnvironmentModel::TrackedObjects& allobjs = mLocalEnvironmentModel->allObjects();
+
+    //get objects identified with sensors (Radar, Lidar and cameras) and add them to ObjectInfo::ObjectsPercievedMap
+    const TrackedObjectsFilterRange& radarobjs = artery::filterBySensorCategory(allobjs, "Radar");
+ 
+    for(const auto& env_robj : radarobjs){
+
+        const LocalEnvironmentModel::Tracking::TrackingMap& prcvd_snsrs =  allobjs.at(env_robj.first).sensors(); //trckd_robj->second.sensors();
+
+        //If the object has been detected by its local perception capabilities (i.e. radar), add obj. to the list to send
+        for(const auto& p_snsr : prcvd_snsrs){
+            if(p_snsr.first->getSensorCategory() == "Radar"){
+
+                //If object not already in the lists or if the current sensor has "more" updated information
+                if(prcvd_objs.find(env_robj.first) == prcvd_objs.end() || prcvd_objs.at(env_robj.first).getLastTrackingTime().last() < p_snsr.second.last()){
+                    const auto& vd = env_robj.first.lock()->getVehicleData();
+                    prcvd_objs[env_robj.first] = ObjectInfo(false, p_snsr.second, mSensorsId->at(p_snsr.first), vd.heading(), true, vd.position(),  vd.speed());
+                }//Both sensors checked the object at the same time
+                else if (prcvd_objs.at(env_robj.first).getLastTrackingTime().last() == p_snsr.second.last()){
+                    prcvd_objs.at(env_robj.first).setNumberOfSensors(prcvd_objs.at(env_robj.first).getNumberOfSensors() + 1);
+                }
+            }
+        }
+    }
+
+    return prcvd_objs;
+}
+
+
+bool FilterObjects::checkobjDynamics(const ObjectInfo::ObjectPercieved& obj, ObjectInfo::ObjectsPercievedMap& trckedobjs, omnetpp::SimTime T_now){
+
+
+    //If the position of the object since last time it has been sent, refuse it
+    if(trckedobjs.find(obj.first) != trckedobjs.end()) {
+
+        const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
+        ObjectInfo &infoObject = trckedobjs.at(obj.first);
+
+        //Object need to be send at least every one second
+        if(T_now - infoObject.getLastTimeSent() >= omnetpp::SimTime(1, SIMTIME_S))
+            return true;
+
+
+        if (!(checkHeadingDelta(infoObject.getLastHeading(), vd.heading()) ||
+              checkPositionDelta(infoObject.getLastPosition(), vd.position()) ||
+              checkSpeedDelta(infoObject.getLastVelocity(), vd.speed()))){
+            //std::cout << "\nObject dynamic local: Filter object "<< vd.station_id() << std::endl;
+            return false;
+        }
+    }
+    return true;
+
+}
+
+
+std::size_t FilterObjects::filterObjects(ObjectInfo::ObjectsPercievedMap &objToSend,
+                                  ObjectInfo::ObjectsPercievedMap &prevObjSent, omnetpp::SimTime T_GenCpmDcc,
                                   Sensor * cpSensor, ObjectInfo::ObjectsReceivedMap& objReceived, const SimTime& T_now){
     std::size_t countObject = 0;
     //Go through all the objects tracked
@@ -202,8 +261,8 @@ std::size_t FilterObjects::filterObjects(ObjectInfo::ObjectsTrackedMap &objToSen
 }
 
 
-void FilterObjects::getObjToSendNoFilter(ObjectInfo::ObjectsTrackedMap &objToSend, bool removeLowDynamics,
-        ObjectInfo::ObjectsTrackedMap objectsPrevSent, const omnetpp::SimTime& T_now)
+void FilterObjects::getObjToSendNoFilter(ObjectInfo::ObjectsPercievedMap &objToSend, bool removeLowDynamics,
+        ObjectInfo::ObjectsPercievedMap objectsPrevSent, const omnetpp::SimTime& T_now)
 {
     //Go through all the objects tracked
     for(const LocalEnvironmentModel::TrackedObject& obj : mLocalEnvironmentModel->allObjects()){
@@ -265,7 +324,7 @@ bool FilterObjects::v2xCapabilities(const LocalEnvironmentModel::TrackedObject& 
 
 bool FilterObjects::objectDynamicsLocal(const LocalEnvironmentModel::TrackedObject& obj,
                                    const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
-                                   ObjectInfo::ObjectsTrackedMap& prevObjSent, omnetpp::SimTime T_now){
+                                   ObjectInfo::ObjectsPercievedMap& prevObjSent, omnetpp::SimTime T_now){
 
     //If the position of the object since last time it has been sent, refuse it
     if(prevObjSent.find(obj.first) != prevObjSent.end()) {
@@ -429,7 +488,7 @@ bool FilterObjects::updatingTime(const LocalEnvironmentModel::TrackedObject& obj
 
 bool FilterObjects::etsiFilter(const LocalEnvironmentModel::TrackedObject& obj,
                                const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
-                               ObjectInfo::ObjectsTrackedMap& prevObjSent,
+                               ObjectInfo::ObjectsPercievedMap& prevObjSent,
                                ObjectInfo::ObjectsReceivedMap& objReceived,
                                const SimTime& T_now){
 

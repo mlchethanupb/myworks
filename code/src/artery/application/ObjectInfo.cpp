@@ -48,7 +48,7 @@ void ObjectInfo::printObjectsReceivedMap(ObjectsReceivedMap objReceived){
     }
 }
 
-void ObjectInfo::printObjectsToSendMap(ObjectsTrackedMap objMap){
+void ObjectInfo::printObjectsToSendMap(ObjectsPercievedMap objMap){
     std::cout << "Number of objects: " << objMap.size() << std::endl;
     for(auto& mapObj : objMap){
         std::cout << "id Object: " << mapObj.first.lock()->getVehicleData().station_id() << std::endl;

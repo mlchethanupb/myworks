@@ -23,7 +23,8 @@ namespace artery
 class ObjectInfo
 {
 public:
-    using ObjectsTrackedMap = std::map<const LocalEnvironmentModel::Object, ObjectInfo, std::owner_less<LocalEnvironmentModel::Object>>;
+    using ObjectsPercievedMap = std::map<const LocalEnvironmentModel::Object, ObjectInfo, std::owner_less<LocalEnvironmentModel::Object>>;
+    using ObjectPercieved = typename ObjectsPercievedMap::value_type;
     using ObjectsReceivedMap = std::map<const uint32_t, ObjectInfo>;
 
     ObjectInfo();
@@ -43,7 +44,7 @@ public:
     void setSensorId(Identifier_t& id) {mSensorsId = id;}
     void setHasV2XCapabilities(bool hasV2XCapabilities) {mHasV2XCapabilities = hasV2XCapabilities;}
     static void printObjectsReceivedMap(ObjectsReceivedMap objReceived);
-    static void printObjectsToSendMap(ObjectsTrackedMap objMap);
+    static void printObjectsToSendMap(ObjectsPercievedMap objMap);
     void setLastTimeSent(omnetpp::SimTime time) { mLastTimeSent = time;}
     omnetpp::SimTime getLastTimeSent() { return mLastTimeSent; }
 

@@ -81,6 +81,10 @@ void CpService::initialize()
 	mFixedRate = par("fixedRate");
 
 	mPrimaryChannel = getFacilities().get_const<MultiChannelPolicy>().primaryChannel(vanetza::aid::CP);
+
+	if(mSensorsId.empty()){
+		generate_sensorid();
+	}
     // Objects filters
     /*
 	mFiltersEnabled = std::vector<bool>{par("v2xCapabilities"), par("objectDynamicsLocal"),
@@ -197,8 +201,8 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 			mLastSenrInfoCntnrTimestamp = T_now;
 		}
 	} 
-	generate_objlist(cpm_msg, T_now);
-	//prcvdobjcntr_prsnt = generatePerceivedObjectsCntnr(cpm_msg);
+	
+	//prcvdobjcntr_prsnt = generatePerceivedObjectsCntnr(cpm_msg, T_now);
 	
 	if(prcvdobjcntr_prsnt || snsrcntr_prsnt ) {
 		generateStnAndMgmtCntnr(cpm_msg);
@@ -224,32 +228,57 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 	this->request(request, std::move(payload));
 }
 
-bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg){
+bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const omnetpp::SimTime& T_now){
 
-	PerceivedObjectContainer_t*& prcvdobj_cntr =  (*cpm_msg).cpm.cpmParameters.perceivedObjectContainer;
-	prcvdobj_cntr = vanetza::asn1::allocate<PerceivedObjectContainer_t>();
+	//get all the prcd object list
+	ObjectInfo::ObjectsPercievedMap prcvd_objs = mFilterObj.getallPercievedObjs();
 
-	//funciton to get the object list
+	//No objects percieved by the sensors
+	if(prcvd_objs.empty())
+		return false;
 
-	//function to add objects to the prcd object list
+	for(const ObjectInfo::ObjectPercieved& p_obj : prcvd_objs){
+
+		//@todo check for the confidence level
+
+		//check in tracking list
+		if(objinTrackedlist(p_obj)){
+
+			//@todo: check for the object belonging to class person or animal
+
+			//check the dynamics and time elapsed of the object
+			if(mFilterObj.checkobjDynamics(p_obj, mObjectsTracked, T_now)){
+				mObjectsToSend.insert(p_obj);
+			}
+		}
+	}
+
+	generateASN1Objects(cpm_msg, T_now, mObjectsToSend);
+    checkCPMSize(T_now, mObjectsToSend, cpm_msg);
+
+    //Add object in the list of previously sent
+    completeMyPrevObjSent(T_now, mObjectsToSend);
 
 	return true;
 }
 
+//check if the object already in the tracked list?
+bool CpService::objinTrackedlist(const ObjectInfo::ObjectPercieved& obj){
+
+	if (mObjectsTracked.find(obj.first) != mObjectsTracked.end()) {
+		return true;
+    } else {
+		//if its new object select add to the object tracking list and also the to object sender list. 
+    	//mObjectsTracked.insert(obj); -- plan is to do it the updatetrackedlist function
+		mObjectsToSend.insert(obj);
+		return false;
+    }
+}
+
 void CpService::generate_objlist(vanetza::asn1::Cpm &message, const omnetpp::SimTime& T_now){
 
-/*
-	//get the object list from LocalenvironmentalModel
-	const LocalEnvironmentModel::TrackedObjects& mtrackedobjs = mLocalEnvironmentModel->allObjects();
-	int i=0;
-	for(const LocalEnvironmentModel::TrackedObject& objs : mtrackedobjs){
-		const auto& vd = objs.first.lock()->getVehicleData();
-		std::cout << "station ids: " << ++i << "," << vd.station_id() << std::endl;
-	}
-*/
-
     mObjectsToSend.clear();
-    std::size_t countObject = mFilterObj.filterObjects(mObjectsToSend, mObjectsPrevSent, genCpmDcc(), mCPSensor,
+    std::size_t countObject = mFilterObj.filterObjects(mObjectsToSend, mObjectsTracked, genCpmDcc(), mCPSensor,
                                                            mObjectsReceived, T_now);
 
     generateASN1Objects(message, T_now, mObjectsToSend);
@@ -266,11 +295,10 @@ void CpService::generate_objlist(vanetza::asn1::Cpm &message, const omnetpp::Sim
 }
 
 void CpService::generateASN1Objects(vanetza::asn1::Cpm &message, const omnetpp::SimTime &T_now,
-                                    ObjectInfo::ObjectsTrackedMap objToSend) {
+                                    ObjectInfo::ObjectsPercievedMap objToSend) {
 
     //TODO: check for memory leaking here
-    CollectivePerceptionMessage_t &cpm = (*message).cpm;
-    PerceivedObjectContainer_t *&perceivedObjectContainers = cpm.cpmParameters.perceivedObjectContainer;
+    PerceivedObjectContainer_t *&perceivedObjectContainers = (*message).cpm.cpmParameters.perceivedObjectContainer;
     vanetza::asn1::free(asn_DEF_PerceivedObjectContainer, perceivedObjectContainers);
     perceivedObjectContainers = nullptr;
 
@@ -278,16 +306,21 @@ void CpService::generateASN1Objects(vanetza::asn1::Cpm &message, const omnetpp::
         perceivedObjectContainers = vanetza::asn1::allocate<PerceivedObjectContainer_t>();
         for (auto &obj : objToSend) {
             if (obj.first.expired()) continue;
-            PerceivedObject_t *objContainer = createPerceivedObjectContainer(obj.first, obj.second, cpm);
+            PerceivedObject_t *objContainer = createPerceivedObjectContainer(obj.first, obj.second);
             ASN_SEQUENCE_ADD(perceivedObjectContainers, objContainer);
         }
     }
+
+	if(perceivedObjectContainers->list.count == 0){
+		vanetza::asn1::free(asn_DEF_PerceivedObjectContainer, perceivedObjectContainers);
+    	perceivedObjectContainers = nullptr;
+		std::cout << "entered" << std::endl;
+	}
 }
 
 PerceivedObject_t *
 CpService::createPerceivedObjectContainer(const std::weak_ptr<artery::EnvironmentModelObject> &object,
-                                          ObjectInfo &infoObj,
-                                          CollectivePerceptionMessage_t &cpm) {
+                                          ObjectInfo &infoObj) {
     const auto &vdObj = object.lock()->getVehicleData();
 
     PerceivedObject_t *objContainer = vanetza::asn1::allocate<PerceivedObject_t>();
@@ -297,7 +330,7 @@ CpService::createPerceivedObjectContainer(const std::weak_ptr<artery::Environmen
 	//objContainer->sensorIDList = new Identifier_t(infoObj.getSensorId());
 
     //Compute relative time between CPM generation and time of observation of the object
-    //std::cout << "Time perception:" << (uint16_t) countvoid CPService::checkCPMSize(const SimTime& T_now, ObjectInfo::ObjectsTrackedMap& objToSend, artery::cpm::Cpm& cpm)ong>(cpm.generationDeltaTime,
+    //std::cout << "Time perception:" << (uint16_t) countvoid CPService::checkCPMSize(const SimTime& T_now, ObjectInfo::ObjectsPercievedMap& objToSend, artery::cpm::Cpm& cpm)ong>(cpm.generationDeltaTime,
      //                                                         (u_int16_t) countTaiMilliseconds(mTimer->getTimeFor(
       //                                                                infoObj.getLastTrackingTime().last())),
        //                                                       TIMEOFMEASUREMENTMAX, GENERATIONDELTATIMEMAX);
@@ -358,22 +391,22 @@ CpService::createPerceivedObjectContainer(const std::weak_ptr<artery::Environmen
 }
 
 
-void CpService::completeMyPrevObjSent(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsTrackedMap objToSend){
+void CpService::completeMyPrevObjSent(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap objToSend){
     //Add object in the list of previously sent
     for(auto obj : objToSend) {
         obj.second.setLastTimeSent(T_now);
-        if (mObjectsPrevSent.find(obj.first) != mObjectsPrevSent.end()) {
-            mObjectsPrevSent[obj.first] = obj.second;
+        if (mObjectsTracked.find(obj.first) != mObjectsTracked.end()) {
+            mObjectsTracked[obj.first] = obj.second;
         } else {
-            mObjectsPrevSent.insert(obj);
+            mObjectsTracked.insert(obj);
         }
     }
 }
 
-void CpService::checkCPMSize(const SimTime& T_now, ObjectInfo::ObjectsTrackedMap& objToSend, vanetza::asn1::Cpm& cpm){
+void CpService::checkCPMSize(const SimTime& T_now, ObjectInfo::ObjectsPercievedMap& objToSend, vanetza::asn1::Cpm& cpm){
 	bool removedObject = false;
 	while(cpm.size() > MAXCPMSIZE){
-		ObjectInfo::ObjectsTrackedMap::iterator item = objToSend.begin();
+		ObjectInfo::ObjectsPercievedMap::iterator item = objToSend.begin();
 		std::advance(item, std::rand() % objToSend.size());
 		objToSend.erase(item);
 		generateASN1Objects(cpm, T_now, objToSend);

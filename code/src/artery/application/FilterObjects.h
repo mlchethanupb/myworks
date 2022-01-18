@@ -32,14 +32,16 @@ namespace artery
                           std::map<const Sensor*, Identifier_t>*, const omnetpp::SimTime&,
                           const omnetpp::SimTime&);
 
-        std::size_t filterObjects(ObjectInfo::ObjectsTrackedMap &, ObjectInfo::ObjectsTrackedMap &,
+        std::size_t filterObjects(ObjectInfo::ObjectsPercievedMap &, ObjectInfo::ObjectsPercievedMap &,
                            omnetpp::SimTime, Sensor *, ObjectInfo::ObjectsReceivedMap&, const omnetpp::SimTime& T_now);
 
         void changeDeltas(vanetza::units::Angle hd, vanetza::units::Length pd, vanetza::units::Velocity sd);
 
-        void getObjToSendNoFilter(ObjectInfo::ObjectsTrackedMap &objToSend, bool removeLowDynamics,
-                ObjectInfo::ObjectsTrackedMap objectsPrevSent, const omnetpp::SimTime& T_now);
+        void getObjToSendNoFilter(ObjectInfo::ObjectsPercievedMap &objToSend, bool removeLowDynamics,
+                ObjectInfo::ObjectsPercievedMap objectsPrevSent, const omnetpp::SimTime& T_now);
 
+        ObjectInfo::ObjectsPercievedMap getallPercievedObjs();
+        bool checkobjDynamics(const ObjectInfo::ObjectPercieved& obj, ObjectInfo::ObjectsPercievedMap&, omnetpp::SimTime T_now);
 
     private:
 
@@ -67,7 +69,7 @@ namespace artery
 
         bool objectDynamicsLocal(const LocalEnvironmentModel::TrackedObject& ,
                                 const LocalEnvironmentModel::Tracking::TrackingMap&,
-                                ObjectInfo::ObjectsTrackedMap&, omnetpp::SimTime T_now);
+                                ObjectInfo::ObjectsPercievedMap&, omnetpp::SimTime T_now);
 
         bool objectDynamicsV2X(const LocalEnvironmentModel::TrackedObject&,
                               const LocalEnvironmentModel::Tracking::TrackingMap&,
@@ -92,7 +94,7 @@ namespace artery
 
         bool etsiFilter(const LocalEnvironmentModel::TrackedObject& obj,
                        const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
-                       ObjectInfo::ObjectsTrackedMap& prevObjSent,
+                       ObjectInfo::ObjectsPercievedMap& prevObjSent,
                        ObjectInfo::ObjectsReceivedMap& objReceived,
                        const omnetpp::SimTime& T_now);
 
