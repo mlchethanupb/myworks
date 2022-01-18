@@ -2,8 +2,8 @@
 // Created by rosk on 13.02.19.
 //
 
-#ifndef ARTERY_INFOOBJECT_H
-#define ARTERY_INFOOBJECT_H
+#ifndef ARTERY_OBJECTINFO_H
+#define ARTERY_OBJECTINFO_H
 
 #include "artery/application/ItsG5BaseService.h"
 #include "artery/utility/Geometry.h"
@@ -20,14 +20,14 @@
 namespace artery
 {
 
-class InfoObject
+class ObjectInfo
 {
 public:
-    using ObjectsToSendMap = std::map<const LocalEnvironmentModel::Object, InfoObject, std::owner_less<LocalEnvironmentModel::Object>>;
-    using ObjectsReceivedMap = std::map<const uint32_t, InfoObject>;
+    using ObjectsTrackedMap = std::map<const LocalEnvironmentModel::Object, ObjectInfo, std::owner_less<LocalEnvironmentModel::Object>>;
+    using ObjectsReceivedMap = std::map<const uint32_t, ObjectInfo>;
 
-    InfoObject();
-    InfoObject(bool, LocalEnvironmentModel::TrackingTime, Identifier_t&,
+    ObjectInfo();
+    ObjectInfo(bool, LocalEnvironmentModel::TrackingTime, Identifier_t&,
                     vanetza::units::Angle, bool, Position, vanetza::units::Velocity);
 
     bool getHasV2XCapabilities() const { return mHasV2XCapabilities;}
@@ -43,7 +43,7 @@ public:
     void setSensorId(Identifier_t& id) {mSensorsId = id;}
     void setHasV2XCapabilities(bool hasV2XCapabilities) {mHasV2XCapabilities = hasV2XCapabilities;}
     static void printObjectsReceivedMap(ObjectsReceivedMap objReceived);
-    static void printObjectsToSendMap(ObjectsToSendMap objMap);
+    static void printObjectsToSendMap(ObjectsTrackedMap objMap);
     void setLastTimeSent(omnetpp::SimTime time) { mLastTimeSent = time;}
     omnetpp::SimTime getLastTimeSent() { return mLastTimeSent; }
 
@@ -60,8 +60,8 @@ private:
     omnetpp::SimTime mLastTimeSent;
 };
 
-std::ostream& operator<<(std::ostream& os, InfoObject& infoObj);
+std::ostream& operator<<(std::ostream& os, ObjectInfo& infoObj);
 
 } //end namespace artery
 
-#endif //ARTERY_INFOOBJECTD_H
+#endif //ARTERY_OBJECTINFO_H

@@ -8,6 +8,8 @@
 #define ARTERY_CPSERVICE_H_
 
 #include "artery/application/ItsG5BaseService.h"
+#include "artery/application/ObjectInfo.h"
+#include "artery/application/FilterObjects.h"
 #include "artery/utility/Channel.h"
 #include "artery/utility/Geometry.h"
 #include "artery/envmod/LocalEnvironmentModel.h"
@@ -18,6 +20,8 @@
 #include <vanetza/units/angle.hpp>
 #include <vanetza/units/velocity.hpp>
 #include <omnetpp/simtime.h>
+
+
 
 namespace artery
 {
@@ -52,6 +56,7 @@ class CpService : public ItsG5BaseService
 		vanetza::units::Velocity mSpeedDelta;
 		bool mFixedRate;
 
+
 		ChannelNumber mPrimaryChannel = channel::CCH;
 		const NetworkInterfaceTable* mNetworkInterfaceTable = nullptr;
 		const VehicleDataProvider* mVehicleDataProvider = nullptr;
@@ -60,13 +65,19 @@ class CpService : public ItsG5BaseService
 		LocalEnvironmentModel* mLocalEnvironmentModel=nullptr;
 		std::map<const Sensor*, Identifier_t> mSensorsId;
 
-
-		
+		ObjectInfo::ObjectsTrackedMap mObjectsToSend;
+		ObjectInfo::ObjectsTrackedMap mObjectsPrevSent;
+		ObjectInfo::ObjectsReceivedMap mObjectsReceived;
+		Sensor* mCPSensor;
+        Sensor* mCASensor;
+		FilterObjects mFilterObj;
+		std::vector<bool> mFiltersEnabled;
 
 		void checkTriggeringConditions(const omnetpp::SimTime&);
 		bool checkHeadingDelta() const;
 		bool checkPositionDelta() const;
 		bool checkSpeedDelta() const;
+		omnetpp::SimTime genCpmDcc();
 		void generateCPM(const omnetpp::SimTime&);
 		void sendCpm(const omnetpp::SimTime&);
 		bool generatePerceivedObjectsCntnr(vanetza::asn1::Cpm&);
@@ -78,8 +89,15 @@ class CpService : public ItsG5BaseService
 		void retrieveCPMmessage(const vanetza::asn1::Cpm&);
 		void generate_sensorid();
 		void addsensorinfo(SensorInformationContainer_t *&seqSensInfCont, Sensor *&sensor, SensorType_t sensorType);
-		void generate_objlist();
+		void generate_objlist(vanetza::asn1::Cpm &message, const omnetpp::SimTime& T_now);
+		PerceivedObject_t* createPerceivedObjectContainer(const std::weak_ptr<artery::EnvironmentModelObject>& object,
+																	ObjectInfo& infoObj, CollectivePerceptionMessage_t& cpm);
+        //void addPerceivedObjectContainer(LocalEnvironmentModel* localEnvironmentModel, vanetza::asn1::Cpm& message, const omnetpp::SimTime& T_now);
+		void generateASN1Objects(vanetza::asn1::Cpm& message, const omnetpp::SimTime& T_now, ObjectInfo::ObjectsTrackedMap objToSend);
+		void completeMyPrevObjSent(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsTrackedMap objToSend);
+		void checkCPMSize(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsTrackedMap& objToSendNoFiltering, vanetza::asn1::Cpm& cpm);
 
+		
 #ifdef REMOVE_CODE
 
 

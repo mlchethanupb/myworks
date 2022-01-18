@@ -2,7 +2,7 @@
 // Created by rosk on 13.02.19.
 //
 
-#include "InfoObject.h"
+#include "ObjectInfo.h"
 
 namespace artery
 {
@@ -14,9 +14,9 @@ long round(const boost::units::quantity<T>& q, const U& u)
     return std::round(v.value());
 }
 
-InfoObject::InfoObject(){}
+ObjectInfo::ObjectInfo(){}
 
-InfoObject::InfoObject(bool hasV2XCapabilities, LocalEnvironmentModel::TrackingTime lastTrackingTime, Identifier_t& id,
+ObjectInfo::ObjectInfo(bool hasV2XCapabilities, LocalEnvironmentModel::TrackingTime lastTrackingTime, Identifier_t& id,
         vanetza::units::Angle lastCpmHeading, bool headAvailable, Position lastCpmPosition,
         vanetza::units::Velocity lastCpmSpeed):
         mHasV2XCapabilities(hasV2XCapabilities), mLastTrackingTime(lastTrackingTime), mNumberOfSensors(1), mSensorsId(id),
@@ -25,7 +25,7 @@ InfoObject::InfoObject(bool hasV2XCapabilities, LocalEnvironmentModel::TrackingT
 {
 }
 
-std::ostream& operator<<(std::ostream& os, InfoObject& infoObj){
+std::ostream& operator<<(std::ostream& os, ObjectInfo& infoObj){
     os << "Info of the object: " << std::endl;
     os << "\tHas V2X capabilities: " << infoObj.getHasV2XCapabilities() << std:: endl;
     os << "\tLast Tracked time: " << infoObj.getLastTrackingTime().last() << std::endl;
@@ -36,9 +36,11 @@ std::ostream& operator<<(std::ostream& os, InfoObject& infoObj){
     os << "\tLast position perceived: (" << infoObj.getLastPosition().x / boost::units::si::meter
        << ", " << infoObj.getLastPosition().y /  boost::units::si::meter << ")" << std::endl;
     os << "\tLast velocity perceived: " << infoObj.getLastVelocity() / vanetza::units::si::meter_per_second << std::endl;
+
+    return os;
 }
 
-void InfoObject::printObjectsReceivedMap(ObjectsReceivedMap objReceived){
+void ObjectInfo::printObjectsReceivedMap(ObjectsReceivedMap objReceived){
     std::cout << "Number of objects: " << objReceived.size() << std::endl;
     for(auto& mapObj : objReceived){
         std::cout << "id Object: " << mapObj.first << std::endl;
@@ -46,7 +48,7 @@ void InfoObject::printObjectsReceivedMap(ObjectsReceivedMap objReceived){
     }
 }
 
-void InfoObject::printObjectsToSendMap(ObjectsToSendMap objMap){
+void ObjectInfo::printObjectsToSendMap(ObjectsTrackedMap objMap){
     std::cout << "Number of objects: " << objMap.size() << std::endl;
     for(auto& mapObj : objMap){
         std::cout << "id Object: " << mapObj.first.lock()->getVehicleData().station_id() << std::endl;

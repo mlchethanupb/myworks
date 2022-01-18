@@ -14,6 +14,7 @@
 #include "artery/envmod/sensor/SensorPosition.h"
 #include "artery/envmod/LocalEnvironmentModel.h"
 #include "artery/envmod/EnvironmentModelObject.h"
+#include "artery/inet/InetMobility.h"
 #include "artery/utility/simtime_cast.h"
 #include "veins/base/utils/Coord.h"
 #include <boost/units/cmath.hpp>
@@ -36,6 +37,9 @@ using namespace omnetpp;
 static const simsignal_t scSignalCpmReceived = cComponent::registerSignal("CpmReceived");
 static const simsignal_t scSignalCpmSent = cComponent::registerSignal("CpmSent");
 static const auto scSnsrInfoContainerInterval = std::chrono::milliseconds(1000);
+
+const auto DCCPROFILECP = vanetza::dcc::Profile::DP2;
+const size_t MAXCPMSIZE = 1100;
 
 Define_Module(CpService)
 
@@ -67,8 +71,6 @@ void CpService::initialize()
 	mGenCpmMin = par("minInterval");
 	mGenCpmMax = par("maxInterval");
 
-	// look up primary channel for CA
-	ChannelNumber mPrimaryChannel = getFacilities().get_const<MultiChannelPolicy>().primaryChannel(vanetza::aid::CP);
 
 	// vehicle dynamics thresholds
 	mHeadingDelta = vanetza::units::Angle { par("headingDelta").doubleValue() * vanetza::units::degree };
@@ -77,6 +79,19 @@ void CpService::initialize()
 
 	//mDccRestriction = par("withDccRestriction");
 	mFixedRate = par("fixedRate");
+
+	mPrimaryChannel = getFacilities().get_const<MultiChannelPolicy>().primaryChannel(vanetza::aid::CP);
+    // Objects filters
+    /*
+	mFiltersEnabled = std::vector<bool>{par("v2xCapabilities"), par("objectDynamicsLocal"),
+                                        par("objectDynamicsV2X"),
+                                        par("fovSensors"), par("perceptionQuality"), par("updatingTime"),
+                                        par("etsiFilter")};
+	*/
+	mFiltersEnabled = std::vector<bool>{true, true, true, true, true, true, true};
+
+    mFilterObj.initialize(mVehicleDataProvider, mLocalEnvironmentModel, mFiltersEnabled, mHeadingDelta,
+                          mPositionDelta, mSpeedDelta, &mSensorsId, mGenCpmMin, mGenCpmMax);
 }
 
 void CpService::trigger()
@@ -151,7 +166,7 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 	}
 }
 
-void CpService::sendCpm(const SimTime& T_now) {
+void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
 	EV<<"MLC -- Generating collective perception message: "<< endl;
 	std::cout <<"================================================================ "<< endl;
@@ -182,7 +197,7 @@ void CpService::sendCpm(const SimTime& T_now) {
 			mLastSenrInfoCntnrTimestamp = T_now;
 		}
 	} 
-	generate_objlist();
+	generate_objlist(cpm_msg, T_now);
 	//prcvdobjcntr_prsnt = generatePerceivedObjectsCntnr(cpm_msg);
 	
 	if(prcvdobjcntr_prsnt || snsrcntr_prsnt ) {
@@ -221,8 +236,9 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg){
 	return true;
 }
 
-void CpService::generate_objlist(){
+void CpService::generate_objlist(vanetza::asn1::Cpm &message, const omnetpp::SimTime& T_now){
 
+/*
 	//get the object list from LocalenvironmentalModel
 	const LocalEnvironmentModel::TrackedObjects& mtrackedobjs = mLocalEnvironmentModel->allObjects();
 	int i=0;
@@ -230,11 +246,144 @@ void CpService::generate_objlist(){
 		const auto& vd = objs.first.lock()->getVehicleData();
 		std::cout << "station ids: " << ++i << "," << vd.station_id() << std::endl;
 	}
+*/
 
+    mObjectsToSend.clear();
+    std::size_t countObject = mFilterObj.filterObjects(mObjectsToSend, mObjectsPrevSent, genCpmDcc(), mCPSensor,
+                                                           mObjectsReceived, T_now);
 
-	//get the complete list of EnvironmentalModel Object
+    generateASN1Objects(message, T_now, mObjectsToSend);
+    checkCPMSize(T_now, mObjectsToSend, message);
+
+    //Add object in the list of previously sent
+    completeMyPrevObjSent(T_now, mObjectsToSend);
+
+    //std::cout << "Send CPM with " << objectsToSend.size() << " objects" << std::endl;
+    double nbRadarObj = (double) boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "Radar"));
+    //if (nbRadarObj != 0)
+        //emit(scSignalRatioFilter, (double) 1 - (double) mObjectsToSend.size() / nbRadarObj);
 
 }
+
+void CpService::generateASN1Objects(vanetza::asn1::Cpm &message, const omnetpp::SimTime &T_now,
+                                    ObjectInfo::ObjectsTrackedMap objToSend) {
+
+    //TODO: check for memory leaking here
+    CollectivePerceptionMessage_t &cpm = (*message).cpm;
+    PerceivedObjectContainer_t *&perceivedObjectContainers = cpm.cpmParameters.perceivedObjectContainer;
+    vanetza::asn1::free(asn_DEF_PerceivedObjectContainer, perceivedObjectContainers);
+    perceivedObjectContainers = nullptr;
+
+    if (!objToSend.empty()) {
+        perceivedObjectContainers = vanetza::asn1::allocate<PerceivedObjectContainer_t>();
+        for (auto &obj : objToSend) {
+            if (obj.first.expired()) continue;
+            PerceivedObject_t *objContainer = createPerceivedObjectContainer(obj.first, obj.second, cpm);
+            ASN_SEQUENCE_ADD(perceivedObjectContainers, objContainer);
+        }
+    }
+}
+
+PerceivedObject_t *
+CpService::createPerceivedObjectContainer(const std::weak_ptr<artery::EnvironmentModelObject> &object,
+                                          ObjectInfo &infoObj,
+                                          CollectivePerceptionMessage_t &cpm) {
+    const auto &vdObj = object.lock()->getVehicleData();
+
+    PerceivedObject_t *objContainer = vanetza::asn1::allocate<PerceivedObject_t>();
+
+    objContainer->objectID = vdObj.station_id();
+    //@todo - add later
+	//objContainer->sensorIDList = new Identifier_t(infoObj.getSensorId());
+
+    //Compute relative time between CPM generation and time of observation of the object
+    //std::cout << "Time perception:" << (uint16_t) countvoid CPService::checkCPMSize(const SimTime& T_now, ObjectInfo::ObjectsTrackedMap& objToSend, artery::cpm::Cpm& cpm)ong>(cpm.generationDeltaTime,
+     //                                                         (u_int16_t) countTaiMilliseconds(mTimer->getTimeFor(
+      //                                                                infoObj.getLastTrackingTime().last())),
+       //                                                       TIMEOFMEASUREMENTMAX, GENERATIONDELTATIMEMAX);
+
+    //Need to give relative position because the relative position is between (-132768..132767) cm
+    //Change axis y from south to north
+    objContainer->xDistance.value =
+            ((vdObj.position().x - mVehicleDataProvider->position().x) / boost::units::si::meter) *
+            DistanceValue_oneMeter;
+    objContainer->xDistance.confidence = DistanceConfidence_oneMeter;
+    objContainer->yDistance.value =
+            -((vdObj.position().y - mVehicleDataProvider->position().y) / boost::units::si::meter) *
+            DistanceValue_oneMeter;
+    objContainer->yDistance.confidence = DistanceConfidence_oneMeter;
+
+    /** @note: prevent teleportation **/
+    if(abs(objContainer->xDistance.value) > 132767 || abs(objContainer->yDistance.value) > 132767){
+        objContainer->xDistance.value = 0;
+        objContainer->yDistance.value = 0;
+    }
+
+
+    /** @note xSpeed and ySpeed should be computed relatively to the ego speed. For simplicity, we consider the
+     * speed of the vehicle detected directly.
+     */
+    const inet::Coord direction{sin(vdObj.heading()), cos(vdObj.heading())};
+    inet::Coord speed =
+            direction * (vdObj.speed() / vanetza::units::si::meter_per_second) * 100; //Conversion in cm/s
+    objContainer->xSpeed.value = speed.x;
+    objContainer->xSpeed.confidence = SpeedConfidence_equalOrWithinOneMeterPerSec;
+    objContainer->ySpeed.value = speed.y;
+    objContainer->ySpeed.confidence = SpeedConfidence_equalOrWithinOneMeterPerSec;
+
+    if(abs(objContainer->xSpeed.value) > 16383 || abs(objContainer->ySpeed.value) > 16383){
+        objContainer->xSpeed.value = 0;
+        objContainer->ySpeed.value = 0;
+
+    }
+
+    objContainer->planarObjectDimension1 = vanetza::asn1::allocate<ObjectDimension_t>();
+    objContainer->planarObjectDimension1->value =
+            object.lock()->getLength() / boost::units::si::meter * ObjectDimensionValue_oneMeter;
+    objContainer->planarObjectDimension1->confidence = 0;
+
+    objContainer->planarObjectDimension2 = vanetza::asn1::allocate<ObjectDimension_t>();
+    objContainer->planarObjectDimension2->value =
+            object.lock()->getWidth() / boost::units::si::meter * ObjectDimensionValue_oneMeter;
+    objContainer->planarObjectDimension2->confidence = 0;
+
+    objContainer->dynamicStatus = vanetza::asn1::allocate<DynamicStatus_t>();
+    *(objContainer->dynamicStatus) = DynamicStatus_dynamic;
+
+	//@todo - convert to the list
+    //objContainer->classification = vanetza::asn1::allocate<StationType_t>();
+    //*(objContainer->classification) = StationType_passengerCar;
+
+    return objContainer;
+}
+
+
+void CpService::completeMyPrevObjSent(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsTrackedMap objToSend){
+    //Add object in the list of previously sent
+    for(auto obj : objToSend) {
+        obj.second.setLastTimeSent(T_now);
+        if (mObjectsPrevSent.find(obj.first) != mObjectsPrevSent.end()) {
+            mObjectsPrevSent[obj.first] = obj.second;
+        } else {
+            mObjectsPrevSent.insert(obj);
+        }
+    }
+}
+
+void CpService::checkCPMSize(const SimTime& T_now, ObjectInfo::ObjectsTrackedMap& objToSend, vanetza::asn1::Cpm& cpm){
+	bool removedObject = false;
+	while(cpm.size() > MAXCPMSIZE){
+		ObjectInfo::ObjectsTrackedMap::iterator item = objToSend.begin();
+		std::advance(item, std::rand() % objToSend.size());
+		objToSend.erase(item);
+		generateASN1Objects(cpm, T_now, objToSend);
+		removedObject = true;
+	}
+
+	//if(removedObject)
+	//	emit(scSignalRemovedObjExcessiveSize, 1);
+}
+
 void CpService::generate_sensorid(){
 
 	std::vector<Sensor*> sensors = mLocalEnvironmentModel->allSensors();
@@ -380,6 +529,21 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 	EV<<" CPM message received, retriving information "<< endl;
 	std::cout <<" CPM message received, retriving information "<< endl;
 
+}
+
+SimTime CpService::genCpmDcc() {
+    // network interface may not be ready yet during initialization, so look it up at this later point
+    auto netifc = mNetworkInterfaceTable->select(mPrimaryChannel);
+    vanetza::dcc::TransmitRateThrottle *trc = netifc ? netifc->getDccEntity().getTransmitRateThrottle() : nullptr;
+    if (!trc) {
+        throw cRuntimeError("No DCC TRC found for CP's primary channel %i", mPrimaryChannel);
+    }
+    static const vanetza::dcc::TransmissionLite cp_tx(DCCPROFILECP, 0);
+    vanetza::Clock::duration delay = trc->interval(cp_tx);
+    SimTime dcc{std::chrono::duration_cast<std::chrono::milliseconds>(delay).count(), SIMTIME_MS};
+    //TODO revove
+    //std::cout << "time to wait before next transmission: " << dcc << std::endl;
+    return std::min(mGenCpmMax, std::max(mGenCpmMin, dcc));
 }
 
 #ifdef REMOVE_CODE

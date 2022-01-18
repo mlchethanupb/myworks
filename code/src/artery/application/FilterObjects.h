@@ -5,7 +5,7 @@
 
 #include "artery/utility/Geometry.h"
 #include <artery/envmod/LocalEnvironmentModel.h>
-#include "artery/application/InfoObject.h"
+#include "artery/application/ObjectInfo.h"
 #include <vanetza/asn1/cam.hpp>
 #include <vanetza/btp/data_interface.hpp>
 #include <vanetza/units/angle.hpp>
@@ -32,13 +32,13 @@ namespace artery
                           std::map<const Sensor*, Identifier_t>*, const omnetpp::SimTime&,
                           const omnetpp::SimTime&);
 
-        std::size_t filterObjects(InfoObject::ObjectsToSendMap &, InfoObject::ObjectsToSendMap &,
-                           omnetpp::SimTime, Sensor *, InfoObject::ObjectsReceivedMap&, const omnetpp::SimTime& T_now);
+        std::size_t filterObjects(ObjectInfo::ObjectsTrackedMap &, ObjectInfo::ObjectsTrackedMap &,
+                           omnetpp::SimTime, Sensor *, ObjectInfo::ObjectsReceivedMap&, const omnetpp::SimTime& T_now);
 
         void changeDeltas(vanetza::units::Angle hd, vanetza::units::Length pd, vanetza::units::Velocity sd);
 
-        void getObjToSendNoFilter(InfoObject::ObjectsToSendMap &objToSend, bool removeLowDynamics,
-                InfoObject::ObjectsToSendMap objectsPrevSent, const omnetpp::SimTime& T_now);
+        void getObjToSendNoFilter(ObjectInfo::ObjectsTrackedMap &objToSend, bool removeLowDynamics,
+                ObjectInfo::ObjectsTrackedMap objectsPrevSent, const omnetpp::SimTime& T_now);
 
 
     private:
@@ -62,17 +62,17 @@ namespace artery
 
         bool v2xCapabilities(const LocalEnvironmentModel::TrackedObject&,
                             const LocalEnvironmentModel::Tracking::TrackingMap&,
-                            InfoObject::ObjectsReceivedMap&);
+                            ObjectInfo::ObjectsReceivedMap&);
 
 
         bool objectDynamicsLocal(const LocalEnvironmentModel::TrackedObject& ,
                                 const LocalEnvironmentModel::Tracking::TrackingMap&,
-                                InfoObject::ObjectsToSendMap&, omnetpp::SimTime T_now);
+                                ObjectInfo::ObjectsTrackedMap&, omnetpp::SimTime T_now);
 
         bool objectDynamicsV2X(const LocalEnvironmentModel::TrackedObject&,
                               const LocalEnvironmentModel::Tracking::TrackingMap&,
                               Sensor * cpSensor, omnetpp::SimTime,
-                              InfoObject::ObjectsReceivedMap&);
+                              ObjectInfo::ObjectsReceivedMap&);
 
 
         bool fovSensors(const LocalEnvironmentModel::TrackedObject&,
@@ -88,12 +88,12 @@ namespace artery
         bool updatingTime(const LocalEnvironmentModel::TrackedObject& ,
                          const LocalEnvironmentModel::Tracking::TrackingMap&,
                          Sensor *, omnetpp::SimTime,
-                         InfoObject::ObjectsReceivedMap&, omnetpp::SimTime T_now);
+                         ObjectInfo::ObjectsReceivedMap&, omnetpp::SimTime T_now);
 
         bool etsiFilter(const LocalEnvironmentModel::TrackedObject& obj,
                        const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
-                       InfoObject::ObjectsToSendMap& prevObjSent,
-                       InfoObject::ObjectsReceivedMap& objReceived,
+                       ObjectInfo::ObjectsTrackedMap& prevObjSent,
+                       ObjectInfo::ObjectsReceivedMap& objReceived,
                        const omnetpp::SimTime& T_now);
 
     };

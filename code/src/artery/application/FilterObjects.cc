@@ -127,9 +127,9 @@ void FilterObjects::changeDeltas(vanetza::units::Angle hd, vanetza::units::Lengt
 }
 
 
-std::size_t FilterObjects::filterObjects(InfoObject::ObjectsToSendMap &objToSend,
-                                  InfoObject::ObjectsToSendMap &prevObjSent, omnetpp::SimTime T_GenCpmDcc,
-                                  Sensor * cpSensor, InfoObject::ObjectsReceivedMap& objReceived, const SimTime& T_now){
+std::size_t FilterObjects::filterObjects(ObjectInfo::ObjectsTrackedMap &objToSend,
+                                  ObjectInfo::ObjectsTrackedMap &prevObjSent, omnetpp::SimTime T_GenCpmDcc,
+                                  Sensor * cpSensor, ObjectInfo::ObjectsReceivedMap& objReceived, const SimTime& T_now){
     std::size_t countObject = 0;
     //Go through all the objects tracked
     for(const LocalEnvironmentModel::TrackedObject& obj : mLocalEnvironmentModel->allObjects()){
@@ -148,7 +148,7 @@ std::size_t FilterObjects::filterObjects(InfoObject::ObjectsToSendMap &objToSend
         //Remove all expired object
         const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
         if (objReceived.find(vd.station_id()) != objReceived.end()) {
-            InfoObject &infoObjectAI = objReceived.at(vd.station_id());
+            ObjectInfo &infoObjectAI = objReceived.at(vd.station_id());
             //Remove the entry if expired
             if (objReceived.at(vd.station_id()).getLastTrackingTime().last() +
                 cpSensor->getValidityPeriod() < mVehicleDataProvider->updated()) {
@@ -190,7 +190,7 @@ std::size_t FilterObjects::filterObjects(InfoObject::ObjectsToSendMap &objToSend
                 //If object not already in the lists or if the current sensor has "more" updated information
                 if(objToSend.find(obj.first) == objToSend.end() || objToSend.at(obj.first).getLastTrackingTime().last() < tracker.second.last()){
                     const auto& vd = obj.first.lock()->getVehicleData();
-                    objToSend[obj.first] = InfoObject(false, tracker.second, mSensorsId->at(tracker.first), vd.heading(), true, vd.position(),  vd.speed());
+                    objToSend[obj.first] = ObjectInfo(false, tracker.second, mSensorsId->at(tracker.first), vd.heading(), true, vd.position(),  vd.speed());
                 } //Both sensors checked the object at the same time
                 else if (objToSend.at(obj.first).getLastTrackingTime().last() == tracker.second.last()){
                     objToSend.at(obj.first).setNumberOfSensors(objToSend.at(obj.first).getNumberOfSensors() + 1);
@@ -202,8 +202,8 @@ std::size_t FilterObjects::filterObjects(InfoObject::ObjectsToSendMap &objToSend
 }
 
 
-void FilterObjects::getObjToSendNoFilter(InfoObject::ObjectsToSendMap &objToSend, bool removeLowDynamics,
-        InfoObject::ObjectsToSendMap objectsPrevSent, const omnetpp::SimTime& T_now)
+void FilterObjects::getObjToSendNoFilter(ObjectInfo::ObjectsTrackedMap &objToSend, bool removeLowDynamics,
+        ObjectInfo::ObjectsTrackedMap objectsPrevSent, const omnetpp::SimTime& T_now)
 {
     //Go through all the objects tracked
     for(const LocalEnvironmentModel::TrackedObject& obj : mLocalEnvironmentModel->allObjects()){
@@ -233,7 +233,7 @@ void FilterObjects::getObjToSendNoFilter(InfoObject::ObjectsToSendMap &objToSend
                 //If object not already in the lists or if the current sensor has "more" updated information
                 if(objToSend.find(obj.first) == objToSend.end() || objToSend.at(obj.first).getLastTrackingTime().last() < tracker.second.last()){
                     const auto& vd = obj.first.lock()->getVehicleData();
-                    objToSend[obj.first] = InfoObject(false, tracker.second, mSensorsId->at(tracker.first), vd.heading(), true, vd.position(),  vd.speed());
+                    objToSend[obj.first] = ObjectInfo(false, tracker.second, mSensorsId->at(tracker.first), vd.heading(), true, vd.position(),  vd.speed());
                 } //Both sensors checked the object at the same time
                 else if (objToSend.at(obj.first).getLastTrackingTime().last() == tracker.second.last()){
                     objToSend.at(obj.first).setNumberOfSensors(objToSend.at(obj.first).getNumberOfSensors() + 1);
@@ -246,7 +246,7 @@ void FilterObjects::getObjToSendNoFilter(InfoObject::ObjectsToSendMap &objToSend
 
 bool FilterObjects::v2xCapabilities(const LocalEnvironmentModel::TrackedObject& obj,
                                    const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
-                                   InfoObject::ObjectsReceivedMap& objReceived){
+                                   ObjectInfo::ObjectsReceivedMap& objReceived){
 
     const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
     bool v2xEnabled = false;
@@ -265,13 +265,13 @@ bool FilterObjects::v2xCapabilities(const LocalEnvironmentModel::TrackedObject& 
 
 bool FilterObjects::objectDynamicsLocal(const LocalEnvironmentModel::TrackedObject& obj,
                                    const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
-                                   InfoObject::ObjectsToSendMap& prevObjSent, omnetpp::SimTime T_now){
+                                   ObjectInfo::ObjectsTrackedMap& prevObjSent, omnetpp::SimTime T_now){
 
     //If the position of the object since last time it has been sent, refuse it
     if(prevObjSent.find(obj.first) != prevObjSent.end()) {
 
         const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
-        InfoObject &infoObject = prevObjSent.at(obj.first);
+        ObjectInfo &infoObject = prevObjSent.at(obj.first);
 
         //Object need to be send at least every one second
         if(T_now - infoObject.getLastTimeSent() >= omnetpp::SimTime(1, SIMTIME_S))
@@ -292,14 +292,14 @@ bool FilterObjects::objectDynamicsLocal(const LocalEnvironmentModel::TrackedObje
 bool FilterObjects::objectDynamicsV2X(const LocalEnvironmentModel::TrackedObject& obj,
                                       const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
                                       Sensor * cpSensor, omnetpp::SimTime T_GenCpmDcc,
-                                      InfoObject::ObjectsReceivedMap& objReceived){
+                                      ObjectInfo::ObjectsReceivedMap& objReceived){
 
     const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
 
     //Check that the object is detected by one of the local sensor and has already been perceived by someone
     if (objReceived.find(vd.station_id()) != objReceived.end()) {
 
-        InfoObject &infoObjectAI = objReceived.at(vd.station_id());
+        ObjectInfo &infoObjectAI = objReceived.at(vd.station_id());
 
         //Remove the entry if expired
         if (infoObjectAI.getLastTrackingTime().last() +
@@ -391,14 +391,14 @@ bool FilterObjects::perceptionQuality(const LocalEnvironmentModel::TrackedObject
 bool FilterObjects::updatingTime(const LocalEnvironmentModel::TrackedObject& obj,
                                                 const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
                                                 Sensor * cpSensor, omnetpp::SimTime T_GenCpmDcc,
-                                                InfoObject::ObjectsReceivedMap& objReceived, omnetpp::SimTime T_now){
+                                                ObjectInfo::ObjectsReceivedMap& objReceived, omnetpp::SimTime T_now){
 
     const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
 
     //Check that the object is detected by one of the local sensor and has already been perceived by someone
     if (objReceived.find(vd.station_id()) != objReceived.end()) {
 
-        InfoObject &infoObjectAI = objReceived.at(vd.station_id());
+        ObjectInfo &infoObjectAI = objReceived.at(vd.station_id());
 
         //Remove the entry if expired
         if (objReceived.at(vd.station_id()).getLastTrackingTime().last() +
@@ -429,15 +429,15 @@ bool FilterObjects::updatingTime(const LocalEnvironmentModel::TrackedObject& obj
 
 bool FilterObjects::etsiFilter(const LocalEnvironmentModel::TrackedObject& obj,
                                const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
-                               InfoObject::ObjectsToSendMap& prevObjSent,
-                               InfoObject::ObjectsReceivedMap& objReceived,
+                               ObjectInfo::ObjectsTrackedMap& prevObjSent,
+                               ObjectInfo::ObjectsReceivedMap& objReceived,
                                const SimTime& T_now){
 
     const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
 
     //If the position of the object since last time it has been sent, refuse it
     if(prevObjSent.find(obj.first) != prevObjSent.end()) {
-        InfoObject &infoObject = prevObjSent.at(obj.first);
+        ObjectInfo &infoObject = prevObjSent.at(obj.first);
 
         if (!(checkTimeDelta(infoObject.getLastTimeSent(), T_now) ||
               checkSpeedDelta(infoObject.getLastVelocity(), vd.speed()) ||

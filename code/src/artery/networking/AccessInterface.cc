@@ -30,6 +30,7 @@ void AccessInterface::request(const DataRequest& request, std::unique_ptr<ChunkP
     gn->setPayload(std::move(payload));
     if( gn->hasPayload()){
         std::cout << "AccessInterface::request -- payload is not empty" << std::endl;
+        std::cout << "AccessInterface::request -- payload size " << gn->getBitLength()  << std::endl;
     }else{
         std::cout << "AccessInterface::request -- payload is empty" << std::endl;
     }

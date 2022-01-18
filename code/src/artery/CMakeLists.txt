@@ -11,7 +11,7 @@ add_library(core SHARED
     application/DenService.cc
     application/ExampleService.cc
     application/FilterObjects.cc
-    application/InfoObject.cpp
+    application/ObjectInfo.cpp
     application/ItsG5BaseService.cc
     application/ItsG5PromiscuousService.cc
     application/ItsG5Service.cc
