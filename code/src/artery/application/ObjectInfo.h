@@ -47,9 +47,11 @@ public:
     static void printObjectsToSendMap(ObjectsPercievedMap objMap);
     void setLastTimeSent(omnetpp::SimTime time) { mLastTimeSent = time;}
     omnetpp::SimTime getLastTimeSent() { return mLastTimeSent; }
-
+    uint8_t getobjectid(){return mObjid;}
 
 private:
+    static std::atomic<uint8_t> unique_id;
+    uint8_t mObjid;
     LocalEnvironmentModel::TrackingTime mLastTrackingTime;
     size_t mNumberOfSensors;
     Identifier_t mSensorsId;

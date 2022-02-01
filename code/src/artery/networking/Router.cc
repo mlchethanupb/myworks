@@ -112,17 +112,19 @@ void Router::receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t signal, om
 void Router::handleMessage(omnetpp::cMessage* msg)
 {
     //std::cout << "MLC - message received from lower layers" << std::endl;
-    EV << "MLC - message received from lower layers" << std::endl;
+    //EV << "MLC - message received from lower layers" << std::endl;
 
     if (msg->getArrivalGate() == mRadioDriverDataIn) {
-        std::cout << "CAM or CPM message received" << std::endl;
+
+        std::cout << "****************************************************" << std::endl;
+        std::cout << "CAM or CPM message received -";
 
         auto* packet = omnetpp::check_and_cast<GeoNetPacket*>(msg);
         auto* indication = omnetpp::check_and_cast<GeoNetIndication*>(packet->getControlInfo());
         
         if( packet->hasPayload()){
-            std::cout << "payload is not empty" << std::endl;
-            std::cout << "Router.cc -- payload size " << packet->getBitLength()  << std::endl;
+            //std::cout << "payload is not empty" << std::endl;
+            std::cout << " payload size: " << packet->getBitLength()  << std::endl;
 
         }else{
             std::cout << "payload is empty" << std::endl;

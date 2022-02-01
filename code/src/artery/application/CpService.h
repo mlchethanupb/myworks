@@ -40,6 +40,7 @@ class CpService : public ItsG5BaseService
 		void trigger() override;
 
 	private:
+
 		omnetpp::SimTime mGenCpmMin;
 		omnetpp::SimTime mGenCpmMax;
 		omnetpp::SimTime mGenCpm;
@@ -92,12 +93,13 @@ class CpService : public ItsG5BaseService
 		PerceivedObject_t* createPerceivedObjectContainer(const std::weak_ptr<artery::EnvironmentModelObject>& object, ObjectInfo& infoObj);
         //void addPerceivedObjectContainer(LocalEnvironmentModel* localEnvironmentModel, vanetza::asn1::Cpm& message, const omnetpp::SimTime& T_now);
 		void generateASN1Objects(vanetza::asn1::Cpm& message, const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap objToSend);
-		void completeMyPrevObjSent(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap objToSend);
+		void updateObjTrackedList(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap objToSend);
 		void checkCPMSize(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap& objToSendNoFiltering, vanetza::asn1::Cpm& cpm);
 
 		bool generatePerceivedObjectsCntnr(vanetza::asn1::Cpm&, const omnetpp::SimTime& T_now);
 		bool objinTrackedlist(const ObjectInfo::ObjectPercieved& obj);
-		
+		void printCPM(const vanetza::asn1::Cpm &message);
+
 #ifdef REMOVE_CODE
 
 

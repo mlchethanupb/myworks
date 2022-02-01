@@ -65,6 +65,8 @@ class VehicleDataProvider
 		void setStationType(StationType);
 		StationType getStationType() const;
 
+		static vanetza::units::Angle computeHeading(vanetza::units::Velocity&, vanetza::units::Velocity&);
+
 	private:
 		typedef boost::units::quantity<boost::units::si::angular_acceleration> AngularAcceleration;
 		void calculateCurvature();

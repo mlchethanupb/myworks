@@ -186,4 +186,24 @@ auto VehicleDataProvider::getStationType() const -> StationType
 	return mStationType;
 }
 
+vanetza::units::Angle VehicleDataProvider::computeHeading(vanetza::units::Velocity& speedX, vanetza::units::Velocity& speedY)
+{
+    /** @note can't retrieve heading if no speed */
+    if(speedX == 0 * vanetza::units::si::meter_per_second && speedY == 0 * vanetza::units::si::meter_per_second){
+        return -1 * vanetza::units::si::radian;
+    }
+
+	vanetza::units::Angle heading = boost::units::atan(speedX / speedY);
+
+    if(speedY < 0 * vanetza::units::si::meter_per_second && speedX >= 0 * vanetza::units::si::meter_per_second)
+        heading = heading + pi * vanetza::units::si::radian;
+    else if(speedY < 0 * vanetza::units::si::meter_per_second && speedX < 0 * vanetza::units::si::meter_per_second)
+        heading = heading + pi * vanetza::units::si::radian;
+    else if(speedY >= 0 * vanetza::units::si::meter_per_second && speedX < 0 * vanetza::units::si::meter_per_second)
+        heading = heading + 2 * pi * vanetza::units::si::radian;
+
+    assert(heading <= 2 * pi * vanetza::units::si::radian && heading >= 0 * pi * vanetza::units::si::radian);
+    return heading;
+}
+
 } // namespace artery

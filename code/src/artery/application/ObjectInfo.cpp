@@ -7,6 +7,8 @@
 namespace artery
 {
 
+std::atomic<uint8_t> ObjectInfo::unique_id;
+
 template<typename T, typename U>
 long round(const boost::units::quantity<T>& q, const U& u)
 {
@@ -14,7 +16,12 @@ long round(const boost::units::quantity<T>& q, const U& u)
     return std::round(v.value());
 }
 
-ObjectInfo::ObjectInfo(){}
+ObjectInfo::ObjectInfo(){
+    if(unique_id == sizeof(uint8_t)-1){
+        unique_id=0;
+    }
+    mObjid = ++unique_id;
+}
 
 ObjectInfo::ObjectInfo(bool hasV2XCapabilities, LocalEnvironmentModel::TrackingTime lastTrackingTime, Identifier_t& id,
         vanetza::units::Angle lastCpmHeading, bool headAvailable, Position lastCpmPosition,
@@ -23,6 +30,10 @@ ObjectInfo::ObjectInfo(bool hasV2XCapabilities, LocalEnvironmentModel::TrackingT
         mLastCpmHeading(lastCpmHeading), mHeadingAvailable(headAvailable), mLastCpmPosition(lastCpmPosition),
         mLastCpmSpeed(lastCpmSpeed)
 {
+    if(unique_id == sizeof(uint8_t)-1){
+        unique_id=0;
+    }
+    mObjid = ++unique_id;
 }
 
 std::ostream& operator<<(std::ostream& os, ObjectInfo& infoObj){

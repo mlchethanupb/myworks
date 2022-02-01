@@ -183,12 +183,8 @@ void RadioDriver::handleDataIndication(cMessage* packet)
     packet->setControlInfo(indication);
     delete lteControlInfo;
 
-    std::cout << "-------------------------------------------------------------"<< std::endl;
-    if(packet-> isPacket()){
-        std::cout << "cMessage is a Cpacket" << std::endl;
-    }
+    //MLC - message received, pass it to higher layers
     indicateData(packet);
-    EV<<" MLC -- RadioDriver::handleDataIndication"<<endl;
 }
 
 void RadioDriver::handleDataRequest(cMessage* packet)
@@ -212,7 +208,7 @@ void RadioDriver::handleDataRequest(cMessage* packet)
         lteControlInfo->setDirection(D2D_MULTI);
     }
 
-    std::cout << "MLC - commenting the code which extracts payload" << std::endl;
+    //std::cout << "MLC - commenting the code which extracts payload" << std::endl;
     /*
     auto* geonet = omnetpp::check_and_cast<GeoNetPacket*>(packet);
 
