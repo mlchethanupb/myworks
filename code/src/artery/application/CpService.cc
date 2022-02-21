@@ -577,7 +577,7 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
 	EV<<" CPM message received, retriving information "<< endl;
 	std::cout <<" CPM message received by "<< mVehicleDataProvider->station_id() <<", retriving information "<< endl;
-#if 0
+
     const CPM_t cpm = (*cpm_msg);
 	const CPM_t* cpm_data = &cpm;
     //Get info of the emitter vehicle
@@ -640,14 +640,20 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
             */
 
         }
-		#endif
-		std::cout << "MLC--- entered " << std::endl;
-        mObjectsReceived[0] = ObjectInfo(true, newTracking, mSensorsId.at(mCPSensor), headingReceived, true, posReceivedStation, speedReceived);
-
-
+		
+        stationID = 1;
+		std::cout << "MLC--- emplace station id: " << stationID << std::endl;
+        auto updated_obj = ObjectInfo(true, newTracking, mSensorsId.at(mCPSensor), headingReceived, true, posReceivedStation, speedReceived);
+        auto p_obj = ObjectInfo::ObjectsReceivedMap::value_type(1, updated_obj);
+        //std::cout << "inserting object: " << p_obj << std::endl;
+        mObjectsReceived.insert(p_obj);
+        //mObjectsReceived[0] = updated_obj ;
+        //mObjectsReceived.emplace(stationID, ObjectInfo(true, newTracking, mSensorsId.at(mCPSensor), headingReceived, true, posReceivedStation, speedReceived));
+        std::cout << "MLC--- station id: " << stationID << std::endl;
+        #endif
     }
 
-
+    #if 0
     //Get info of the objects received:
     PerceivedObjectContainer_t *objectsContainer = cpm_data->cpm.cpmParameters.perceivedObjectContainer;
     for (int i = 0; objectsContainer != nullptr && i < objectsContainer->list.count; i++) {
@@ -689,6 +695,8 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
                     boost::units::pow<2>(speedX) + boost::units::pow<2>(speedY));
 
             if (mObjectsReceived.find(objCont->objectID) == mObjectsReceived.end()) {
+
+                std::cout << "adding element here 1 "<< std::endl;
                 mObjectsReceived[objCont->objectID] = ObjectInfo(false, newTracking, mSensorsId.at(mCPSensor),
                                                                  headingReceived, headingAvalaible, posReceived,
                                                                  speedReceived); //don't know if object has V2X capabilities, default is false
@@ -705,7 +713,8 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
                        boost::units::si::meter < 50.0);
                 */
                 //emit(scSignalDeltaPositionObject, distance(posReceived, mObjectsReceived[objCont->objectID].getLastPosition()) / boost::units::si::meter);
-
+                
+                std::cout << "adding element here 2 "<< std::endl;
                 mObjectsReceived[objCont->objectID] = ObjectInfo(
                         mObjectsReceived[objCont->objectID].getHasV2XCapabilities(),
                         newTracking, mSensorsId.at(mCPSensor), headingReceived,
@@ -713,7 +722,8 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
             }
         }
     }
-#endif
+    #endif
+
 }
 
 SimTime CpService::genCpmDcc() {
