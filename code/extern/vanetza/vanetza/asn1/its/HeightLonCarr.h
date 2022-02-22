@@ -28,7 +28,6 @@ typedef enum HeightLonCarr {
 typedef long	 HeightLonCarr_t;
 
 /* Implementation */
-extern asn_per_constraints_t asn_PER_type_HeightLonCarr_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_HeightLonCarr;
 asn_struct_free_f HeightLonCarr_free;
 asn_struct_print_f HeightLonCarr_print;
@@ -41,8 +40,6 @@ oer_type_decoder_f HeightLonCarr_decode_oer;
 oer_type_encoder_f HeightLonCarr_encode_oer;
 per_type_decoder_f HeightLonCarr_decode_uper;
 per_type_encoder_f HeightLonCarr_encode_uper;
-per_type_decoder_f HeightLonCarr_decode_aper;
-per_type_encoder_f HeightLonCarr_encode_aper;
 
 #ifdef __cplusplus
 }

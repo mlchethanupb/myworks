@@ -24,7 +24,7 @@ extern "C" {
 /* EventPoint */
 typedef struct EventPoint {
 	DeltaReferencePosition_t	 eventPosition;
-	PathDeltaTime_t	*eventDeltaTime;	/* OPTIONAL */
+	PathDeltaTime_t	*eventDeltaTime	/* OPTIONAL */;
 	InformationQuality_t	 informationQuality;
 	
 	/* Context for parsing across buffer boundaries */

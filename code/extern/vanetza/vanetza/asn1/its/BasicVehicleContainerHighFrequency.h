@@ -47,13 +47,13 @@ typedef struct BasicVehicleContainerHighFrequency {
 	Curvature_t	 curvature;
 	CurvatureCalculationMode_t	 curvatureCalculationMode;
 	YawRate_t	 yawRate;
-	AccelerationControl_t	*accelerationControl;	/* OPTIONAL */
-	LanePosition_t	*lanePosition;	/* OPTIONAL */
-	struct SteeringWheelAngle	*steeringWheelAngle;	/* OPTIONAL */
-	struct LateralAcceleration	*lateralAcceleration;	/* OPTIONAL */
-	struct VerticalAcceleration	*verticalAcceleration;	/* OPTIONAL */
-	PerformanceClass_t	*performanceClass;	/* OPTIONAL */
-	struct CenDsrcTollingZone	*cenDsrcTollingZone;	/* OPTIONAL */
+	AccelerationControl_t	*accelerationControl	/* OPTIONAL */;
+	LanePosition_t	*lanePosition	/* OPTIONAL */;
+	struct SteeringWheelAngle	*steeringWheelAngle	/* OPTIONAL */;
+	struct LateralAcceleration	*lateralAcceleration	/* OPTIONAL */;
+	struct VerticalAcceleration	*verticalAcceleration	/* OPTIONAL */;
+	PerformanceClass_t	*performanceClass	/* OPTIONAL */;
+	struct CenDsrcTollingZone	*cenDsrcTollingZone	/* OPTIONAL */;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;

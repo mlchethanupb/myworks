@@ -25,9 +25,9 @@ struct ClosedLanes;
 
 /* RoadWorksContainerBasic */
 typedef struct RoadWorksContainerBasic {
-	RoadworksSubCauseCode_t	*roadworksSubCauseCode;	/* OPTIONAL */
+	RoadworksSubCauseCode_t	*roadworksSubCauseCode	/* OPTIONAL */;
 	LightBarSirenInUse_t	 lightBarSirenInUse;
-	struct ClosedLanes	*closedLanes;	/* OPTIONAL */
+	struct ClosedLanes	*closedLanes	/* OPTIONAL */;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;

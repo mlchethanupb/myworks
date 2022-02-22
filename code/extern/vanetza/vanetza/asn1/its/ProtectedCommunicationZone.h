@@ -27,11 +27,11 @@ extern "C" {
 /* ProtectedCommunicationZone */
 typedef struct ProtectedCommunicationZone {
 	ProtectedZoneType_t	 protectedZoneType;
-	TimestampIts_t	*expiryTime;	/* OPTIONAL */
+	TimestampIts_t	*expiryTime	/* OPTIONAL */;
 	Latitude_t	 protectedZoneLatitude;
 	Longitude_t	 protectedZoneLongitude;
-	ProtectedZoneRadius_t	*protectedZoneRadius;	/* OPTIONAL */
-	ProtectedZoneID_t	*protectedZoneID;	/* OPTIONAL */
+	ProtectedZoneRadius_t	*protectedZoneRadius	/* OPTIONAL */;
+	ProtectedZoneID_t	*protectedZoneID	/* OPTIONAL */;
 	/*
 	 * This type is extensible,
 	 * possible extensions are below.

@@ -46,8 +46,6 @@ oer_type_decoder_f CurvatureCalculationMode_decode_oer;
 oer_type_encoder_f CurvatureCalculationMode_encode_oer;
 per_type_decoder_f CurvatureCalculationMode_decode_uper;
 per_type_encoder_f CurvatureCalculationMode_encode_uper;
-per_type_decoder_f CurvatureCalculationMode_decode_aper;
-per_type_encoder_f CurvatureCalculationMode_encode_aper;
 
 #ifdef __cplusplus
 }

@@ -35,8 +35,6 @@ oer_type_decoder_f SubCauseCodeType_decode_oer;
 oer_type_encoder_f SubCauseCodeType_encode_oer;
 per_type_decoder_f SubCauseCodeType_decode_uper;
 per_type_encoder_f SubCauseCodeType_encode_uper;
-per_type_decoder_f SubCauseCodeType_decode_aper;
-per_type_encoder_f SubCauseCodeType_encode_aper;
 
 #ifdef __cplusplus
 }

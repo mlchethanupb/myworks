@@ -30,9 +30,7 @@ typedef enum StationarySince {
 typedef long	 StationarySince_t;
 
 /* Implementation */
-extern asn_per_constraints_t asn_PER_type_StationarySince_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_StationarySince;
-extern const asn_INTEGER_specifics_t asn_SPC_StationarySince_specs_1;
 asn_struct_free_f StationarySince_free;
 asn_struct_print_f StationarySince_print;
 asn_constr_check_f StationarySince_constraint;
@@ -44,8 +42,6 @@ oer_type_decoder_f StationarySince_decode_oer;
 oer_type_encoder_f StationarySince_encode_oer;
 per_type_decoder_f StationarySince_decode_uper;
 per_type_encoder_f StationarySince_encode_uper;
-per_type_decoder_f StationarySince_decode_aper;
-per_type_encoder_f StationarySince_encode_aper;
 
 #ifdef __cplusplus
 }

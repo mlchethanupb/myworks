@@ -128,7 +128,7 @@ static asn_per_constraints_t asn_PER_memb_companyName_constr_9 CC_NOTUSED = {
 	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
 	0, 0	/* No PER value map */
 };
-asn_TYPE_member_t asn_MBR_DangerousGoodsExtended_1[] = {
+static asn_TYPE_member_t asn_MBR_DangerousGoodsExtended_1[] = {
 	{ ATF_NOFLAGS, 0, offsetof(struct DangerousGoodsExtended, dangerousGoodsType),
 		(ASN_TAG_CLASS_CONTEXT | (0 << 2)),
 		-1,	/* IMPLICIT tag at current level */
@@ -216,7 +216,7 @@ static const asn_TYPE_tag2member_t asn_MAP_DangerousGoodsExtended_tag2el_1[] = {
     { (ASN_TAG_CLASS_CONTEXT | (6 << 2)), 6, 0, 0 }, /* phoneNumber */
     { (ASN_TAG_CLASS_CONTEXT | (7 << 2)), 7, 0, 0 } /* companyName */
 };
-asn_SEQUENCE_specifics_t asn_SPC_DangerousGoodsExtended_specs_1 = {
+static asn_SEQUENCE_specifics_t asn_SPC_DangerousGoodsExtended_specs_1 = {
 	sizeof(struct DangerousGoodsExtended),
 	offsetof(struct DangerousGoodsExtended, _asn_ctx),
 	asn_MAP_DangerousGoodsExtended_tag2el_1,

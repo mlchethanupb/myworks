@@ -12,7 +12,7 @@
 #include "asn_application.h"
 
 /* Including external dependencies */
-#include "Identifier.h"
+#include "StationID.h"
 #include "TimeOfMeasurement.h"
 #include "ObjectAge.h"
 #include "ObjectConfidence.h"
@@ -40,7 +40,7 @@ struct MatchedPosition;
 
 /* PerceivedObject */
 typedef struct PerceivedObject {
-	Identifier_t	 objectID;
+	StationID_t	 objectID;
 	struct SensorIdList	*sensorIDList	/* OPTIONAL */;
 	TimeOfMeasurement_t	 timeOfMeasurement;
 	ObjectAge_t	*objectAge	/* OPTIONAL */;

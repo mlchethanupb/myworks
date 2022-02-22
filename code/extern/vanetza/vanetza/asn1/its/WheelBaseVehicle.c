@@ -39,7 +39,7 @@ WheelBaseVehicle_constraint(const asn_TYPE_descriptor_t *td, const void *sptr,
 static asn_oer_constraints_t asn_OER_type_WheelBaseVehicle_constr_1 CC_NOTUSED = {
 	{ 1, 1 }	/* (1..127) */,
 	-1};
-asn_per_constraints_t asn_PER_type_WheelBaseVehicle_constr_1 CC_NOTUSED = {
+static asn_per_constraints_t asn_PER_type_WheelBaseVehicle_constr_1 CC_NOTUSED = {
 	{ APC_CONSTRAINED,	 7,  7,  1,  127 }	/* (1..127) */,
 	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
 	0, 0	/* No PER value map */

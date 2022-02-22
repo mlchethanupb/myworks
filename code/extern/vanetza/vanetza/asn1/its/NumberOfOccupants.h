@@ -28,7 +28,6 @@ typedef enum NumberOfOccupants {
 typedef long	 NumberOfOccupants_t;
 
 /* Implementation */
-extern asn_per_constraints_t asn_PER_type_NumberOfOccupants_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_NumberOfOccupants;
 asn_struct_free_f NumberOfOccupants_free;
 asn_struct_print_f NumberOfOccupants_print;
@@ -41,8 +40,6 @@ oer_type_decoder_f NumberOfOccupants_decode_oer;
 oer_type_encoder_f NumberOfOccupants_encode_oer;
 per_type_decoder_f NumberOfOccupants_decode_uper;
 per_type_encoder_f NumberOfOccupants_encode_uper;
-per_type_decoder_f NumberOfOccupants_decode_aper;
-per_type_encoder_f NumberOfOccupants_encode_aper;
 
 #ifdef __cplusplus
 }

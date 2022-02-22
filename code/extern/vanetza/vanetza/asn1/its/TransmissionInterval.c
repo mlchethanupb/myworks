@@ -39,7 +39,7 @@ TransmissionInterval_constraint(const asn_TYPE_descriptor_t *td, const void *spt
 static asn_oer_constraints_t asn_OER_type_TransmissionInterval_constr_1 CC_NOTUSED = {
 	{ 2, 1 }	/* (1..10000) */,
 	-1};
-asn_per_constraints_t asn_PER_type_TransmissionInterval_constr_1 CC_NOTUSED = {
+static asn_per_constraints_t asn_PER_type_TransmissionInterval_constr_1 CC_NOTUSED = {
 	{ APC_CONSTRAINED,	 14,  14,  1,  10000 }	/* (1..10000) */,
 	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
 	0, 0	/* No PER value map */

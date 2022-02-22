@@ -55,7 +55,7 @@ asn_TYPE_member_t asn_MBR_PerceivedObject_1[] = {
 	{ ATF_NOFLAGS, 0, offsetof(struct PerceivedObject, objectID),
 		(ASN_TAG_CLASS_CONTEXT | (0 << 2)),
 		-1,	/* IMPLICIT tag at current level */
-		&asn_DEF_Identifier,
+		&asn_DEF_StationID,
 		0,
 		{ 0, 0, 0 },
 		0, 0, /* No default value */

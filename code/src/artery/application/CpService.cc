@@ -189,7 +189,7 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
 	ItsPduHeader_t& header = (*cpm_msg).header;
 	header.protocolVersion = 1;
-	header.messageID = ItsPduHeader__messageID_cpm;
+	header.messageID = ItsPduHeader__messageID_cam; //ItsPduHeader__messageID_cpm
 	header.stationID = mVehicleDataProvider->station_id();
 
 	CollectivePerceptionMessage_t& cpm = (*cpm_msg).cpm;
@@ -338,7 +338,8 @@ CpService::createPerceivedObjectContainer(const std::weak_ptr<artery::Environmen
 
     PerceivedObject_t *objContainer = vanetza::asn1::allocate<PerceivedObject_t>();
 
-    objContainer->objectID = infoObj.getobjectid();
+    objContainer->objectID = vdObj.station_id();//infoObj.getobjectid();
+
     //@todo - add later
 	//objContainer->sensorIDList = new Identifier_t(infoObj.getSensorId());
 
@@ -441,13 +442,12 @@ void CpService::generate_sensorid(){
 
     for (int i = 0; i < sensors.size(); i++) {
         mSensorsId.insert(std::pair<Sensor *, Identifier_t>(sensors[i], i));
-		/*
+		
         if (!mCPSensor && sensors[i]->getSensorCategory() == "CP")
             mCPSensor = sensors[i];
 
         if (!mCASensor && sensors[i]->getSensorCategory() == "CA")
             mCASensor = sensors[i];
-		*/
     }
 }
 
@@ -607,46 +607,10 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
         vanetza::units::Velocity speedReceived(originVeh.speed.speedValue * config::centimeter_per_second);
 
-		#if 0
-        if (mObjectsReceived.find(stationID) != mObjectsReceived.end()) {
-
-
-            /*auto dist = distance(posReceivedStation, mObjectsReceived[stationID].getLastPosition()) /
-                        boost::units::si::meter;
-            if(dist > 20.0){
-                std::cout << "Distance computed " << simTime() << " " << dist << std::endl;
-                std::cout << "Station " << stationID << std::endl;
-                std::cout << "Position received (" << posReceivedStation.x / boost::units::si::meter << " " << posReceivedStation.y / boost::units::si::meter << std::endl;
-                std::cout << "Position previous (" << mObjectsReceived[stationID].getLastPosition().x / boost::units::si::meter << " " << mObjectsReceived[stationID].getLastPosition().y / boost::units::si::meter << std::endl;
-                std::cout <<  mObjectsReceived[stationID] << std::endl;
-            }*/
-
-            //TODO remove when found out why
-            /*if(distance(posReceivedStation, mObjectsReceived[stationID].getLastPosition()) /
-               boost::units::si::meter >= 50.0){
-                auto dist = distance(posReceivedStation, mObjectsReceived[stationID].getLastPosition()) /
-                            boost::units::si::meter;
-                std::cout << "Problem with object: " << std::endl;
-                std::cout << "Distance with object is: " << dist << std::endl;
-                std::cout << "Last tracking time: " << mObjectsReceived[stationID].getLastTrackingTime().last() << std::endl;
-                std::cout << "Last vehicle update: " << mVehicleDataProvider->updated() << std::endl;
-            }
-
-            assert(distance(posReceivedStation, mObjectsReceived[stationID].getLastPosition()) /
-                   boost::units::si::meter < 50.0);
-
-            emit(scSignalDeltaPositionObject,
-                 distance(posReceivedStation, mObjectsReceived[stationID].getLastPosition()) /
-                 boost::units::si::meter);
-            */
-
-        }
-		 #endif
 		std::cout << "MLC--- station id: " << stationID << std::endl;
         Identifier_t idntfr = 0; /*mSensorsId.at(mCPSensor)*/
         mObjectsReceived[stationID] = ObjectInfo(newTracking,  idntfr, headingReceived,  posReceivedStation, speedReceived);
-        std::cout << "MLC--- station id: " << stationID << std::endl;
-       
+      
     }
 
     #if 1
@@ -691,26 +655,12 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
             if (mObjectsReceived.find(objCont->objectID) == mObjectsReceived.end()) {
 
-                std::cout << "adding element here 1 "<< std::endl;
                 Identifier_t idntfr = 0; /*mSensorsId.at(mCPSensor)*/
                 mObjectsReceived[objCont->objectID] = ObjectInfo(newTracking, idntfr,
                                                                  headingReceived, posReceived,
                                                                  speedReceived); //don't know if object has V2X capabilities, default is false
             } else {
-                //TODO remove
-                //auto dist = distance(posReceived, mObjectsReceived[objCont->objectID].getLastPosition()) /
-                //            boost::units::si::meter;
-               /* if(dist > 50.0){
-                    std::cout << "Distance computed " << simTime() << " " << dist << std::endl;
-                    std::cout << "Position received (" << posReceived.x / boost::units::si::meter << " " << posReceived.y / boost::units::si::meter << std::endl;
-                    std::cout << "Position previous (" << mObjectsReceived[objCont->objectID].getLastPosition().x / boost::units::si::meter << " " << mObjectsReceived[objCont->objectID].getLastPosition().y / boost::units::si::meter << std::endl;
-                }
-                assert(distance(posReceived, mObjectsReceived[objCont->objectID].getLastPosition()) /
-                       boost::units::si::meter < 50.0);
-                */
-                //emit(scSignalDeltaPositionObject, distance(posReceived, mObjectsReceived[objCont->objectID].getLastPosition()) / boost::units::si::meter);
                 
-                std::cout << "adding element here 2 "<< std::endl;
                 Identifier_t idntfr = 0; /*mSensorsId.at(mCPSensor)*/
                 mObjectsReceived[objCont->objectID] = ObjectInfo(
                         newTracking, idntfr, headingReceived,

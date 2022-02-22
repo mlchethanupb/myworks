@@ -31,9 +31,9 @@ typedef struct DangerousGoodsExtended {
 	BOOLEAN_t	 elevatedTemperature;
 	BOOLEAN_t	 tunnelsRestricted;
 	BOOLEAN_t	 limitedQuantity;
-	IA5String_t	*emergencyActionCode;	/* OPTIONAL */
-	PhoneNumber_t	*phoneNumber;	/* OPTIONAL */
-	UTF8String_t	*companyName;	/* OPTIONAL */
+	IA5String_t	*emergencyActionCode	/* OPTIONAL */;
+	PhoneNumber_t	*phoneNumber	/* OPTIONAL */;
+	UTF8String_t	*companyName	/* OPTIONAL */;
 	/*
 	 * This type is extensible,
 	 * possible extensions are below.
@@ -45,8 +45,6 @@ typedef struct DangerousGoodsExtended {
 
 /* Implementation */
 extern asn_TYPE_descriptor_t asn_DEF_DangerousGoodsExtended;
-extern asn_SEQUENCE_specifics_t asn_SPC_DangerousGoodsExtended_specs_1;
-extern asn_TYPE_member_t asn_MBR_DangerousGoodsExtended_1[8];
 
 #ifdef __cplusplus
 }

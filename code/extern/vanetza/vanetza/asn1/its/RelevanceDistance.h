@@ -34,9 +34,7 @@ typedef enum RelevanceDistance {
 typedef long	 RelevanceDistance_t;
 
 /* Implementation */
-extern asn_per_constraints_t asn_PER_type_RelevanceDistance_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_RelevanceDistance;
-extern const asn_INTEGER_specifics_t asn_SPC_RelevanceDistance_specs_1;
 asn_struct_free_f RelevanceDistance_free;
 asn_struct_print_f RelevanceDistance_print;
 asn_constr_check_f RelevanceDistance_constraint;
@@ -48,8 +46,6 @@ oer_type_decoder_f RelevanceDistance_decode_oer;
 oer_type_encoder_f RelevanceDistance_encode_oer;
 per_type_decoder_f RelevanceDistance_decode_uper;
 per_type_encoder_f RelevanceDistance_encode_uper;
-per_type_decoder_f RelevanceDistance_decode_aper;
-per_type_encoder_f RelevanceDistance_encode_aper;
 
 #ifdef __cplusplus
 }

@@ -22,8 +22,8 @@ extern "C" {
 
 /* VehicleIdentification */
 typedef struct VehicleIdentification {
-	WMInumber_t	*wMInumber;	/* OPTIONAL */
-	VDS_t	*vDS;	/* OPTIONAL */
+	WMInumber_t	*wMInumber	/* OPTIONAL */;
+	VDS_t	*vDS	/* OPTIONAL */;
 	/*
 	 * This type is extensible,
 	 * possible extensions are below.
@@ -35,8 +35,6 @@ typedef struct VehicleIdentification {
 
 /* Implementation */
 extern asn_TYPE_descriptor_t asn_DEF_VehicleIdentification;
-extern asn_SEQUENCE_specifics_t asn_SPC_VehicleIdentification_specs_1;
-extern asn_TYPE_member_t asn_MBR_VehicleIdentification_1[2];
 
 #ifdef __cplusplus
 }

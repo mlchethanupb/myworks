@@ -28,7 +28,6 @@ typedef enum PosLonCarr {
 typedef long	 PosLonCarr_t;
 
 /* Implementation */
-extern asn_per_constraints_t asn_PER_type_PosLonCarr_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_PosLonCarr;
 asn_struct_free_f PosLonCarr_free;
 asn_struct_print_f PosLonCarr_print;
@@ -41,8 +40,6 @@ oer_type_decoder_f PosLonCarr_decode_oer;
 oer_type_encoder_f PosLonCarr_encode_oer;
 per_type_decoder_f PosLonCarr_decode_uper;
 per_type_encoder_f PosLonCarr_encode_uper;
-per_type_decoder_f PosLonCarr_decode_aper;
-per_type_encoder_f PosLonCarr_encode_aper;
 
 #ifdef __cplusplus
 }

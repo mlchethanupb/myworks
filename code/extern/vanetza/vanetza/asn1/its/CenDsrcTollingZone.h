@@ -25,7 +25,7 @@ extern "C" {
 typedef struct CenDsrcTollingZone {
 	Latitude_t	 protectedZoneLatitude;
 	Longitude_t	 protectedZoneLongitude;
-	CenDsrcTollingZoneID_t	*cenDsrcTollingZoneID;	/* OPTIONAL */
+	CenDsrcTollingZoneID_t	*cenDsrcTollingZoneID	/* OPTIONAL */;
 	/*
 	 * This type is extensible,
 	 * possible extensions are below.

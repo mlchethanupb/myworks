@@ -23,7 +23,7 @@ extern "C" {
 /* PathPoint */
 typedef struct PathPoint {
 	DeltaReferencePosition_t	 pathPosition;
-	PathDeltaTime_t	*pathDeltaTime;	/* OPTIONAL */
+	PathDeltaTime_t	*pathDeltaTime	/* OPTIONAL */;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;

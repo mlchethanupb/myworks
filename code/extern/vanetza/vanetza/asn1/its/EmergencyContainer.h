@@ -26,8 +26,8 @@ struct CauseCode;
 /* EmergencyContainer */
 typedef struct EmergencyContainer {
 	LightBarSirenInUse_t	 lightBarSirenInUse;
-	struct CauseCode	*incidentIndication;	/* OPTIONAL */
-	EmergencyPriority_t	*emergencyPriority;	/* OPTIONAL */
+	struct CauseCode	*incidentIndication	/* OPTIONAL */;
+	EmergencyPriority_t	*emergencyPriority	/* OPTIONAL */;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;

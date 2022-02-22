@@ -27,9 +27,9 @@ struct CauseCode;
 /* SafetyCarContainer */
 typedef struct SafetyCarContainer {
 	LightBarSirenInUse_t	 lightBarSirenInUse;
-	struct CauseCode	*incidentIndication;	/* OPTIONAL */
-	TrafficRule_t	*trafficRule;	/* OPTIONAL */
-	SpeedLimit_t	*speedLimit;	/* OPTIONAL */
+	struct CauseCode	*incidentIndication	/* OPTIONAL */;
+	TrafficRule_t	*trafficRule	/* OPTIONAL */;
+	SpeedLimit_t	*speedLimit	/* OPTIONAL */;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;

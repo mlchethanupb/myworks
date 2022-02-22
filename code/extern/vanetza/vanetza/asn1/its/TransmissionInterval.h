@@ -28,7 +28,6 @@ typedef enum TransmissionInterval {
 typedef long	 TransmissionInterval_t;
 
 /* Implementation */
-extern asn_per_constraints_t asn_PER_type_TransmissionInterval_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_TransmissionInterval;
 asn_struct_free_f TransmissionInterval_free;
 asn_struct_print_f TransmissionInterval_print;
@@ -41,8 +40,6 @@ oer_type_decoder_f TransmissionInterval_decode_oer;
 oer_type_encoder_f TransmissionInterval_encode_oer;
 per_type_decoder_f TransmissionInterval_decode_uper;
 per_type_encoder_f TransmissionInterval_encode_uper;
-per_type_decoder_f TransmissionInterval_decode_aper;
-per_type_encoder_f TransmissionInterval_encode_aper;
 
 #ifdef __cplusplus
 }

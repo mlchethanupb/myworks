@@ -7,7 +7,7 @@
 
 #include "VehicleIdentification.h"
 
-asn_TYPE_member_t asn_MBR_VehicleIdentification_1[] = {
+static asn_TYPE_member_t asn_MBR_VehicleIdentification_1[] = {
 	{ ATF_POINTER, 2, offsetof(struct VehicleIdentification, wMInumber),
 		(ASN_TAG_CLASS_CONTEXT | (0 << 2)),
 		-1,	/* IMPLICIT tag at current level */
@@ -35,7 +35,7 @@ static const asn_TYPE_tag2member_t asn_MAP_VehicleIdentification_tag2el_1[] = {
     { (ASN_TAG_CLASS_CONTEXT | (0 << 2)), 0, 0, 0 }, /* wMInumber */
     { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 1, 0, 0 } /* vDS */
 };
-asn_SEQUENCE_specifics_t asn_SPC_VehicleIdentification_specs_1 = {
+static asn_SEQUENCE_specifics_t asn_SPC_VehicleIdentification_specs_1 = {
 	sizeof(struct VehicleIdentification),
 	offsetof(struct VehicleIdentification, _asn_ctx),
 	asn_MAP_VehicleIdentification_tag2el_1,

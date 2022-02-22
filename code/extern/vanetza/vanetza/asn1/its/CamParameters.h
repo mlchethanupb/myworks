@@ -28,8 +28,8 @@ struct SpecialVehicleContainer;
 typedef struct CamParameters {
 	BasicContainer_t	 basicContainer;
 	HighFrequencyContainer_t	 highFrequencyContainer;
-	struct LowFrequencyContainer	*lowFrequencyContainer;	/* OPTIONAL */
-	struct SpecialVehicleContainer	*specialVehicleContainer;	/* OPTIONAL */
+	struct LowFrequencyContainer	*lowFrequencyContainer	/* OPTIONAL */;
+	struct SpecialVehicleContainer	*specialVehicleContainer	/* OPTIONAL */;
 	/*
 	 * This type is extensible,
 	 * possible extensions are below.

@@ -44,8 +44,6 @@ oer_type_decoder_f HeadingValue_decode_oer;
 oer_type_encoder_f HeadingValue_encode_oer;
 per_type_decoder_f HeadingValue_decode_uper;
 per_type_encoder_f HeadingValue_encode_uper;
-per_type_decoder_f HeadingValue_decode_aper;
-per_type_encoder_f HeadingValue_encode_aper;
 
 #ifdef __cplusplus
 }

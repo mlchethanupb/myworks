@@ -28,9 +28,7 @@ typedef enum RequestResponseIndication {
 typedef long	 RequestResponseIndication_t;
 
 /* Implementation */
-extern asn_per_constraints_t asn_PER_type_RequestResponseIndication_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_RequestResponseIndication;
-extern const asn_INTEGER_specifics_t asn_SPC_RequestResponseIndication_specs_1;
 asn_struct_free_f RequestResponseIndication_free;
 asn_struct_print_f RequestResponseIndication_print;
 asn_constr_check_f RequestResponseIndication_constraint;
@@ -42,8 +40,6 @@ oer_type_decoder_f RequestResponseIndication_decode_oer;
 oer_type_encoder_f RequestResponseIndication_encode_oer;
 per_type_decoder_f RequestResponseIndication_decode_uper;
 per_type_encoder_f RequestResponseIndication_encode_uper;
-per_type_decoder_f RequestResponseIndication_decode_aper;
-per_type_encoder_f RequestResponseIndication_encode_aper;
 
 #ifdef __cplusplus
 }

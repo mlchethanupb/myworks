@@ -28,7 +28,6 @@ typedef enum PosCentMass {
 typedef long	 PosCentMass_t;
 
 /* Implementation */
-extern asn_per_constraints_t asn_PER_type_PosCentMass_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_PosCentMass;
 asn_struct_free_f PosCentMass_free;
 asn_struct_print_f PosCentMass_print;
@@ -41,8 +40,6 @@ oer_type_decoder_f PosCentMass_decode_oer;
 oer_type_encoder_f PosCentMass_encode_oer;
 per_type_decoder_f PosCentMass_decode_uper;
 per_type_encoder_f PosCentMass_encode_uper;
-per_type_decoder_f PosCentMass_decode_aper;
-per_type_encoder_f PosCentMass_encode_aper;
 
 #ifdef __cplusplus
 }

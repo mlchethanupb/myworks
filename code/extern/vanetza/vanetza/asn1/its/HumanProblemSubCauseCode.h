@@ -41,8 +41,6 @@ oer_type_decoder_f HumanProblemSubCauseCode_decode_oer;
 oer_type_encoder_f HumanProblemSubCauseCode_encode_oer;
 per_type_decoder_f HumanProblemSubCauseCode_decode_uper;
 per_type_encoder_f HumanProblemSubCauseCode_encode_uper;
-per_type_decoder_f HumanProblemSubCauseCode_decode_aper;
-per_type_encoder_f HumanProblemSubCauseCode_encode_aper;
 
 #ifdef __cplusplus
 }

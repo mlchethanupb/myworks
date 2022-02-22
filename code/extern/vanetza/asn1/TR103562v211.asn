@@ -6,7 +6,7 @@ DEFINITIONS AUTOMATIC TAGS ::=
 
 BEGIN
 
-IMPORTS ItsPduHeader, Heading, ReferencePosition, Speed, DriveDirection, LongitudinalAcceleration, LateralAcceleration, VerticalAcceleration, StationType, VehicleLength, VehicleWidth, YawRate, SpeedConfidence
+IMPORTS ItsPduHeader, Heading, ReferencePosition, Speed, DriveDirection, LongitudinalAcceleration, LateralAcceleration, VerticalAcceleration, StationType, StationID, VehicleLength, VehicleWidth, YawRate, SpeedConfidence
 FROM ITS-Container { itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) ts (102894) cdd (2) version (2) }
 IntersectionReferenceID, LaneID, NodeOffsetPointXY, Offset-B10, Offset-B11, Offset-B12, Offset-B13, Offset-B14, Offset-B16, RoadSegmentReferenceID, VehicleHeight
 FROM DSRC { iso (1) standard (0) signalizedIntersection (19091) profilec(2) dsrc (2) version2 (2) }
@@ -83,7 +83,7 @@ SensorInformation ::= SEQUENCE {
 PerceivedObjectContainer ::= SEQUENCE SIZE(1..128, ...) OF PerceivedObject
 
 PerceivedObject ::= SEQUENCE {
-    objectID                Identifier,
+    objectID                StationID,
     sensorIDList            SensorIdList OPTIONAL,
     timeOfMeasurement       TimeOfMeasurement,
     objectAge               ObjectAge OPTIONAL,

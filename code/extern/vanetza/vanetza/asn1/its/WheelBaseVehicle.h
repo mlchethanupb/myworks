@@ -28,7 +28,6 @@ typedef enum WheelBaseVehicle {
 typedef long	 WheelBaseVehicle_t;
 
 /* Implementation */
-extern asn_per_constraints_t asn_PER_type_WheelBaseVehicle_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_WheelBaseVehicle;
 asn_struct_free_f WheelBaseVehicle_free;
 asn_struct_print_f WheelBaseVehicle_print;
@@ -41,8 +40,6 @@ oer_type_decoder_f WheelBaseVehicle_decode_oer;
 oer_type_encoder_f WheelBaseVehicle_encode_oer;
 per_type_decoder_f WheelBaseVehicle_decode_uper;
 per_type_encoder_f WheelBaseVehicle_encode_uper;
-per_type_decoder_f WheelBaseVehicle_decode_aper;
-per_type_encoder_f WheelBaseVehicle_encode_aper;
 
 #ifdef __cplusplus
 }

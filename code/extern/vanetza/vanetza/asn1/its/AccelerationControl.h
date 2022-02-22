@@ -46,8 +46,6 @@ oer_type_decoder_f AccelerationControl_decode_oer;
 oer_type_encoder_f AccelerationControl_encode_oer;
 per_type_decoder_f AccelerationControl_decode_uper;
 per_type_encoder_f AccelerationControl_encode_uper;
-per_type_decoder_f AccelerationControl_decode_aper;
-per_type_encoder_f AccelerationControl_encode_aper;
 
 #ifdef __cplusplus
 }

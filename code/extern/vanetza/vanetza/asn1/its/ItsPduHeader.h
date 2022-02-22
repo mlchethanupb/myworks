@@ -34,8 +34,7 @@ typedef enum ItsPduHeader__messageID {
 	ItsPduHeader__messageID_ssem	= 10,
 	ItsPduHeader__messageID_evcsn	= 11,
 	ItsPduHeader__messageID_saem	= 12,
-	ItsPduHeader__messageID_rtcmem	= 13,
-	ItsPduHeader__messageID_cpm	= 14
+	ItsPduHeader__messageID_rtcmem	= 13
 } e_ItsPduHeader__messageID;
 
 /* ItsPduHeader */
