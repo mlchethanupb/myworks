@@ -649,7 +649,7 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
        
     }
 
-    #if 0
+    #if 1
     //Get info of the objects received:
     PerceivedObjectContainer_t *objectsContainer = cpm_data->cpm.cpmParameters.perceivedObjectContainer;
     for (int i = 0; objectsContainer != nullptr && i < objectsContainer->list.count; i++) {
@@ -666,8 +666,7 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
                 cpm_data->cpm.generationDeltaTime - objCont->timeOfMeasurement));
 
         if (mObjectsReceived.find(objCont->objectID) == mObjectsReceived.end() || //First time object perceived
-            mObjectsReceived.at(objCont->objectID).getLastTrackingTime().last() + mCPSensor->getValidityPeriod() <=
-            simTime() || //Object is expired
+            //mObjectsReceived.at(objCont->objectID).getLastTrackingTime().last() + mCPSensor->getValidityPeriod() <= simTime() || //Object is expired
             objectPerceptTime > mObjectsReceived.at(
                     objCont->objectID).getLastTrackingTime().last()) { // the CPM received is more recent
 
@@ -693,7 +692,8 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
             if (mObjectsReceived.find(objCont->objectID) == mObjectsReceived.end()) {
 
                 std::cout << "adding element here 1 "<< std::endl;
-                mObjectsReceived[objCont->objectID] = ObjectInfo(newTracking, mSensorsId.at(mCPSensor),
+                Identifier_t idntfr = 0; /*mSensorsId.at(mCPSensor)*/
+                mObjectsReceived[objCont->objectID] = ObjectInfo(newTracking, idntfr,
                                                                  headingReceived, posReceived,
                                                                  speedReceived); //don't know if object has V2X capabilities, default is false
             } else {
@@ -711,8 +711,9 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
                 //emit(scSignalDeltaPositionObject, distance(posReceived, mObjectsReceived[objCont->objectID].getLastPosition()) / boost::units::si::meter);
                 
                 std::cout << "adding element here 2 "<< std::endl;
+                Identifier_t idntfr = 0; /*mSensorsId.at(mCPSensor)*/
                 mObjectsReceived[objCont->objectID] = ObjectInfo(
-                        newTracking, mSensorsId.at(mCPSensor), headingReceived,
+                        newTracking, idntfr, headingReceived,
                         posReceived, speedReceived);
             }
         }
