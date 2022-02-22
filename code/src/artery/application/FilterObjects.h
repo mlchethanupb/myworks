@@ -41,7 +41,7 @@ namespace artery
                 ObjectInfo::ObjectsPercievedMap objectsPrevSent, const omnetpp::SimTime& T_now);
 
         ObjectInfo::ObjectsPercievedMap getallPercievedObjs();
-        bool checkobjDynamics(const ObjectInfo::ObjectPercieved& obj, ObjectInfo::ObjectsPercievedMap&, omnetpp::SimTime T_now);
+        bool checkobjectDynamics(const ObjectInfo::ObjectPercieved& obj, ObjectInfo::ObjectsPercievedMap&, omnetpp::SimTime T_now);
 
     private:
 
@@ -62,41 +62,10 @@ namespace artery
         bool checkSpeedDelta(vanetza::units::Velocity,  vanetza::units::Velocity) const;
         bool checkTimeDelta(omnetpp::SimTime T_prev, omnetpp::SimTime T_now) const;
 
-        bool v2xCapabilities(const LocalEnvironmentModel::TrackedObject&,
-                            const LocalEnvironmentModel::Tracking::TrackingMap&,
-                            ObjectInfo::ObjectsReceivedMap&);
-
-
-        bool objectDynamicsLocal(const LocalEnvironmentModel::TrackedObject& ,
-                                const LocalEnvironmentModel::Tracking::TrackingMap&,
+        bool checkobjectDynamics(const LocalEnvironmentModel::TrackedObject& ,
                                 ObjectInfo::ObjectsPercievedMap&, omnetpp::SimTime T_now);
 
-        bool objectDynamicsV2X(const LocalEnvironmentModel::TrackedObject&,
-                              const LocalEnvironmentModel::Tracking::TrackingMap&,
-                              Sensor * cpSensor, omnetpp::SimTime,
-                              ObjectInfo::ObjectsReceivedMap&);
 
-
-        bool fovSensors(const LocalEnvironmentModel::TrackedObject&,
-                         const LocalEnvironmentModel::Tracking::TrackingMap&,
-                         omnetpp::SimTime);
-
-
-        bool perceptionQuality(const LocalEnvironmentModel::TrackedObject&,
-                                              const LocalEnvironmentModel::Tracking::TrackingMap&,
-                                              omnetpp::SimTime);
-
-
-        bool updatingTime(const LocalEnvironmentModel::TrackedObject& ,
-                         const LocalEnvironmentModel::Tracking::TrackingMap&,
-                         Sensor *, omnetpp::SimTime,
-                         ObjectInfo::ObjectsReceivedMap&, omnetpp::SimTime T_now);
-
-        bool etsiFilter(const LocalEnvironmentModel::TrackedObject& obj,
-                       const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection,
-                       ObjectInfo::ObjectsPercievedMap& prevObjSent,
-                       ObjectInfo::ObjectsReceivedMap& objReceived,
-                       const omnetpp::SimTime& T_now);
 
     };
 

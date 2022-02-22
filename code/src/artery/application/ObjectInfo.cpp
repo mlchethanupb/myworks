@@ -23,11 +23,11 @@ ObjectInfo::ObjectInfo(){
     mObjid = ++unique_id;
 }
 
-ObjectInfo::ObjectInfo(bool hasV2XCapabilities, LocalEnvironmentModel::TrackingTime lastTrackingTime, Identifier_t& id,
-        vanetza::units::Angle lastCpmHeading, bool headAvailable, Position lastCpmPosition,
+ObjectInfo::ObjectInfo(LocalEnvironmentModel::TrackingTime lastTrackingTime, Identifier_t& id,
+        vanetza::units::Angle lastCpmHeading, Position lastCpmPosition,
         vanetza::units::Velocity lastCpmSpeed):
-        mHasV2XCapabilities(hasV2XCapabilities), mLastTrackingTime(lastTrackingTime), mNumberOfSensors(1), mSensorsId(id),
-        mLastCpmHeading(lastCpmHeading), mHeadingAvailable(headAvailable), mLastCpmPosition(lastCpmPosition),
+        mLastTrackingTime(lastTrackingTime), mNumberOfSensors(1), mSensorsId(id),
+        mLastCpmHeading(lastCpmHeading), mLastCpmPosition(lastCpmPosition),
         mLastCpmSpeed(lastCpmSpeed)
 {
     if(unique_id == sizeof(uint8_t)-1){
@@ -38,7 +38,6 @@ ObjectInfo::ObjectInfo(bool hasV2XCapabilities, LocalEnvironmentModel::TrackingT
 
 std::ostream& operator<<(std::ostream& os, ObjectInfo& infoObj){
     os << "Info of the object: " << std::endl;
-    os << "\tHas V2X capabilities: " << infoObj.getHasV2XCapabilities() << std:: endl;
     os << "\tLast Tracked time: " << infoObj.getLastTrackingTime().last() << std::endl;
     os << "\tNumber of sensors in the detection: " << infoObj.getNumberOfSensors() << std::endl;
     os << "\tSensor used in the detection: " << infoObj.getSensorId() << std::endl;
