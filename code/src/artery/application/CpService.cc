@@ -189,7 +189,7 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
 	ItsPduHeader_t& header = (*cpm_msg).header;
 	header.protocolVersion = 1;
-	header.messageID = ItsPduHeader__messageID_cam; //ItsPduHeader__messageID_cpm
+	header.messageID = ItsPduHeader__messageID_cpm;
 	header.stationID = mVehicleDataProvider->station_id();
 
 	CollectivePerceptionMessage_t& cpm = (*cpm_msg).cpm;
