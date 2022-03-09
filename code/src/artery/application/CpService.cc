@@ -120,7 +120,7 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 	if (cpm && cpm->validate()) {
 
 		CpObject obj = visitor.shared_wrapper;
-		emit(scSignalCpmReceived, &obj);
+		//emit(scSignalCpmReceived, &obj);
 
 		const vanetza::asn1::Cpm& cpm_msg = obj.asn1();
 		retrieveCPMmessage(cpm_msg);
