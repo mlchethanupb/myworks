@@ -116,18 +116,17 @@ void Router::handleMessage(omnetpp::cMessage* msg)
 
     if (msg->getArrivalGate() == mRadioDriverDataIn) {
 
-        std::cout << "****************************************************" << std::endl;
-        std::cout << "CAM or CPM message received -";
+        EV << "Router::handlemessage - CAM or CPM message received -";
 
         auto* packet = omnetpp::check_and_cast<GeoNetPacket*>(msg);
         auto* indication = omnetpp::check_and_cast<GeoNetIndication*>(packet->getControlInfo());
         
         if( packet->hasPayload()){
             //std::cout << "payload is not empty" << std::endl;
-            std::cout << " payload size: " << packet->getBitLength()  << std::endl;
+            EV << " payload size: " << packet->getBitLength()  << std::endl;
 
         }else{
-            std::cout << "payload is empty" << std::endl;
+            EV << " payload is empty" << std::endl;
         }
         //check whether first argument is null 
         mRouter->indicate(std::move(*packet).extractPayload(), indication->source, indication->destination);

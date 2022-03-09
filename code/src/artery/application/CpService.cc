@@ -108,9 +108,8 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 {
 
 	Enter_Method("indicate");
-	//std::cout << "MLC - CpService::indicate" << std::endl;
 
-	EV<<"CPM message received"<< endl;
+	EV<< "CPM message received" << endl;
 
 	if(mSensorsId.empty()){
 		generate_sensorid();
@@ -121,7 +120,7 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 	if (cpm && cpm->validate()) {
 
 		CpObject obj = visitor.shared_wrapper;
-		//emit(scSignalCpmReceived, &obj);
+		emit(scSignalCpmReceived, &obj);
 
 		const vanetza::asn1::Cpm& cpm_msg = obj.asn1();
 		retrieveCPMmessage(cpm_msg);
@@ -174,9 +173,7 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 
 void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
-	EV<<"MLC -- Generating collective perception message: "<< endl;
-	std::cout <<"=========================================================================================== "<< endl;
-	std::cout <<"MLC -- Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
+	EV <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
 
 	if(mSensorsId.empty()){
 		generate_sensorid();
@@ -198,7 +195,7 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 	cpm.generationDeltaTime = genDeltaTime * GenerationDeltaTime_oneMilliSec;
 
 	if(T_now - mLastSenrInfoCntnrTimestamp >= SimTime(1, SIMTIME_S)){
-		std::cout << "generating sensor objects" << std::endl;
+		EV << "Generating sensor objects" << std::endl;
 		snsrcntr_prsnt = generateSensorInfoCntnr(cpm_msg);
 		if(snsrcntr_prsnt){
 			mLastSenrInfoCntnrTimestamp = T_now;
@@ -254,7 +251,6 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const
 
 			//check the dynamics and time elapsed of the object
 			if(mFilterObj.checkobjectDynamics(p_obj, mObjectsTracked, T_now)){
-				std::cout << "MLC ----- Inserting object" << std::endl;
 				mObjectsToSend.insert(p_obj);
 			}
 		}
@@ -294,7 +290,7 @@ void CpService::generate_objlist(vanetza::asn1::Cpm &message, const omnetpp::Sim
     //Add object in the list of previously sent
     updateObjTrackedList(T_now, mObjectsToSend);
 
-    //std::cout << "Send CPM with " << objectsToSend.size() << " objects" << std::endl;
+    //EV << "Send CPM with " << objectsToSend.size() << " objects" << std::endl;
     double nbRadarObj = (double) boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "Radar"));
     //if (nbRadarObj != 0)
         //emit(scSignalRatioFilter, (double) 1 - (double) mObjectsToSend.size() / nbRadarObj);
@@ -312,14 +308,12 @@ void CpService::generateASN1Objects(vanetza::asn1::Cpm &message, const omnetpp::
     if (!objToSend.empty()) {
         perceivedObjectContainers = vanetza::asn1::allocate<PerceivedObjectContainer_t>();
         for (auto &obj : objToSend) {
-			std::cout << "MLC ----- in for loop" << std::endl;
             //if (obj.first.expired()) continue;
             PerceivedObject_t *objContainer = createPerceivedObjectContainer(obj.first, obj.second);
             ASN_SEQUENCE_ADD(perceivedObjectContainers, objContainer);
         }
 	}else{
 		EV_INFO << "MLC ----- No objects to send" << std::endl;
-		std::cout << "MLC ----- No objects to send" << std::endl;
 	}
 #ifdef REMOVE_CODE
 	if(perceivedObjectContainers->list.count == 0){
@@ -333,12 +327,12 @@ void CpService::generateASN1Objects(vanetza::asn1::Cpm &message, const omnetpp::
 PerceivedObject_t *
 CpService::createPerceivedObjectContainer(const std::weak_ptr<artery::EnvironmentModelObject> &object,
                                           ObjectInfo &infoObj) {
-	std::cout << "MLC ----- in createPerceivedObjectContainer()" << std::endl;
+
     const auto &vdObj = object.lock()->getVehicleData();
 
     PerceivedObject_t *objContainer = vanetza::asn1::allocate<PerceivedObject_t>();
 
-    objContainer->objectID = vdObj.station_id();//infoObj.getobjectid();
+    objContainer->objectID = vdObj.station_id();
 
     //@todo - add later
 	//objContainer->sensorIDList = new Identifier_t(infoObj.getSensorId());
@@ -441,8 +435,11 @@ void CpService::generate_sensorid(){
 	}
 
     for (int i = 0; i < sensors.size(); i++) {
+        
+        //std::cout << "sensor category: " << sensors[i]->getSensorCategory() << std::endl;
+
         mSensorsId.insert(std::pair<Sensor *, Identifier_t>(sensors[i], i));
-		
+      
         if (!mCPSensor && sensors[i]->getSensorCategory() == "CP")
             mCPSensor = sensors[i];
 
@@ -462,7 +459,7 @@ void CpService::addsensorinfo(SensorInformationContainer_t *& snsrinfo_cntr, Sen
 		snsr_info->type = sensorType;
 		snsr_info->detectionArea.present = DetectionArea_PR_vehicleSensor;
 		
-		std::cout << "adding sensor information " << snsr_info->sensorID << std::endl;
+		//std::cout << "adding sensor information " << snsr_info->sensorID << std::endl;
 
 		VehicleSensor_t& vehicle_snsr =  snsr_info->detectionArea.choice.vehicleSensor;
 
@@ -575,8 +572,7 @@ void CpService::generateRSUStnCntnr(vanetza::asn1::Cpm& cpm_msg){
 
 void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
-	EV<<" CPM message received, retriving information "<< endl;
-	std::cout <<" CPM message received by "<< mVehicleDataProvider->station_id() <<", retriving information "<< endl;
+	EV <<" CPM message received by "<< mVehicleDataProvider->station_id() <<", retriving information "<< endl;
 
     const CPM_t cpm = (*cpm_msg);
 	const CPM_t* cpm_data = &cpm;
@@ -584,10 +580,9 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
     uint32_t stationID = cpm_data->header.stationID;
     omnetpp::SimTime generationTime = mTimer->getTimeFor(
             mTimer->reconstructMilliseconds(cpm_data->cpm.generationDeltaTime));
-    std::cout << "MLC--- 111 : "  << std::endl;
 
     if (mObjectsReceived.find(stationID) == mObjectsReceived.end() || //First time object perceived
-        //mObjectsReceived.at(stationID).getLastTrackingTime().last() + mCPSensor->getValidityPeriod() <= simTime() ||
+        mObjectsReceived.at(stationID).getLastTrackingTime().last() + mCPSensor->getValidityPeriod() <= simTime() ||
         //Object is expired
         generationTime > mObjectsReceived.at(stationID).getLastTrackingTime().last()) { // the CPM received is more recent
 
@@ -607,9 +602,8 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
         vanetza::units::Velocity speedReceived(originVeh.speed.speedValue * config::centimeter_per_second);
 
-		std::cout << "MLC--- station id: " << stationID << std::endl;
-        Identifier_t idntfr = 0; /*mSensorsId.at(mCPSensor)*/
-        mObjectsReceived[stationID] = ObjectInfo(newTracking,  idntfr, headingReceived,  posReceivedStation, speedReceived);
+		EV << "MLC--- station id: " << stationID << std::endl;
+        mObjectsReceived[stationID] = ObjectInfo(newTracking,  mSensorsId.at(mCPSensor), headingReceived,  posReceivedStation, speedReceived);
       
     }
 
@@ -622,7 +616,6 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
         /** @note Skip message received about myself */
         if (objCont->objectID == mVehicleDataProvider->station_id()) {
-            //std::cout << "Skip myself" << std::endl;
             continue;
         }
 
@@ -630,7 +623,7 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
                 cpm_data->cpm.generationDeltaTime - objCont->timeOfMeasurement));
 
         if (mObjectsReceived.find(objCont->objectID) == mObjectsReceived.end() || //First time object perceived
-            //mObjectsReceived.at(objCont->objectID).getLastTrackingTime().last() + mCPSensor->getValidityPeriod() <= simTime() || //Object is expired
+            mObjectsReceived.at(objCont->objectID).getLastTrackingTime().last() + mCPSensor->getValidityPeriod() <= simTime() || //Object is expired
             objectPerceptTime > mObjectsReceived.at(
                     objCont->objectID).getLastTrackingTime().last()) { // the CPM received is more recent
 
@@ -655,15 +648,13 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
             if (mObjectsReceived.find(objCont->objectID) == mObjectsReceived.end()) {
 
-                Identifier_t idntfr = 0; /*mSensorsId.at(mCPSensor)*/
-                mObjectsReceived[objCont->objectID] = ObjectInfo(newTracking, idntfr,
+                mObjectsReceived[objCont->objectID] = ObjectInfo(newTracking, mSensorsId.at(mCPSensor),
                                                                  headingReceived, posReceived,
                                                                  speedReceived); //don't know if object has V2X capabilities, default is false
             } else {
                 
-                Identifier_t idntfr = 0; /*mSensorsId.at(mCPSensor)*/
                 mObjectsReceived[objCont->objectID] = ObjectInfo(
-                        newTracking, idntfr, headingReceived,
+                        newTracking, mSensorsId.at(mCPSensor), headingReceived,
                         posReceived, speedReceived);
             }
         }
@@ -694,28 +685,28 @@ SimTime CpService::genCpmDcc() {
 void CpService::printCPM(const vanetza::asn1::Cpm &message) {
         const CPM_t &cpm = (*message);
 
-        std::cout << "\n--- CPM at: " << simTime() << " ---" << std::endl;
+        EV << "\n--- CPM at: " << simTime() << " ---" << std::endl;
         //Print header
-        std::cout << "Header:\n\tprotocolVersion: " << cpm.header.protocolVersion
+        EV << "Header:\n\tprotocolVersion: " << cpm.header.protocolVersion
                   << "\n\tmessageID: " << cpm.header.messageID << "\n\tstationID: " << cpm.header.stationID
                   << std::endl;
 
         //Generation delta time
-        std::cout << "generationDeltaTime: " << cpm.cpm.generationDeltaTime << std::endl;
+        EV << "generationDeltaTime: " << cpm.cpm.generationDeltaTime << std::endl;
 
         //CPM parameters
-        std::cout << "-- CpmParameters --" << std::endl;
+        EV << "-- CpmParameters --" << std::endl;
 
         //Management container
         CpmManagementContainer_t cpmManag = cpm.cpm.cpmParameters.managementContainer;
-        std::cout << "CpmManagementContainer:\n\tstationType: " << cpmManag.stationType
+        EV << "CpmManagementContainer:\n\tstationType: " << cpmManag.stationType
                   << "\n\treferencePosition:\n\t\tlongitude: " << cpmManag.referencePosition.longitude
                   << "\n\t\tlatitude: " << cpmManag.referencePosition.latitude << std::endl;
 
         //Station data container
         StationDataContainer_t *cpmStationDC = cpm.cpm.cpmParameters.stationDataContainer;
         if (cpmStationDC) {
-            std::cout << "StationDataContainer:\n\ttype: vehicle (fixed)"
+            EV << "StationDataContainer:\n\ttype: vehicle (fixed)"
                       << "\n\theading: " << cpmStationDC->choice.originatingVehicleContainer.heading.headingValue
                       << "\n\tspeed: " << cpmStationDC->choice.originatingVehicleContainer.speed.speedValue
                       << std::endl;
@@ -723,25 +714,25 @@ void CpService::printCPM(const vanetza::asn1::Cpm &message) {
         }
 
         //Sensors list:
-        std::cout << "-- List of sensors --" << std::endl;
+        EV << "-- List of sensors --" << std::endl;
         SensorInformationContainer_t *sensorsContainer = cpm.cpm.cpmParameters.sensorInformationContainer;
         for (int i = 0; sensorsContainer != nullptr && i < sensorsContainer->list.count; i++) {
             SensorInformation_t *sensCont = sensorsContainer->list.array[i];
-            std::cout << "Sensor " << i << ": \n\tId: " << sensCont->sensorID
+            EV << "Sensor " << i << ": \n\tId: " << sensCont->sensorID
                       << "\n\tType: " << sensCont->type;
 
 			/*
             if (sensCont->details.present == SensorDetails_PR_vehicleSensor) {
                 VehicleSensor_t sensDetails = sensCont->details.choice.vehicleSensor;
 
-                std::cout << "\n\tReference point: " << sensDetails.refPointId
+                EV << "\n\tReference point: " << sensDetails.refPointId
                           << "\n\tX Sensor offset: " << sensDetails.xSensorOffset
                           << "\n\tY Sensor offset: " << sensDetails.ySensorOffset;
 
                 ListOfVehicleSensorProperties_t sensorProperties = sensDetails.vehicleSensorProperties;
                 for (int j = 0; j < sensorProperties.list.count; j++) {
                     VehicleSensorProperties_t *sensProp = sensorProperties.list.array[j];
-                    std::cout << "\n\tRange: " << sensProp->range / Range_oneMeter
+                    EV << "\n\tRange: " << sensProp->range / Range_oneMeter
                               << "\n\tHor. op. angle start: "
                               << sensProp->horizontalOpeningAngleStart / CartesianAngleValue_oneDegree
                               << "\n\tHor. op. angle end: "
@@ -750,15 +741,15 @@ void CpService::printCPM(const vanetza::asn1::Cpm &message) {
             }
 			*/
 
-            std::cout << std::endl << std::endl;
+            EV << std::endl << std::endl;
         }
 
         //Perceived object container
-        std::cout << "-- List of Objects --" << std::endl;
+        EV << "-- List of Objects --" << std::endl;
         PerceivedObjectContainer_t *objectsContainer = cpm.cpm.cpmParameters.perceivedObjectContainer;
         for (int i = 0; objectsContainer != nullptr && i < objectsContainer->list.count; i++) {
             PerceivedObject_t *objCont = objectsContainer->list.array[i];
-            std::cout << "Object " << i << ": \n\tobjectId: " << objCont->objectID
+            EV << "Object " << i << ": \n\tobjectId: " << objCont->objectID
                       << "\n\ttimeOfMeasurement: " << objCont->timeOfMeasurement
                       << "\n\txDistance: " << objCont->xDistance.value
                       << "\n\tyDistance: " << objCont->yDistance.value
