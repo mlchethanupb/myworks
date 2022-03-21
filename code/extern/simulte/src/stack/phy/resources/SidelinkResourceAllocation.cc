@@ -101,6 +101,7 @@ void SidelinkResourceAllocation::initialize(int stage)
     }
     else if (stage == inet::INITSTAGE_NETWORK_LAYER_2)
     {
+        EV<<"SRA stage 7:"<<endl;
         initialiseSensingWindow();
         sidelinkSynchronization();
     }
@@ -565,6 +566,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
 
     //Discarding subframes where sync information appears - PSSS,SSSS,DMRS
     EV<<"Next SLSS: "<<nextSLSS<<endl;
+
     simtime_t selStartTime;
     simtime_t selEndTime;
     //Converting to ms
@@ -577,6 +579,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
 
     if (nodeType_==UE)
     {
+        //nextSLSS=NOW+40*TTI; ///just for checking
         selStartTime = (nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
         selEndTime =  (selStartTime+(maxLatency/1000.0)).trunc(SIMTIME_MS);
 

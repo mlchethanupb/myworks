@@ -18,11 +18,11 @@ package artery.application;
 simple CpService like ItsG5Service
 {
     parameters:
-        @signal[CamReceived](type=CpObject);
-        @signal[CamSent](type=CpObject);
+        @signal[CpmReceived](type=CpObject);
+        @signal[CpmSent](type=CpObject);
 
-        @statistic[reception](source=CamReceived;record=vector(camStationId)?,vector(camGenerationDeltaTime)?);
-        @statistic[transmission](source=CamSent;record=vector(camStationId)?,vector(camGenerationDeltaTime)?);
+        @statistic[reception](source=CpmReceived;record=vector(camStationId)?,vector(camGenerationDeltaTime)?);
+        @statistic[transmission](source=CpmSent;record=vector(camStationId)?,vector(camGenerationDeltaTime)?);
 
         // evaluate DCC transmission interval restrictions
         bool withDccRestriction = default(true);

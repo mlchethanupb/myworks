@@ -10,6 +10,8 @@ simple LocalEnvironmentModel
 {
     parameters:
         @display("i=abstract/db");
+        //@signal[timeBetweenUpdates];
+        //@statistic[updateTime](source=timeBetweenUpdates);
         xml sensors = default(xml("<sensors />"));
         string globalEnvironmentModule;
         string middlewareModule;
