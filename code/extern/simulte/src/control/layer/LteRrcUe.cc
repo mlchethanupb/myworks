@@ -45,7 +45,8 @@ void LteRrcUe::initialize(int stage)
     {
         EV <<"LteRrcUe::initialize Configure resource allocation mode when UEs enter the simulation environment"<< endl;
 
-        bool cellFound = checkCellCoverage();
+        //bool cellFound = checkCellCoverage();
+        bool cellFound = false;
         modeSelect(cellFound);
     }
 

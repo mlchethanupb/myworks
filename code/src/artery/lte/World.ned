@@ -66,8 +66,8 @@ network World extends artery.inet.World
 //        }
 
     connections allowunconnected:
-        for i=0..numLteBaseStations-2 {
-            eNodeB[i].x2++ <--> Eth10G <--> eNodeB[i+1].x2++;
+        for i=0..numLteBaseStations-2, for j=i..numLteBaseStations-2 {
+            eNodeB[i].x2++ <--> Eth10G <--> eNodeB[j+1].x2++;
         }
 
         for i=0..numLteBaseStations-1 {

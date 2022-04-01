@@ -20,7 +20,7 @@ artery::Position position_cast(const Boundary& boundary, const TraCIPosition& po
 
 TraCIPosition position_cast(const Boundary& boundary, const artery::Position& pos)
 {
-    const double x = pos.x.value() + boundary.lowerLeftPosition().x;
+    const double x = pos.x.value() - boundary.lowerLeftPosition().x;
     const double y = boundary.upperRightPosition().y - pos.y.value();
     TraCIPosition tmp;
     tmp.x = x;
