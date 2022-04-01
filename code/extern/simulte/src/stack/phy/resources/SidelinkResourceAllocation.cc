@@ -579,7 +579,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
 
     if (nodeType_==UE)
     {
-        //nextSLSS=NOW+40*TTI; ///just for checking
+        nextSLSS=NOW+40*TTI; ///just for checking
         selStartTime = (nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
         selEndTime =  (selStartTime+(maxLatency/1000.0)).trunc(SIMTIME_MS);
 
