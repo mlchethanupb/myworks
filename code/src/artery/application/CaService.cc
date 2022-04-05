@@ -183,8 +183,8 @@ SimTime CaService::genCamDcc()
 vanetza::asn1::Cam createCooperativeAwarenessMessage(const VehicleDataProvider& vdp, uint16_t genDeltaTime)
 {
     EV<<"Creating cooperative awareness message: "<< genDeltaTime<< endl;
-	std::cout <<"================================================================ "<< endl;
-	std::cout <<"Creating cooperative awareness message:  "<< endl;
+	//std::cout <<"================================================================ "<< endl;
+	//std::cout <<"Creating cooperative awareness message:  "<< endl;
 
 	vanetza::asn1::Cam message;
 

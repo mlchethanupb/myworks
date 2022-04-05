@@ -520,6 +520,12 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
 
     if (packetDrop==false && (getAllocatedBlocksPrevious() == 0 || cResel==0)  )
     {
+<<<<<<< HEAD
+=======
+        nextSLSS=NOW+40*TTI; ///just for checking
+        selStartTime = (nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
+        selEndTime =  (selStartTime+(maxLatency/1000.0)).trunc(SIMTIME_MS);
+>>>>>>> f9b911f46a680a05952af80ec828b394f8d613ac
 
 
         //Fresh allocations
