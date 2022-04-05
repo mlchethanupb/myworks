@@ -4,7 +4,7 @@
 #include "stack/d2dModeSelection/D2DModeSelectionBase.h"
 #include "stack/mac/packet/SPSResourcePoolMode3.h"
 #include "stack/phy/packet/SPSResourcePool.h"
-#include "stack/mac/packet/LteMacPdu.h"
+
 Define_Module(LtePhyUeD2D);
 
 LtePhyUeD2D::LtePhyUeD2D()
@@ -93,7 +93,7 @@ void LtePhyUeD2D::handleAirFrame(cMessage* msg)
 
 
     EV << "LtePhyUeD2D: received new LteAirFrame with ID " << lteInfo->getFrameType() << " from channel" << "source Id: "<<lteInfo->getSourceId()<<
-            "Destination Id: "<<nodeId_<<endl;
+            "Destination Id: "<<lteInfo->getDestId()<<"Node Id: "<<nodeId_<<endl;
 
     int sourceId = binder_->getOmnetId(lteInfo->getSourceId());
     if(sourceId == 0 )
@@ -120,10 +120,11 @@ void LtePhyUeD2D::handleAirFrame(cMessage* msg)
         return;
     }
 
-    if (lteInfo->getFrameType() == SCIPKT)
+    if (lteInfo->getFrameType() == SCIPKT || lteInfo->getFrameType() ==DATAPKT)
     {
 
         //Process SCI
+
         frame->setControlInfo(lteInfo);
 
         if(lteInfo->getGrantStartTime()==NOW)
@@ -137,26 +138,19 @@ void LtePhyUeD2D::handleAirFrame(cMessage* msg)
             halfDuplexError= false;
             receivedPacket=true;
             lteInfo->setDeciderResult(true);
+
         }
 
-        return;
-    }
-    if (lteInfo->getFrameType()==DATAPKT)
-    {
         //Statistics collection
+        if (lteInfo->getFrameType()==DATAPKT)
+        {
+            decodeAirFrame(frame, lteInfo);
+            numAirFrameReceived_ = numAirFrameReceived_+1;
+            emit(numberReceivedPackets,numAirFrameReceived_);
+        }
 
-
-        EV<<"Received DATAPKT from: "<<lteInfo->getSourceId()<<endl;
-        decodeAirFrame(frame, lteInfo);
-        numAirFrameReceived_ = numAirFrameReceived_+1;
-        emit(numberReceivedPackets,numAirFrameReceived_);
-        EV<<"Sending received airframepdu to MAC layer"<<endl;
-        cPacket* recvdpdu = check_and_cast<cPacket*>(frame->decapsulate());
-        recvdpdu->setControlInfo(lteInfo);
-        send (recvdpdu,upperGateOut_);
 
         return;
-
     }
 
 
@@ -324,7 +318,7 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
         //SCI
         sciframe->setSchedulingPriority(airFramePriority_);
         sciframe->setDuration(TTI);
-
+        setSciframe(sciframe);
         return;
     }
     if (strcmp(msg->getName(), "CSRsPrevious")==0)
@@ -394,10 +388,9 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
     }
 
     EV<<"Broadcasting sidelink control information (SCI)"<<endl;
-    //sendBroadcast(sciframe);
+
 
     //Prepare data frame for broadcast
-    EV<<"Prepare LteAirFrame for the message: "<<msg->getName()<<endl; //LteMacPdu
     frame = new LteAirFrame("airframePdu");
     frame->encapsulate(check_and_cast<cPacket*>(msg));
     LteRealisticChannelModel* chan = check_and_cast< LteRealisticChannelModel*>(getParentModule()->getSubmodule("channelModel"));
@@ -407,7 +400,7 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
 
 
     //rsrpVector = chan->getRSRP_D2D(frame, lteInfo, nodeId_, LtePhyUe::getCoord());
-
+    //rssiVector = chan->getRSSI(frame, lteInfo, nodeId_, LtePhyUe::getCoord(), 0);
     /*std::vector<std::vector<std::pair<Band,double>>>::iterator it = rssiVector.begin();
     std::vector<std::pair<Band,double>>::iterator iter;
 
@@ -437,8 +430,13 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
     lteInfo->setD2dTxPower(d2dTxPower_);
     frame->setControlInfo(lteInfo);
 
+    //sendBroadcast(getSciframe());
     sendBroadcast(frame);
     frameSent=true;
+
+    //Update sensing window with transmission status
+    SidelinkResourceAllocation* sra = check_and_cast<SidelinkResourceAllocation*>(getParentModule()->getSubmodule("mode4"));
+    sra->updateSensingWindow(NOW.dbl(),rsrpMean,rssiMean, frameSent,false);
 
     //Decrement the re-selection counter on successful data frame transmission in mode 4
 
@@ -582,6 +580,9 @@ void LtePhyUeD2D::decodeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo)
     rsrpVector.clear();
     EV << NOW << " LtePhyUeD2D::decodeAirFrame - Start decoding..." << endl;
     EV<<"Number of bytes received: "<<frame->getByteLength();
+
+
+
     LteRealisticChannelModel* chan = check_and_cast< LteRealisticChannelModel*>(getParentModule()->getSubmodule("channelModel"));
     rssiVector=chan->getRSSI(frame, lteInfo, lteInfo->getSourceId(), lteInfo->getCoord() , 0);
     rsrpVector = chan->getRSRP_D2D(lteInfo,rssiVector );
@@ -613,9 +614,13 @@ void LtePhyUeD2D::decodeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo)
     //Store mean RSRP,RSSI with timestamp of receiving frame
     phyMeasurements.push_back(std::make_tuple(frame->getArrivalTime().dbl(),rsrpMean,rssiMean));
     binder_->setMeasurements(phyMeasurements);
+    SidelinkResourceAllocation* sra = check_and_cast<SidelinkResourceAllocation*>(getParentModule()->getSubmodule("mode4"));
+    sra->updateSensingWindow(frame->getArrivalTime().dbl(),rsrpMean,rssiMean,false,true);
 
+    //get number of allocated blocks
+    int allocatedRB=20; //come back here
+    sra->updateCbrWindow(frame->getArrivalTime().dbl(), sra->calculateChannelBusyRatio(10));
 }
-
 
 void LtePhyUeD2D::sendFeedback(LteFeedbackDoubleVector fbDl, LteFeedbackDoubleVector fbUl, FeedbackRequest req)
 {

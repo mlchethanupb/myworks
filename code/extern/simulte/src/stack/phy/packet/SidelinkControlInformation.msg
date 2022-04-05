@@ -27,5 +27,6 @@ packet SidelinkControlInformation {
     unsigned int timeGapRetrans;
     unsigned int mcs;
     unsigned int retransmissionIndex;
+    int cResel;
    
 }

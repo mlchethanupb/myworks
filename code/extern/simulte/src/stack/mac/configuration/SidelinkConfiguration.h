@@ -259,6 +259,13 @@ public:
         return allocatedBlocksSCIandData;
     }
 
+    int getResourceReselectionCounter()  {
+        return resourceReselectionCounter_;
+    }
+
+    void setResourceReselectionCounter(int resourceReselectionCounter) {
+        resourceReselectionCounter_ = resourceReselectionCounter;
+    }
 };
 
 

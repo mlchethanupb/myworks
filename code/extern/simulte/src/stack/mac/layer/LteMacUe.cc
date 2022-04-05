@@ -99,7 +99,9 @@ void LteMacUe::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
+
         cellId_ = getAncestorPar("masterId");
+        EV<<"get master ID: "<<cellId_<<endl;
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3)
     {
@@ -118,10 +120,19 @@ void LteMacUe::initialize(int stage)
         binder_->addUeInfo(info);
 
         // only for UEs that have been added dynamically to the simulation
+        EV<<"Cell Id debug: "<<cellId_<<endl;
+
+        if (cellId_==0 || cellId_ >100)
+        {
+            throw cRuntimeError("Invalid");
+        }
         LteAmc *amc = check_and_cast<LteMacEnb *>(getSimulation()->getModule(binder_->getOmnetId(cellId_))->getSubmodule("lteNic")->getSubmodule("mac"))->getAmc();
+
+
         amc->attachUser(nodeId_, UL);
         amc->attachUser(nodeId_, DL);
         amc->attachUser(nodeId_, D2D);
+       // throw cRuntimeError("Interface");
         // find interface entry and use its address
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         // TODO: how do we find the LTE interface?
@@ -485,7 +496,6 @@ void LteMacUe::macPduUnmake(cPacket* pkt)
 {
     EV<<"LteMacUe::macPduUnmake"<<endl;
     LteMacPdu* macPkt = check_and_cast<LteMacPdu*>(pkt);
-
     while (macPkt->hasSdu())
     {
         // Extract and send SDU
@@ -496,18 +506,18 @@ void LteMacUe::macPduUnmake(cPacket* pkt)
         EV << "LteMacBase: pduUnmaker extracted SDU" << endl;
 
         // store descriptor for the incoming connection, if not already stored
-        LteControlInfo* lteInfo = check_and_cast<LteControlInfo*>(upPkt->getControlInfo());
+        FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(upPkt->getControlInfo());
         MacNodeId senderId = lteInfo->getSourceId();
         LogicalCid lcid = lteInfo->getLcid();
         MacCid cid = idToMacCid(senderId, lcid);
         if (connDescIn_.find(cid) == connDescIn_.end())
         {
-            LteControlInfo toStore(*lteInfo);
+            FlowControlInfo toStore(*lteInfo);
             connDescIn_[cid] = toStore;
         }
         sendUpperPackets(upPkt);
     }
-    //throw cRuntimeError("LteMacUe::macPduUnmake");
+
     ASSERT(macPkt->getOwner() == this);
     delete macPkt;
 }

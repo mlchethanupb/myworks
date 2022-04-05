@@ -22,19 +22,21 @@ Define_Module(AlertNonIp);
 
 void AlertNonIp::initialize(int stage)
 {
-    AlertNonIp::initialize(stage);
+
     if (stage==inet::INITSTAGE_LOCAL){
         // Register the node with the binder
         // Issue primarily is how do we set the link layer address
-
+        NonIpBase::initialize(stage);
         // Get the binder
         binder_ = getBinder();
 
         // Get our UE
         cModule *ue = getParentModule();
 
+
+
         //Register with the binder
-        nodeId_ = binder_->registerNode(ue, UE, 0);
+        nodeId_ = binder_->registerNode(ue, PED, 0);
 
         // Register the nodeId_ with the binder.
         binder_->setMacNodeId(nodeId_, nodeId_);
@@ -87,13 +89,13 @@ void AlertNonIp::handleSelfMessage(cMessage* msg)
 {
     if (!strcmp(msg->getName(), "selfSender")){
         // Replace method
-        AlertPacket* packet = new AlertPacket("Alert");
+        AlertPacket* packet = new AlertPacket("VAM");
         packet->setTimestamp(simTime());
         packet->setByteLength(size_);
         packet->setSno(nextSno_);
 
         nextSno_++;
-
+        EV<<"VAM Packet size at application layer: "<<size_<<endl;
         auto lteControlInfo = new FlowControlInfoNonIp();
 
         lteControlInfo->setSrcAddr(nodeId_);
@@ -101,7 +103,9 @@ void AlertNonIp::handleSelfMessage(cMessage* msg)
         lteControlInfo->setPriority(priority_);
         lteControlInfo->setDuration(duration_);
         lteControlInfo->setCreationTime(simTime());
-
+        lteControlInfo->setRlcType(1);
+        lteControlInfo->setTraffic(VAM);
+        lteControlInfo->setApplication(VRUVAM);
         packet->setControlInfo(lteControlInfo);
 
       NonIpBase::sendLowerPackets(packet);

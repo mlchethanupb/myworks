@@ -6,6 +6,7 @@
 #include <iterator>
 #include <vector>
 #include <tuple>
+#include <tuple>
 #include "stack/phy/resources/SidelinkResourceAllocation.h"
 #include "stack/phy/packet/LteFeedbackPkt.h"
 #include "stack/d2dModeSelection/D2DModeSelectionBase.h"
@@ -14,6 +15,11 @@
 #include <unordered_map>
 #include "common/LteControlInfo.h"
 #include "stack/mac/configuration/SidelinkConfiguration.h"
+
+using namespace std;
+
+
+
 
 Define_Module(SidelinkResourceAllocation);
 
@@ -37,7 +43,6 @@ void SidelinkResourceAllocation::handleMessage(cMessage* msg)
         EV<<"SidelinkResourceAllocation::handleMessage()"<<endl;
         handleSelfMessage(msg);
 
-        //updateCBR();
     }
 }
 void SidelinkResourceAllocation::initialize(int stage)
@@ -56,9 +61,13 @@ void SidelinkResourceAllocation::initialize(int stage)
         numberSubcarriersperPRB = par ("numberSubcarriersperPRB");
         numberSymbolsPerSlot = par("numberSymbolsPerSlot");
         bitsPerSymbolQPSK = par ("bitsPerSymbolQPSK");
-        int thresholdRSSI = par("thresholdRSSI");
+        int thresholdRSSI = 50;
         subChRBStart_ = par ("subChRBStart");
-        thresholdRSSI_ = (-112 + 2 * thresholdRSSI);
+        //thresholdRSSI_ = (-112 + 2 * thresholdRSSI);
+        rsrpThreshold_ = par("rsrpThreshold");
+        rssiThreshold_=par("rssiThreshold");
+        nodeType_=aToNodeType(par("nodeType"));
+        EV<<"SRA nodetype: "<<nodeType_<<endl;
         numberPRBSCI = 2;
         d2dTxPower_ = par("d2dTxPower");
         if (d2dTxPower_ <= 0){
@@ -97,13 +106,17 @@ void SidelinkResourceAllocation::initialize(int stage)
         allocatedBlocksPrevious = 0;
         cResel =0;
         pcCountMode4 = 0;
+        packetDrop = false;
 
     }
     else if (stage == inet::INITSTAGE_NETWORK_LAYER_2)
     {
-        EV<<"SRA stage 7:"<<endl;
         initialiseSensingWindow();
-        sidelinkSynchronization();
+        setReselectionCounter(cResel);
+        sidelinkSynchronization(packetDrop);
+        occupiedResourceBlocks= RBIndicesSCI.size()+RBIndicesData.size();
+        initialiseCbrWindow();
+        initialiseFreqAllocationMap();
     }
 
 }
@@ -111,119 +124,17 @@ void SidelinkResourceAllocation::initialize(int stage)
 void SidelinkResourceAllocation::handleSelfMessage(cMessage *msg)
 {
 
-
-    if (msg->isName("d2dDecodingTimer"))
-    {
-        std::vector<int> missingTbs;
-        for (int i=0; i<sciFrames_.size(); i++){
-            bool foundTB=false;
-            LteAirFrame* sciFrame = sciFrames_[i];
-            UserControlInfo* sciInfo = check_and_cast<UserControlInfo*>(sciFrame->removeControlInfo());
-            for (int j=0; j<tbFrames_.size();j++){
-                LteAirFrame* tbFrame = tbFrames_[j];
-                UserControlInfo* tbInfo = check_and_cast<UserControlInfo*>(tbFrame->removeControlInfo());
-                if (sciInfo->getSourceId() == tbInfo->getSourceId()){
-                    foundTB = true;
-                    tbFrame->setControlInfo(tbInfo);
-                    break;
-                }
-                tbFrame->setControlInfo(tbInfo);
-            }
-            if (!foundTB){
-                missingTbs.push_back(i);
-            }
-            sciFrame->setControlInfo(sciInfo);
-        }
-
-        while (!sciFrames_.empty()){
-            // Get received SCI and it's corresponding RsrpVector
-            LteAirFrame* frame = sciFrames_.back();
-            std::vector<double> rsrpVector = sciRsrpVectors_.back();
-            std::vector<double> rssiVector = sciRssiVectors_.back();
-
-            // Remove it from the vector
-            sciFrames_.pop_back();
-            sciRsrpVectors_.pop_back();
-            sciRssiVectors_.pop_back();
-
-            UserControlInfo* lteInfo = check_and_cast<UserControlInfo*>(frame->removeControlInfo());
-
-            // decode the selected frame
-            decodeAirFrame(frame, lteInfo);
-
-
-            sciReceived_ = 0;
-            sciDecoded_ = 0;
-            sciNotDecoded_ = 0;
-            sciFailedHalfDuplex_ = 0;
-            subchannelReceived_ = 0;
-            subchannelsUsed_ = 0;
-        }
-        int countTbs = 0;
-        if (tbFrames_.empty()){
-            for(countTbs=0; countTbs<missingTbs.size(); countTbs++){
-
-            }
-        }
-        while (!tbFrames_.empty())
-        {
-            if(std::find(missingTbs.begin(), missingTbs.end(), countTbs) != missingTbs.end()) {
-                // This corresponds to where we are missing a TB, record results as being negative to identify this.
-
-            } else {
-                LteAirFrame *frame = tbFrames_.back();
-                std::vector<double> rsrpVector = tbRsrpVectors_.back();
-                std::vector<double> rssiVector = tbRssiVectors_.back();
-
-                tbFrames_.pop_back();
-                tbRsrpVectors_.pop_back();
-                tbRssiVectors_.pop_back();
-
-                UserControlInfo *lteInfo = check_and_cast<UserControlInfo *>(frame->removeControlInfo());
-
-                // decode the selected frame
-                decodeAirFrame(frame, lteInfo);
-
-
-                tbReceived_ = 0;
-                tbDecoded_ = 0;
-                tbFailedDueToNoSCI_ = 0;
-                tbFailedButSCIReceived_ = 0;
-                tbFailedHalfDuplex_ = 0;
-            }
-            countTbs++;
-        }
-        std::vector<cPacket*>::iterator it;
-        for(it=scis_.begin();it!=scis_.end();it++)
-        {
-            delete(*it);
-        }
-        scis_.clear();
-        delete msg;
-        d2dDecodingTimer_ = NULL;
-    }
-    else if (msg->isName("updateSubframe"))
-    {
-        transmitting_ = false;
-        //updateSubframe();
-        // updateCBR();
-        delete msg;
-    }
-
-    else if (msg->isName("SLSS"))
+    if (msg->isName("SLSS"))
     {
         //Start sidelink synchronization
         EV<<"SLSS self"<<endl;
-        sidelinkSynchronization();
+        sidelinkSynchronization(packetDrop);
     }
     else if (msg->isName("SIB21PreConfigured"))
     {
 
-        // LtePhyUe::handleSelfMessage(msg);
         EV<<"SidelinkResourceAllocation::handleSelfMessage() SIB 21"<<endl;
-        //initialiseSensingWindow();
-        //updateSubframe();
-        //updateCBR();
+
     }
     else
     {
@@ -237,13 +148,13 @@ void SidelinkResourceAllocation::handleUpperMessage(cMessage* msg)
     EV<<"SidelinkResourceAllocation::handleUpperMessage: "<<msg->getName()<<endl;
     UserControlInfo* lteInfo = check_and_cast<UserControlInfo*>(msg->removeControlInfo());
 
-    if (msg->isName("LteMode4Grant") )
+    /*    if (msg->isName("LteMode4Grant") )
     {
         nodeType_ = UE;}
     else if ( msg->isName("LteMode3Grant"))
     {
         nodeType_ = ENODEB;
-    }
+    }*/
 
     if (lteInfo->getFrameType() == SIDELINKGRANT)
     {
@@ -254,14 +165,16 @@ void SidelinkResourceAllocation::handleUpperMessage(cMessage* msg)
                 // Mark all the subchannels as not sensed
                 sensingWindow_[sensingWindowFront_][i]->setSensed(false);
             }*/
+        cResel = getReselectionCounter();
+        setReselectionCounter(cResel);
+        EV<<"Number of previously granted blocks: "<<getAllocatedBlocksPrevious()<<"previous cResel: "<<cResel<<endl;
 
-        EV<<"Number of previously granted blocks: "<<getAllocatedBlocksPrevious()<<"previous cResel: "<<getReselectionCounter()<<endl;
-
+        EV<<"Node type: "<<nodeType_<<endl;
         //Mode 4
-        if (nodeType_ ==UE)
+        if (nodeType_ ==UE || nodeType_ ==PED)
         {
 
-            if (getAllocatedBlocksPrevious() > 0 && getReselectionCounter()>0)
+            if (getAllocatedBlocksPrevious() > 0 && cResel>0)
             {
 
                 //Check if data size fits into previously allocated TB size
@@ -269,7 +182,8 @@ void SidelinkResourceAllocation::handleUpperMessage(cMessage* msg)
                 int numberSymbolsTransmitBlock = grant->getTransmitBlockSize()/bitsPerSymbolQPSK;
                 numberPRBTransmitBlock = (numberSymbolsTransmitBlock/numberSymbolsPerPRB)+1;
                 int numberPRBNeeded =   numberPRBTransmitBlock+2; //SCI+TB
-                if (numberPRBNeeded<=getAllocatedBlocksPrevious()-2) //" RBs for SCI
+
+                if (numberPRBNeeded<=getAllocatedBlocksPrevious()) //" RBs for SCI
                 {
                     //Use previous subchannels for the current subframes
                     RBIndicesData =  getPreviousSubchannelsData();
@@ -277,23 +191,24 @@ void SidelinkResourceAllocation::handleUpperMessage(cMessage* msg)
                     //determine the subframe
                     computeCSRs(grant,nodeType_);
 
-
+                    return;
                 }
-                if (numberPRBNeeded>getAllocatedBlocksPrevious()-2) //" RBs for SCI
+                if (numberPRBNeeded>getAllocatedBlocksPrevious()) //" RBs for SCI
                 {
                     EV<<"Data size does not fit into previous allocation, need for re-allocation"<<endl;
 
                     //Reset counter and previous allocations
                     cResel=0;
-                    setReselectionCounter(cResel);
+                    //setReselectionCounter(cResel);
                     setAllocatedBlocksPrevious(0);
                     computeCSRs(grant,nodeType_);
                     return;
                 }
+                return;
 
             }
             //This if loop should check for cResel - alloctaion for first time and re-allocation based on cResel
-            if (getAllocatedBlocksPrevious() == 0 || getReselectionCounter()==0)
+            if (getAllocatedBlocksPrevious() == 0 || cResel==0)
             {
                 // Generate a vector of CSRs and send it to the MAC layer
                 EV<<"Calling computeSCRs()"<<grant->getTransmitBlockSize()<<endl;
@@ -331,6 +246,10 @@ void SidelinkResourceAllocation::handleUpperMessage(cMessage* msg)
 
 
 }
+
+//5G Mode 2 resource allocation
+
+//Stage 1 SCI
 
 LteAirFrame* SidelinkResourceAllocation::createSCIMessage(cMessage* msg, LteSidelinkGrant* grant)
 {
@@ -381,10 +300,6 @@ LteAirFrame* SidelinkResourceAllocation::createSCIMessage(cMessage* msg, LteSide
      *         RIV = numSubchannels(numSubchannels-SubchannelLength+1) + (numSubchannels-1-subchannelIndex)
      */
 
-    EV<<"numSubchannels_ : "<<numSubchannels_<<endl;
-    EV<<"Lch: "<<grant->getNumSubchannels()<<endl; // SCI+TB size e.g. 9PRBs means two contiguous subchannels (write the logic )
-    EV<<"starting subchannel: "<<grant->getStartingSubchannel()<<endl;
-
     unsigned  int riv;
     //
     if (grant->getNumSubchannels() -1 <= (numSubchannels_/2))
@@ -428,6 +343,12 @@ LteAirFrame* SidelinkResourceAllocation::createSCIMessage(cMessage* msg, LteSide
     {
         sci->setRetransmissionIndex(0);
     }
+    //cResel = grant->getResourceReselectionCounter();
+
+
+    //sci->setCResel(grant->getResourceReselectionCounter());
+    //cResel = grant->getResourceReselectionCounter();
+    //setReselectionCounter(cResel);
 
     /* Filler up to 32 bits
      * Can just set the length to 32 bits and ignore the issue of adding filler
@@ -436,11 +357,13 @@ LteAirFrame* SidelinkResourceAllocation::createSCIMessage(cMessage* msg, LteSide
 
     //Print all SCI values
     EV<<"Priority: "<<grant->getSpsPriority()<<endl;
-    EV<<"resource Reservation Interval: "<<(grant->getPeriod()/100)<<endl;
+    EV<<"Resource Reservation Interval: "<<(grant->getPeriod()/100)<<endl;
     EV<<"Frequency resource location of initial transmission and re-transmission (RIV): "<<riv<<endl;
     EV<<"Subframe gap: "<<grant->getTimeGapTransRetrans()<<endl;
     EV<<"Modulation and Coding Scheme: "<<grant->getMcs()<<endl;
     EV<<"Re-transmission index: "<<sci->getRetransmissionIndex()<<endl;
+    //EV<<"Re-selection counter: "<<getReselectionCounter()<<endl;
+
     UserControlInfo* lteInfo = new UserControlInfo();
     lteInfo->setGrantStartTime(grant->getStartTime());
     LteAirFrame* sciFrame = prepareAirFrame(sci, lteInfo);
@@ -482,16 +405,23 @@ std::vector<int> SidelinkResourceAllocation::getallocationTBIndex(int bitLength,
 
     int startSubChTB = subChSCI.at(1)+1;
     int beta = 2;
+    EV<<"startSubChTB"<<subChSCI[0]<<" "<<subChSCI[1]<<endl;
 
+    EV<<" numberPRBTransmitBlock: "<< numberPRBTransmitBlock<<endl;
     for (int j=0; j<numberPRBTransmitBlock; j++)
     {
-         allocatedPRBTBIndex.push_back(startSubChTB+j);
+
+
+        EV<<"TB indices: "<<startSubChTB+j<<endl;
+        allocatedPRBTBIndex.push_back(startSubChTB+j);
 
         if (!adjacencyPSCCHPSSCH_)
         {
             allocatedPRBSciIndex.push_back(subChRBStart_ + numberPRBSCI*subchannelSize_+j+beta);
         }
     }
+
+    setAllocatedPrbtbIndex(allocatedPRBTBIndex);
     return allocatedPRBTBIndex;
 
 }
@@ -517,22 +447,86 @@ std::vector<int>  SidelinkResourceAllocation::getallocationSciIndex(int subChRBS
         allocatedPRBSciIndex.push_back(subChRBStart_ + j);
     }
 
+    setAllocatedPrbSciIndex(allocatedPRBSciIndex);
     return allocatedPRBSciIndex;
 }
 
 void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeType nodeType_) {
     candidateSubframes.clear();
+    //Re-allocate subchannels and subframes
+    RBIndicesSCI.clear();
+    RBIndicesData.clear();
+    resourceAllocationMap.clear();
+    //Computing subframes
+           int startSubFrame = intuniform(0,4);
+           double maxLatency = grant->getMaximumLatency();
+           EV<<"Max latency: "<<maxLatency<<endl;
+           int endSubFrame = startSubFrame+maxLatency;
+           int selectionWindow =  maxLatency - startSubFrame;
+           //int possibleCSRSSelWindow;
+           EV<<"Start subframe: "<<startSubFrame<<endl;
+           EV<<"End subframe: "<<endSubFrame<<endl;
 
-    if ((nodeType_==ENODEB) || (getAllocatedBlocksPrevious() == 0 && getReselectionCounter()==0 && nodeType_ == UE))
+           //Discarding subframes where sync information appears - PSSS,SSSS,DMRS
+           EV<<"Next SLSS: "<<nextSLSS<<endl;
+           simtime_t selStartTime;
+           simtime_t selEndTime;
+           //Converting to ms
+           selStartTime = (NOW+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
+           selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
+
+           if (nodeType_ == ENODEB)
+
+           {
+               selStartTime = (NOW+nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
+               selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
+
+           }
+
+
+           if (nodeType_==UE ||nodeType_==PED)
+
+           {
+               EV<<"packetDropStatus: "<<packetDrop<<endl;
+               if (packetDrop==false)
+               {
+                   selStartTime = (nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
+                   selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
+
+               }
+               if (packetDrop==true)
+               {
+                   selStartTime = (NOW+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
+                   selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
+               }
+
+           }
+
+           tSync = (nextSLSS+0.001-NOW).dbl();  //it takes one TTI for SLSS acknowledgement
+           EV<<"Synchronization latency: "<<tSync<<endl;
+           emit(syncLatency,tSync);
+
+           EV<<"selectionWindow start time:  "<<selStartTime<<endl;
+           EV<<"selectionWindow end time:  "<<selEndTime<<endl;
+
+           emit(configurationLatency,0.004);
+
+           for (double k = selStartTime.dbl(); k<=selEndTime.dbl(); k=k+TTI)
+           {
+               candidateSubframes.push_back(k);
+
+           }
+           EV<<"Number of candidate subframes: "<< candidateSubframes.size()<<endl;
+
+    if (packetDrop==false && (getAllocatedBlocksPrevious() == 0 || cResel==0)  )
     {
-        //Re-allocate subchannels and subframes
-        RBIndicesSCI.clear();
-        RBIndicesData.clear();
-        resourceAllocationMap.clear();
-        //Allocating subchannels
-        int cResel = grant->getResourceReselectionCounter();
-        setReselectionCounter(cResel);
-        EV<<"Retrieve cResel: "<<getReselectionCounter()<<endl;
+
+
+        //Fresh allocations
+        cResel = grant->getResourceReselectionCounter();
+
+
+        /*EV<<"Retrieve cResel: "<<getReselectionCounter()<<endl;*/
         subChRBStart_ = intuniform(0,std::ceil((numSubchannels_*subchannelSize_)/2)-1);
 
         EV<<"Start of subchannel: "<<subChRBStart_<<endl;
@@ -540,166 +534,96 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         RBIndicesSCI=getallocationSciIndex(subChRBStart_);
         RBIndicesData=getallocationTBIndex(grant->getTransmitBlockSize(),  RBIndicesSCI);
 
-        grant->setStartingSubchannel(0);
-    }
-
-    EV<<"CSR alllocating module : "<<nodeTypeToA(nodeType_)<<endl;
-
-    int totalPRBsPerSubframe = 0;
-    totalPRBsPerSubframe = RBIndicesSCI.size()+RBIndicesData.size();
-    grant->setTotalGrantedBlocks(totalPRBsPerSubframe);
-    EV<<"Total number of RBs for SCI+Data: "<<totalPRBsPerSubframe<<endl;
-
-    binder_ = getBinder();
-    std::map<MacNodeId,inet::Coord> broadcastUeMap = binder_->getBroadcastUeInfo();
-
-    std::map<MacNodeId,inet::Coord>::iterator itb = broadcastUeMap.begin();
-
-    //Computing subframes
-    int startSubFrame = intuniform(0,4);
-    double maxLatency = grant->getMaximumLatency();
-    int endSubFrame = startSubFrame+maxLatency;
-    int selectionWindow =  maxLatency - startSubFrame;
-    int possibleCSRSSelWindow;
-    EV<<"Start subframe: "<<startSubFrame<<endl;
-    EV<<"End subframe: "<<endSubFrame<<endl;
-
-    //Discarding subframes where sync information appears - PSSS,SSSS,DMRS
-    EV<<"Next SLSS: "<<nextSLSS<<endl;
-
-    simtime_t selStartTime;
-    simtime_t selEndTime;
-    //Converting to ms
-    if (nodeType_ == ENODEB)
-    {
-        selStartTime = (NOW+nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
-        selEndTime =  (selStartTime+(maxLatency/1000.0)).trunc(SIMTIME_MS);
-
-    }
-
-    if (nodeType_==UE)
-    {
-        //nextSLSS=NOW+40*TTI; ///just for checking
-        selStartTime = (nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
-        selEndTime =  (selStartTime+(maxLatency/1000.0)).trunc(SIMTIME_MS);
-
-    }
-
-    tSync = (nextSLSS+0.001-NOW).dbl();  //it takes one TTI for SLSS acknowledgement
-    EV<<"Synchronization latency: "<<tSync<<endl;
-    emit(syncLatency,tSync);
-
-    EV<<"selectionWindow start time:  "<<selStartTime<<endl;
-    EV<<"selectionWindow end time:  "<<selEndTime<<endl;
-
-    emit(configurationLatency,0.004);
-
-    for (double k = selStartTime.dbl(); k<=selEndTime.dbl(); k=k+TTI)
-    {
-        candidateSubframes.push_back(k);
-
-    }
-    EV<<"Number of candidate subframes: "<< candidateSubframes.size()<<endl;
-    int candidateSubframeInitial = 0;
-    candidateSubframeInitial =candidateSubframes.size();
+        grant->setStartingSubchannel(subChRBStart_);
 
 
-    unsigned int Prsvp_TX = grant->getPeriod(); //Resource reservation interval
-    unsigned int  Prsvp_TX_prime = (Prsvp_TX*pStep_)/100;
-    std::vector<double> possibleRRIs = grant->getPossibleRRIs();
-    std::vector<double>::iterator k;
-
-    if ((getAllocatedBlocksPrevious() == 0 || getReselectionCounter()==0) ||nodeType_ == ENODEB)
-    {
-        //Allocating subchannels
-        int cResel = grant->getResourceReselectionCounter();
-        setReselectionCounter(cResel);
-        int randomIndexInitial = rand() % candidateSubframeInitial;
-        simtime_t startFirstTransmissionInitial = candidateSubframes[randomIndexInitial];
-
-        EV<<"First transmission initial: "<<startFirstTransmissionInitial<<endl;
-
-        std::vector<std::pair<MacNodeId,double>> camueinfo = binder_->getCamUeinfo();
-        std::vector<double> eraseSubframe ;
-        double eraseSubframeTime;
+        EV<<"Allocating CSRs for : "<<nodeTypeToA(nodeType_)<<endl;
 
 
-        //Allocating subframes
-        if(broadcastUeMap.size()>0)
+        int totalPRBsPerSubframe = 0;
+        totalPRBsPerSubframe = RBIndicesSCI.size()+RBIndicesData.size();
+
+        grant->setTotalGrantedBlocks(totalPRBsPerSubframe);
+        EV<<"Total number of RBs for SCI+Data: "<<totalPRBsPerSubframe<<endl;
+
+        cbr = calculateChannelBusyRatio(totalPRBsPerSubframe);
+        //Compute average CBR measured over past 100 subframes
+        averageCbr = 0.0;
+        cbrWindow = getCbrWindow();
+        for (auto [X, Y]:cbrWindow)
         {
-            for (; itb!=broadcastUeMap.end();++itb)
+            averageCbr= averageCbr+Y;
+        }
+        averageCbr = averageCbr/cbrWindow.size();
+        //cr = calculateChannelOccupancyRatio();
+        crLimitReached = checkCRLimit(averageCbr,cr);
+
+
+        binder_ = getBinder();
+        std::map<MacNodeId,inet::Coord> broadcastUeMap = binder_->getBroadcastUeInfo();
+
+        EV<<"broadcastUeMap: "<<broadcastUeMap.size()<<endl;
+
+        std::map<MacNodeId,inet::Coord>::iterator itb = broadcastUeMap.begin();
+
+
+
+        boost::circular_buffer<std::tuple<double, double,double,bool,bool>> sensingWindowSubframes = getSensingWindow();
+        unsigned int Prsvp_TX = grant->getPeriod(); //Resource reservation interval
+        unsigned int  Prsvp_TX_prime = 0.1;
+
+        EV<<"Re-selection counter: "<<cResel<<endl;
+
+        double ySensing;
+        std::vector<double> zSelection;
+        zSelection.clear();
+        auto itc=sensingWindowSubframes.begin();
+        for (;itc != sensingWindowSubframes.end();++itc)
+        {
+            //Previous transmission or reception in sensing window
+            if((get<2>(*itc)==true)||(get<3>(*itc)==true))
             {
-                MacNodeId bid = itb->first;
-                for (auto iter : camueinfo)
+                ySensing = get<0>(*itc);
+                // EV<<"Subframes to be checked: "<<ySensing<<endl;
+                for(int j=0;j<cResel-1;j++)
                 {
-                    if (bid == iter.first)
-                    {
-                        double y = iter.second;
-                        for(int j=0; j<cResel-1;j++)
-                        {
-                            eraseSubframeTime = (y+j*Prsvp_TX_prime);
-                            if (eraseSubframeTime >= selStartTime.dbl() && eraseSubframeTime <=selEndTime.dbl())
-                            {
-                                EV<<"erase subframe: "<<(y+j*Prsvp_TX)<<endl;
-
-                                if ((y+j*Prsvp_TX)==startFirstTransmissionInitial.dbl())
-                                {
-                                    countHD=countHD+1;
-                                    emit(halfDuplexError,countHD);
-                                }
-                                eraseSubframe.push_back((y+j*Prsvp_TX));
-                            }
-                        }
-
-
-                    }
+                    zSelection.push_back(ySensing+j*0.1);
+                    //EV<<"Subframes to be removed from selection window: "<<ySensing+j*0.1<<endl;
                 }
             }
         }
 
 
-        //Find the subframes to be discarded
-        for (auto iter : eraseSubframe)
+        for (auto & iter : zSelection)
         {
-            std::vector<double>::iterator it = std::find(candidateSubframes.begin(), candidateSubframes.end(), iter);
-            int index = std::distance(candidateSubframes.begin(), it);
+            EV<<"value to be compared: "<<iter<<endl;
 
-            if(it!=candidateSubframes.end())
+            for (auto  &it:candidateSubframes)
             {
-                candidateSubframes.erase(it);
-            }
-            else
-            {
-                candidateSubframes.pop_back();
+
+                if(std::abs(it -iter) < 0.0001)
+                {
+                    EV<<"Match: "<<it<<endl;
+                    //Erase from candidate subframe
+                    int index =  &it - &candidateSubframes[0];
+                    EV<<"Matching index: "<<index<<endl;
+                    candidateSubframes.erase(candidateSubframes.begin()+index);
+                }
             }
         }
 
-        int randomIndex = rand() % candidateSubframes.size();
+        //Print final selection window
+        /*    for  (auto csr:candidateSubframes )
+    {
+        EV<<"Final selection window: "<<csr<<endl;
+    }*/
 
-        //Select best RSRP & RSSI -
-        simtime_t startFirstTransmission = candidateSubframes[randomIndex];
+        EV<<"Final selection window size: "<<candidateSubframes.size()<<endl;
 
-        //Print all candidate subframes
+        int randomIndexInitial = rand() % candidateSubframes.size();
+        simtime_t startFirstTransmission = candidateSubframes[randomIndexInitial];
 
-        for (int k=0;k<candidateSubframes.size();k++)
-        {
-            resourceAllocationMap.push_back(std::make_tuple(candidateSubframes[k],RBIndicesSCI,RBIndicesData));
-        }
-
-        //Detecting packet collisions
-        sort(eraseSubframe.begin(), eraseSubframe.end());
-
-        for(int k =0; k<eraseSubframe.size();k++)
-        {
-
-            if (eraseSubframe[k]==eraseSubframe[k+1])
-            {
-                pcCountMode4 = pcCountMode4+1;
-                emit(pcMode4,pcCountMode4);
-
-            }
-
-        }
+        EV<<"First transmission: "<<startFirstTransmission<<endl;
 
         grant->setTotalGrantedBlocks(RBIndicesSCI.size()+RBIndicesData.size());
         setPreviousSubchannelsData(RBIndicesData);
@@ -711,39 +635,63 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         binder_->updatePeriodicCamTransmissions(nodeId_,startFirstTransmission.dbl());
 
         EV<<"Resource allocation latency: "<<(startFirstTransmission-selStartTime).dbl()<<endl;
+        resourceAllocationLatency = (startFirstTransmission-selStartTime).dbl();
         emit(resourceAllocationLatency,(startFirstTransmission-selStartTime).dbl());
-        optimalCSRs=selectBestRSSIs(eraseSubframe, grant,NOW.dbl());
-        if(eraseSubframe.size()>(0.8*candidateSubframeInitial))
 
-        {
-            //RSRP
 
-            EV<<"Filtering of erased subframes needed: "<<endl;
-            //RSSI
-            for (int k=0; k<eraseSubframe.size();k++)
-            {
-                optimalCSRs=selectBestRSSIs(eraseSubframe, grant,eraseSubframe[k]);
-            }
-        }
-        else
+
+        for (int k=0; k<candidateSubframes.size();k++)
         {
-            for (int k=0; k<candidateSubframes.size();k++)
-            {
-                optimalCSRs.emplace_back(0,9,candidateSubframes[k]);
-            }
+            optimalCSRs.emplace_back(0,totalPRBsPerSubframe,candidateSubframes[k]);
         }
     }
 
-    if (getAllocatedBlocksPrevious() > 0 && getReselectionCounter()>0 && nodeType_==UE) //only for mode 4
+    else {
+
+//Subsequent allocations
+            cResel = getReselectionCounter();
+            FirstTransmission = getFirstTransmissionPrevious()+0.1;//increment by RRI for subsequent packet transmissions
+            setFirstTransmissionPrevious(FirstTransmission);
+            grant->setTotalGrantedBlocks(getAllocatedBlocksPrevious());
+            EV<<"First transmission subsequent: "<< FirstTransmission<<endl;
+            binder_->updatePeriodicCamTransmissions(nodeId_, FirstTransmission);
+            grant->setStartTime( FirstTransmission);
+
+    }
+    //Make sure allocations are within CR limits and only then update in the FreqAllocationMap buffer
+    updateFreqAllocationMap(FirstTransmission,grant->getTotalGrantedBlocks());
+    double crValue=calculateChannelOccupancyRatio(getFreqAllocationMap(),getReselectionCounter());
+    EV<<"CRValue: "<<crValue<<endl;
+    EV<<"crLimit: "<<crLimit<<endl;
+
+    if ((crValue-crLimit)<0.02)
     {
-        FirstTransmission = getFirstTransmissionPrevious()+0.1;//increment by RRI for subsequent packet transmissions
-        setFirstTransmissionPrevious(FirstTransmission);
-        EV<<"First transmission subsequent: "<< FirstTransmission<<endl;
-        binder_->updatePeriodicCamTransmissions(nodeId_, FirstTransmission);
-        grant->setStartTime( FirstTransmission);
+        updateFreqAllocationMap(FirstTransmission,grant->getTotalGrantedBlocks());
+    }
+    else
+    {
+        EV<<"Congestion detected: "<<endl;
+        //Implement range control approach to control congestion
+    }
 
+    grant->setNextArrival(NOW.dbl()+0.1);
+
+    EV<<"Start time grant: "<<grant->getStartTime()<<endl;
+    EV<<"Next arrival grant: "<<grant->getNextArrival()<<endl;
+
+    if ((grant->getStartTime()>grant->getNextArrival())||(grant->getStartTime().dbl() < selStartTime.dbl()))
+    {
+        EV<<"Activating packet drop"<<endl;
+        packetDrop = true;
+        //setReselectionCounter(0);
+        //setAllocatedBlocksPrevious(0);
 
     }
+    else
+    {
+        packetDrop = false;
+    }
+
 
     // Send the packet up to the MAC layer where it will choose the CSR and the retransmission if that is specified
     // Need to generate the message that is to be sent to the upper layers.
@@ -752,12 +700,11 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
     LtePhyBase* phy=check_and_cast<LtePhyBase*>(getParentModule()->getSubmodule("phy"));
     phy->sendUpperPackets(candidateResourcesMessage);
 
+
 }
 
 std::vector<std::tuple<double, int, double>> SidelinkResourceAllocation::selectBestRSSIs(std::vector<double> subframes, LteSidelinkGrant* &grant, double subFrame)
 {
-    double startSensingWindow = 0.0;
-    double endSensingWindow = 0.0;
     subch = new Subchannel(numSubchannels_,subFrame);
     EV << NOW << " LtePhyVUeMode4::selectBestRSSIs - Selecting best CSRs from possible CSRs..." << endl;
     int decrease = pStep_;
@@ -777,25 +724,15 @@ std::vector<std::tuple<double, int, double>> SidelinkResourceAllocation::selectB
 
     // This will be avgRSSI -> (subframeIndex, subchannelIndex)
     std::vector<std::tuple<double, int, double>> orderedCSRs;
-   // PhyLayerMeasurements uePhy;
-
 
     LtePhyBase* phy=check_and_cast<LtePhyBase*>(getParentModule()->getSubmodule("phy"));
-    std::vector<std::tuple<double,double,double>> phyLayerMetrics = binder_->getMeasurements();
-
-    startSensingWindow = NOW.dbl()-0.1;
-    endSensingWindow = NOW.dbl();
-
-
-
-    //throw cRuntimeError("select best RSSI");
-   /* std::vector<std::pair<Band,double>> rssiD2DPeers=phy->getRSSIVector();
+    std::vector<std::pair<Band,double>> rssiD2DPeers=phy->getRSSIVector();
 
     EV<<"RSSI vector size: "<<rssiD2DPeers.size()<<endl;
     double averageRSSI = 0.0;
     for(int k=0; k<rssiD2DPeers.size();k++)
     {
-        averageRSSI=averageRSSI+subch->getAverageRSSI(rssiD2DPeers[k]);
+        averageRSSI=0.0;
 
     }
 
@@ -806,12 +743,12 @@ std::vector<std::tuple<double, int, double>> SidelinkResourceAllocation::selectB
     // throughout the selection window.
     std::random_shuffle (orderedCSRs.begin(), orderedCSRs.end());
 
-     std::sort(begin(orderedCSRs), end(orderedCSRs), [](const std::tuple<double, int, int> &t1, const std::tuple<double, int, int> &t2) {
+    /* std::sort(begin(orderedCSRs), end(orderedCSRs), [](const std::tuple<double, int, int> &t1, const std::tuple<double, int, int> &t2) {
             return get<0>(t1) < get<0>(t2); // or use a custom compare function
-        });
+        });*/
 
     int minSize = std::round(totalPossibleCSRs * .2);
-    orderedCSRs.resize(minSize);*/
+    orderedCSRs.resize(minSize);
 
     return orderedCSRs;
 }
@@ -821,7 +758,7 @@ void SidelinkResourceAllocation::storeAirFrame(LteAirFrame* frame, UserControlIn
     // implements the capture effect
     // store the frame received from the nearest transmitter
 
-    EV<<""<<endl;
+    /*EV<<""<<endl;
     // Need to be able to figure out which subchannel is associated to the Rbs in this case
     if (lteInfo->getFrameType() == SCIPKT){
         sciFrames_.push_back(frame);
@@ -830,7 +767,7 @@ void SidelinkResourceAllocation::storeAirFrame(LteAirFrame* frame, UserControlIn
         tbFrames_.push_back(frame);
     }
 
-    decodeAirFrame(frame,lteInfo);
+    decodeAirFrame(frame,lteInfo);*/
 }
 
 void SidelinkResourceAllocation::decodeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo)
@@ -848,61 +785,68 @@ std::tuple<int,int> SidelinkResourceAllocation::decodeRivValue(SidelinkControlIn
     return std::make_tuple(subchannelIndex, lengthInSubchannels);
 }
 
+//Keeps a track of measured RSSI in every subframe
 void  SidelinkResourceAllocation::initialiseSensingWindow()
 {
     Enter_Method("initialiseSensingWindow()");
-    EV << NOW << " SidelinkResourceAllocation::initialiseSensingWindow - creating subframes to be added to sensingWindow..." << endl;
 
-    simtime_t subframeTime = NOW - TTI;
+    EV << NOW << " SidelinkResourceAllocation::initialiseSensingWindow in each subframe" << endl;
+    txStatus = false;
+    rxStatus=false;
+    rssiReception= 0.0;
+    rsrpReception=0.0;
+    subframeTime = NOW;
+    sensingWindow.set_capacity(1000);  //Limit buffer capacity to 1000
 
-    //EV<<"subframeTime: "<<subframeTime<<endl;
-    // Reserve the full size of the sensing window (might improve efficiency).
-    sensingWindow_.reserve(10*pStep_);
+    sensingWindow.push_back(std::make_tuple(subframeTime.dbl(),rssiReception,rsrpReception,txStatus,rxStatus));
 
-    EV<<"Reserve: "<<10*pStep_<< "sensing window size: "<<sensingWindow_.size()<<endl;
-    Band band = 0;
+    //Iterate through circular buffer and also the tuple
 
-    while(sensingWindow_.size() < 10*pStep_)
+    EV<<"Sensing window size: "<<sensingWindow.size()<<endl;
+
+    //To verify
+    /*    for (auto [X, Y,Z,A,B]:sensingWindow)
     {
-        subframe.reserve(numSubchannels_);
-
-        if (!adjacencyPSCCHPSSCH_)
-        {
-            // This assumes the bands only every have 1 Rb (which is fine as that appears to be the case)
-            band = numSubchannels_*2;
-        }
-        for (int i = 0; i < numSubchannels_; i++) {
-            Subchannel *currentSubchannel = new Subchannel(subchannelSize_, subframeTime);
-            // Need to determine the RSRP and RSSI that corresponds to background noise
-            // Best off implementing this in the channel model as a method.
-
-            std::vector <Band> occupiedBands;
-
-            int overallCapacity = 0;
-
-            // Ensure the subchannel is allocated the correct number of RBs
-            while (overallCapacity < subchannelSize_ && band < getBinder()->getNumBands()) {
-
-                // This acts like there are multiple RBs per band which is not allowed.
-                occupiedBands.push_back(band);
-                ++overallCapacity;
-                ++band;
-
-            }
-
-            currentSubchannel->setOccupiedBands(occupiedBands);
-            subframe.push_back(currentSubchannel);
-        }
-        sensingWindow_.push_back(subframe);
-        subframeTime += TTI;
-    }
-
-    EV<<"Number of resource elements inside sensing window: "<<subframe.size()<<" "<<"Sensing window size: "<<sensingWindow_.size()<<endl;
-    EV<<"Number of subchannels: "<<numSubchannels_<<endl;
-
+        EV<<"Sensing window parameters: "<<X<<" "<<Y<<" "<<Z<<" "<<A<<" "<<B<<endl;
+    }*/
 }
 
-simtime_t SidelinkResourceAllocation::sidelinkSynchronization()
+// Updating sensing window when packet is transmitted or received
+boost::circular_buffer<std::tuple<double, double,double,bool,bool>> SidelinkResourceAllocation::updateSensingWindow(double subframeTime, double rssi, double rsrp, bool txStatus, bool rxStatus)
+{
+    EV<<"Updating Sensing window for subframe: "<<subframeTime<< "on transmitting: "<<txStatus<<"on receiving: "<<rxStatus<<endl;
+    sensingWindow.set_capacity(1000);  //Limit buffer capacity to 1000
+    //Sensing window was initialized with some values. Now we replace with current values when packet is transmitted or received.
+
+    /*for (auto [X, Y,Z,A,B]:sensingWindow)
+    {
+        EV<<"Sensing window current: "<<X<<" "<<Y<<" "<<Z<<" "<<A<<" "<<B<<endl;
+    }*/
+
+    EV<<"Sensing window size: "<<sensingWindow.size();
+    auto itc=sensingWindow.begin();
+
+    for (;itc != sensingWindow.end();++itc) {
+        if(get<0>(*itc)==subframeTime)
+        {
+            //Replace the values on transmission or reception
+            sensingWindow.erase(itc);
+            sensingWindow.push_back(std::make_tuple(subframeTime,rssi,rsrp,txStatus,rxStatus));
+
+        }
+    }
+
+    //sensingWindow.push_back(std::make_tuple(subframeTime,rssi,rsrp,txStatus,rxStatus));
+
+    for (auto [X, Y,Z,A,B]:sensingWindow)
+    {
+        EV<<"Sensing window updated parameters: "<<X<<" "<<Y<<" "<<Z<<" "<<A<<" "<<B<<endl;
+    }
+    setSensingWindow(sensingWindow); //Used by computeCSRs() method
+    return sensingWindow;
+}
+
+simtime_t SidelinkResourceAllocation::sidelinkSynchronization(bool status)
 {
     Enter_Method("sidelinkSynchronization()");
     //Synchronization messages are scheduled every 160ms
@@ -918,6 +862,7 @@ simtime_t SidelinkResourceAllocation::sidelinkSynchronization()
     frame->setControlInfo(lteInfo);
     slsync->setSchedulingPriority(0);
 
+
     nextSLSS = (NOW+160*TTI);
     scheduleAt(NOW+160*TTI, slsync);
 
@@ -927,19 +872,197 @@ simtime_t SidelinkResourceAllocation::sidelinkSynchronization()
 }
 
 
+//Congestion control parameters
+void SidelinkResourceAllocation::initialiseFreqAllocationMap()
+{
+    freqAllocationMap.set_capacity(1000);
+    EV<<"SidelinkResourceAllocation::initialiseFreqAllocationMap"<<endl;
+    //  freqAllocationMap.push_back(std::make_tuple(NOW.dbl(), 0.0));
+}
+
+boost::circular_buffer<std::tuple<double, int>> SidelinkResourceAllocation::updateFreqAllocationMap(double subframeTime, int allocatedRB )
+{
+    EV<<"SidelinkResourceAllocation::updateFreqAllocationMap"<<endl;
+    //auto itf=freqAllocationMap.begin();
+    freqAllocationMap.set_capacity(1000);
+    freqAllocationMap.push_back(std::make_tuple(subframeTime, allocatedRB));
+
+    /*    for (;itf != freqAllocationMap.end();++itf) {
+        if(get<0>(*itf)==subframeTime)
+        {
+            //Replace the values on transmission or reception
+            freqAllocationMap.erase(itf);
+            //throw cRuntimeError("SidelinkResourceAllocation::updateFreqAllocationMap ");
+            freqAllocationMap.push_back(std::make_tuple(subframeTime, allocatedRB));
+        }
+        setFreqAllocationMap(freqAllocationMap);
+
+
+    }*/
+
+
+    //View updated Frequency allocation map
+    /*    for (auto [X, Y]:freqAllocationMap)
+    {
+        EV<<"Frequency allocation map for transmissions: "<<X<<" "<<Y<<endl;
+    }*/
+    return freqAllocationMap;
+}
+
+void  SidelinkResourceAllocation::initialiseCbrWindow()
+{
+    Enter_Method("initialiseCbrWindow()");
+
+    EV << NOW << " SidelinkResourceAllocation::initialiseCbrWindow in each subframe" << endl;
+    txStatus = false;
+    rxStatus=false;
+    rssiReception= 0.0;
+    rsrpReception=0.0;
+    subframeTime = NOW;
+    cbrWindow.set_capacity(100);  //Limit buffer capacity to 1000
+    occupiedResourceBlocks = RBIndicesSCI.size()+RBIndicesData.size();
+    calculateChannelBusyRatio(occupiedResourceBlocks);
+
+    cbrWindow.push_back(std::make_tuple(subframeTime.dbl(),calculateChannelBusyRatio(occupiedResourceBlocks)));
+
+    //Iterate through circular buffer and also the tuple
+
+    EV<<"CBR window size: "<<cbrWindow.size()<<endl;
+
+    //To verify
+    /*for (auto [X, Y]:cbrWindow)
+    {
+        EV<<"CBR window initialized: "<<X<<" "<<Y<<endl;
+    }*/
+}
+
+boost::circular_buffer<std::tuple<double,double>>  SidelinkResourceAllocation::updateCbrWindow(double subframeTime,double cbr)
+
+{
+    cbrWindow.set_capacity(100);  //Limit buffer capacity to 1000
+    //Sensing window was initialized with some values. Now we replace with current values when packet is transmitted or received.
+
+    /*for (auto [X, Y]:cbrWindow)
+    {
+        EV<<"CBR window current: "<<X<<" "<<Y<<endl;
+    }*/
+
+    EV<<"CBR window size: "<<cbrWindow.size();
+    auto itc=cbrWindow.begin();
+
+    for (;itc != cbrWindow.end();++itc) {
+        if(get<0>(*itc)==subframeTime)
+        {
+            //Replace the values on transmission or reception
+            cbrWindow.erase(itc);
+            cbrWindow.push_back(std::make_tuple(subframeTime,cbr));
+
+        }
+    }
+
+    //sensingWindow.push_back(std::make_tuple(subframeTime,rssi,rsrp,txStatus,rxStatus));
+
+    /*for (auto [X, Y]:cbrWindow)
+    {
+        EV<<"CBR window updated parameters: "<<X<<" "<<Y<<endl;
+    }*/
+    setCbrWindow(cbrWindow);
+    return cbrWindow;
+}
+
+
+
+
+double SidelinkResourceAllocation::calculateChannelBusyRatio(int occupiedRB)
+{
+    if(occupiedRB>0)
+    {
+        cbr = occupiedRB/(numSubchannels_ *subchannelSize_) ;
+    }
+    else
+    {
+        EV<<"CBR regulation"<<endl;
+        cbr = uniform(0.6,1);
+    }
+
+    return cbr;
+}
+
+//Calculate channel occupancy ratio
+double SidelinkResourceAllocation::calculateChannelOccupancyRatio(boost::circular_buffer<std::tuple<double, int>> freqallocmap,int cresel)
+{
+    EV<<"SidelinkResourceAllocation::calculateChannelOccupancyRatio: "<<endl;
+
+    //Calculated for the transmitter - both past and future transmissions
+    int a;
+    a = 500;
+    int sum = 0;
+
+    //double futureAllocationTime = NOW.dbl()+(cresel-1)*0.1;
+    EV<<"cResel: "<<cresel<<endl;
+
+    //Past allocations are stored in freqAllocationMap. For future allocations, we determine based on CResel.
+    boost::circular_buffer<std::tuple<double, int>>::iterator itc = freqallocmap.begin();
+    double subframeTime = NOW.dbl();
+    for (auto [X, Y]:freqallocmap)
+    {
+        EV<<"Freq allocation map for CR calculation: "<<X<<" "<<Y<<endl;
+        if (( subframeTime -0.5)>=X)
+        {
+            EV<<"Past 500 subframes: "<<X<<endl;
+            sum+=Y;
+        }
+    }
+
+    //throw cRuntimeError("SRA");
+    int b = std::get<1> (*(itc+(freqallocmap.size()-1)));
+
+
+    sum = sum+b*(cresel-1);
+    cr = sum/(1000.0*50.0);
+
+    EV<<"Channel occupancy ratio: "<<cr<<endl;
+    return cr;
+}
+
+
+
+
+//Before transmission, based on CBR of previous 100 subframes, we check if the CR limit is reached
+bool SidelinkResourceAllocation::checkCRLimit(double averageCbR, double crMeasured)
+{
+    //Average CBR over previous 100 subframes is considered
+    EV<<"Average CBR: "<<averageCbr<<endl;
+
+    if (0.65<averageCbR<0.8)
+    {
+        crLimit=0.02;
+
+    }
+    else if(0.8<averageCbR<1)
+    {
+        crLimit=0.01;
+
+    }
+    else
+    {
+        crLimit=0.0;
+    }
+
+    if (crMeasured<crLimit)
+    {
+        crLimitReached=true;
+    }
+    else
+    {
+        crLimitReached=false;
+    }
+    return crLimitReached;
+}
+
 void SidelinkResourceAllocation::finish()
 {
 
-    /*    std::vector<std::vector<Subchannel *>>::iterator it;
-    for (it=sensingWindow_.begin();it!=sensingWindow_.end();it++)
-    {
-        std::vector<Subchannel *>::iterator jt;
-        for (jt=it->begin();jt!=it->end();jt++)
-        {
-            delete (*jt);
-        }
-    }
-    sensingWindow_.clear();*/
 
 
 }

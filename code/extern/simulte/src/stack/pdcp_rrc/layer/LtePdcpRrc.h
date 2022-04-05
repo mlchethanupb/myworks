@@ -68,6 +68,8 @@ protected:
     cGate* DataPortNonIpIn;
     cGate* DataPortIpOut;
     cGate* DataPortNonIpOut;
+    cGate* DataPortLteAppIn;
+    cGate* DataPortLteAppOut;
     cGate* eutranRrcSap_[2];
     cGate* tmSap_[2];
     cGate* umSap_[2];

@@ -98,10 +98,19 @@ void LtePdcpRrcBase::setTrafficInformation(cPacket* pkt, FlowControlInfoNonIp* n
 {
     EV<<"LtePdcpRrcBase::setTrafficInformation: "<<endl;
 
-    nonIpInfo->setApplication(GEONET);
-    nonIpInfo->setTraffic(CAM);
-    nonIpInfo->setRlcType((int) par("backgroundRlc"));
-    nonIpInfo->setDirection(getDirection());
+    if (strcmp(pkt->getName(), "AlertNonIp")==0)
+    {
+        nonIpInfo->setApplication(VRUVAM);
+        nonIpInfo->setTraffic(VAM);
+        nonIpInfo->setRlcType((int) par("backgroundRlc"));
+        nonIpInfo->setDirection(getDirection());
+    }
+    if ( strcmp(pkt->getName(), "GeoNet packet")==0){
+        nonIpInfo->setApplication(GEONET);
+        nonIpInfo->setTraffic(CAM);
+        nonIpInfo->setRlcType((int) par("backgroundRlc"));
+        nonIpInfo->setDirection(getDirection());
+    }
 }
 
 /*
@@ -227,8 +236,8 @@ void LtePdcpRrcBase::setDataArrivalStatus(bool dataArrival)
 }
 
 bool LtePdcpRrcBase::getDataArrivalStatus(){
-       return dataArrival;
-   }
+    return dataArrival;
+}
 
 
 void LtePdcpRrcBase::fromEutranRrcSap(cPacket *pkt)
@@ -268,7 +277,7 @@ void LtePdcpRrcBase::toDataPort(cPacket *pkt)
         headerDecompress(upPkt, lteInfo->getHeaderSize()); // Decompress packet header
         handleControlInfo(upPkt, lteInfo);
         EV << "LtePdcp : Sending IP packet " << upPkt->getName()
-                       << " on port DataPort$o\n";
+                               << " on port DataPort$o\n";
         // Send message
         send(upPkt, DataPortIpOut);
         emit(sentPacketToUpperLayer, upPkt);
@@ -283,8 +292,8 @@ void LtePdcpRrcBase::toDataPort(cPacket *pkt)
         upPkt = pdcpPkt->decapsulate(); // Decapsulate packet
         delete pdcpPkt;
         upPkt->setControlInfo(lteInfo);
-        EV << "LtePdcp : Sending Non IP packet " << upPkt->getName();
-                          // << " on port DataPort$o\n";
+        EV << "LtePdcp : Sending Non IP packet " << upPkt->getName()
+                                   << " on port DataPort$o\n";
         // Send message
         send(upPkt, DataPortNonIpOut);
         emit(sentPacketToUpperLayer, upPkt);
@@ -301,7 +310,7 @@ void LtePdcpRrcBase::toEutranRrcSap(cPacket *pkt)
     delete pkt;
 
     EV << "LteRrc : Sending packet " << upPkt->getName()
-               << " on port EUTRAN_RRC_Sap$o\n";
+                       << " on port EUTRAN_RRC_Sap$o\n";
     send(upPkt, eutranRrcSap_[OUT]);
 }
 
@@ -317,6 +326,9 @@ void LtePdcpRrcBase::initialize(int stage)
         DataPortIpOut = gate("DataPortIpOut");
         DataPortNonIpIn = gate("DataPortNonIpIn");
         DataPortNonIpOut = gate("DataPortNonIpOut");
+
+        DataPortLteAppOut = gate("DataPortLteAppOut");
+        DataPortLteAppIn = gate ("DataPortLteAppIn");
 
         eutranRrcSap_[IN] = gate("EUTRAN_RRC_Sap$i");
         eutranRrcSap_[OUT] = gate("EUTRAN_RRC_Sap$o");
@@ -380,7 +392,7 @@ void LtePdcpRrcBase::handleMessage(cMessage* msg)
             << pkt->getArrivalGate()->getName() << endl;
 
     cGate* incoming = pkt->getArrivalGate();
-    if (incoming == DataPortIpIn || incoming == DataPortNonIpIn)
+    if (incoming == DataPortIpIn || incoming == DataPortNonIpIn || incoming == DataPortLteAppIn)
     {
         EV<<"Incoming: DataPortIn"<<endl;
         fromDataPort(pkt);

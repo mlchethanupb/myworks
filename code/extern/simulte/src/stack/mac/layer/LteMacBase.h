@@ -16,7 +16,6 @@
 
 class LteHarqBufferTx;
 class LteHarqBufferRx;
-class LteHarqBufferRxD2D;
 class LteBinder;
 class FlowControlInfo;
 class LteMacBuffer;
@@ -32,8 +31,6 @@ typedef std::map<MacNodeId, LteHarqBufferTx *> HarqTxBuffers;
  * Used in eNB, where there is more than one RX H-ARQ buffer.
  */
 typedef std::map<MacNodeId, LteHarqBufferRx *> HarqRxBuffers;
-
-typedef std::map<MacNodeId, LteHarqBufferRxD2D *> HarqRxD2DBuffers;
 
 /*
  * MultiMap associating a LCG group with all connection belonging to it and
@@ -107,8 +104,6 @@ public:
 
     /// Harq Rx Buffers
     HarqRxBuffers harqRxBuffers_;
-
-    HarqRxD2DBuffers harqRxD2DBuffers_;
     unsigned int totalOverflowedBytes_;
     bool ipBased;
     int retrievedPacketId;

@@ -23,6 +23,7 @@ void NonIpBase::initialize(int stage)
     if (stage == inet::INITSTAGE_LOCAL) {
         lowerGateIn_ = findGate("lowerGateIn");
         lowerGateOut_ = findGate("lowerGateOut");
+
     }
 }
 

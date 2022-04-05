@@ -68,7 +68,15 @@ void LtePhyBase::handleMessage(cMessage* msg)
     else if (msg->getArrivalGate()->getId() == radioInGate_)
     {
         EV<<"LtePhyBase::handleMessage: "<<msg->getName()<<endl;
-        handleAirFrame(msg);
+        if(strcmp(msg->getName(), "SCIframe")== 0)
+            {
+            EV<<"LtePhyBase::SCIframe"<<endl;
+          return;
+            }
+        else
+        {
+            handleAirFrame(msg);
+        }
     }
 
 

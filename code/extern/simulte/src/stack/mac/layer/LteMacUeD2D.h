@@ -13,7 +13,6 @@
 #include "stack/mac/layer/LteMacUe.h"
 #include "stack/mac/layer/LteMacEnbD2D.h"
 #include "stack/mac/buffer/harq_d2d/LteHarqBufferTxD2D.h"
-#include "stack/mac/buffer/harq_d2d/LteHarqBufferRxD2D.h"
 #include "stack/mac/configuration/SidelinkConfiguration.h"
 #include "stack/mac/packet/LteSidelinkGrant.h"
 #include "control/packet/RRCStateChange_m.h"

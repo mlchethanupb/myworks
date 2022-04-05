@@ -28,6 +28,8 @@ const std::string lteTrafficClassToA(LteTrafficClass type)
             return "BACKGROUND";
         case CAM:
             return "CAM";
+        case VAM:
+            return "VAM";
         default:
             return "UNKNOWN_TRAFFIC_TYPE";
     }
@@ -45,6 +47,8 @@ LteTrafficClass aToLteTrafficClass(std::string s)
         return BACKGROUND;
     if (s == "CAM")
         return CAM;
+    if (s=="VAM")
+        return VAM;
     return UNKNOWN_TRAFFIC_TYPE;
 }
 
@@ -395,15 +399,17 @@ const std::string fbGeneratorTypeToA(FeedbackGeneratorType type)
 
 LteNodeType getNodeTypeById(MacNodeId id)
 {
+    EV<<"getNodeTypeById "<<id<<endl;
     if (id >= ENB_MIN_ID && id <= ENB_MAX_ID)
         return ENODEB;
     if (id >= RELAY_MIN_ID && id <= RELAY_MAX_ID)
         return RELAY;
     if (id >= UE_MIN_ID && id <= UE_MAX_ID)
         return UE;
-    if (id>=RSUEnB_MIN_ID && id >= RSUEnB_MAX_ID)
+    if (id>=RSUEnB_MIN_ID && id <= RSUEnB_MAX_ID)
         return RSUEnB;
-    return UNKNOWN_NODE_TYPE;
+    if (id >= PED_MIN_ID && id <= PED_MAX_ID)
+        return PED;
 }
 
 const std::string planeToA(Plane p)

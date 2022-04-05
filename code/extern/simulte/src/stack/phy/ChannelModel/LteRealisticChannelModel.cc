@@ -1754,6 +1754,8 @@ double LteRealisticChannelModel::computePathLoss(double distance, double dbp, bo
 {
     //compute attenuation based on selected scenario and based on LOS or NLOS
     double pathLoss = 0;
+    EV<<"Computing Pathloss"<<endl;
+    EV<< "Scenario: "<<scenario_<<"Los: "<<los<<endl;
     switch (scenario_)
     {
     case INDOOR_HOTSPOT:
@@ -1834,10 +1836,6 @@ double LteRealisticChannelModel::computeUrbanMicro(double d, bool los)
 
 double LteRealisticChannelModel::computeUrbanMacro(double d, bool los)
 {
-    //std::cout << "path loss distance: " << d << std::endl;
-    if(d > 5000)
-        std::cout << "Need co-ordinate correction" << endl;
-
     if (d < 10)
         d = 10;
 
@@ -1859,13 +1857,11 @@ double LteRealisticChannelModel::computeUrbanMacro(double d, bool los)
 
     if (d < 10)
         throw cRuntimeError("Error NLOS urban macrocell path loss model is valid for 10m < d ");
-    if (d > 50000000){ //MLC
+    if (d > 5000){
         if(tolerateMaxDistViolation_)
             return ATT_MAXDISTVIOLATED;
-        else {
-            std::cout << "throw error" << endl;
+        else
             throw cRuntimeError("Error NLOS urban macrocell path loss model is valid for d <5000 m");
-        }
     }
 
     double att = 161.04 - 7.1 * log10(wStreet_) + 7.5 * log10(hBuilding_)
@@ -2028,6 +2024,7 @@ bool LteRealisticChannelModel::computeExtCellInterference(MacNodeId eNbId, MacNo
         EV << "\t distance between UE[" << coord.x << "," << coord.y <<
                 "] and extCell[" << c.x << "," << c.y << "] is -> "
                 << dist << "\t";
+
         // compute attenuation according to some path loss model
         att = computeExtCellPathLoss(dist, nodeId);
 

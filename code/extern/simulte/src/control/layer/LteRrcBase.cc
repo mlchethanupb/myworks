@@ -47,6 +47,16 @@ void LteRrcBase::initialize(int stage)
             EV<<"LteRrcBase::initialize UE "<<  nodeId_  ;
         }
 
+        if (nodeType_ == PED)
+        {
+            // TODO not so elegant
+            cModule *pe = getParentModule()->getParentModule();
+            nodeId_ = binder_->getPedId();
+            masterId_ = pe->par("masterId");
+            EV<<"LteRrcBase::initialize Ped "<<  nodeId_  ;
+            //throw cRuntimeError("test ped rrc");
+            EV<<"LteRrcBase::initialize Ped "<<  nodeId_  ;
+        }
         if (nodeType_==RSUEnB)
         {
             cModule *rsuEnb = getParentModule()->getParentModule();
