@@ -13,6 +13,7 @@ clean:
 	-$(MAKE) -C $(INET_DIR) cleanall
 	-$(MAKE) -C $(VEINS_DIR) cleanall
 	-rm -rf $(VANETZA_BUILD_DIR)
+	-$(MAKE) -C $(SIMULTE_DIR) cleanall
 
 $(INET_DIR)/.oppfeaturestate: $(INET_DIR)/.oppfeatures
 	cd $(INET_DIR); $(PYTHON) inet_featuretool repair
