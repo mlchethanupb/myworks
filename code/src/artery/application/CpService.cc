@@ -220,7 +220,7 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
 
 	CpObject obj(std::move(cpm_msg));
-	//emit(scSignalCpmSent, &obj);
+	emit(scSignalCpmSent, &obj);
 
 	using CpmByteBuffer = convertible::byte_buffer_impl<asn1::Cpm>;
 	std::unique_ptr<geonet::DownPacket> payload { new geonet::DownPacket() };

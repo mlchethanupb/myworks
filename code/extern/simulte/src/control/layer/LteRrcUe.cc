@@ -115,6 +115,7 @@ void LteRrcUe::handleSelfMessage()
 {
     EV <<"LteRrcUe::handleSelfMessage Track UE movement and check for cell coverage"<< endl;
     bool cellFound = checkCellCoverage();
+    //cellFound=false;
     modeSelect(cellFound);
     scheduleAt(simTime()+TTI, ttiTick_);
 }

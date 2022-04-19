@@ -22,6 +22,14 @@ TraCIPosition position_cast(const Boundary& boundary, const artery::Position& po
 {
     const double x = pos.x.value() - boundary.lowerLeftPosition().x;
     const double y = boundary.upperRightPosition().y - pos.y.value();
+
+    /*
+    std::cout<<"traci::position actual x: "<<pos.x.value() <<"boundary left x: "<<boundary.lowerLeftPosition().x<<endl;
+    std::cout<<"traci::position actual y: "<<pos.y.value() <<"boundary right y: "<<boundary.upperRightPosition().y<<endl;
+
+    std::cout<<"traci::position x= "<<x<<endl;
+    std::cout<<"traci::position y= "<<y<<endl;
+    */
     TraCIPosition tmp;
     tmp.x = x;
     tmp.y = y;
