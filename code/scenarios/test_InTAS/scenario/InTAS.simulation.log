@@ -1,0 +1,21 @@
+***Starting server on port 39299 ***
+Loading net-file from 'ingolstadt_rtest.net.xml' ... done (6ms).
+Loading additional-files from 'buildings_reduced.poly.xml' ... done (14ms).
+Loading additional-files from 'enodeb_poi.add.xml' ... done (0ms).
+Loading done.
+Simulation started with time: 0.00
+Error: tcpip::Socket::recvAndCheck @ recv: peer shutdown
+Quitting (on error).
+Simulation ended at time: 20.10
+Performance: 
+ Duration: 33.95s
+ TraCI-Duration: 11.12s
+ Real time factor: 0.592082
+ UPS: 26.599505
+Vehicles: 
+ Inserted: 10 (Loaded: 48)
+ Running: 9
+ Waiting: 0
+
+DijkstraRouter answered 9 queries and explored 3.11 edges on average.
+DijkstraRouter spent 0.00s answering queries (0.00ms on average).

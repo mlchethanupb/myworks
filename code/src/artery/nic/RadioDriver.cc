@@ -250,9 +250,9 @@ std::vector<TraCIPosition> RadioDriver::getStationaryModulePosition()
     for (int k=0; k< baseStations.size(); k++)
     {
         std::string poiID = baseStations.at(k);
-        //if(api.poi().getType(poiID) == "eNodeB"){
+        if(api.poi().getType(poiID) == "eNodeB"){
             enbPosTraci.push_back(api.poi().getPosition(poiID));
-        //}
+        }
     }
 
     for (int k=0; k< enbPosTraci.size(); k++)

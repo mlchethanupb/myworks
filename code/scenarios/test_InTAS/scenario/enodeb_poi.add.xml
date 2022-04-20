@@ -1,0 +1,4 @@
+<additional>
+<poi id="1" type="eNodeB" color="white" width="10" height="30" layer="202.00" lat="48.772402" lon="11.436855" imgFile="../../images/enodeb.jpg"/>
+<poi id="2" type="eNodeB" color="white" width="10" height="30" layer="202.00" lat="48.771266" lon="11.440354" imgFile="../../images/enodeb.jpg"/>
+</additional>
