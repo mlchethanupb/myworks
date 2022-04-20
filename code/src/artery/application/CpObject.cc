@@ -70,7 +70,7 @@ protected:
     }
 };
 
-Register_ResultFilter("camStationId", CpmStationIdResultFilter)
+Register_ResultFilter("cpmStationId", CpmStationIdResultFilter)
 
 
 class CpmGenerationDeltaTimeResultFilter : public cObjectResultFilter
@@ -85,6 +85,6 @@ protected:
     }
 };
 
-Register_ResultFilter("camGenerationDeltaTime", CpmGenerationDeltaTimeResultFilter)
+Register_ResultFilter("cpmGenerationDeltaTime", CpmGenerationDeltaTimeResultFilter)
 
 } // namespace artery

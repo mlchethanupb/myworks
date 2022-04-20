@@ -110,6 +110,7 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 	Enter_Method("indicate");
 
 	EV<< "CPM message received" << endl;
+    std::cout << "CPM message received" << endl;
 
 	if(mSensorsId.empty()){
 		generate_sensorid();
@@ -120,13 +121,17 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 	if (cpm && cpm->validate()) {
 
 		CpObject obj = visitor.shared_wrapper;
+
+        std::cout << "publishing signal cpm received" << std::endl;
 		emit(scSignalCpmReceived, &obj);
 
 		const vanetza::asn1::Cpm& cpm_msg = obj.asn1();
 		retrieveCPMmessage(cpm_msg);
 		printCPM(cpm_msg);
 
-	}
+	}else{
+        std::cout << "cpm object: " << cpm << endl;
+    }
 }
 
 bool CpService::checkHeadingDelta() const
@@ -174,6 +179,7 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
 	EV <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
+    std::cout <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
 
 	if(mSensorsId.empty()){
 		generate_sensorid();

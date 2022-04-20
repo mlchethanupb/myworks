@@ -21,8 +21,11 @@ simple CpService like ItsG5Service
         @signal[CpmReceived](type=CpObject);
         @signal[CpmSent](type=CpObject);
 
-        @statistic[reception](source=CpmReceived;record=vector(camStationId)?,vector(camGenerationDeltaTime)?);
-        @statistic[transmission](source=CpmSent;record=vector(camStationId)?,vector(camGenerationDeltaTime)?);
+        @statistic[receptioncpm](source=CpmReceived;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
+        @statistic[transmissioncpm](source=CpmSent;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
+        @statistic[sentcpmpkt](source=count(CpmSent);record=last,vector);
+        @statistic[rcvdcpmpkt](source=count(CpmReceived);record=last,vector);
+
 
         // evaluate DCC transmission interval restrictions
         bool withDccRestriction = default(true);

@@ -250,15 +250,15 @@ std::vector<TraCIPosition> RadioDriver::getStationaryModulePosition()
     for (int k=0; k< baseStations.size(); k++)
     {
         std::string poiID = baseStations.at(k);
-        if(api.poi().getType(poiID) == "eNodeB"){
+        //if(api.poi().getType(poiID) == "eNodeB"){
             enbPosTraci.push_back(api.poi().getPosition(poiID));
-        }
+        //}
     }
 
     for (int k=0; k< enbPosTraci.size(); k++)
     {
         enbPosOmnet.push_back(traci::position_cast(boundary, Position {enbPosTraci[k].x,enbPosTraci[k].y})) ;
-        //std::cout << "RadioDriver::getStationaryModulePosition: enodeb " << k << ", Position: " << enbPosOmnet[k].x << ", "<<enbPosOmnet[k].y <<endl;
+        std::cout << "RadioDriver::getStationaryModulePosition: enodeb " << k << ", Position: " << enbPosOmnet[k].x << ", "<<enbPosOmnet[k].y <<endl;
     }
 
     //enbPos= traci::position_cast(boundary, Position {enbCoord.x,enbCoord.y});

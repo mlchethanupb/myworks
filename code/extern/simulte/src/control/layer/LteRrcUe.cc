@@ -56,7 +56,7 @@ void LteRrcUe::initialize(int stage)
         EV <<"LteRrcUe::initialize Configure resource allocation mode when UEs enter the simulation environment"<< endl;
 
        bool cellFound = checkCellCoverage();
-        //cellFound=false;
+        cellFound=false; //MLC
         modeSelect(cellFound);
     }
 
@@ -115,7 +115,7 @@ void LteRrcUe::handleSelfMessage()
 {
     EV <<"LteRrcUe::handleSelfMessage Track UE movement and check for cell coverage"<< endl;
     bool cellFound = checkCellCoverage();
-    //cellFound=false;
+    cellFound=false; // MLC
     modeSelect(cellFound);
     scheduleAt(simTime()+TTI, ttiTick_);
 }
@@ -141,7 +141,8 @@ bool  LteRrcUe::checkCellCoverage(){
     if (ueDistanceFromEnb < 200)
     {
         //To set default mode 4, just put cellFound=false always
-        cellFound=true;
+        //cellFound=true;
+        cellFound = false; //MLC
         //Register to corresponding eNodeB
         binder_->registerNextHop(masterId_, nodeId_);
     }

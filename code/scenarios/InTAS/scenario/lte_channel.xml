@@ -47,7 +47,7 @@
                 <!-- if true, enables the inter-cell interference computation -->
                 <parameter name="extCell-interference" type="bool" value="true"/>
                 <!-- if true, enables the multi-cell interference computation -->
-                <parameter name="multiCell-interference" type="bool" value="false"/>
+                <parameter name="multiCell-interference" type="bool" value="true"/>
         </ChannelModel>
 
         <!-- Feedback Type (REAL, DUMMY) -->
