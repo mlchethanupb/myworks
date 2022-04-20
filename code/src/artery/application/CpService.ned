@@ -20,11 +20,13 @@ simple CpService like ItsG5Service
     parameters:
         @signal[CpmReceived](type=CpObject);
         @signal[CpmSent](type=CpObject);
+        @signal[EteDelay](type=simtime_t);
 
         @statistic[receptioncpm](source=CpmReceived;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[transmissioncpm](source=CpmSent;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[sentcpmpkt](source=count(CpmSent);record=last,vector);
         @statistic[rcvdcpmpkt](source=count(CpmReceived);record=last,vector);
+        @statistic[EteDelay](source=EteDelay; record = stats?);
 
 
         // evaluate DCC transmission interval restrictions

@@ -8,7 +8,7 @@
     </input>
 
     <output>
-        <output-file value="/home/momo/dateien/Studies/thesis/workspace/InTAS_test/scenario/ingolstadt_reduced.net.xml"/>
+        <output-file value="/home/momo/dateien/Studies/thesis/workspace/test_InTAS/scenario/ingolstadt_reduced.net.xml"/>
     </output>
 
     <processing>
@@ -30,7 +30,7 @@
     </pedestrian>
 
     <netedit>
-        <additional-files value="/home/momo/dateien/Studies/thesis/workspace/InTAS_test/scenario/buildings_reduced.poly.xml"/>
+        <additional-files value="/home/momo/dateien/Studies/thesis/workspace/test_InTAS/scenario/buildings_reduced.poly.xml"/>
     </netedit>
 
     <report>

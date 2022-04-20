@@ -36,6 +36,8 @@ using namespace omnetpp;
 
 static const simsignal_t scSignalCpmReceived = cComponent::registerSignal("CpmReceived");
 static const simsignal_t scSignalCpmSent = cComponent::registerSignal("CpmSent");
+static const simsignal_t scSignalEteDelay = cComponent::registerSignal("EteDelay");
+
 static const auto scSnsrInfoContainerInterval = std::chrono::milliseconds(1000);
 
 const auto DCCPROFILECP = vanetza::dcc::Profile::DP2;
@@ -586,6 +588,9 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
     uint32_t stationID = cpm_data->header.stationID;
     omnetpp::SimTime generationTime = mTimer->getTimeFor(
             mTimer->reconstructMilliseconds(cpm_data->cpm.generationDeltaTime));
+
+    omnetpp::SimTime ete_delay = mVehicleDataProvider->updated() - generationTime;
+    emit(scSignalEteDelay, ete_delay);
 
     if (mObjectsReceived.find(stationID) == mObjectsReceived.end() || //First time object perceived
         mObjectsReceived.at(stationID).getLastTrackingTime().last() + mCPSensor->getValidityPeriod() <= simTime() ||
