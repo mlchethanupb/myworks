@@ -37,6 +37,8 @@ using namespace omnetpp;
 static const simsignal_t scSignalCpmReceived = cComponent::registerSignal("CpmReceived");
 static const simsignal_t scSignalCpmSent = cComponent::registerSignal("CpmSent");
 static const simsignal_t scSignalEteDelay = cComponent::registerSignal("EteDelay");
+static const simsignal_t scSignalRatioObjectAge = cComponent::registerSignal("objectAge");
+
 
 static const auto scSnsrInfoContainerInterval = std::chrono::milliseconds(1000);
 
@@ -104,6 +106,9 @@ void CpService::trigger()
 {
 	Enter_Method("trigger");
 	generateCPM(simTime());
+
+    //Statistics
+    recordObjectsAge();
 }
 
 void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::UpPacket> packet)
@@ -661,7 +666,7 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
                 mObjectsReceived[objCont->objectID] = ObjectInfo(newTracking, mSensorsId.at(mCPSensor),
                                                                  headingReceived, posReceived,
-                                                                 speedReceived); //don't know if object has V2X capabilities, default is false
+                                                                 speedReceived); 
             } else {
                 
                 mObjectsReceived[objCont->objectID] = ObjectInfo(
@@ -689,6 +694,40 @@ SimTime CpService::genCpmDcc() {
     return std::min(mGenCpmMax, std::max(mGenCpmMin, dcc));
 }
 
+
+
+void CpService::recordObjectsAge(){
+
+	for(const LocalEnvironmentModel::TrackedObject& obj : mLocalEnvironmentModel->allObjects()){
+		const artery::LocalEnvironmentModel::Tracking& tracking_ptr = obj.second;
+		const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection =  tracking_ptr.sensors();
+
+		bool detectedByRadars = false;
+
+		for(const auto& tracker : sensorsDetection) {
+			if (tracker.first->getSensorCategory() == "Radar") {
+				detectedByRadars = true;
+				break;
+			}
+		}
+
+		if(!detectedByRadars){
+			const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
+
+			if (mObjectsReceived.find(vd.station_id()) != mObjectsReceived.end()) {
+				ObjectInfo &infoObjectAI = mObjectsReceived.at(vd.station_id());
+
+				//Remove the entry if expired
+				if (mObjectsReceived.at(vd.station_id()).getLastTrackingTime().last() +
+					mCPSensor->getValidityPeriod() < mVehicleDataProvider->updated()) {
+					mObjectsReceived.erase(vd.station_id());
+				} else {
+                    emit(scSignalRatioObjectAge, simTime() - mObjectsReceived.at(vd.station_id()).getLastTrackingTime().last());
+                }
+			}
+		}
+	}
+}
 /** Print information of a CPM message
  * @param CPM struct from asnc
  * @return /

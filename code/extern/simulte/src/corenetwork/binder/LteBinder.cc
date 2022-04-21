@@ -73,17 +73,21 @@ void LteBinder::unregisterNode(MacNodeId id)
 
 
 
-   for (; itb != BroadcastUeInfo.end(); ++itb) // == myVector.end() means the element was not found
-        {
+   for (; itb != BroadcastUeInfo.end(); /*Increment within loop*/) // == myVector.end() means the element was not found
+    {
        EV<<"Erasing UE information: "<<id<<" "<<itb->first<<endl;
 
        if (itb->first==id)
         {
             EV<<"Removing UE from broadcast list: "<<id<<endl;
-            BroadcastUeInfo.erase(itb);
+
+            //itb++ : post increment to make use of copy constructor to increment the iterator after deleting
+            BroadcastUeInfo.erase(itb++);
             setNodeRegisteredInSimlation(false);
+        }else{
+            ++itb; //Just increment the iterator
         }
-        }
+    }
 
 
 }

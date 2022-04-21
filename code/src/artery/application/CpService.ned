@@ -21,6 +21,7 @@ simple CpService like ItsG5Service
         @signal[CpmReceived](type=CpObject);
         @signal[CpmSent](type=CpObject);
         @signal[EteDelay](type=simtime_t);
+        @signal[objectAge](type=simtime_t);
 
         @statistic[receptioncpm](source=CpmReceived;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[transmissioncpm](source=CpmSent;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
