@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- generated on 2022-04-21 14:16:02.183568 by randomTrips.py UNKNOWN
+  options: -n ingolstadt_rtest.net.xml -r routes_new.rou.xml -o trips_new.xml -e 15 -p 2 <doubleminus>trip-attributes=departLane="best" departSpeed="20" departPos="random"
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <trip id="0" depart="0.00" from="25796398#0" to="25902677#0" departLane="best" departSpeed="20" departPos="random"/>
+    <trip id="1" depart="2.00" from="257907860#1.168" to="25902677#0" departLane="best" departSpeed="20" departPos="random"/>
+    <trip id="2" depart="4.00" from="25796398#0" to="305495773#0" departLane="best" departSpeed="20" departPos="random"/>
+    <trip id="3" depart="6.00" from="31342064#1.83" to="25902677#0" departLane="best" departSpeed="20" departPos="random"/>
+    <trip id="4" depart="8.00" from="257907860#1.168" to="25902677#0" departLane="best" departSpeed="20" departPos="random"/>
+    <trip id="5" depart="10.00" from="137463477#0" to="305495773#0" departLane="best" departSpeed="20" departPos="random"/>
+    <trip id="6" depart="12.00" from="137463477#0" to="25902677#0" departLane="best" departSpeed="20" departPos="random"/>
+    <trip id="7" depart="14.00" from="25796398#0" to="305495773#0" departLane="best" departSpeed="20" departPos="random"/>
+</routes>

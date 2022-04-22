@@ -1,0 +1,11 @@
+<routes>
+    <vType id="veh" length="5" maxSpeed="0.01" accel="5" decel="5" sigma="0" speedDev="0" vClass="passenger"/>
+
+    <route id="route0" color="1,1,0" edges="route0"/>
+    <route id="route1" color="1,1,0" edges="route1"/>
+
+    <vehicle id="0" type="veh" route="route1" depart="0" color="1,0,0" departPos="10" departSpeed="0"/>
+    <vehicle id="1" type="veh" route="route0" depart="0" color="1,0,0" departPos="10" departSpeed="0"/>
+
+
+</routes>

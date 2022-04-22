@@ -6,11 +6,11 @@
 
 package artery.envmod.sensor;
 
-simple FrontRadar like Radar
+simple AbsoluteRadar like Radar
 {
     parameters:
-        double fovRange @unit(m) = default(80.0 m);
-        double fovAngle = default(60.0); // degree
-        int numSegments = default(10);
+        double fovRange @unit(m) = default(150.0 m);
+        double fovAngle = default(360.0); // degree
+        int numSegments = default(36);
         bool doLineOfSightCheck = default(true);
 }

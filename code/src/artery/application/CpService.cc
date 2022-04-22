@@ -105,6 +105,8 @@ void CpService::initialize()
 void CpService::trigger()
 {
 	Enter_Method("trigger");
+    std::cout << "mVehicleDataProvider->updated(): " << mVehicleDataProvider->updated() << ", simTime(): " << simTime() << std::endl; 
+
 	generateCPM(simTime());
 
     //Statistics
@@ -186,7 +188,7 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
 	EV <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
-    std::cout <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
+    //std::cout <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
 
 	if(mSensorsId.empty()){
 		generate_sensorid();
@@ -252,6 +254,7 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const
 		return false;
 	}*/
 		
+    //std::cout << "objs perceived count: " << prcvd_objs.size() << endl;
 
 	for(const ObjectInfo::ObjectPercieved& p_obj : prcvd_objs){
 
@@ -305,6 +308,9 @@ void CpService::generate_objlist(vanetza::asn1::Cpm &message, const omnetpp::Sim
 
     //EV << "Send CPM with " << objectsToSend.size() << " objects" << std::endl;
     double nbRadarObj = (double) boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "Radar"));
+
+
+
     //if (nbRadarObj != 0)
         //emit(scSignalRatioFilter, (double) 1 - (double) mObjectsToSend.size() / nbRadarObj);
 

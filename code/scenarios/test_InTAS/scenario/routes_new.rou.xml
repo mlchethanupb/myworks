@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2022-04-21 14:16:02 by Eclipse SUMO duarouter Version 1.12.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="ingolstadt_rtest.net.xml"/>
+        <route-files value="trips_new.xml"/>
+    </input>
+
+    <output>
+        <output-file value="routes_new.rou.xml"/>
+        <alternatives-output value="routes_new.rou.alt.xml"/>
+    </output>
+
+    <time>
+        <begin value="0"/>
+        <end value="15"/>
+    </time>
+
+    <report>
+        <no-warnings value="true"/>
+        <ignore-errors value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+</configuration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <vehicle id="1" depart="2.00" departLane="best" departPos="random" departSpeed="20.00">
+        <route edges="257907860#1.168 25902677#0"/>
+    </vehicle>
+    <vehicle id="2" depart="4.00" departLane="best" departPos="random" departSpeed="20.00">
+        <route edges="25796398#0 305495773#0"/>
+    </vehicle>
+    <vehicle id="3" depart="6.00" departLane="best" departPos="random" departSpeed="20.00">
+        <route edges="31342064#1.83 25902677#0"/>
+    </vehicle>
+    <vehicle id="4" depart="8.00" departLane="best" departPos="random" departSpeed="20.00">
+        <route edges="257907860#1.168 25902677#0"/>
+    </vehicle>
+    <vehicle id="5" depart="10.00" departLane="best" departPos="random" departSpeed="20.00">
+        <route edges="137463477#0 305495773#0"/>
+    </vehicle>
+    <vehicle id="6" depart="12.00" departLane="best" departPos="random" departSpeed="20.00">
+        <route edges="137463477#0 25902677#0"/>
+    </vehicle>
+    <vehicle id="7" depart="14.00" departLane="best" departPos="random" departSpeed="20.00">
+        <route edges="25796398#0 305495773#0"/>
+    </vehicle>
+</routes>

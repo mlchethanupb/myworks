@@ -1,0 +1,18 @@
+<configuration>
+   <input>
+       <net-file value="straight_line.net.xml"/>
+       <route-files value="straight_line.rou.xml"/>
+       <additional-files value="obstacles.poly.xml,enodeb_poi.add.xml"/>
+   </input>
+
+    <time>
+        <begin value="0"/>
+        <end value="100"/>
+        <step-length value="0.025"/>
+    </time>
+	<report>
+        <verbose value="true"/>
+		<no-warnings value="true"/>
+	    <log value="test_sensor.simulation.log"/>
+	</report>
+</configuration>
