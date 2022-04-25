@@ -222,29 +222,31 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
     // Ref Sec-4.3.4.2; Add objects perceived by the vehicle to the CPM message. 
 	prcvdobjcntr_prsnt = generatePerceivedObjectsCntnr(cpm_msg, T_now);
 	
-    // Add station and management container only if either of perceived objects or sensor container is present. 
+    // Add station and management container and send CPM only if either of perceived objects or sensor container is present. 
 	if(prcvdobjcntr_prsnt || snsrcntr_prsnt ) {
+
 		generateStnAndMgmtCntnr(cpm_msg);
-	} 
+	
 
-	using namespace vanetza;
-	btp::DataRequestB request;
-	request.destination_port = btp::ports::CPM;
-	request.gn.its_aid = aid::CP;
-	request.gn.transport_type = geonet::TransportType::SHB;
-	request.gn.maximum_lifetime = geonet::Lifetime { geonet::Lifetime::Base::One_Second, 1 };
-	request.gn.traffic_class.tc_id(static_cast<unsigned>(dcc::Profile::DP2));
-	request.gn.communication_profile = geonet::CommunicationProfile::ITS_G5; //@todo: LTE-V2X ?
+        using namespace vanetza;
+        btp::DataRequestB request;
+        request.destination_port = btp::ports::CPM;
+        request.gn.its_aid = aid::CP;
+        request.gn.transport_type = geonet::TransportType::SHB;
+        request.gn.maximum_lifetime = geonet::Lifetime { geonet::Lifetime::Base::One_Second, 1 };
+        request.gn.traffic_class.tc_id(static_cast<unsigned>(dcc::Profile::DP2));
+        request.gn.communication_profile = geonet::CommunicationProfile::ITS_G5; //@todo: LTE-V2X ?
 
 
-	CpObject obj(std::move(cpm_msg));
-	emit(scSignalCpmSent, &obj);
+        CpObject obj(std::move(cpm_msg));
+        emit(scSignalCpmSent, &obj);
 
-	using CpmByteBuffer = convertible::byte_buffer_impl<asn1::Cpm>;
-	std::unique_ptr<geonet::DownPacket> payload { new geonet::DownPacket() };
-	std::unique_ptr<convertible::byte_buffer> buffer { new CpmByteBuffer(obj.shared_ptr()) };
-	payload->layer(OsiLayer::Application) = std::move(buffer);
-	this->request(request, std::move(payload));
+        using CpmByteBuffer = convertible::byte_buffer_impl<asn1::Cpm>;
+        std::unique_ptr<geonet::DownPacket> payload { new geonet::DownPacket() };
+        std::unique_ptr<convertible::byte_buffer> buffer { new CpmByteBuffer(obj.shared_ptr()) };
+        payload->layer(OsiLayer::Application) = std::move(buffer);
+        this->request(request, std::move(payload));
+    } 
 }
 
 /*
@@ -256,9 +258,9 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const
 	ObjectInfo::ObjectsPercievedMap prcvd_objs = mFilterObj.getallPercievedObjs();
 
 	//No objects percieved by the sensors
-	/*if(prcvd_objs.empty()){
+	if(prcvd_objs.empty()){
 		return false;
-	}*/
+	}
 		
     //std::cout << "objs perceived count: " << prcvd_objs.size() << endl;
 
@@ -287,7 +289,9 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const
 	return true;
 }
 
-//check if the object already in the tracked list?
+/*
+ * Function to check if the object already in the tracked list.
+ */
 bool CpService::objinTrackedlist(const ObjectInfo::ObjectPercieved& obj){
 
 	if (mObjectsTracked.find(obj.first) != mObjectsTracked.end()) {
@@ -301,7 +305,7 @@ bool CpService::objinTrackedlist(const ObjectInfo::ObjectPercieved& obj){
 }
 
 /*
- *
+ * Creat objects according to ASN format specified. 
  */
 void CpService::generateASN1Objects(vanetza::asn1::Cpm &message, const omnetpp::SimTime &T_now,
                                     ObjectInfo::ObjectsPercievedMap objToSend) {
@@ -319,19 +323,12 @@ void CpService::generateASN1Objects(vanetza::asn1::Cpm &message, const omnetpp::
             ASN_SEQUENCE_ADD(perceivedObjectContainers, objContainer);
         }
 	}else{
-		EV_INFO << "MLC ----- No objects to send" << std::endl;
+		EV_INFO << "No objects to send" << std::endl;
 	}
-#ifdef REMOVE_CODE
-	if(perceivedObjectContainers->list.count == 0){
-		vanetza::asn1::free(asn_DEF_PerceivedObjectContainer, perceivedObjectContainers);
-    	perceivedObjectContainers = nullptr;
-		std::cout << "entered" << std::endl;
-	}
-#endif
 }
 
 /*
- *
+ * Create objects container from the sensor detected objects. 
  */
 PerceivedObject_t *
 CpService::createPerceivedObjectContainer(const std::weak_ptr<artery::EnvironmentModelObject> &object,
@@ -343,7 +340,7 @@ CpService::createPerceivedObjectContainer(const std::weak_ptr<artery::Environmen
 
     objContainer->objectID = vdObj.station_id();
 
-    //@todo - add later
+    //@todo - Check why CPM sensor ID is passed here. 
 	//objContainer->sensorIDList = new Identifier_t(infoObj.getSensorId());
 
     //Compute relative time between CPM generation and time of observation of the object
@@ -408,7 +405,7 @@ CpService::createPerceivedObjectContainer(const std::weak_ptr<artery::Environmen
 }
 
 /*
- *
+ * Track all the objects detected and sent in the last sent CPM
  */
 void CpService::updateObjTrackedList(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap objToSend){
     //Add object in the list of previously sent
@@ -423,7 +420,7 @@ void CpService::updateObjTrackedList(const omnetpp::SimTime& T_now, ObjectInfo::
 }
 
 /*
- *
+ * Check and remove objects of the generated CPM is more than the given threshold size (MAXCPMSIZE=1100)
  */
 void CpService::checkCPMSize(const SimTime& T_now, ObjectInfo::ObjectsPercievedMap& objToSend, vanetza::asn1::Cpm& cpm){
 	bool removedObject = false;
@@ -475,6 +472,10 @@ bool CpService::generateSensorInfoCntnr(vanetza::asn1::Cpm& cpm_msg){
 	snsrinfo_cntr = vanetza::asn1::allocate<SensorInformationContainer_t>();
 
 	std::vector<Sensor*> sensors = mLocalEnvironmentModel->allSensors();
+
+    if(sensors.empty()){
+        return false;
+    }
 
     for (int i = 0; i < sensors.size(); i++) {
         if (sensors[i]->getSensorCategory() == "Radar") {
@@ -539,7 +540,7 @@ void CpService::addsensorinfo(SensorInformationContainer_t *& snsrinfo_cntr, Sen
 }
 
 /*
- *
+ * Function to generate Station and Management container
  */
 bool CpService::generateStnAndMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 
@@ -559,7 +560,7 @@ bool CpService::generateStnAndMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 }
 
 /*
- *
+ * Functon to generate Managment container. Contatins infomarion depecting position of the ego vehicle. 
  */
 void CpService::generateMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 
@@ -577,7 +578,7 @@ void CpService::generateMgmtCntnr(vanetza::asn1::Cpm& cpm_msg){
 }
 
 /*
- *
+ * Function to generate Station Container for vehciles. Contains information depicting the dynamics of vehilce.
  */
 void CpService::generateCarStnCntnr(vanetza::asn1::Cpm& cpm_msg){
 
@@ -595,7 +596,7 @@ void CpService::generateCarStnCntnr(vanetza::asn1::Cpm& cpm_msg){
 }
 
 /*
- *
+ * Function to generate Station container for RSUs
  */
 void CpService::generateRSUStnCntnr(vanetza::asn1::Cpm& cpm_msg){
 
@@ -619,7 +620,7 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
     omnetpp::SimTime generationTime = mTimer->getTimeFor(
             mTimer->reconstructMilliseconds(cpm_data->cpm.generationDeltaTime));
 
-    omnetpp::SimTime ete_delay = mVehicleDataProvider->updated() - generationTime;
+    omnetpp::SimTime ete_delay = simTime() - generationTime; //@todo: mVehicleDataProvider->updated() insted of simtime()??
     emit(scSignalEteDelay, ete_delay);
 
     if (mObjectsReceived.find(stationID) == mObjectsReceived.end() || //First time object perceived
@@ -648,7 +649,6 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
       
     }
 
-    #if 1
     //Get info of the objects received:
     PerceivedObjectContainer_t *objectsContainer = cpm_data->cpm.cpmParameters.perceivedObjectContainer;
     for (int i = 0; objectsContainer != nullptr && i < objectsContainer->list.count; i++) {
@@ -700,8 +700,6 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
             }
         }
     }
-    #endif
-
 }
 
 /*

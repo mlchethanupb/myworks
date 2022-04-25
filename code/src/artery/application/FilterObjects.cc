@@ -147,7 +147,7 @@ ObjectInfo::ObjectsPercievedMap FilterObjects::getallPercievedObjs(){
                 if(prcvd_objs.find(env_robj.first) == prcvd_objs.end() || prcvd_objs.at(env_robj.first).getLastTrackingTime().last() < p_snsr.second.last()){
                     const auto& vd = env_robj.first.lock()->getVehicleData();
                     prcvd_objs[env_robj.first] = ObjectInfo(p_snsr.second, mSensorsId->at(p_snsr.first), vd.heading(), vd.position(),  vd.speed());
-                }//Both sensors checked the object at the same time
+                }//Both sensors checked the object at the same time (@todo: to remove?)
                 else if (prcvd_objs.at(env_robj.first).getLastTrackingTime().last() == p_snsr.second.last()){
                     prcvd_objs.at(env_robj.first).setNumberOfSensors(prcvd_objs.at(env_robj.first).getNumberOfSensors() + 1);
                 }
