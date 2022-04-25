@@ -72,7 +72,6 @@ class CpService : public ItsG5BaseService
 		Sensor* mCPSensor;
         Sensor* mCASensor;
 		FilterObjects mFilterObj;
-		std::vector<bool> mFiltersEnabled;
 
 		void checkTriggeringConditions(const omnetpp::SimTime&);
 		bool checkHeadingDelta() const;
@@ -90,7 +89,6 @@ class CpService : public ItsG5BaseService
 		void retrieveCPMmessage(const vanetza::asn1::Cpm&);
 		void generate_sensorid();
 		void addsensorinfo(SensorInformationContainer_t *&seqSensInfCont, Sensor *&sensor, SensorType_t sensorType);
-		void generate_objlist(vanetza::asn1::Cpm &message, const omnetpp::SimTime& T_now);
 		PerceivedObject_t* createPerceivedObjectContainer(const std::weak_ptr<artery::EnvironmentModelObject>& object, ObjectInfo& infoObj);
         //void addPerceivedObjectContainer(LocalEnvironmentModel* localEnvironmentModel, vanetza::asn1::Cpm& message, const omnetpp::SimTime& T_now);
 		void generateASN1Objects(vanetza::asn1::Cpm& message, const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap objToSend);

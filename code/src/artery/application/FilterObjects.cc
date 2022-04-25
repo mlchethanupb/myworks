@@ -36,11 +36,11 @@ namespace artery
 
 FilterObjects::FilterObjects(){}
 
-FilterObjects::FilterObjects(const VehicleDataProvider* vd, LocalEnvironmentModel* le, std::vector<bool> filtersEnabled,
+FilterObjects::FilterObjects(const VehicleDataProvider* vd, LocalEnvironmentModel* le,
                              vanetza::units::Angle hd, vanetza::units::Length pd, vanetza::units::Velocity sd,
                              std::map<const Sensor*, Identifier_t>* sensorsId, const omnetpp::SimTime& T_GenCpmMin,
                             const SimTime& T_GenCpmMax):
-        mVehicleDataProvider(vd), mLocalEnvironmentModel(le), mFiltersEnabled(filtersEnabled),
+        mVehicleDataProvider(vd), mLocalEnvironmentModel(le), 
         mHeadingDelta(hd), mPositionDelta(pd), mSpeedDelta(sd), mSensorsId(sensorsId), mGenCpmMin(T_GenCpmMin),
         mGenCpmMax(T_GenCpmMax)
 {
@@ -55,14 +55,13 @@ long round(const boost::units::quantity<T>& q, const U& u)
 }
 
 
-void FilterObjects::initialize(const VehicleDataProvider* vd, LocalEnvironmentModel* le, std::vector<bool> filtersEnabled,
+void FilterObjects::initialize(const VehicleDataProvider* vd, LocalEnvironmentModel* le,
                                  vanetza::units::Angle hd, vanetza::units::Length pd, vanetza::units::Velocity sd,
                                  std::map<const Sensor*, Identifier_t>* sensorsId, const omnetpp::SimTime& T_GenCpmMin,
                                  const omnetpp::SimTime& T_GenCpmMax)
 {
     mVehicleDataProvider = vd;
     mLocalEnvironmentModel= le;
-    mFiltersEnabled = filtersEnabled;
     mHeadingDelta = hd;
     mPositionDelta = pd;
     mSpeedDelta = sd;
@@ -159,108 +158,6 @@ ObjectInfo::ObjectsPercievedMap FilterObjects::getallPercievedObjs(){
     return prcvd_objs;
 }
 
-
-
-
-
-std::size_t FilterObjects::filterObjects(ObjectInfo::ObjectsPercievedMap &objToSend,
-                                  ObjectInfo::ObjectsPercievedMap &prevObjSent, omnetpp::SimTime T_GenCpmDcc,
-                                  Sensor * cpSensor, ObjectInfo::ObjectsReceivedMap& objReceived, const SimTime& T_now){
-    std::size_t countObject = 0;
-    //Go through all the objects tracked
-    for(const LocalEnvironmentModel::TrackedObject& obj : mLocalEnvironmentModel->allObjects()){
-
-        const artery::LocalEnvironmentModel::Tracking& tracking_ptr = obj.second;
-        const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection =  tracking_ptr.sensors();
-
-        bool detectedByRadars = false;
-        for(const auto& tracker : sensorsDetection) {
-            if (tracker.first->getSensorCategory() == "Radar") {
-                detectedByRadars = true;
-                break;
-            }
-        }
-
-        //Remove all expired object
-        const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
-        if (objReceived.find(vd.station_id()) != objReceived.end()) {
-            ObjectInfo &infoObjectAI = objReceived.at(vd.station_id());
-            //Remove the entry if expired
-            if (objReceived.at(vd.station_id()).getLastTrackingTime().last() +
-                cpSensor->getValidityPeriod() < mVehicleDataProvider->updated()) {
-                objReceived.erase(vd.station_id());
-            }
-        }
-
-        //Remove objects not detected by the local sensors (Radars, cameras, Lidar)
-        if(!detectedByRadars)
-            continue;
-
-        countObject++;
-
-        //check whether the position of the objects tracked has changed or not
-        if(!checkobjectDynamics(obj, prevObjSent, T_now))
-            continue;
-
-        //If the object has been detected by its local perception capabilities (i.e. radar), add obj. to the list to send
-        for(const auto& tracker : sensorsDetection){
-            if(tracker.first->getSensorCategory() == "Radar"){
-
-                //If object not already in the lists or if the current sensor has "more" updated information
-                if(objToSend.find(obj.first) == objToSend.end() || objToSend.at(obj.first).getLastTrackingTime().last() < tracker.second.last()){
-                    const auto& vd = obj.first.lock()->getVehicleData();
-                    objToSend[obj.first] = ObjectInfo(tracker.second, mSensorsId->at(tracker.first), vd.heading(), vd.position(),  vd.speed());
-                } //Both sensors checked the object at the same time
-                else if (objToSend.at(obj.first).getLastTrackingTime().last() == tracker.second.last()){
-                    objToSend.at(obj.first).setNumberOfSensors(objToSend.at(obj.first).getNumberOfSensors() + 1);
-                }
-            }
-        }
-    }
-    return countObject;
-}
-
-
-void FilterObjects::getObjToSendNoFilter(ObjectInfo::ObjectsPercievedMap &objToSend, bool removeLowDynamics,
-        ObjectInfo::ObjectsPercievedMap objectsPrevSent, const omnetpp::SimTime& T_now)
-{
-    //Go through all the objects tracked
-    for(const LocalEnvironmentModel::TrackedObject& obj : mLocalEnvironmentModel->allObjects()){
-
-        const artery::LocalEnvironmentModel::Tracking& tracking_ptr = obj.second;
-        const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection =  tracking_ptr.sensors();
-
-        bool detectedByRadars = false;
-        for(const auto& tracker : sensorsDetection) {
-            if (tracker.first->getSensorCategory() == "Radar") {
-                detectedByRadars = true;
-                break;
-            }
-        }
-
-        //Remove objects not detected by the local sensors (Radars, cameras, Lidar)
-        if(!detectedByRadars)
-            continue;
-
-        if(removeLowDynamics && !checkobjectDynamics(obj, objectsPrevSent, T_now))
-            continue;
-
-        //If the object has been detected by its local perception capabilities (i.e. radar), add obj. to the list to send
-        for(const auto& tracker : sensorsDetection){
-            if(tracker.first->getSensorCategory() == "Radar"){
-
-                //If object not already in the lists or if the current sensor has "more" updated information
-                if(objToSend.find(obj.first) == objToSend.end() || objToSend.at(obj.first).getLastTrackingTime().last() < tracker.second.last()){
-                    const auto& vd = obj.first.lock()->getVehicleData();
-                    objToSend[obj.first] = ObjectInfo(tracker.second, mSensorsId->at(tracker.first), vd.heading(), vd.position(),  vd.speed());
-                } //Both sensors checked the object at the same time
-                else if (objToSend.at(obj.first).getLastTrackingTime().last() == tracker.second.last()){
-                    objToSend.at(obj.first).setNumberOfSensors(objToSend.at(obj.first).getNumberOfSensors() + 1);
-                }
-            }
-        }
-    }
-}
 
 bool FilterObjects::checkobjectDynamics(const ObjectInfo::ObjectPercieved& obj, ObjectInfo::ObjectsPercievedMap& trckedobjs, omnetpp::SimTime T_now){
 

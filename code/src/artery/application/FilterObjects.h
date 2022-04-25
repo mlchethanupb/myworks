@@ -22,12 +22,12 @@ namespace artery
 
         FilterObjects();
 
-        FilterObjects(const VehicleDataProvider*, LocalEnvironmentModel*, std::vector<bool>,
+        FilterObjects(const VehicleDataProvider*, LocalEnvironmentModel*,
                       vanetza::units::Angle, vanetza::units::Length, vanetza::units::Velocity,
                       std::map<const Sensor*, Identifier_t>*, const omnetpp::SimTime&,
                       const omnetpp::SimTime&);
 
-        void initialize(const VehicleDataProvider*, LocalEnvironmentModel*, std::vector<bool>,
+        void initialize(const VehicleDataProvider*, LocalEnvironmentModel*, 
                           vanetza::units::Angle, vanetza::units::Length, vanetza::units::Velocity,
                           std::map<const Sensor*, Identifier_t>*, const omnetpp::SimTime&,
                           const omnetpp::SimTime&);
@@ -37,9 +37,6 @@ namespace artery
 
         void changeDeltas(vanetza::units::Angle hd, vanetza::units::Length pd, vanetza::units::Velocity sd);
 
-        void getObjToSendNoFilter(ObjectInfo::ObjectsPercievedMap &objToSend, bool removeLowDynamics,
-                ObjectInfo::ObjectsPercievedMap objectsPrevSent, const omnetpp::SimTime& T_now);
-
         ObjectInfo::ObjectsPercievedMap getallPercievedObjs();
         bool checkobjectDynamics(const ObjectInfo::ObjectPercieved& obj, ObjectInfo::ObjectsPercievedMap&, omnetpp::SimTime T_now);
 
@@ -47,7 +44,6 @@ namespace artery
 
         const VehicleDataProvider* mVehicleDataProvider;
         const LocalEnvironmentModel* mLocalEnvironmentModel;
-        std::vector<bool> mFiltersEnabled;
         vanetza::units::Angle mHeadingDelta;
         vanetza::units::Length mPositionDelta;
         vanetza::units::Velocity mSpeedDelta;
