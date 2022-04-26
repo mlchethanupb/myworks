@@ -46,12 +46,7 @@
 #include "stack/phy/ChannelModel/LteRealisticChannelModel.h"
 #include  "stack/phy/packet/SidelinkSynchronization_m.h"
 #include "stack/phy/resources/Subchannel.h"
-#include <boost/circular_buffer.hpp>
-#include <numeric>
-#include <assert.h>
-#include <bits/stdc++.h>
 using namespace omnetpp;
-using namespace std;
 
 /**
  * TODO - Generated class
@@ -117,25 +112,6 @@ public:
     int allocatedBlocksPrevious;
     double FirstTransmission;
     int pcCountMode4;
-    bool packetDrop;
-
-    //Sensing window parameters
-
-    simtime_t subframeTime ;
-    double rssiReception;
-    double rsrpReception;
-    bool txStatus;
-    bool rxStatus;
-    //Congestion control parameters
-    double cbr;
-    double cr;
-    double rsrpThreshold_;
-    double rssiThreshold_;
-    double crLimit;
-    bool crLimitReached;
-    int occupiedResourceBlocks;
-    double averageCbr;
-
 
     std::vector<int> allocatedPRBSciIndex;
     std::vector<int> allocatedPRBTBIndex;
@@ -160,15 +136,6 @@ public:
     std::vector<double> allowedRRIs;
     std::vector<std::tuple<double, int, double>> optimalCSRs;
     std::vector<std::tuple<double,std::vector<int>,std::vector<int>>> resourceAllocationMap;
-    typedef std::tuple<double, double,double,bool,bool>  sensingVector;
-    typedef std::tuple<double, double>  cbrParamsVector;
-    typedef std::tuple<double, int>  freqAllocationParams;
-    sensingVector s1;
-    cbrParamsVector c1;
-    freqAllocationParams f1;
-    boost::circular_buffer<sensingVector> sensingWindow ;
-    boost::circular_buffer<cbrParamsVector> cbrWindow;
-    boost::circular_buffer<freqAllocationParams> freqAllocationMap;
 
     MacNodeId nodeId_;
     MacNodeId masterId_;
@@ -190,7 +157,7 @@ public:
     simsignal_t pcMode4;
 
     simtime_t getLastActive() { return lastActive_; }
-    simtime_t sidelinkSynchronization(bool);
+    simtime_t sidelinkSynchronization();
 
     void storeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo);
     LteAirFrame* extractAirFrame();
@@ -211,18 +178,9 @@ public:
     virtual std::tuple<int,int> decodeRivValue(SidelinkControlInformation* sci, UserControlInfo* sciInfo);
     virtual LteAirFrame* prepareAirFrame(cMessage* msg, UserControlInfo* lteInfo);
     virtual void  initialiseSensingWindow();
-    boost::circular_buffer<sensingVector> updateSensingWindow(double, double, double, bool, bool);
     virtual void computeCSRs(LteSidelinkGrant* , LteNodeType );
     std::vector<std::tuple<double, int, double>> selectBestRSSIs(std::vector<double> subframes, LteSidelinkGrant* &grant, double subFrame );
 
-    //Congestion control parameters
-    double calculateChannelBusyRatio(int);
-    bool checkCRLimit(double cbr,double cr);
-    boost::circular_buffer<std::tuple<double, double>>  updateCbrWindow(double subframeTime,double cbr);
-    void  initialiseCbrWindow();
-    void initialiseFreqAllocationMap();
-    boost::circular_buffer<std::tuple<double, int>>  updateFreqAllocationMap(double subframeTime, int allocatedRB);
-    double calculateChannelOccupancyRatio(boost::circular_buffer<std::tuple<double, int>> ,int );
 public:
     SidelinkResourceAllocation();
     virtual ~SidelinkResourceAllocation();
@@ -258,26 +216,9 @@ public:
         RBIndicesDataPrevious = subchannels;
     }
     std::vector<int> getPreviousSubchannelsData()
-                                                {
+        {
         return RBIndicesDataPrevious;
-                                                }
-    std::vector<int>& getAllocatedPrbSciIndex()  {
-        return allocatedPRBSciIndex;
-    }
-
-    void setAllocatedPrbSciIndex(
-            std::vector<int> &allocatedPrbSciIndex) {
-        allocatedPRBSciIndex = allocatedPrbSciIndex;
-    }
-
-    std::vector<int>& getAllocatedPrbtbIndex()  {
-        return allocatedPRBTBIndex;
-    }
-
-    void setAllocatedPrbtbIndex(
-            std::vector<int> &allocatedPrbtbIndex) {
-        allocatedPRBTBIndex = allocatedPrbtbIndex;
-    }
+        }
 
     void setFirstTransmissionPrevious(double firstTransmission)
     {
@@ -286,38 +227,6 @@ public:
     double getFirstTransmissionPrevious()
     {
         return FirstTransmission;
-    }
-    const boost::circular_buffer<sensingVector>& getSensingWindow() const {
-        return sensingWindow;
-    }
-
-    void setSensingWindow(
-            const boost::circular_buffer<sensingVector> &sensingWindow) {
-        this->sensingWindow = sensingWindow;
-    }
-    boost::circular_buffer<cbrParamsVector>& getCbrWindow(){
-        return cbrWindow;
-    }
-
-    void setCbrWindow(
-            boost::circular_buffer<cbrParamsVector> &cbrWindow) {
-        this->cbrWindow = cbrWindow;
-    }
-
-    int getOccupiedResourceBlocks() {
-        return occupiedResourceBlocks;
-    }
-
-    void setOccupiedResourceBlocks(int occupiedResourceBlocks) {
-        this->occupiedResourceBlocks = occupiedResourceBlocks;
-    }
-    boost::circular_buffer<freqAllocationParams>& getFreqAllocationMap()  {
-        return freqAllocationMap;
-    }
-
-    void setFreqAllocationMap(
-            boost::circular_buffer<freqAllocationParams> &freqAllocationMap) {
-        this->freqAllocationMap = freqAllocationMap;
     }
 };
 

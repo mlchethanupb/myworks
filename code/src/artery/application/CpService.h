@@ -69,8 +69,8 @@ class CpService : public ItsG5BaseService
 		ObjectInfo::ObjectsPercievedMap mObjectsToSend;
 		ObjectInfo::ObjectsPercievedMap mObjectsTracked;
 		ObjectInfo::ObjectsReceivedMap mObjectsReceived;
-		Sensor* mCPSensor;
-        Sensor* mCASensor;
+		Sensor* mCPSensor = nullptr;
+        Sensor* mCASensor = nullptr;
 		FilterObjects mFilterObj;
 
 		void checkTriggeringConditions(const omnetpp::SimTime&);

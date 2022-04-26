@@ -51,6 +51,7 @@ LteHarqBufferRx::LteHarqBufferRx(unsigned int num, LteMacBase *owner,
 
 void LteHarqBufferRx::insertPdu(Codeword cw, LteMacPdu *pdu)
 {
+    EV<<"LteHarqBufferRx::insertPdu"<<endl;
     UserControlInfo *uInfo = check_and_cast<UserControlInfo *>(pdu->getControlInfo());
     MacNodeId srcId = uInfo->getSourceId();
     if (macOwner_->isHarqReset(srcId))
@@ -117,14 +118,16 @@ unsigned int LteHarqBufferRx::purgeCorruptedPdus()
 }
 
 std::list<LteMacPdu *> LteHarqBufferRx::extractCorrectPdus()
-{
+{//throw cRuntimeError("LteHarqBufferRx::extractCorrectPdus");
     this->sendFeedback();
     std::list<LteMacPdu*> ret;
     unsigned char acid = 0;
+
     for (unsigned int i = 0; i < numHarqProcesses_; i++)
     {
         for (Codeword cw = 0; cw < MAX_CODEWORDS; ++cw)
         {
+
             if (processes_[i]->isCorrect(cw))
             {
                 LteMacPdu* temp = processes_[i]->extractPdu(cw);

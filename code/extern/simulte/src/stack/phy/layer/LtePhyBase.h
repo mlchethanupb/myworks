@@ -139,7 +139,6 @@ protected:
     //receiveng(downlink) current packet
     MacNodeId connectedNodeId_;
     std::vector<std::tuple<double,double,double>> phyMeasurements;
-
     // last time that the node has transmitted (currently, used only by UEs)
     simtime_t lastActive_;
 
@@ -337,7 +336,7 @@ public:
      */
     simtime_t getLastActive() { return lastActive_; }
 
-    virtual  std::vector<std::pair<Band,double>>  getRSSIVector()
+    virtual  std::vector<std::pair<Band,double>> getRSSIVector()
                     {
         return rssiVector;
                     }
@@ -346,6 +345,16 @@ public:
     {
         this->rssiVector=rssiVector;
     }
+
+    /*const std::vector<std::tuple<double, double, double> >& getMeasurements() const {
+            return measurements;
+        }
+
+        void setMeasurements(
+                const std::vector<std::tuple<double, double, double> > &measurements) {
+            this->measurements = measurements;
+        }
+*/
 
 };
 

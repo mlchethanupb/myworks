@@ -30,7 +30,7 @@ void LteHarqProcessRx::insertPdu(Codeword cw, LteMacPdu *pdu)
     UserControlInfo *lteInfo = check_and_cast<UserControlInfo *>(pdu->getControlInfo());
     bool ndi = lteInfo->getNdi();
 
-    EV << "LteHarqProcessRx::insertPdu - ndi is " << ndi << endl;
+
     if (ndi && !(status_.at(cw) == RXHARQ_PDU_EMPTY))
         throw cRuntimeError("New data arriving in busy harq process -- this should not happen");
 
@@ -52,12 +52,21 @@ void LteHarqProcessRx::insertPdu(Codeword cw, LteMacPdu *pdu)
     rxTime_.at(cw) = NOW;
 
     transmissions_++;
+    EV << "LteHarqProcessRx::insertPdu - ndi is " << ndi << "status at codeword: "<<  status_.at(cw)<<endl;
 }
 
 bool LteHarqProcessRx::isEvaluated(Codeword cw)
 {
-    if (status_.at(cw) == RXHARQ_PDU_EVALUATING && (NOW - rxTime_.at(cw)) >= HARQ_FB_EVALUATION_INTERVAL)
+
+
+    //if (status_.at(cw) == RXHARQ_PDU_EVALUATING && (NOW - rxTime_.at(cw)) >= HARQ_FB_EVALUATION_INTERVAL)
+    if (status_.at(cw) == RXHARQ_PDU_EVALUATING )
+    {
+        EV<<"Evaluation true"<<endl;
+
         return true;
+    }
+
     else
         return false;
 }

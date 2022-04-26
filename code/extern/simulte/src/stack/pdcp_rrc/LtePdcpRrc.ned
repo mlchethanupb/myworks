@@ -22,12 +22,8 @@ moduleinterface LtePdcpRrc {
     gates:
         input DataPortIpIn;
         input DataPortNonIpIn;
-        input DataPortLteAppIn;
-        
         output DataPortIpOut;
         output DataPortNonIpOut;
-        output DataPortLteAppOut;
-        
         inout EUTRAN_RRC_Sap;
         inout TM_Sap;
         inout UM_Sap;
@@ -69,11 +65,9 @@ simple LtePdcpRrcBase like LtePdcpRrc {
         
         input DataPortIpIn;
         input DataPortNonIpIn;
-        input DataPortLteAppIn;
-        
         output DataPortIpOut;
         output DataPortNonIpOut;
-        output DataPortLteAppOut;
+        
         //# Control Ports
         
         inout EUTRAN_RRC_Sap;    // Control of RRC Layer

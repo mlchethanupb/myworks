@@ -74,10 +74,6 @@ module LteNicBase like ILteNic
         input upperLayerNonIpIn @loose;
         output upperLayerNonIpOut @loose;
         
-        input lteAppIn @loose;  // other NonIp based LTE applications
-        output lteAppOut @loose;
-              
-        
         input radioIn @loose;  // to receive messages sent using sendDirect()
         inout x2[] @loose;     // optional x2 manager
         input control_IN @loose; // sendDirect() on control plane
@@ -131,9 +127,6 @@ module LteNicBase like ILteNic
         pdcpRrc.DataPortNonIpOut --> upperLayerNonIpOut;
         upperLayerNonIpIn --> pdcpRrc.DataPortNonIpIn;
         
-        //PDP traffic
-        pdcpRrc.DataPortLteAppOut --> lteAppOut;
-        lteAppIn --> pdcpRrc.DataPortLteAppIn;
         
         
         //#

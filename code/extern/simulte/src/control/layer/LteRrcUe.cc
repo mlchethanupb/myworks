@@ -30,17 +30,7 @@ Define_Module(LteRrcUe);
 
 void LteRrcUe::initialize(int stage)
 {
-    cModule *ue = getParentModule()->getParentModule();
-    //nodeType_=PED;
-
-    if (strcmp(ue->getName(), "pedestrians")== 0)
-    {
-        nodeType_=PED;
-    }
-    else
-    {
-        nodeType_=UE;
-    }
+    nodeType_=UE;
     LteRrcBase::initialize(stage);
     dataArrivalStatus = false;
     EV<<"LteRrcUe::initialize"<<masterId_<<endl;
@@ -55,8 +45,7 @@ void LteRrcUe::initialize(int stage)
     {
         EV <<"LteRrcUe::initialize Configure resource allocation mode when UEs enter the simulation environment"<< endl;
 
-       bool cellFound = checkCellCoverage();
-        cellFound=false; //MLC
+        bool cellFound = checkCellCoverage();
         modeSelect(cellFound);
     }
 
@@ -115,7 +104,6 @@ void LteRrcUe::handleSelfMessage()
 {
     EV <<"LteRrcUe::handleSelfMessage Track UE movement and check for cell coverage"<< endl;
     bool cellFound = checkCellCoverage();
-    cellFound=false; // MLC
     modeSelect(cellFound);
     scheduleAt(simTime()+TTI, ttiTick_);
 }
@@ -133,7 +121,7 @@ bool  LteRrcUe::checkCellCoverage(){
     LtePhyBase* ue_ = check_and_cast<LtePhyBase*>(
             getSimulation()->getModule(binder_->getOmnetId(nodeId_))->getSubmodule("lteNic")->getSubmodule("phy"));
     ueCoord = ue_->getCoord();
-    EV<<"Coordinates of UE: "<<ueCoord<<endl;
+
     ueDistanceFromEnb =ue_->getCoord().distance( enbCoord);
 
 
@@ -141,8 +129,7 @@ bool  LteRrcUe::checkCellCoverage(){
     if (ueDistanceFromEnb < 200)
     {
         //To set default mode 4, just put cellFound=false always
-        //cellFound=true;
-        cellFound = false; //MLC
+        cellFound=true;
         //Register to corresponding eNodeB
         binder_->registerNextHop(masterId_, nodeId_);
     }

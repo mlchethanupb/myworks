@@ -187,7 +187,7 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
 	EV <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
-    //std::cout <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
+    std::cout <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
 
 	if(mSensorsId.empty()){
 		generate_sensorid();
@@ -246,6 +246,9 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
         std::unique_ptr<convertible::byte_buffer> buffer { new CpmByteBuffer(obj.shared_ptr()) };
         payload->layer(OsiLayer::Application) = std::move(buffer);
         this->request(request, std::move(payload));
+
+        EV <<"Requesting lower layers to send CPM " << endl;
+        std::cout <<"Requesting lower layers to send CPM " << endl;
     } 
 }
 
@@ -449,16 +452,24 @@ void CpService::generate_sensorid(){
         EV_WARN << "No sensors for local perception currently used along the CP service" << std::endl;
 	}
 
+    std::cout << "generate_sensorid " << endl;
+
     for (int i = 0; i < sensors.size(); i++) {
         
+        std::cout << "sensors[i]->getSensorCategory():  " << sensors[i]->getSensorCategory() << endl; 
         mSensorsId.insert(std::pair<Sensor *, Identifier_t>(sensors[i], i));
       
-        if (!mCPSensor && sensors[i]->getSensorCategory() == "CP")
+        if (!mCPSensor && sensors[i]->getSensorCategory() == "CP"){
             mCPSensor = sensors[i];
+            std::cout << "mCPSensor generated " << endl;
+        }
+            
 
         if (!mCASensor && sensors[i]->getSensorCategory() == "CA")
             mCASensor = sensors[i];
     }
+
+    
 }
 
 
@@ -762,28 +773,28 @@ void CpService::recordObjectsAge(){
 void CpService::printCPM(const vanetza::asn1::Cpm &message) {
         const CPM_t &cpm = (*message);
 
-        EV << "\n--- CPM at: " << simTime() << " ---" << std::endl;
+        std::cout << "\n--- CPM at: " << simTime() << " ---" << std::endl;
         //Print header
-        EV << "Header:\n\tprotocolVersion: " << cpm.header.protocolVersion
+        std::cout << "Header:\n\tprotocolVersion: " << cpm.header.protocolVersion
                   << "\n\tmessageID: " << cpm.header.messageID << "\n\tstationID: " << cpm.header.stationID
                   << std::endl;
 
         //Generation delta time
-        EV << "generationDeltaTime: " << cpm.cpm.generationDeltaTime << std::endl;
+        std::cout << "generationDeltaTime: " << cpm.cpm.generationDeltaTime << std::endl;
 
         //CPM parameters
-        EV << "-- CpmParameters --" << std::endl;
+        std::cout << "-- CpmParameters --" << std::endl;
 
         //Management container
         CpmManagementContainer_t cpmManag = cpm.cpm.cpmParameters.managementContainer;
-        EV << "CpmManagementContainer:\n\tstationType: " << cpmManag.stationType
+        std::cout << "CpmManagementContainer:\n\tstationType: " << cpmManag.stationType
                   << "\n\treferencePosition:\n\t\tlongitude: " << cpmManag.referencePosition.longitude
                   << "\n\t\tlatitude: " << cpmManag.referencePosition.latitude << std::endl;
 
         //Station data container
         StationDataContainer_t *cpmStationDC = cpm.cpm.cpmParameters.stationDataContainer;
         if (cpmStationDC) {
-            EV << "StationDataContainer:\n\ttype: vehicle (fixed)"
+            std::cout << "StationDataContainer:\n\ttype: vehicle (fixed)"
                       << "\n\theading: " << cpmStationDC->choice.originatingVehicleContainer.heading.headingValue
                       << "\n\tspeed: " << cpmStationDC->choice.originatingVehicleContainer.speed.speedValue
                       << std::endl;
@@ -791,25 +802,25 @@ void CpService::printCPM(const vanetza::asn1::Cpm &message) {
         }
 
         //Sensors list:
-        EV << "-- List of sensors --" << std::endl;
+        std::cout << "-- List of sensors --" << std::endl;
         SensorInformationContainer_t *sensorsContainer = cpm.cpm.cpmParameters.sensorInformationContainer;
         for (int i = 0; sensorsContainer != nullptr && i < sensorsContainer->list.count; i++) {
             SensorInformation_t *sensCont = sensorsContainer->list.array[i];
-            EV << "Sensor " << i << ": \n\tId: " << sensCont->sensorID
+            std::cout << "Sensor " << i << ": \n\tId: " << sensCont->sensorID
                       << "\n\tType: " << sensCont->type;
 
 			/*
             if (sensCont->details.present == SensorDetails_PR_vehicleSensor) {
                 VehicleSensor_t sensDetails = sensCont->details.choice.vehicleSensor;
 
-                EV << "\n\tReference point: " << sensDetails.refPointId
+                std::cout << "\n\tReference point: " << sensDetails.refPointId
                           << "\n\tX Sensor offset: " << sensDetails.xSensorOffset
                           << "\n\tY Sensor offset: " << sensDetails.ySensorOffset;
 
                 ListOfVehicleSensorProperties_t sensorProperties = sensDetails.vehicleSensorProperties;
                 for (int j = 0; j < sensorProperties.list.count; j++) {
                     VehicleSensorProperties_t *sensProp = sensorProperties.list.array[j];
-                    EV << "\n\tRange: " << sensProp->range / Range_oneMeter
+                    std::cout << "\n\tRange: " << sensProp->range / Range_oneMeter
                               << "\n\tHor. op. angle start: "
                               << sensProp->horizontalOpeningAngleStart / CartesianAngleValue_oneDegree
                               << "\n\tHor. op. angle end: "
@@ -818,15 +829,15 @@ void CpService::printCPM(const vanetza::asn1::Cpm &message) {
             }
 			*/
 
-            EV << std::endl << std::endl;
+            std::cout << std::endl << std::endl;
         }
 
         //Perceived object container
-        EV << "-- List of Objects --" << std::endl;
+        std::cout << "-- List of Objects --" << std::endl;
         PerceivedObjectContainer_t *objectsContainer = cpm.cpm.cpmParameters.perceivedObjectContainer;
         for (int i = 0; objectsContainer != nullptr && i < objectsContainer->list.count; i++) {
             PerceivedObject_t *objCont = objectsContainer->list.array[i];
-            EV << "Object " << i << ": \n\tobjectId: " << objCont->objectID
+            std::cout << "Object " << i << ": \n\tobjectId: " << objCont->objectID
                       << "\n\ttimeOfMeasurement: " << objCont->timeOfMeasurement
                       << "\n\txDistance: " << objCont->xDistance.value
                       << "\n\tyDistance: " << objCont->yDistance.value

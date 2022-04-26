@@ -56,13 +56,19 @@ void IP2lte::initialize(int stage)
 
         EV<<"Nodetype IP2lte: "<<nodeType_<<endl;
 
+       if (nodeType_ == 6)
+        {
+            // TODO not so elegant
+            EV<<"RSUEnB ip2lte"<<endl;
+            cModule *rsuenodeb = getParentModule()->getParentModule();
+            MacNodeId nodeId = getBinder()->getRsuEnbId();
+            binder_->setRsuEnbId(nodeId);
+            registerInterface();
+        }
     }
-    else if (stage == inet::INITSTAGE_NETWORK_LAYER - 1)  // the configurator runs at stage NETWORK_LAYER, so the interface
-    {
-
-        // must be configured at a previous stage
-        EV<<"Stage 5 ip2lte: "<<nodeType_<<endl;
-        if (nodeType_ == 3)
+    if (stage == inet::INITSTAGE_NETWORK_LAYER - 1)  // the configurator runs at stage NETWORK_LAYER, so the interface
+    {                                                // must be configured at a previous stage
+        if (nodeType_ == UE)
         {
             // TODO not so elegant
             cModule *ue = getParentModule()->getParentModule();
@@ -71,20 +77,6 @@ void IP2lte::initialize(int stage)
             binder_->setUeId(nodeId_);
             binder_->registerNextHop(binder_->getEnbId(), nodeId_);
             registerInterface();
-        }
-
-        if (nodeType_ == 4)
-        {
-            // TODO not so elegant
-            cModule *ue = getParentModule()->getParentModule();
-            //nodeId_ = binder_->registerNode(ue, nodeType_, ue->par("masterId"));
-            nodeId_ = binder_->getPedId();
-            binder_->setPedId(nodeId_);
-            EV<<"ip2lte:nodeId_ "<<nodeId_<<endl;
-            binder_->registerNextHop(binder_->getEnbId(), nodeId_);
-            registerInterface();
-        }
-
 
             // if the UE has been created dynamically, we need to manually add a default route having "wlan" as output interface
             // otherwise we are not able to reach devices outside the cellular network
@@ -101,7 +93,7 @@ void IP2lte::initialize(int stage)
 
                 irt->addRoute(defaultRoute);
             }
-
+        }
     }
     else if (stage == inet::INITSTAGE_NETWORK_LAYER_3+1)
     {

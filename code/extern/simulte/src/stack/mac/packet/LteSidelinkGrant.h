@@ -44,7 +44,6 @@ protected:
     int packetId;
     int CAMId;
     MacNodeId destId;
-    double nextArrival;
 
 
 public:
@@ -64,7 +63,6 @@ public:
         startTime = simTime();
         packetId = 0;
         CAMId = 0;
-        nextArrival = 0.0;
     }
 
 
@@ -99,7 +97,6 @@ public:
         expirationCounter = other.expirationCounter;
         packetId = other.packetId;
         CAMId  = other.CAMId;
-        nextArrival = other.nextArrival;
         LteSchedulingGrant::operator=(other);
         return *this;
     }
@@ -255,14 +252,6 @@ public:
 
     void setCamId(int camId) {
         CAMId = camId;
-    }
-
-    double getNextArrival(){
-        return nextArrival;
-    }
-
-    void setNextArrival(double nextArrival) {
-        this->nextArrival = nextArrival;
     }
 };
 

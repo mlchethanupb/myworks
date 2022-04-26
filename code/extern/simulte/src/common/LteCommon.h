@@ -68,8 +68,7 @@ class ExtCell;
 #define RSUEnB_MAX_ID 8050
 #define RSUUE_MIN_ID 8051
 #define RSUUE_MAX_ID 8100
-#define PED_MIN_ID 2000
-#define PED_MAX_ID 2500
+
 ///CAM awareness distance
 #define CAM_AWARENESS_DISTANCE_HIGHWAY 200
 #define CAM_AWARENESS_DISTANCE_TUNNEL 100
@@ -165,7 +164,7 @@ enum GateDirection
 /// Lte Traffic Classes
 enum LteTrafficClass
 {
-    CONVERSATIONAL, STREAMING, INTERACTIVE, BACKGROUND,CAM, ALERT, VAM,UNKNOWN_TRAFFIC_TYPE
+    CONVERSATIONAL, STREAMING, INTERACTIVE, BACKGROUND,CAM, ALERT, UNKNOWN_TRAFFIC_TYPE
 };
 
 /// Scheduler grant type
@@ -229,7 +228,6 @@ enum ApplicationType
     GAMING,
     FULLBUFFER,
     GEONET,
-    VRUVAM,
     UNKNOWN_APP
 };
 
@@ -247,7 +245,6 @@ const ApplicationTable applications[] = {
     ELEM(FTP),
     ELEM(FULLBUFFER),
     ELEM(GEONET),
-    ELEM(VRUVAM),
     ELEM(UNKNOWN_APP)
 };
 
@@ -543,7 +540,6 @@ enum LteNodeType
     ENODEB, /// eNodeB
     RELAY, /// Relay
     UE, /// UE
-    PED,
     RSUEnB,
     RSUUE,
     UNKNOWN_NODE_TYPE /// unknown
@@ -560,7 +556,6 @@ const LteNodeTable nodetypes[] = {
     ELEM(ENODEB),
     ELEM(RELAY),
     ELEM(UE),
-    ELEM(PED),
     ELEM(UNKNOWN_NODE_TYPE)
 };
 
@@ -970,6 +965,7 @@ void parseStringToIntArray(std::string str, int* values, int dim, int pad);
  * @param mod module whose channels needs initialization
  */
 void initializeAllChannels(cModule *mod);
+
 
 #endif
 

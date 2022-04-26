@@ -68,7 +68,7 @@ private:
     // list of all UEs. Used for inter-cell interference evaluation
     std::vector<UeInfo*> ueList_;
 
-    MacNodeId macNodeIdCounter_[4]; // MacNodeId Counter
+    MacNodeId macNodeIdCounter_[3]; // MacNodeId Counter
     DeployedUesMap dMap_; // DeployedUes --> Master Mapping
     QCIParameters QCIParam_[LTE_QCI_CLASSES];
 
@@ -118,7 +118,6 @@ protected:
     MacNodeId enbId;
     MacNodeId rsuEnbId;
     MacNodeId rsuUeId;
-    MacNodeId pedId;
     bool nodeRegisteredInSimlation;
     virtual void initialize(int stages);
 
@@ -138,7 +137,6 @@ public:
         macNodeIdCounter_[0] = ENB_MIN_ID;
         macNodeIdCounter_[1] = RELAY_MIN_ID;
         macNodeIdCounter_[2] = UE_MIN_ID;
-        macNodeIdCounter_[3] = PED_MIN_ID;
         macNodeIdCounter_[4] = RSUEnB_MIN_ID;
         ulTransmissionMap_.resize(2); // store transmission map of previous and current TTI
     }
@@ -356,9 +354,9 @@ public:
     }
 
     std::vector<EnbInfo*> * getEnbList()
-                    {
+            {
         return &enbList_;
-                    }
+            }
 
     void addUeInfo(UeInfo* info)
     {
@@ -366,9 +364,9 @@ public:
     }
 
     std::vector<UeInfo*> * getUeList()
-                    {
+            {
         return &ueList_;
-                    }
+            }
 
 
     void addBroadcastUeList(MacNodeId nodeId, inet::Coord coordinates)
@@ -380,9 +378,9 @@ public:
     }
 
     std::map<MacNodeId,inet::Coord> getBroadcastUeInfo()
-                        {
+                {
         return       BroadcastUeInfo;
-                        }
+                }
 
 
     Cqi meanCqi(std::vector<Cqi> bandCqi,MacNodeId id,Direction dir);
@@ -433,14 +431,14 @@ public:
     void updatePeriodicCamTransmissions(MacNodeId, double );
 
     std::pair<MacNodeId,double>  getNextCamTransmission()
-                        {
+                {
         return camTransmissionsMap;
-                        }
+                }
 
     std::vector<std::pair<MacNodeId,double>> getCamUeinfo()
-                        {
+                {
         return camTransmissionInfo;
-                        }
+                }
 
     MacNodeId getEnbId()  {
         return enbId;
@@ -465,14 +463,6 @@ public:
         this->ueId = ueId;
     }
 
-    MacNodeId getPedId()  {
-        return pedId;
-    }
-
-    void setPedId(MacNodeId pedId) {
-        this->pedId = pedId;
-    }
-
     bool isNodeRegisteredInSimlation()  {
         return nodeRegisteredInSimlation;
     }
@@ -480,16 +470,16 @@ public:
     void setNodeRegisteredInSimlation(bool nodeRegisteredInSimlation) {
         this->nodeRegisteredInSimlation = nodeRegisteredInSimlation;
     }
-
     std::vector<std::tuple<double,double,double>> measurements;
     std::vector<std::tuple<double, double, double> >& getMeasurements() {
-        return measurements;
-    }
+                return measurements;
+            }
 
-    void setMeasurements(
-            std::vector<std::tuple<double, double, double> > &measurements) {
-        this->measurements = measurements;
-    }
+            void setMeasurements(
+                     std::vector<std::tuple<double, double, double> > &measurements) {
+                this->measurements = measurements;
+            }
+
 };
 
 #endif

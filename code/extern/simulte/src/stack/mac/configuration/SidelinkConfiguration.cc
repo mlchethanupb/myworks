@@ -32,8 +32,6 @@
 #include "stack/mac/amc/LteMcs.h"
 #include <map>
 #include "stack/mac/packet/SPSResourcePoolMode4.h"
-#include <omnetpp.h>
-using namespace omnetpp;
 Define_Module(SidelinkConfiguration);
 
 SidelinkConfiguration::SidelinkConfiguration()
@@ -78,7 +76,6 @@ void SidelinkConfiguration::initialize(int stage)
         currentCw_=0;
         missedTransmissions_=0;
         expiredGrant_ = false;
-
 
         // Register the necessary signals for this simulation
         grantStartTime          = registerSignal("grantStartTime");
@@ -460,25 +457,20 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
     {
         LteMacBase* mac = dynamic_cast<LteMacBase*>(getParentModule()->getSubmodule("mac"));
 
-
         if (mac->getIpBased()==false)
         {
             FlowControlInfoNonIp* lteInfo = check_and_cast<FlowControlInfoNonIp*>(pkt->removeControlInfo());
             lteInfo->setIpBased(false);
 
             receivedTime_ = NOW;
-
             simtime_t elapsedTime = receivedTime_ - lteInfo->getCreationTime();
-
             simtime_t duration = SimTime(lteInfo->getDuration(), SIMTIME_MS);
             duration = duration - elapsedTime;
             double dur = duration.dbl();
-
             remainingTime_ = lteInfo->getDuration() - dur;
 
             if (schedulingGrant_ != NULL && periodCounter_ > remainingTime_)
             {
-
                 //emit(grantBreakTiming, 1);
                 //delete schedulingGrant_;
                 //schedulingGrant_ = NULL;
@@ -486,13 +478,11 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             }
             else if (schedulingGrant_ == NULL)
             {
-
                 mode4Grant= macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
 
             }
             else
             {
-
                 LteSidelinkGrant* mode4Grant = check_and_cast<LteSidelinkGrant*>(schedulingGrant_);
                 mode4Grant->setSpsPriority(lteInfo->getPriority());
                 // Need to get the creation time for this
@@ -508,9 +498,11 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             pkt->setControlInfo(lteInfo);
         }
 
+
+
+
         if (mac->getIpBased()==true)
         {
-
             FlowControlInfo*  lteInfo = check_and_cast<FlowControlInfo*>(pkt->removeControlInfo());
             lteInfo->setIpBased(true);
 
@@ -894,16 +886,7 @@ void SidelinkConfiguration::flushHarqBuffers(HarqTxBuffers harqTxBuffers_, LteSi
 
         std::unordered_map<std::string,double> cbrMap = cbrPSSCHTxConfigList_.at(currentCbrIndex_);
         std::unordered_map<std::string,double>::const_iterator got;
-        EV<<"start time: "<<grant->getStartTime()<<endl;
-        EV<<"next arrival: "<<grant->getNextArrival()<<endl;
 
-        if (grant->getStartTime()>grant->getNextArrival())
-        {
-            EV<<"Dropping packet due to Synchronization delays..."<<endl;
-            UnitList ul = it2->second->firstAvailable();
-            it2->second->forceDropProcess(ul.first);
-            return;
-        }
 
         if (packetDropping_) {
             throw cRuntimeError("debug 1");
@@ -993,19 +976,19 @@ void SidelinkConfiguration::flushHarqBuffers(HarqTxBuffers harqTxBuffers_, LteSi
                         EV<<" mcsCapacity: "<< mcsCapacity <<endl;
 
 
-                        EV<<"Valid MCS found: "<<endl;
-                        foundValidMCS = true;
+                            EV<<"Valid MCS found: "<<endl;
+                            foundValidMCS = true;
 
-                        slGrant->setMcs(mcs);
+                            slGrant->setMcs(mcs);
 
-                        slGrant->setGrantedCwBytes(cw, mcsCapacity);
+                            slGrant->setGrantedCwBytes(cw, mcsCapacity);
 
-                        if (! slGrant->getUserTxParams())
-                        {
-                            slGrant->setUserTxParams(preconfiguredTxParams_);
-                        }
+                            if (! slGrant->getUserTxParams())
+                            {
+                                slGrant->setUserTxParams(preconfiguredTxParams_);
+                            }
 
-                        /*  LteSidelinkGrant* phyGrant =  slGrant;
+                            /*  LteSidelinkGrant* phyGrant =  slGrant;
 
                             LteMacBase* mac=check_and_cast<LteMacBase*>(getParentModule()->getSubmodule("mac"));
                             UserControlInfo* uinfo = new UserControlInfo();
@@ -1025,21 +1008,21 @@ void SidelinkConfiguration::flushHarqBuffers(HarqTxBuffers harqTxBuffers_, LteSi
                             uinfo->setSubchannelLength(slGrant->getNumSubchannels());
                             uinfo->setGrantStartTime(slGrant->getStartTime());*/
 
-                        //phyGrant->setControlInfo(uinfo);
+                            //phyGrant->setControlInfo(uinfo);
 
-                        // Send Grant to PHY layer for sci creation
-                        //mac->sendLowerPackets(phyGrant);
+                            // Send Grant to PHY layer for sci creation
+                            //mac->sendLowerPackets(phyGrant);
 
-                        // Send pdu to PHY layer for sending.
-                        it2->second->sendSelectedDown();
+                            // Send pdu to PHY layer for sending.
+                            it2->second->sendSelectedDown();
 
-                        // Log transmission to A calculation log
-                        previousTransmissions_[NOW.dbl()] =  slGrant->getNumSubchannels();
+                            // Log transmission to A calculation log
+                            previousTransmissions_[NOW.dbl()] =  slGrant->getNumSubchannels();
 
-                        missedTransmissions_ = 0;
+                            missedTransmissions_ = 0;
 
-                        //emit(selectedMCS, mcs);
-                        EV<<"VALID MCS: "<<foundValidMCS<<endl;
+                            //emit(selectedMCS, mcs);
+                            EV<<"VALID MCS: "<<foundValidMCS<<endl;
 
 
                     }

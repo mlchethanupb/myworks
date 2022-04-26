@@ -74,7 +74,7 @@ void LteMacBase::sendLowerPackets(cPacket* pkt)
 void LteMacBase::sendPDULower(LteMacPdu* pdu)
 {
     EV << "LteMacBase : Sending PDU " << pdu << " on port MAC_to_PHY\n";
-send(pdu,down_[OUT]);
+    send(pdu,down_[OUT]);
 
 }
 
@@ -134,28 +134,37 @@ void LteMacBase::fromPhy(cPacket *pkt)
     else if(userInfo->getFrameType() == DATAPKT)
     {
         // data packet: insert in proper rx buffer
-        EV << NOW << "Mac::fromPhy: node " << nodeId_ << " Received DATA packet" << endl;
-
+        EV << NOW << "Mac::fromPhy: node " << src << " Received DATA packet" << pkt->getByteLength()<<endl;
+        //throw cRuntimeError("fromPHY");
         LteMacPdu *pdu = check_and_cast<LteMacPdu *>(pkt);
         Codeword cw = userInfo->getCw();
+        /*EV<<"Codeword :"<<cw<<endl;
         HarqRxBuffers::iterator hrit = harqRxBuffers_.find(src);
+
         if (hrit != harqRxBuffers_.end())
         {
+            EV<<"Inserting into HARQ RX Buffer"<<endl;
             hrit->second->insertPdu(cw,pdu);
         }
         else
         {
-            // FIXME: possible memory leak
+           // FIXME: possible memory leak
             EV<<"LteMacBase::fromPhy possible memory leak"<<endl;
             LteHarqBufferRx *hrb;
             if (userInfo->getDirection() == DL || userInfo->getDirection() == UL)
                 hrb = new LteHarqBufferRx(ENB_RX_HARQ_PROCESSES, this,src);
             else // D2D
-                hrb = new LteHarqBufferRxD2D(ENB_RX_HARQ_PROCESSES, this,src, (userInfo->getDirection() == D2D_MULTI) );
+               // hrb = new LteHarqBufferRx(ENB_RX_HARQ_PROCESSES, this,src);
+                 hrb = new LteHarqBufferRxD2D(ENB_RX_HARQ_PROCESSES, this,src, (userInfo->getDirection() == D2D_MULTI) );
 
             harqRxBuffers_[src] = hrb;
+
             hrb->insertPdu(cw,pdu);
-        }
+
+
+        }*/
+        macPduUnmake(pdu);
+
     }
     else if (userInfo->getFrameType() == RACPKT)
     {
@@ -165,8 +174,8 @@ void LteMacBase::fromPhy(cPacket *pkt)
 
     else if (userInfo->getFrameType() == SCIPKT)
     {
-       EV<<"LteMacBase receives SCIPKT"<<endl;
-       throw cRuntimeError("LteMacBase::SCIPKT");
+        EV<<"LteMacBase receives SCIPKT"<<endl;
+        throw cRuntimeError("LteMacBase::SCIPKT");
     }
 
     else if (userInfo->getFrameType()==MODE3GRANTREQUEST ||userInfo->getFrameType()==DATAARRIVAL)
@@ -384,31 +393,31 @@ void LteMacBase::handleMessage(cMessage* msg)
 
 
     if (msg->isSelfMessage())
-        {
-            handleSelfMessage();
-            scheduleAt(NOW + TTI, ttiTick_);
-            return;
-        }
-
-        cPacket* pkt = check_and_cast<cPacket *>(msg);
-        EV << "LteMacBase : Received packet " << pkt->getName() <<
-        " from port " << pkt->getArrivalGate()->getName() << endl;
-
-        cGate* incoming = pkt->getArrivalGate();
-
-        if (incoming == down_[IN])
-        {
-            // message from PHY_to_MAC gate (from lower layer)
-            emit(receivedPacketFromLowerLayer, pkt);
-            fromPhy(pkt);
-        }
-        else
-        {
-            // message from RLC_to_MAC gate (from upper layer)
-            emit(receivedPacketFromUpperLayer, pkt);
-            fromRlc(pkt);
-        }
+    {
+        handleSelfMessage();
+        scheduleAt(NOW + TTI, ttiTick_);
         return;
+    }
+
+    cPacket* pkt = check_and_cast<cPacket *>(msg);
+    EV << "LteMacBase : Received packet " << pkt->getName() <<
+            " from port " << pkt->getArrivalGate()->getName() << endl;
+
+    cGate* incoming = pkt->getArrivalGate();
+
+    if (incoming == down_[IN])
+    {
+        // message from PHY_to_MAC gate (from lower layer)
+        emit(receivedPacketFromLowerLayer, pkt);
+        fromPhy(pkt);
+    }
+    else
+    {
+        // message from RLC_to_MAC gate (from upper layer)
+        emit(receivedPacketFromUpperLayer, pkt);
+        fromRlc(pkt);
+    }
+    return;
 }
 
 

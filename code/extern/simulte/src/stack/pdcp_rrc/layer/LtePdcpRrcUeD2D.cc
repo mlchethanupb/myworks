@@ -58,7 +58,7 @@ MacNodeId LtePdcpRrcUeD2D::getDestId(FlowControlInfo* lteInfo)
  */
 void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
 {
-    EV<<"LtePdcpRrcUeD2D::fromDataPort: "<<pkt->getName()<<" Size: "<<pkt->getByteLength()<<endl;
+    EV<<"LtePdcpRrcUeD2D::fromDataPort: "<<pkt->getName()<<endl;
 
     emit(receivedPacketFromUpperLayer, pkt);
     LogicalCid mylcid;
@@ -66,17 +66,17 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
     LtePdcpEntity* entity;
     MacNodeId destId;
 
-   // pkt->setBitLength(pkt->getByteLength()*8);
     if (three_hundred == 0)
-        {
-            pkt->setBitLength(2400);
-            three_hundred = 4;
-        }
-        else
-        {
-            pkt->setBitLength(1520);
-            three_hundred -= 1;
-        }
+    {
+        pkt->setBitLength(2400);
+        three_hundred = 4;
+    }
+    else
+    {
+        pkt->setBitLength(1520);
+        three_hundred -= 1;
+    }
+
 
     if(strcmp(pkt->getName(), "Alert") == 0)
     {
@@ -87,323 +87,321 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
         emit(alertSentMsg_,numberAlertPackets);
 
     }
-    if ((strcmp(pkt->getName(), "AlertNonIp")==0)||(strcmp(pkt->getName(), "GeoNet packet")==0))
+    else
     {
         ipBased_=false;
         retrievedCAMId = retrievedCAMId+1;
     }
 
     if(ipBased_)
+    {
+
+        FlowControlInfo* ipInfo = check_and_cast<FlowControlInfo*>(pkt->removeControlInfo());
+        ipInfo->setIpBased(true);
+
+        setTrafficInformation(pkt, ipInfo);
+        headerCompress(pkt, ipInfo->getHeaderSize()); // header compression
+
+        IPv4Address destAddr = IPv4Address(ipInfo->getDstAddr());
+
+        // the direction of the incoming connection is a D2D_MULTI one if the application is of the same type,
+        // else the direction will be selected according to the current status of the UE, i.e. D2D or UL
+        if (destAddr.isMulticast())
         {
+            ipInfo->setDirection(D2D_MULTI);
 
-            FlowControlInfo* ipInfo = check_and_cast<FlowControlInfo*>(pkt->removeControlInfo());
-            ipInfo->setIpBased(true);
-
-            setTrafficInformation(pkt, ipInfo);
-            headerCompress(pkt, ipInfo->getHeaderSize()); // header compression
-
-            IPv4Address destAddr = IPv4Address(ipInfo->getDstAddr());
-
-            // the direction of the incoming connection is a D2D_MULTI one if the application is of the same type,
-            // else the direction will be selected according to the current status of the UE, i.e. D2D or UL
-            if (destAddr.isMulticast())
-            {
-                ipInfo->setDirection(D2D_MULTI);
-
-                // assign a multicast group id
-                // multicast IP addresses are 224.0.0.0/4.
-                // We consider the host part of the IP address (the remaining 28 bits) as identifier of the group,
-                // so as it is univocally determined for the whole network
-                uint32 address = IPv4Address(ipInfo->getDstAddr()).getInt();
-                uint32 mask = ~((uint32)255 << 28);      // 0000 1111 1111 1111
-                uint32 groupId = address & mask;
-                ipInfo->setMulticastGroupId((int32)groupId);
-            }
-
-            else
-            {
-                // FlowControlInfoNonIp* nonIpInfo = check_and_cast<FlowControlInfoNonIp*>(pkt->removeControlInfo());
-                // setTrafficInformation(pkt, nonIpInfo);
-                if (binder_->getMacNodeId(destAddr) == 0)
-                {
-                    EV << NOW << " LtePdcpRrcUeD2D::fromDataIn - Destination " << destAddr << " has left the simulation. Delete packet." << endl;
-                    delete pkt;
-                    return;
-                }
-
-                // This part is required for supporting D2D unicast with dynamic-created modules
-                // the first time we see a new destination address, we need to check whether the endpoint
-                // is a D2D peer and, eventually, add it to the binder
-                const char* destName = (L3AddressResolver().findHostWithAddress(destAddr))->getFullName();
-                if (d2dPeeringInit_.find(destName) == d2dPeeringInit_.end() || !d2dPeeringInit_.at(destName))
-                {
-                    MacNodeId d2dPeerId = binder_->getMacNodeId(destAddr);
-                    binder_->addD2DCapability(nodeId_, d2dPeerId);
-                    d2dPeeringInit_[destName] = true;
-                }
-
-                // set direction based on the destination Id. If the destination can be reached
-                // using D2D, set D2D direction. Otherwise, set UL direction
-                destId = binder_->getMacNodeId(destAddr);
-                ipInfo->setDirection(D2D_MULTI);
-
-                if (binder_->checkD2DCapability(nodeId_, destId))
-                {
-                    // this way, we record the ID of the endpoint even if the connection is in IM
-                    // this is useful for mode switching
-                    ipInfo->setD2dTxPeerId(nodeId_);
-                    ipInfo->setD2dRxPeerId(destId);
-                }
-                else
-                {
-                    ipInfo->setD2dTxPeerId(0);
-                    ipInfo->setD2dRxPeerId(0);
-                }
-            }
-
-            // Cid Request
-            EV << NOW << " LtePdcpRrcUeD2D : Received CID request for Traffic [ " << "Source: "
-                    << IPv4Address(ipInfo->getSrcAddr()) << "@" << ipInfo->getSrcPort()
-                    << " Destination: " << destAddr << "@" << ipInfo->getDstPort()
-                    << " , Direction: " << dirToA((Direction)ipInfo->getDirection()) << " ]\n";
-
-            /*
-             * Different lcid for different directions of the same flow are assigned.
-             * RLC layer will create different RLC entities for different LCIDs
-             */
-
-            LogicalCid mylcid;
-            if ((mylcid = ht_->find_entry(ipInfo->getSrcAddr(), ipInfo->getDstAddr(),
-                    ipInfo->getSrcPort(), ipInfo->getDstPort(), ipInfo->getDirection())) == 0xFFFF)
-            {
-                // LCID not found
-
-                // assign a new LCID to the connection
-                mylcid = lcid_++;
-
-                EV << "LtePdcpRrcUeD2D : Connection not found, new CID created with LCID " << mylcid << "\n";
-
-                ht_->create_entry(ipInfo->getSrcAddr(), ipInfo->getDstAddr(),
-                        ipInfo->getSrcPort(), ipInfo->getDstPort(), ipInfo->getDirection(), mylcid);
-            }
-
-            entity= getEntity(mylcid);
-
-            // get the sequence number for this PDCP SDU.
-            // Note that the numbering depends on the entity the packet is associated to.
-            unsigned int sno = entity->nextSequenceNumber();
-
-            ipInfo->setSequenceNumber(sno);
-            ipInfo->setDuration(1); //Duration as 1s
-            ipInfo->setCreationTime(pkt->getCreationTime());
-            ipInfo->setPriority(1); // Warning messages have higher priority
-            ipInfo->setTraffic(5);
-            ipInfo->setPktId(retrievedPktId);
-            EV<<"Retrieved packetId: "<<retrievedPktId<<endl;
-
-
-
-
-            // set some flow-related info
-            ipInfo->setLcid(mylcid);
-            ipInfo->setSourceId(nodeId_);
-            if (ipInfo->getDirection() == D2D)
-                ipInfo->setDestId(destId);
-            else if (ipInfo->getDirection() == D2D_MULTI)
-                ipInfo->setDestId(nodeId_);             // destId is meaningless for multicast D2D (we use the id of the source for statistic purposes at lower levels)
-            else // UL
-                ipInfo->setDestId(getDestId(ipInfo));
-            EV << "LtePdcpRrcUeD2D : Assigned Lcid: " << mylcid << "\n";
-            EV << "LtePdcpRrcUeD2D : Assigned Node ID: " << nodeId_ << "\n";
-
-            // PDCP Packet creation
-            LtePdcpPdu* pdcpPkt = new LtePdcpPdu("LtePdcpPdu");
-            pdcpPkt->setByteLength(ipInfo->getRlcType() == UM ? PDCP_HEADER_UM : PDCP_HEADER_AM);
-            pdcpPkt->encapsulate(pkt);
-            pdcpPkt->setControlInfo(ipInfo);
-
-            EV << "LtePdcp : Preparing to send "
-                    << lteTrafficClassToA((LteTrafficClass) ipInfo->getTraffic())
-                    << " traffic\n";
-            EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
-            EV << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
-                    << (ipInfo->getRlcType() == UM ? "UM_Sap$o\n" : "AM_Sap$o\n");
-            setDataArrivalStatus(true);
-            // Send message
-            send(pdcpPkt, (ipInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
-            emit(sentPacketToLowerLayer, pdcpPkt);
+            // assign a multicast group id
+            // multicast IP addresses are 224.0.0.0/4.
+            // We consider the host part of the IP address (the remaining 28 bits) as identifier of the group,
+            // so as it is univocally determined for the whole network
+            uint32 address = IPv4Address(ipInfo->getDstAddr()).getInt();
+            uint32 mask = ~((uint32)255 << 28);      // 0000 1111 1111 1111
+            uint32 groupId = address & mask;
+            ipInfo->setMulticastGroupId((int32)groupId);
         }
-
-        else if(ipBased_==false)
-        {
-            binder_->BroadcastUeInfo.clear();
-            // NonIp flow
-            FlowControlInfoNonIp* nonIpInfo = check_and_cast<FlowControlInfoNonIp*>(pkt->removeControlInfo());
-
-            //setTrafficInformation(pkt, nonIpInfo);
-
-
-            long dstAddr = nonIpInfo->getDstAddr();
-            destId = binder_->getMacNodeId(dstAddr);
-
-            // Cid Request
-            EV << "LtePdcpRrc : Received CID request for Traffic [ " << "Source: "
-                    << nonIpInfo->getSrcAddr() << " Destination: " << nonIpInfo->getDstAddr() << " ]\n";
-
-            if ((mylcid = nonIpHt_->find_entry(nonIpInfo->getSrcAddr(), nonIpInfo->getDstAddr())) == 0xFFFF)
-            {
-                // LCID not found
-                mylcid = lcid_++;
-
-                EV << "LteRrc : Connection not found, new CID created with LCID " << mylcid << "\n";
-                // Non-IP connection table
-                nonIpHt_->create_entry(nonIpInfo->getSrcAddr(), nonIpInfo->getDstAddr(), mylcid);
-            }
-
-            entity= getEntity(mylcid);
-
-            // get the sequence number for this PDCP SDU.
-            // Note that the numbering depends on the entity the packet is associated to.
-            unsigned int sno = entity->nextSequenceNumber();
-
-            // set sequence number
-            nonIpInfo->setSequenceNumber(sno);
-
-            // set some flow-related info
-            nonIpInfo->setLcid(mylcid);
-            nonIpInfo->setSourceId(nodeId_);
-            nonIpInfo->setPriority(2); //CAMS have lower priority
-            nonIpInfo->setTraffic(4);
-            nonIpInfo->setRlcType((int) par("backgroundRlc"));
-            nonIpInfo->setCAMId(retrievedCAMId);
-            if (nonIpInfo->getDirection() == D2D)
-                nonIpInfo->setDestId(destId);
-            else if (nonIpInfo->getDirection() == D2D_MULTI)
-            {
-                nonIpInfo->setDestId(nodeId_);
-                //std::map<MacNodeId,inet::Coord> BroadcastUeInfo;
-                std::vector<inet::Coord> ueCoords;
-                double distance;
-                std::vector<UeInfo*>* ueList = binder_->getUeList();
-                std::vector<UeInfo*>::iterator itue = ueList->begin();
-                int k = 0;
-
-                MacNodeId sourceId = nodeId_;
-                LtePhyBase* phy = check_and_cast<LtePhyBase*>(getSimulation()->getModule(binder_->getOmnetId(sourceId))->getSubmodule("lteNic")->getSubmodule("phy"));
-                inet::Coord sourceCoord = phy->getCoord();
-                EV<<"Number of UEs in simulation: "<<ueList->size()<<endl;
-                EV<<"Source UE Id : "<<sourceId<<" Source UE coordinates : "<<sourceCoord<<endl;
-                if (ueList->size()!=0)
-                {
-                    for (; itue != ueList->end(); ++itue)
-                    {
-                        MacNodeId UeId = (*itue)->id;
-                        LtePhyBase* phy = check_and_cast<LtePhyBase*>(getSimulation()->getModule(binder_->getOmnetId(UeId))->getSubmodule("lteNic")->getSubmodule("phy"));
-                        inet::Coord uePos = phy->getCoord();
-                        //Saving the Info of broadcast neighbours
-                        if(UeId!=sourceId)
-                        {
-                            binder_->BroadcastUeInfo[UeId]=uePos;
-                            ueCoords.push_back(uePos);
-                            k=k+1;
-                        }
-                    }
-                }
-
-                //Select only UEs inside a broadcast range
-                std::map<MacNodeId,inet::Coord>::iterator itf = binder_->BroadcastUeInfo.begin();
-
-                for(; itf != binder_->BroadcastUeInfo.end(); ++itf)
-                {
-                    EV<<"Chosen UE recipients: "<<"NodeId: "<<itf->first<<" Coordinates: "<<itf->second<<endl;
-                    distance = itf->second.distance(sourceCoord);
-                    EV<<"Distance of recipient UE: "<<distance<<endl;
-                    if((distance !=0 && distance<=200) && binder_->isNodeRegisteredInSimlation()==true)
-                    {
-                        nonIpInfo->setDestId(itf->first);
-                    }
-                    else if (distance > 200)
-                    {
-                        EV<<"UE outside of SL broadcast range: "<<endl;
-                    }
-
-                }
-
-                /*          int k1= ueCoords.size();
-
-                EV<<"Number of UEs in simulation: "<<ueCoords.size()<<endl;
-                std::map<MacNodeId,inet::Coord>::iterator itb = binder_->BroadcastUeInfo.begin();
-                EV<<"BroadcastUeInfo size: "<<binder_->BroadcastUeInfo.size()<<endl;
-                inet::Coord sourceCoord =binder_->BroadcastUeInfo.find(sourceId)->second;
-                EV<<"Source coordinates: "<<sourceCoord<<endl;
-
-                for(; itb != binder_->BroadcastUeInfo.end(); ++itb)
-                {
-                    distance = itb->second.distance(sourceCoord);
-
-                    EV<<"Distance: "<<distance<<endl;
-                    EV<<"Connected: "<<binder_->isNodeRegisteredInSimlation()<<endl;
-
-                    if((distance !=0 && distance<=100) && binder_->isNodeRegisteredInSimlation()==true)
-                    {
-                        EV<<"Sensing neighbours"<<endl;
-                        MacNodeId ueid = itb->first;
-                        binder_->BroadcastUeInfo[ueid]=itb->second;
-
-                        nonIpInfo->setDestId(ueid);
-                    }
-
-                    else if (distance ==0 || distance > 100)
-                    {
-                        EV<<"EGO vehicle itself"<<endl;
-                        //binder_->BroadcastUeInfo.erase(itb);
-                        nonIpInfo->setDestId(nodeId_);
-
-                    }
-                    else
-                    {
-                        EV<<"distance: "<<distance <<endl;
-                        //throw cRuntimeError("Invalid nodes in the simulation");
-                    }
-
-                }*/
-
-                //EV<<"BroadcastUeInfo size final : "<<binder_->BroadcastUeInfo.size()<<endl;
-
-
-
-            }
-
-            //(we use the id of the source for statistic purposes at lower levels)
-            else // UL
-                nonIpInfo->setDestId(getDestId(nonIpInfo));
-
-
-            // PDCP Packet creation
-            LtePdcpPdu* pdcpPkt = new LtePdcpPdu("LtePdcpPdu");
-            cMessage* dataArrival = new cMessage("Data Arrival");
-            pdcpPkt->setByteLength(nonIpInfo->getRlcType() == UM ? PDCP_HEADER_UM : PDCP_HEADER_AM);
-            pdcpPkt->encapsulate(pkt);
-            pdcpPkt->setControlInfo(nonIpInfo);
-
-            EV << "LtePdcp : Preparing to send "
-                    << lteTrafficClassToA((LteTrafficClass) nonIpInfo->getTraffic())
-                    << " traffic\n";
-            EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
-            EV << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
-                    << (nonIpInfo->getRlcType() == UM ? "UM_Sap$o\n" : "AM_Sap$o\n");
-            // Send message
-            setDataArrivalStatus(true);
-            send(pdcpPkt, (nonIpInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
-            send(dataArrival,control_OUT);
-            emit(sentPacketToLowerLayer, pdcpPkt);
-        }
-
 
         else
         {
-            throw cRuntimeError("invalid message type");
+            // FlowControlInfoNonIp* nonIpInfo = check_and_cast<FlowControlInfoNonIp*>(pkt->removeControlInfo());
+            // setTrafficInformation(pkt, nonIpInfo);
+            if (binder_->getMacNodeId(destAddr) == 0)
+            {
+                EV << NOW << " LtePdcpRrcUeD2D::fromDataIn - Destination " << destAddr << " has left the simulation. Delete packet." << endl;
+                delete pkt;
+                return;
+            }
+
+            // This part is required for supporting D2D unicast with dynamic-created modules
+            // the first time we see a new destination address, we need to check whether the endpoint
+            // is a D2D peer and, eventually, add it to the binder
+            const char* destName = (L3AddressResolver().findHostWithAddress(destAddr))->getFullName();
+            if (d2dPeeringInit_.find(destName) == d2dPeeringInit_.end() || !d2dPeeringInit_.at(destName))
+            {
+                MacNodeId d2dPeerId = binder_->getMacNodeId(destAddr);
+                binder_->addD2DCapability(nodeId_, d2dPeerId);
+                d2dPeeringInit_[destName] = true;
+            }
+
+            // set direction based on the destination Id. If the destination can be reached
+            // using D2D, set D2D direction. Otherwise, set UL direction
+            destId = binder_->getMacNodeId(destAddr);
+            ipInfo->setDirection(D2D_MULTI);
+
+            if (binder_->checkD2DCapability(nodeId_, destId))
+            {
+                // this way, we record the ID of the endpoint even if the connection is in IM
+                // this is useful for mode switching
+                ipInfo->setD2dTxPeerId(nodeId_);
+                ipInfo->setD2dRxPeerId(destId);
+            }
+            else
+            {
+                ipInfo->setD2dTxPeerId(0);
+                ipInfo->setD2dRxPeerId(0);
+            }
         }
+
+        // Cid Request
+        EV << NOW << " LtePdcpRrcUeD2D : Received CID request for Traffic [ " << "Source: "
+                << IPv4Address(ipInfo->getSrcAddr()) << "@" << ipInfo->getSrcPort()
+                << " Destination: " << destAddr << "@" << ipInfo->getDstPort()
+                << " , Direction: " << dirToA((Direction)ipInfo->getDirection()) << " ]\n";
+
+        /*
+         * Different lcid for different directions of the same flow are assigned.
+         * RLC layer will create different RLC entities for different LCIDs
+         */
+
+        LogicalCid mylcid;
+        if ((mylcid = ht_->find_entry(ipInfo->getSrcAddr(), ipInfo->getDstAddr(),
+                ipInfo->getSrcPort(), ipInfo->getDstPort(), ipInfo->getDirection())) == 0xFFFF)
+        {
+            // LCID not found
+
+            // assign a new LCID to the connection
+            mylcid = lcid_++;
+
+            EV << "LtePdcpRrcUeD2D : Connection not found, new CID created with LCID " << mylcid << "\n";
+
+            ht_->create_entry(ipInfo->getSrcAddr(), ipInfo->getDstAddr(),
+                    ipInfo->getSrcPort(), ipInfo->getDstPort(), ipInfo->getDirection(), mylcid);
+        }
+
+        entity= getEntity(mylcid);
+
+        // get the sequence number for this PDCP SDU.
+        // Note that the numbering depends on the entity the packet is associated to.
+        unsigned int sno = entity->nextSequenceNumber();
+
+        ipInfo->setSequenceNumber(sno);
+        ipInfo->setDuration(1); //Duration as 1s
+        ipInfo->setCreationTime(pkt->getCreationTime());
+        ipInfo->setPriority(1); // Warning messages have higher priority
+        ipInfo->setTraffic(5);
+        ipInfo->setPktId(retrievedPktId);
+        EV<<"Retrieved packetId: "<<retrievedPktId<<endl;
+
+
+
+
+        // set some flow-related info
+        ipInfo->setLcid(mylcid);
+        ipInfo->setSourceId(nodeId_);
+        if (ipInfo->getDirection() == D2D)
+            ipInfo->setDestId(destId);
+        else if (ipInfo->getDirection() == D2D_MULTI)
+            ipInfo->setDestId(nodeId_);             // destId is meaningless for multicast D2D (we use the id of the source for statistic purposes at lower levels)
+        else // UL
+            ipInfo->setDestId(getDestId(ipInfo));
+        EV << "LtePdcpRrcUeD2D : Assigned Lcid: " << mylcid << "\n";
+        EV << "LtePdcpRrcUeD2D : Assigned Node ID: " << nodeId_ << "\n";
+
+        // PDCP Packet creation
+        LtePdcpPdu* pdcpPkt = new LtePdcpPdu("LtePdcpPdu");
+        pdcpPkt->setByteLength(ipInfo->getRlcType() == UM ? PDCP_HEADER_UM : PDCP_HEADER_AM);
+        pdcpPkt->encapsulate(pkt);
+        pdcpPkt->setControlInfo(ipInfo);
+
+        EV << "LtePdcp : Preparing to send "
+                << lteTrafficClassToA((LteTrafficClass) ipInfo->getTraffic())
+                << " traffic\n";
+        EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
+        EV << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
+                << (ipInfo->getRlcType() == UM ? "UM_Sap$o\n" : "AM_Sap$o\n");
+        setDataArrivalStatus(true);
+        // Send message
+        send(pdcpPkt, (ipInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
+        emit(sentPacketToLowerLayer, pdcpPkt);
+    }
+
+    else if(ipBased_==false)
+    {
+        binder_->BroadcastUeInfo.clear();
+        // NonIp flow
+        FlowControlInfoNonIp* nonIpInfo = check_and_cast<FlowControlInfoNonIp*>(pkt->removeControlInfo());
+
+        setTrafficInformation(pkt, nonIpInfo);
+        long dstAddr = nonIpInfo->getDstAddr();
+        destId = binder_->getMacNodeId(dstAddr);
+
+        // Cid Request
+        EV << "LtePdcpRrc : Received CID request for Traffic [ " << "Source: "
+                << nonIpInfo->getSrcAddr() << " Destination: " << nonIpInfo->getDstAddr() << " ]\n";
+
+        if ((mylcid = nonIpHt_->find_entry(nonIpInfo->getSrcAddr(), nonIpInfo->getDstAddr())) == 0xFFFF)
+        {
+            // LCID not found
+            mylcid = lcid_++;
+
+            EV << "LteRrc : Connection not found, new CID created with LCID " << mylcid << "\n";
+            // Non-IP connection table
+            nonIpHt_->create_entry(nonIpInfo->getSrcAddr(), nonIpInfo->getDstAddr(), mylcid);
+        }
+
+        entity= getEntity(mylcid);
+
+        // get the sequence number for this PDCP SDU.
+        // Note that the numbering depends on the entity the packet is associated to.
+        unsigned int sno = entity->nextSequenceNumber();
+
+        // set sequence number
+        nonIpInfo->setSequenceNumber(sno);
+
+        // set some flow-related info
+        nonIpInfo->setLcid(mylcid);
+        nonIpInfo->setSourceId(nodeId_);
+        nonIpInfo->setPriority(2); //CAMS have lower priority
+        nonIpInfo->setTraffic(4);
+        nonIpInfo->setCAMId(retrievedCAMId);
+        if (nonIpInfo->getDirection() == D2D)
+            nonIpInfo->setDestId(destId);
+        else if (nonIpInfo->getDirection() == D2D_MULTI)
+        {
+            nonIpInfo->setDestId(nodeId_);
+            //std::map<MacNodeId,inet::Coord> BroadcastUeInfo;
+            std::vector<inet::Coord> ueCoords;
+            double distance;
+            std::vector<UeInfo*>* ueList = binder_->getUeList();
+            std::vector<UeInfo*>::iterator itue = ueList->begin();
+            int k = 0;
+
+            MacNodeId sourceId = nodeId_;
+            LtePhyBase* phy = check_and_cast<LtePhyBase*>(getSimulation()->getModule(binder_->getOmnetId(sourceId))->getSubmodule("lteNic")->getSubmodule("phy"));
+            inet::Coord sourceCoord = phy->getCoord();
+            EV<<"Number of UEs in simulation: "<<ueList->size()<<endl;
+            EV<<"Source UE Id : "<<sourceId<<" Source UE coordinates : "<<sourceCoord<<endl;
+            if (ueList->size()!=0)
+            {
+                for (; itue != ueList->end(); ++itue)
+                {
+                    MacNodeId UeId = (*itue)->id;
+                    LtePhyBase* phy = check_and_cast<LtePhyBase*>(getSimulation()->getModule(binder_->getOmnetId(UeId))->getSubmodule("lteNic")->getSubmodule("phy"));
+                    inet::Coord uePos = phy->getCoord();
+                    //Saving the Info of broadcast neighbours
+                    if(UeId!=sourceId)
+                    {
+                        binder_->BroadcastUeInfo[UeId]=uePos;
+                        ueCoords.push_back(uePos);
+                        k=k+1;
+                    }
+                }
+            }
+
+            //Select only UEs inside a broadcast range
+            std::map<MacNodeId,inet::Coord>::iterator itf = binder_->BroadcastUeInfo.begin();
+
+            for(; itf != binder_->BroadcastUeInfo.end(); ++itf)
+            {
+                EV<<"Chosen UE recipients: "<<"NodeId: "<<itf->first<<" Coordinates: "<<itf->second<<endl;
+                distance = itf->second.distance(sourceCoord);
+                EV<<"Distance of recipient UE: "<<distance<<endl;
+                if((distance !=0 && distance<=200) && binder_->isNodeRegisteredInSimlation()==true)
+                {
+                    nonIpInfo->setDestId(itf->first);
+                }
+                else if (distance > 200)
+                {
+                    EV<<"UE outside of SL broadcast range: "<<endl;
+                }
+
+            }
+
+            /*          int k1= ueCoords.size();
+
+            EV<<"Number of UEs in simulation: "<<ueCoords.size()<<endl;
+            std::map<MacNodeId,inet::Coord>::iterator itb = binder_->BroadcastUeInfo.begin();
+            EV<<"BroadcastUeInfo size: "<<binder_->BroadcastUeInfo.size()<<endl;
+            inet::Coord sourceCoord =binder_->BroadcastUeInfo.find(sourceId)->second;
+            EV<<"Source coordinates: "<<sourceCoord<<endl;
+
+            for(; itb != binder_->BroadcastUeInfo.end(); ++itb)
+            {
+                distance = itb->second.distance(sourceCoord);
+
+                EV<<"Distance: "<<distance<<endl;
+                EV<<"Connected: "<<binder_->isNodeRegisteredInSimlation()<<endl;
+
+                if((distance !=0 && distance<=100) && binder_->isNodeRegisteredInSimlation()==true)
+                {
+                    EV<<"Sensing neighbours"<<endl;
+                    MacNodeId ueid = itb->first;
+                    binder_->BroadcastUeInfo[ueid]=itb->second;
+
+                    nonIpInfo->setDestId(ueid);
+                }
+
+                else if (distance ==0 || distance > 100)
+                {
+                    EV<<"EGO vehicle itself"<<endl;
+                    //binder_->BroadcastUeInfo.erase(itb);
+                    nonIpInfo->setDestId(nodeId_);
+
+                }
+                else
+                {
+                    EV<<"distance: "<<distance <<endl;
+                    //throw cRuntimeError("Invalid nodes in the simulation");
+                }
+
+            }*/
+
+            //EV<<"BroadcastUeInfo size final : "<<binder_->BroadcastUeInfo.size()<<endl;
+
+
+
+        }
+
+        //(we use the id of the source for statistic purposes at lower levels)
+        else // UL
+            nonIpInfo->setDestId(getDestId(nonIpInfo));
+
+
+        // PDCP Packet creation
+        LtePdcpPdu* pdcpPkt = new LtePdcpPdu("LtePdcpPdu");
+        cMessage* dataArrival = new cMessage("Data Arrival");
+        pdcpPkt->setByteLength(nonIpInfo->getRlcType() == UM ? PDCP_HEADER_UM : PDCP_HEADER_AM);
+        pdcpPkt->encapsulate(pkt);
+        pdcpPkt->setControlInfo(nonIpInfo);
+
+        EV << "LtePdcp : Preparing to send "
+                << lteTrafficClassToA((LteTrafficClass) nonIpInfo->getTraffic())
+                << " traffic\n";
+        EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
+        EV << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
+                << (nonIpInfo->getRlcType() == UM ? "UM_Sap$o\n" : "AM_Sap$o\n");
+        // Send message
+        setDataArrivalStatus(true);
+        send(pdcpPkt, (nonIpInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
+        send(dataArrival,control_OUT);
+        emit(sentPacketToLowerLayer, pdcpPkt);
+    }
+
+
+    else
+    {
+        throw cRuntimeError("invalid message type");
+    }
+
 
 }
 

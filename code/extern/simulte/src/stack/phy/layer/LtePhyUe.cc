@@ -22,6 +22,7 @@ LtePhyUe::LtePhyUe()
     handoverTrigger_ = NULL;
 }
 
+
 LtePhyUe::~LtePhyUe()
 {
     cancelAndDelete(handoverStarter_);
@@ -34,19 +35,7 @@ void LtePhyUe::initialize(int stage)
 
     if (stage == inet::INITSTAGE_LOCAL)
     {
-        cModule *ue = getParentModule()->getParentModule();
-        //nodeType_=PED;
-
-        if (strcmp(ue->getName(), "pedestrians")== 0)
-        {
-            EV<<"PHY Ped"<<endl;
-            nodeType_=PED;
-        }
-        else
-        {
-            EV<<"PHY UE"<<endl;
-            nodeType_=UE;
-        }
+        nodeType_ = UE;
         useBattery_ = false;  // disabled
         enableHandover_ = par("enableHandover");
         handoverLatency_ = par("handoverLatency").doubleValue();
@@ -151,22 +140,19 @@ void LtePhyUe::initialize(int stage)
 
                 if (rssi > candidateMasterRssi_)
                 {
-                    EV<<"high RSSI: "<<endl;
                     candidateMasterId_ = cellId;
                     candidateMasterRssi_ = rssi;
                 }
-                masterId_ = cellId;
-                emit(servingCell,(long)masterId_);
-                getAncestorPar("masterId").setIntValue(masterId_);
-                currentMasterRssi_ = candidateMasterRssi_;
-                updateHysteresisTh(candidateMasterRssi_);
             }
             delete cInfo;
             delete frame;
 
             // set serving cell
-
-
+            masterId_ = candidateMasterId_;
+            emit(servingCell,(long)masterId_);
+            getAncestorPar("masterId").setIntValue(masterId_);
+            currentMasterRssi_ = candidateMasterRssi_;
+            updateHysteresisTh(candidateMasterRssi_);
 
         }
         else
@@ -177,7 +163,7 @@ void LtePhyUe::initialize(int stage)
         }
         EV << "LtePhyUe::initialize - Attaching to eNodeB " << masterId_ << endl;
 
-        das_->setMasterRuSet(1);
+        das_->setMasterRuSet(masterId_);
 
     }
     else if (stage == inet::INITSTAGE_NETWORK_LAYER_2)
@@ -192,7 +178,7 @@ void LtePhyUe::initialize(int stage)
 
         distanceFromEnb = ue_->getCoord().distance(cellPos);
 
-        if(distanceFromEnb<200 && nodeType_==UE)
+        if(distanceFromEnb<200)
         {
             rrcCurrentState="RRC_CONN";
             // get cellInfo at this stage because the next hop of the node is registered in the IP2Lte module at the INITSTAGE_NETWORK_LAYER

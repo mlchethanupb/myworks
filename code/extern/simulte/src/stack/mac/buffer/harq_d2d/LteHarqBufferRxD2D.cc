@@ -59,6 +59,7 @@ LteHarqBufferRxD2D::LteHarqBufferRxD2D(unsigned int num, LteMacBase *owner, MacN
 
 void LteHarqBufferRxD2D::insertPdu(Codeword cw, LteMacPdu *pdu)
 {
+    EV<<"LteHarqBufferRxD2D::insertPdu"<<endl;
     UserControlInfo *uInfo = check_and_cast<UserControlInfo *>(pdu->getControlInfo());
 
     MacNodeId srcId = uInfo->getSourceId();
@@ -74,7 +75,7 @@ void LteHarqBufferRxD2D::insertPdu(Codeword cw, LteMacPdu *pdu)
     // TODO add codeword to inserPdu
     processes_[acid]->insertPdu(cw, pdu);
     // debug output
-    EV << "H-ARQ RX: new pdu (id " << pdu->getId() << " ) inserted into process " << (int) acid << endl;
+    EV << "H-ARQ RX: new pdu (id " << pdu->getId() << " ) inserted into process " << (int) acid << "CODEWORD: "<<cw<<endl;
 }
 
 void LteHarqBufferRxD2D::sendFeedback()
@@ -83,6 +84,7 @@ void LteHarqBufferRxD2D::sendFeedback()
     {
         for (Codeword cw = 0; cw < MAX_CODEWORDS; ++cw)
         {
+
             if (processes_[i]->isEvaluated(cw))
             {
                 // create a copy of the feedback to be sent to the eNB
@@ -122,13 +124,17 @@ void LteHarqBufferRxD2D::sendFeedback()
 
 std::list<LteMacPdu *> LteHarqBufferRxD2D::extractCorrectPdus()
 {
+
     this->sendFeedback();
     std::list<LteMacPdu*> ret;
     unsigned char acid = 0;
+
     for (unsigned int i = 0; i < numHarqProcesses_; i++)
-    {
+    {//throw cRuntimeError("LteHarqBufferRxD2D::extractCorrectPdus");
         for (Codeword cw = 0; cw < MAX_CODEWORDS; ++cw)
-        {
+        {//throw cRuntimeError("LteHarqBufferRxD2D::extractCorrectPdus 1");
+
+
             if (processes_[i]->isCorrect(cw))
             {
                 LteMacPdu* temp = processes_[i]->extractPdu(cw);
@@ -138,6 +144,7 @@ std::list<LteMacPdu *> LteHarqBufferRxD2D::extractCorrectPdus()
                 // emit delay statistic
                 if (info->getDirection() == D2D)
                 {
+
                     check_and_cast<LteMacUeD2D*>(macOwner_)->emit(macDelayD2D_, (NOW - temp->getCreationTime()).dbl());
                 }
                 else

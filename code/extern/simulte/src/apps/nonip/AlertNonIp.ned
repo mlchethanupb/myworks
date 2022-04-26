@@ -21,9 +21,9 @@ import lte.apps.nonip.NonIpBase;
 simple AlertNonIp like NonIpBase
 {
      parameters:
-        int packetSize = default(300); // Size of the actual packet in bytes
+        int packetSize = default(10); // Size of the actual packet itself
         int priority = default(3); // Priority of the packets sent
-        int duration = default(1); // MS before packet must be dropped
+        int duration = default(1000); // MS before packet must be dropped
         double period @unit("s") = default(0.1s);
         int macNodeId = default(0);
         

@@ -148,22 +148,16 @@ void LtePhyEnbD2D::handleAirFrame(cMessage* msg)
         return;
      }*/
 
-   /* EV<<"LtePhyEnbD2D::handleAirFrame: "<< msg->getName()<<endl;
-        if(strcmp(msg->getName(), "RRCStateChange")== 0)
-     {
-        //throw cRuntimeError("RRC Enb");
-        delete msg;
-        return;
-     }*/
+    EV<<"LtePhyEnbD2D::handleAirFrame: "<< msg->getSenderModule()<<endl;
 
     //throw cRuntimeError("LtePhyEnbD2D::handleAirFrame 1");
     UserControlInfo* lteInfo = check_and_cast<UserControlInfo*>(msg->removeControlInfo());
     LteAirFrame* frame = static_cast<LteAirFrame*>(msg);
 
-    EV << "LtePhyEnbD2D::handleAirFrame - received new LteAirFrame with ID " << frame->getName() << " from channel" << endl;
+    EV << "LtePhyEnbD2D::handleAirFrame - received new LteAirFrame with ID " << frame->getId() << " from channel" << endl;
 
     // handle broadcast packet sent by another eNB
-    if (lteInfo->getFrameType() == HANDOVERPKT )
+    if (lteInfo->getFrameType() == HANDOVERPKT)
     {
         EV << "LtePhyEnb::handleAirFrame - received handover packet from another eNodeB. Ignore it." << endl;
         delete lteInfo;
@@ -171,10 +165,8 @@ void LtePhyEnbD2D::handleAirFrame(cMessage* msg)
         return;
     }
 
-
     if (lteInfo->getFrameType() == DATAARRIVAL)
     {
-
         DataArrival* datapkt = check_and_cast<DataArrival*>(frame->decapsulate());
         EV<<"Source id: "<<lteInfo->getSourceId()<<endl;
         datapkt->setControlInfo(lteInfo);

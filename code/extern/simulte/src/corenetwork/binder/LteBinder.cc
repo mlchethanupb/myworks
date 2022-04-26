@@ -120,11 +120,6 @@ MacNodeId LteBinder::registerNode(cModule *module, LteNodeType type,
         macNodeId = macNodeIdCounter_[4];
         setRsuEnbId(macNodeId);
     }
-    else if (type==PED)
-    {
-        macNodeId=macNodeIdCounter_[3]++;
-        setPedId(macNodeId);
-    }
 
     EV << "LteBinder : Assigning to module " << module->getName()
                << " with OmnetId: " << module->getId() << " and MacNodeId " << macNodeId
@@ -137,7 +132,7 @@ MacNodeId LteBinder::registerNode(cModule *module, LteNodeType type,
 
     module->par("macNodeId") = macNodeId;
 
-    if (type == RELAY || type == UE || type == RSUUE || type==PED)
+    if (type == RELAY || type == UE || type == RSUUE)
     {
         //registerNextHop(masterId, macNodeId);
     }
@@ -152,7 +147,7 @@ MacNodeId LteBinder::registerNode(cModule *module, LteNodeType type,
 void LteBinder::registerNextHop(MacNodeId masterId, MacNodeId slaveId)
 {
     Enter_Method_Silent("registerNextHop");
-    EV << "f " << slaveId << " to master "
+    EV << "LteBinder : Registering slave " << slaveId << " to master "
             << masterId << "\n";
 
     if (masterId != slaveId)
