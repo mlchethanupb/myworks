@@ -42,6 +42,7 @@ simple CpService like ItsG5Service
 
         // generate at fixed rate (using minInterval, optionally restricted by DCC)
         bool fixedRate = default(false);
+        double fixedInterval @unit(s) = default(0.1s);
 
         // change in orientation triggering CAM generation (in degree)
         double headingDelta = default(4.0);

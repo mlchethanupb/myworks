@@ -25,6 +25,7 @@
 #include <vanetza/dcc/transmit_rate_control.hpp>
 #include <vanetza/facilities/cam_functions.hpp>
 #include <chrono>
+#include <iomanip>
 
 // #define COMPILE_CODE
 
@@ -78,6 +79,7 @@ void CpService::initialize()
 	mSpeedDelta = par("speedDelta").doubleValue() * vanetza::units::si::meter_per_second;
 
 	mFixedRate = par("fixedRate");
+    mFixedRateInterval = par("fixedInterval");
 
 	mPrimaryChannel = getFacilities().get_const<MultiChannelPolicy>().primaryChannel(vanetza::aid::CP);
 
@@ -95,11 +97,14 @@ void CpService::initialize()
  */
 void CpService::trigger()
 {
+    std::cout << "===========================================================================" << endl;
+
 	Enter_Method("trigger");
    
     //std::cout << "mVehicleDataProvider->updated(): " << mVehicleDataProvider->updated() << ", simTime(): " << simTime() << std::endl; 
 
     generateCPM(simTime());
+    removeExpRcvdobjs();
     recordObjectsAge();
 }
 
@@ -109,10 +114,12 @@ void CpService::trigger()
 void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::UpPacket> packet)
 {
 
+    std::cout << "===========================================================================" << endl;
+
 	Enter_Method("indicate");
 
 	EV<< "CPM message received" << endl;
-    std::cout << "CPM message received" << endl;
+    //std::cout << "CPM message received" << endl;
 
 	if(mSensorsId.empty()){
 		generate_sensorid();
@@ -124,12 +131,12 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 
 		CpObject obj = visitor.shared_wrapper;
 
-        std::cout << "publishing signal cpm received" << std::endl;
+        //std::cout << "publishing signal cpm received" << std::endl;
 		emit(scSignalCpmReceived, &obj);
 
 		const vanetza::asn1::Cpm& cpm_msg = obj.asn1();
 		retrieveCPMmessage(cpm_msg);
-		printCPM(cpm_msg);
+		//printCPM(cpm_msg);
 
 	}else{
         std::cout << "cpm object: " << cpm << endl;
@@ -165,15 +172,24 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 	const SimTime& T_GenCpmMax = mGenCpmMax;
 	const SimTime T_elapsed = T_now - mLastCpmTimestamp;
 
-	if (T_elapsed >= T_GenCpmMax) { //T_GenCpmDcc to be used??
-		if (mFixedRate) {
+
+    if(mFixedRate){
+        //CPM are generated with fixed interval
+        if (T_elapsed >= mFixedRateInterval) { 
+            std::cout << "fixed rate" << endl;
 			sendCpm(T_now);
-		} else if (checkHeadingDelta() || checkPositionDelta() || checkSpeedDelta()) {
-			sendCpm(T_now);
+		}
+    } 
+    else if (T_elapsed >= T_GenCpmMin) { //@todo: If congestion control time is available add that.
+        
+        if (checkHeadingDelta() || checkPositionDelta() || checkSpeedDelta()) {
+            std::cout << "Dynamics" << endl;
+            sendCpm(T_now);
 			T_GenCpm = std::min(T_elapsed, T_GenCpmMax); /*< if middleware update interval is too long */
 			mGenCpmLowDynamicsCounter = 0;
 		} else if (T_elapsed >= T_GenCpm) {
-			sendCpm(T_now);
+            std::cout << "T_elapsed >= T_GenCpm" << endl;
+            sendCpm(T_now);
 			if (++mGenCpmLowDynamicsCounter >= mGenCpmLowDynamicsLimit) {
 				T_GenCpm = T_GenCpmMax;
 			}
@@ -186,8 +202,9 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
  */
 void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
-	EV <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
-    std::cout <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
+	EV <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << ", simetime: "<< T_now << endl;
+
+    std::cout << mVehicleDataProvider->station_id() << " ------ " << T_now << endl;
 
     /*
     bool en_mode4 = par("enable_mode4");  
@@ -223,7 +240,7 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
     // Ref Sec-4.3.4.3; Add sensor container to the CPM message, only if time elapased to CPM containing sensor container is more than 1 second.
 	if(T_now - mLastSenrInfoCntnrTimestamp >= SimTime(1, SIMTIME_S)){
-		EV << "Generating sensor objects" << std::endl;
+		std::cout << "Generating sensor objects" << std::endl;
 		snsrcntr_prsnt = generateSensorInfoCntnr(cpm_msg);
 		if(snsrcntr_prsnt){
 			mLastSenrInfoCntnrTimestamp = T_now;
@@ -236,8 +253,15 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
     // Add station and management container and send CPM only if either of perceived objects or sensor container is present. 
 	if(prcvdobjcntr_prsnt || snsrcntr_prsnt ) {
 
+        std::cout << "prcvdobjcntr_prsnt: " << prcvdobjcntr_prsnt;
+        std::cout << ", snsrcntr_prsnt: " << snsrcntr_prsnt << endl;
+
 		generateStnAndMgmtCntnr(cpm_msg);
-	
+	    
+        mLastCpmPosition = mVehicleDataProvider->position();
+        mLastCpmSpeed = mVehicleDataProvider->speed();
+        mLastCpmHeading = mVehicleDataProvider->heading();
+        mLastCpmTimestamp = T_now;
 
         using namespace vanetza;
         btp::DataRequestB request;
@@ -273,6 +297,7 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const
 
 	//No objects percieved by the sensors
 	if(prcvd_objs.empty()){
+        std::cout << "No perceived objects available" << endl;
 		return false;
 	}
 		
@@ -496,6 +521,7 @@ bool CpService::generateSensorInfoCntnr(vanetza::asn1::Cpm& cpm_msg){
 	std::vector<Sensor*> sensors = mLocalEnvironmentModel->allSensors();
 
     if(sensors.empty()){
+        std::cout << "No sensors available" << endl;
         return false;
     }
 
@@ -742,11 +768,34 @@ SimTime CpService::genCpmDcc() {
     return std::min(mGenCpmMax, std::max(mGenCpmMin, dcc));
 }
 
+
+void CpService::removeExpRcvdobjs(){
+
+    //std::cout << "===========================================================================" << endl;
+    //std::cout << "my vehicle id: " << mVehicleDataProvider->station_id() << endl;
+
+    for(auto obj_it = mObjectsReceived.cbegin(); obj_it != mObjectsReceived.cend(); /*increment within loop*/){
+
+        ObjectInfo infoObject = obj_it->second;
+        /*Check for object expiry*/
+        if( mVehicleDataProvider->updated() - infoObject.getLastTrackingTime().last() >= mCPSensor->getValidityPeriod()){
+            //std::cout << "Deleting object: " << obj_it->first << endl;
+            mObjectsReceived.erase(obj_it++);
+        }else{
+            ++obj_it;
+        }
+    }
+}
 /*
  *
  */
 void CpService::recordObjectsAge(){
 
+    //std::cout << "===========================================================================" << endl;
+    //std::cout << "------------------------Radar Objects: " << boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "Radar")) << endl;
+    //std::cout << "----------------AbsoluteRadar Objects: " << boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "AbsoluteRadar")) << endl;
+    //std::cout << "------------Objects known through CPM: " << mObjectsReceived.size() << endl;
+    //std::cout << "---------------------------------------------------------------------------" << endl;
 	for(const LocalEnvironmentModel::TrackedObject& obj : mLocalEnvironmentModel->allObjects()){
 		const artery::LocalEnvironmentModel::Tracking& tracking_ptr = obj.second;
 		const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection =  tracking_ptr.sensors();
@@ -765,6 +814,11 @@ void CpService::recordObjectsAge(){
 
 			if (mObjectsReceived.find(vd.station_id()) != mObjectsReceived.end()) {
 				ObjectInfo &infoObjectAI = mObjectsReceived.at(vd.station_id());
+                
+                //std::cout << "vd.station_id() - " << vd.station_id();
+                //std::cout << ", last tracking time - " << mObjectsReceived.at(vd.station_id()).getLastTrackingTime().last();
+                //std::cout << ", mVehicleDataProvider->updated() - " << mVehicleDataProvider->updated();
+                //std::cout << ", difference: " << mVehicleDataProvider->updated() - mObjectsReceived.at(vd.station_id()).getLastTrackingTime().last() << endl;
 
 				//Remove the entry if expired
 				if (mObjectsReceived.at(vd.station_id()).getLastTrackingTime().last() +

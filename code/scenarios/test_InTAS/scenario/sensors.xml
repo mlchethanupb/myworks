@@ -8,5 +8,13 @@
 			<showLineOfSight value="true" />
 		</visualization>
 	</sensor>
+	<sensor type="artery.envmod.sensor.AbsoluteRadar">
+		<visualization>
+			<showObjectsInSensorRange value="false" />
+			<showObstaclesInSensorRange value="false" />
+			<showSensorCone value="true" />
+			<showLineOfSight value="true" />
+		</visualization>
+	</sensor>
 	<sensor type="artery.envmod.sensor.CPmSensor" />
 </sensors>

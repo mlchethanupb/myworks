@@ -3,7 +3,7 @@
 	<service type="artery.application.CpService">
 		<listener port="2006" />
 		<filters>
-			<penetration rate="0.25" />
+			<penetration rate="1" />
 		</filters>
 	</service>
 	<service type="artery.envmod.service.EnvmodPrinter">

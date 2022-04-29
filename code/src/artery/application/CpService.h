@@ -56,6 +56,7 @@ class CpService : public ItsG5BaseService
 		vanetza::units::Length mPositionDelta;
 		vanetza::units::Velocity mSpeedDelta;
 		bool mFixedRate;
+		omnetpp::SimTime mFixedRateInterval;
 
 
 		ChannelNumber mPrimaryChannel = channel::CCH;
@@ -85,6 +86,7 @@ class CpService : public ItsG5BaseService
 		void generateMgmtCntnr(vanetza::asn1::Cpm&);
 		void generateCarStnCntnr(vanetza::asn1::Cpm&);
 		void generateRSUStnCntnr(vanetza::asn1::Cpm&);
+		void removeExpRcvdobjs();
 		void recordObjectsAge();
 		void retrieveCPMmessage(const vanetza::asn1::Cpm&);
 		void generate_sensorid();
@@ -99,42 +101,8 @@ class CpService : public ItsG5BaseService
 		bool objinTrackedlist(const ObjectInfo::ObjectPercieved& obj);
 		void printCPM(const vanetza::asn1::Cpm &message);
 
-#ifdef REMOVE_CODE
-
-
-	private:
-		void checkTriggeringConditions(const omnetpp::SimTime&);
-		bool checkHeadingDelta() const;
-		bool checkPositionDelta() const;
-		bool checkSpeedDelta() const;
-		omnetpp::SimTime genCamDcc();
-
-
-
-		omnetpp::SimTime mGenCpmMin;
-		omnetpp::SimTime mGenCpmMax;
-		omnetpp::SimTime mGenCpm;
-		//unsigned mGenCamLowDynamicsCounter;
-		//unsigned mGenCamLowDynamicsLimit;
-		Position mLastCamPosition;
-		vanetza::units::Velocity mLastCamSpeed;
-		vanetza::units::Angle mLastCamHeading;
-		omnetpp::SimTime mLastCamTimestamp;
-		
-		vanetza::units::Angle mHeadingDelta;
-		vanetza::units::Length mPositionDelta;
-		vanetza::units::Velocity mSpeedDelta;
-		bool mDccRestriction;
-		bool mFixedRate;
-#endif
 };
 
-#ifdef REMOVE_CODE
-
-vanetza::asn1::Cam createCooperativeAwarenessMessage_cp(const VehicleDataProvider&, uint16_t genDeltaTime);
-void addLowFrequencyContainer_cp(vanetza::asn1::Cam&);
-
-#endif
 } // namespace artery
 
 #endif /* ARTERY_CPSERVICE_H_ */

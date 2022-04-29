@@ -50,9 +50,9 @@ void LteRrcUe::initialize(int stage)
         bool en_mode4 = par("enable_mode4");  
         if(en_mode4){
             cellFound = false;
-            std::cout << "********************* LteRrcUe Enabling mode 4 ***********************" << endl;
+            //std::cout << "********************* LteRrcUe Enabling mode 4 ***********************" << endl;
         }else{
-            std::cout << "--------------------- LteRrcUe Enabling mode 3 -----------------------" << endl;
+            //std::cout << "--------------------- LteRrcUe Enabling mode 3 -----------------------" << endl;
         }
         
         modeSelect(cellFound);
@@ -117,9 +117,9 @@ void LteRrcUe::handleSelfMessage()
     bool en_mode4 = par("enable_mode4");
     if(en_mode4){
         cellFound = false;
-        std::cout << "********************* LteRrcUe Enabling mode 4 ***********************" << endl;
+        //std::cout << "********************* LteRrcUe Enabling mode 4 ***********************" << endl;
     }else{
-        std::cout << "--------------------- LteRrcUe Enabling mode 3 -----------------------" << endl;
+        //std::cout << "--------------------- LteRrcUe Enabling mode 3 -----------------------" << endl;
     }
 
     modeSelect(cellFound);

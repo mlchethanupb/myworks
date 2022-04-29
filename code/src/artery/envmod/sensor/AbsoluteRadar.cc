@@ -20,7 +20,7 @@ void AbsoluteRadar::initialize()
 
 const std::string& AbsoluteRadar::getSensorCategory() const
 {
-    static const std::string category = "Radar";
+    static const std::string category = "AbsoluteRadar";
     return category;
 }
 
