@@ -30,6 +30,9 @@ simple CpService like ItsG5Service
         @statistic[EteDelay](source=EteDelay; record = stats?);
 
 
+        // parameter to enable mode 4
+        bool enable_mode4 = default(true);
+
         // evaluate DCC transmission interval restrictions
         bool withDccRestriction = default(true);
 

@@ -2,12 +2,11 @@
 <services>
 	<service type="artery.application.CpService">
 		<listener port="2006" />
-	</service>
-	<service type="artery.application.ExampleService">
-		<listener port="4711" />
 		<filters>
-			<name pattern="flow0\.1.*" />
-			<penetration rate="0.1" />
+			<penetration rate="1" />
 		</filters>
+	</service>
+	<service type="artery.envmod.service.EnvmodPrinter">
+		<listener port="3001" />
 	</service>
 </services>

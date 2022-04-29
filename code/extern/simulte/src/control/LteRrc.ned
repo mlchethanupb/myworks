@@ -23,7 +23,7 @@ simple LteRrcBase like ControlPlane
 {
     parameters:
         string nodeType;
-        
+
         //Timers
         @signal[detectionLatency];
         @statistic[detectionLatency](title="Detection Latency"; source="detectionLatency"; record=vector,stats);
@@ -46,8 +46,8 @@ simple LteRrcUe extends LteRrcBase{
     parameters:
         @class("LteRrcUe");
         
-        
-        
+        // parameter to enable mode 4
+        bool enable_mode4 = default(true);        
 }
 
 simple LteRrcEnb extends LteRrcBase{

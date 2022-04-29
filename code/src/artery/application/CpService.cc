@@ -189,6 +189,17 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 	EV <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
     std::cout <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << endl;
 
+    /*
+    bool en_mode4 = par("enable_mode4");  
+    if(en_mode4)
+        std::cout << "********************* CpService Enabling mode 4 ***********************" << endl;
+    else
+        std::cout << "--------------------- CpService Enabling mode 3 -----------------------" << endl;
+    */
+
+    //clearing the objects to send list
+    mObjectsToSend.clear();
+
 	if(mSensorsId.empty()){
 		generate_sensorid();
 	}

@@ -46,6 +46,15 @@ void LteRrcUe::initialize(int stage)
         EV <<"LteRrcUe::initialize Configure resource allocation mode when UEs enter the simulation environment"<< endl;
 
         bool cellFound = checkCellCoverage();
+
+        bool en_mode4 = par("enable_mode4");  
+        if(en_mode4){
+            cellFound = false;
+            std::cout << "********************* LteRrcUe Enabling mode 4 ***********************" << endl;
+        }else{
+            std::cout << "--------------------- LteRrcUe Enabling mode 3 -----------------------" << endl;
+        }
+        
         modeSelect(cellFound);
     }
 
@@ -104,6 +113,15 @@ void LteRrcUe::handleSelfMessage()
 {
     EV <<"LteRrcUe::handleSelfMessage Track UE movement and check for cell coverage"<< endl;
     bool cellFound = checkCellCoverage();
+
+    bool en_mode4 = par("enable_mode4");
+    if(en_mode4){
+        cellFound = false;
+        std::cout << "********************* LteRrcUe Enabling mode 4 ***********************" << endl;
+    }else{
+        std::cout << "--------------------- LteRrcUe Enabling mode 3 -----------------------" << endl;
+    }
+
     modeSelect(cellFound);
     scheduleAt(simTime()+TTI, ttiTick_);
 }
@@ -133,7 +151,6 @@ bool  LteRrcUe::checkCellCoverage(){
         //Register to corresponding eNodeB
         binder_->registerNextHop(masterId_, nodeId_);
     }
-
     else{
 
         cellFound = false;
