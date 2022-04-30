@@ -22,12 +22,19 @@ simple CpService like ItsG5Service
         @signal[CpmSent](type=CpObject);
         @signal[EteDelay](type=simtime_t);
         @signal[objectAge](type=simtime_t);
+        @signal[ear](type=double);
+        @signal[numobjAR](type=long);
+        @signal[numobjCPM](type=long);
 
         @statistic[receptioncpm](source=CpmReceived;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[transmissioncpm](source=CpmSent;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[sentcpmpkt](source=count(CpmSent);record=last,vector);
         @statistic[rcvdcpmpkt](source=count(CpmReceived);record=last,vector);
         @statistic[EteDelay](source=EteDelay; record = stats?);
+        @statistic[EAR](source=ear; record = stats?);
+        @statistic[numobjAR](source=numobjAR; record=vector);
+        @statistic[numobjCPM](source=numobjCPM; record=vector);
+        @statistic[objAge](source=objectAge; record=stats,vector);
 
 
         // parameter to enable mode 4

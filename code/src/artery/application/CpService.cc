@@ -39,6 +39,9 @@ static const simsignal_t scSignalCpmReceived = cComponent::registerSignal("CpmRe
 static const simsignal_t scSignalCpmSent = cComponent::registerSignal("CpmSent");
 static const simsignal_t scSignalEteDelay = cComponent::registerSignal("EteDelay");
 static const simsignal_t scSignalRatioObjectAge = cComponent::registerSignal("objectAge");
+static const simsignal_t scSignalEAR = cComponent::registerSignal("ear");
+static const simsignal_t scSignalnumobjAR = cComponent::registerSignal("numobjAR");
+static const simsignal_t scSignalnumobjCPM = cComponent::registerSignal("numobjCPM");
 
 
 static const auto scSnsrInfoContainerInterval = std::chrono::milliseconds(1000);
@@ -796,6 +799,21 @@ void CpService::recordObjectsAge(){
     //std::cout << "----------------AbsoluteRadar Objects: " << boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "AbsoluteRadar")) << endl;
     //std::cout << "------------Objects known through CPM: " << mObjectsReceived.size() << endl;
     //std::cout << "---------------------------------------------------------------------------" << endl;
+
+    //record statistic of EAR
+    long numobjAR = boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "AbsoluteRadar"));
+    long numobjCPM = mObjectsReceived.size();
+    double ear_val = 0; 
+    
+    if(numobjAR != 0){
+        ear_val = numobjCPM / numobjAR; 
+    }
+ 
+    emit(scSignalnumobjAR, numobjAR);
+    emit(scSignalnumobjCPM, numobjCPM);
+    emit(scSignalEAR, ear_val);
+
+
 	for(const LocalEnvironmentModel::TrackedObject& obj : mLocalEnvironmentModel->allObjects()){
 		const artery::LocalEnvironmentModel::Tracking& tracking_ptr = obj.second;
 		const LocalEnvironmentModel::Tracking::TrackingMap& sensorsDetection =  tracking_ptr.sensors();
