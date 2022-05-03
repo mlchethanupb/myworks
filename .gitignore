@@ -7,6 +7,11 @@ build
 #hidden files and folder
 .*
 
+#compressed backups
+*.zip
+
+
 #Don't include the result folder of the scenarios
 code/scenarios/**/results*/
+code/scenarios/**/*.simu*
 code/doc
