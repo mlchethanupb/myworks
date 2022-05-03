@@ -151,6 +151,7 @@ bool  LteRrcUe::checkCellCoverage(){
         //Register to corresponding eNodeB
         binder_->registerNextHop(masterId_, nodeId_);
     }
+
     else{
 
         cellFound = false;

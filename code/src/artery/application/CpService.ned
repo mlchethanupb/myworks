@@ -30,8 +30,8 @@ simple CpService like ItsG5Service
         @statistic[transmissioncpm](source=CpmSent;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[sentcpmpkt](source=count(CpmSent);record=last,vector);
         @statistic[rcvdcpmpkt](source=count(CpmReceived);record=last,vector);
-        @statistic[EteDelay](source=EteDelay; record = stats?);
-        @statistic[EAR](source=ear; record = stats?);
+        @statistic[EteDelay](source=EteDelay; record = stats?,vector);
+        @statistic[EAR](source=ear; record = stats?,vector);
         @statistic[numobjAR](source=numobjAR; record=vector);
         @statistic[numobjCPM](source=numobjCPM; record=vector);
         @statistic[objAge](source=objectAge; record=stats,vector);

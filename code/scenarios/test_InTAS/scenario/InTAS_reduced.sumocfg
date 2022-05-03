@@ -11,7 +11,8 @@
 	<input>
 		<net-file value="ingolstadt_rtest.net.xml"/>
 		<!--route-files value="routes_reduced/ped.rou.xml,routes_reduced/BusRoutes.flow.xml,routes_reduced/InTAS_001.rou.xml,routes_reduced/InTAS_002.rou.xml,routes_reduced/InTAS_003.rou.xml,routes_reduced/InTAS_004.rou.xml,routes_reduced/InTAS_005.rou.xml,routes_reduced/InTAS_006.rou.xml,routes_reduced/InTAS_007.rou.xml,routes_reduced/InTAS_008.rou.xml,routes_reduced/InTAS_009.rou.xml,routes_reduced/InTAS_010.rou.xml,routes_reduced/InTAS_011.rou.xml,routes_reduced/InTAS_012.rou.xml,routes_reduced/InTAS_013.rou.xml,routes_reduced/InTAS_014.rou.xml,routes_reduced/InTAS_015.rou.xml,routes_reduced/InTAS_016.rou.xml,routes_reduced/InTAS_017.rou.xml,routes_reduced/InTAS_018.rou.xml,routes_reduced/InTAS_019.rou.xml,routes_reduced/InTAS_020.rou.xml,routes_reduced/InTAS_021.rou.xml,routes_reduced/InTAS_022.rou.xml"/-->
-		<route-files value="routes_new.rou.xml"/>
+		<route-files value="routes.rou.xml"/>
+		<!--route-files value="routes_new.rou.xml"/-->
 		<additional-files value="buildings_reduced.poly.xml,enodeb_poi.add.xml"/>
 	</input>
 	<output>
@@ -22,7 +23,7 @@
 	<time>
 		<begin value="0"/>
 		<step-length value="0.025"/>
-		<end value="100"/>
+		<end value="200"/>
 	</time>
 	<processing>
 		<route-steps value="200"/>

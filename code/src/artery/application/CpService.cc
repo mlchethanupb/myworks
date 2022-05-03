@@ -117,12 +117,12 @@ void CpService::trigger()
 void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::UpPacket> packet)
 {
 
-    std::cout << "===========================================================================" << endl;
+    std::cout << "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*" << endl;
 
 	Enter_Method("indicate");
 
 	EV<< "CPM message received" << endl;
-    //std::cout << "CPM message received" << endl;
+    std::cout << "CPM message received" << endl;
 
 	if(mSensorsId.empty()){
 		generate_sensorid();
@@ -179,7 +179,7 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
     if(mFixedRate){
         //CPM are generated with fixed interval
         if (T_elapsed >= mFixedRateInterval) { 
-            std::cout << "fixed rate" << endl;
+            std::cout << "fixed rate: " << mFixedRateInterval << ", T_elapsed: " << T_elapsed << endl;
 			sendCpm(T_now);
 		}
     } 
@@ -663,11 +663,15 @@ void CpService::generateRSUStnCntnr(vanetza::asn1::Cpm& cpm_msg){
 void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
 	EV <<" CPM message received by "<< mVehicleDataProvider->station_id() <<", retriving information "<< endl;
+    //std::cout <<" CPM message received by "<< mVehicleDataProvider->station_id() <<", retriving information "<< endl;
 
     const CPM_t cpm = (*cpm_msg);
 	const CPM_t* cpm_data = &cpm;
     //Get info of the emitter vehicle
     uint32_t stationID = cpm_data->header.stationID;
+
+    std::cout << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID <<", retriving information "<< endl;
+
     omnetpp::SimTime generationTime = mTimer->getTimeFor(
             mTimer->reconstructMilliseconds(cpm_data->cpm.generationDeltaTime));
 
@@ -796,19 +800,20 @@ void CpService::recordObjectsAge(){
 
     //std::cout << "===========================================================================" << endl;
     //std::cout << "------------------------Radar Objects: " << boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "Radar")) << endl;
-    //std::cout << "----------------AbsoluteRadar Objects: " << boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "AbsoluteRadar")) << endl;
-    //std::cout << "------------Objects known through CPM: " << mObjectsReceived.size() << endl;
+    std::cout << "----------------AbsoluteRadar Objects: " << boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "AbsoluteRadar")) << endl;
+    std::cout << "------------Objects known through CPM: " << mObjectsReceived.size() << endl;
     //std::cout << "---------------------------------------------------------------------------" << endl;
 
     //record statistic of EAR
     long numobjAR = boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "AbsoluteRadar"));
     long numobjCPM = mObjectsReceived.size();
-    double ear_val = 0; 
-    
+    double ear_val = (numobjAR == 0) ? 0 : (double)numobjCPM/(double)numobjAR  ; 
+    /*
     if(numobjAR != 0){
         ear_val = numobjCPM / numobjAR; 
-    }
- 
+    }*/
+    std::cout << "ear value " << ear_val << std::endl;
+
     emit(scSignalnumobjAR, numobjAR);
     emit(scSignalnumobjCPM, numobjCPM);
     emit(scSignalEAR, ear_val);

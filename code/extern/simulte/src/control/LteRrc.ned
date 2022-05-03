@@ -47,7 +47,7 @@ simple LteRrcUe extends LteRrcBase{
         @class("LteRrcUe");
         
         // parameter to enable mode 4
-        bool enable_mode4 = default(false);        
+        bool enable_mode4 = default(true);        
 }
 
 simple LteRrcEnb extends LteRrcBase{
