@@ -70,6 +70,7 @@ class CpService : public ItsG5BaseService
 		ObjectInfo::ObjectsPercievedMap mObjectsToSend;
 		ObjectInfo::ObjectsPercievedMap mObjectsTracked;
 		ObjectInfo::ObjectsReceivedMap mObjectsReceived;
+		ObjectInfo::ObjectsReceivedMap mObjsRelevanceArea;
 		Sensor* mCPSensor = nullptr;
         Sensor* mCASensor = nullptr;
 		FilterObjects mFilterObj;
@@ -86,7 +87,7 @@ class CpService : public ItsG5BaseService
 		void generateMgmtCntnr(vanetza::asn1::Cpm&);
 		void generateCarStnCntnr(vanetza::asn1::Cpm&);
 		void generateRSUStnCntnr(vanetza::asn1::Cpm&);
-		void removeExpRcvdobjs();
+		void removeExpobjs();
 		void recordObjectsAge();
 		void retrieveCPMmessage(const vanetza::asn1::Cpm&);
 		void generate_sensorid();
@@ -96,6 +97,9 @@ class CpService : public ItsG5BaseService
 		void generateASN1Objects(vanetza::asn1::Cpm& message, const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap objToSend);
 		void updateObjTrackedList(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap objToSend);
 		void checkCPMSize(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap& objToSendNoFiltering, vanetza::asn1::Cpm& cpm);
+
+		void updateObjlist(ObjectInfo::ObjectsReceivedMap& obj_list, uint32_t stationID, LocalEnvironmentModel::TrackingTime& newTrackingtime, 
+							vanetza::units::Angle &newHeading, Position &newPosition, vanetza::units::Velocity &newSpeed);
 
 		bool generatePerceivedObjectsCntnr(vanetza::asn1::Cpm&, const omnetpp::SimTime& T_now);
 		bool objinTrackedlist(const ObjectInfo::ObjectPercieved& obj);

@@ -141,10 +141,12 @@ bool  LteRrcUe::checkCellCoverage(){
     ueCoord = ue_->getCoord();
 
     ueDistanceFromEnb =ue_->getCoord().distance( enbCoord);
+    //std::cout << "ueCoord: " << ueCoord << endl;
+    //std::cout << "enbCoord: " << enbCoord << endl;
+    //std::cout << "ueDistanceFromEnb: " << ueDistanceFromEnb << endl;
 
 
-
-    if (ueDistanceFromEnb < 200)
+    if (ueDistanceFromEnb < 5000) //MLC @tocheck 200
     {
         //To set default mode 4, just put cellFound=false always
         cellFound=true;
@@ -156,6 +158,8 @@ bool  LteRrcUe::checkCellCoverage(){
 
         cellFound = false;
     }
+
+    //std::cout << "checkCellCoverage: " << (cellFound == false? "false":"true") << endl;
     return cellFound;
 }
 
@@ -295,6 +299,7 @@ case FSM_Exit(INACTIVE):
 
     }
 
+    //std::cout << "-------------------------Mode: " << (mode==MODE3?"mode 3":"mode 4") << endl;
     //Notify PHY layer about mode
     return mode;
 }

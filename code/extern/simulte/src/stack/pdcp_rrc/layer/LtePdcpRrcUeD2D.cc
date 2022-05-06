@@ -297,12 +297,27 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
                     MacNodeId UeId = (*itue)->id;
                     LtePhyBase* phy = check_and_cast<LtePhyBase*>(getSimulation()->getModule(binder_->getOmnetId(UeId))->getSubmodule("lteNic")->getSubmodule("phy"));
                     inet::Coord uePos = phy->getCoord();
+                    distance = uePos.distance(sourceCoord);
                     //Saving the Info of broadcast neighbours
                     if(UeId!=sourceId)
                     {
-                        binder_->BroadcastUeInfo[UeId]=uePos;
-                        ueCoords.push_back(uePos);
-                        k=k+1;
+                        if((distance !=0 && distance<=200) && binder_->isNodeRegisteredInSimlation()==true)
+                        {
+                            EV<<"Distance from ego vehicle: "<<distance<<endl;
+                            //std::cout<<"---- Distance from ego vehicle: "<<distance<<endl;
+                            binder_->BroadcastUeInfo[UeId]=uePos;
+                            ueCoords.push_back(uePos);
+                            //nonIpInfo->setDestId(UeId);
+                            //nonIpInfo->setBroadcastUeInfo(UeId,uePos);
+                            k=k+1;
+                        }
+                        else
+                        {
+                            EV<<"UEs outside sidelink broadcast range"<<endl;
+                        }
+                        //binder_->BroadcastUeInfo[UeId]=uePos;
+                        //ueCoords.push_back(uePos);
+                        //k=k+1;
                     }
                 }
             }

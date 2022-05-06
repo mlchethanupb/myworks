@@ -31,20 +31,31 @@ public:
     ObjectInfo( LocalEnvironmentModel::TrackingTime, Identifier_t&,
                     vanetza::units::Angle, Position, vanetza::units::Velocity);
 
+    //get functions
     LocalEnvironmentModel::TrackingTime& getLastTrackingTime() { return mLastTrackingTime; }
     size_t getNumberOfSensors() const { return mNumberOfSensors; }
     Identifier_t getSensorId() const { return mSensorsId; }
     vanetza::units::Angle getLastHeading(){return mLastCpmHeading;}
     Position getLastPosition(){return mLastCpmPosition;}
     vanetza::units::Velocity getLastVelocity(){return mLastCpmSpeed;}
+    omnetpp::SimTime getLastTimeSent() { return mLastTimeSent; }
+    uint8_t getobjectid(){return mObjid;}
+
+
+    //set functions
     void setLastTrackingTime(LocalEnvironmentModel::TrackingTime lastTrackingTime) {mLastTrackingTime = lastTrackingTime;}
     void setNumberOfSensors(size_t numberOfSensors) {mNumberOfSensors = numberOfSensors;}
     void setSensorId(Identifier_t& id) {mSensorsId = id;}
+    void setLastTimeSent(omnetpp::SimTime time) { mLastTimeSent = time;}
+    void setLastHeading(vanetza::units::Angle newHeading){ mLastCpmHeading = newHeading;}
+    void setLastPosition(Position newPosition){mLastCpmPosition = newPosition;}
+    void setLastVelocity(vanetza::units::Velocity newSpeed){mLastCpmSpeed = newSpeed;}
+
+    //print functions
     static void printObjectsReceivedMap(ObjectsReceivedMap objReceived);
     static void printObjectsToSendMap(ObjectsPercievedMap objMap);
-    void setLastTimeSent(omnetpp::SimTime time) { mLastTimeSent = time;}
-    omnetpp::SimTime getLastTimeSent() { return mLastTimeSent; }
-    uint8_t getobjectid(){return mObjid;}
+    
+
 
 private:
     static std::atomic<uint8_t> unique_id;

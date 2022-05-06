@@ -40,6 +40,9 @@ simple CpService like ItsG5Service
         // parameter to enable mode 4
         bool enable_mode4 = default(true);
 
+        //parameter for the relevance area
+        double maxRadiusRelArea @unit(m) = default(500m);
+
         // evaluate DCC transmission interval restrictions
         bool withDccRestriction = default(true);
 

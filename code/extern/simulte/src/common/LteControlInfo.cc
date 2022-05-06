@@ -14,8 +14,10 @@ UserControlInfo::~UserControlInfo()
 {
     if (userTxParams != NULL)
     {
-        delete userTxParams;
-        userTxParams = NULL;
+        //MLC @tocheck
+        std::cout << "Delete userTxParams" << endl;
+        //delete userTxParams; 
+        //userTxParams = NULL;
     }
 }
 

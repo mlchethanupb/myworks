@@ -46,6 +46,9 @@ class LteAirFrame : public LteAirFrame_Base
     {
         return new LteAirFrame(*this);
     }
+    virtual ~LteAirFrame()
+    {
+    }
     // ADD CODE HERE to redefine and implement pure virtual functions from LteAirFrame_Base
     void addRemoteUnitPhyDataVector(RemoteUnitPhyData data);
     RemoteUnitPhyDataVector getRemoteUnitPhyDataVector();
