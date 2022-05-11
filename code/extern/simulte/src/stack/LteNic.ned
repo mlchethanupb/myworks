@@ -27,6 +27,8 @@ import lte.stack.phy.resources.SidelinkResourceAllocation;
 import lte.stack.mac.configuration.SidelinkConfiguration;
 import lte.corenetwork.multiplextraffic.TrafficMux;
 
+import lte.control.LteRrcBase;
+
 // 
 // Interface for the LTE Stack.
 //
@@ -82,6 +84,7 @@ module LteNicBase like ILteNic
         control: <LteRrcType> like ControlPlane {
                 @display("p=66.304,141.568");
                 nodeType = nodeType;
+                enable_mode4 = true;
         }
         
         

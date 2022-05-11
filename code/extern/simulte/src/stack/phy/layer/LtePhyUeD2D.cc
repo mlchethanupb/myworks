@@ -437,7 +437,7 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
     lteInfo->setD2dTxPower(d2dTxPower_);
     frame->setControlInfo(lteInfo);
 
-    sendBroadcast(frame);
+    sendMulticast(frame);
     frameSent=true;
 
     //Decrement the re-selection counter on successful data frame transmission in mode 4

@@ -16,7 +16,7 @@
 #include "common/LteCommon.h"
 #include "stack/phy/layer/LtePhyEnbD2D.h"
 #include "control/packet/RRCStateChange_m.h"
-#include "common/LteCommon.h"
+
 
 class LtePhyUeD2D : public LtePhyUe
 {
@@ -38,7 +38,7 @@ protected:
     double bestRsrpMean_;
     bool frameSent;
     double rsrpMean;
-    double rssiMean;
+        double rssiMean;
 
     std::vector<std::tuple<double, int, int>> optimalCSRs;
     std::vector<LteAirFrame*> d2dReceivedFrames_;
@@ -86,7 +86,13 @@ public:
         this->rssiMean = rssiMean;
     }
 
+   LteAirFrame*& getSciframe()  {
+        return sciframe;
+    }
 
+    void setSciframe( LteAirFrame *&sciframe) {
+        this->sciframe = sciframe;
+    }
 };
 
 #endif  /* _LTE_AIRPHYUED2D_H_ */

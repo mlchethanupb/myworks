@@ -1,0 +1,66 @@
+{
+    "etsi_mode3_p25" : {
+        "run_sim" : false
+    },
+
+    "etsi_mode3_p50" : {
+        "run_sim" : false
+    },
+
+    "etsi_mode3_p75" : {
+        "run_sim" : false
+    },
+
+    "etsi_mode3_p100" : {
+        "run_sim" : false
+    },
+
+    "etsi_mode4_p25" : {
+        "run_sim" : true
+    },
+
+    "etsi_mode4_p50" : {
+        "run_sim" : true
+    },
+
+    "etsi_mode4_p75" : {
+        "run_sim" : true
+    },
+
+    "etsi_mode4_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed_300ms_mode3_p25" : {
+        "run_sim" : false
+    },
+
+    "fixed_300ms_mode3_p50" : {
+        "run_sim" : false
+    },
+
+    "fixed_300ms_mode3_p75" : {
+        "run_sim" : false
+    },
+
+    "fixed_300ms_mode3_p100" : {
+        "run_sim" : false
+    },
+
+    "fixed_300ms_mode4_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed_300ms_mode4_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed_300ms_mode4_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed_300ms_mode4_p100" : {
+        "run_sim" : true
+    }
+
+}

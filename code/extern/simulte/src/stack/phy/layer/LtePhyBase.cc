@@ -213,104 +213,137 @@ LteAmc *LtePhyBase::getAmcModule(MacNodeId id)
     return amc;
 }
 
-void LtePhyBase::sendMulticast(LteAirFrame *frame)
+void LtePhyBase::sendMulticast(AirFrame *frame)
 {
+    //throw cRuntimeError("sendMulticast");
     UserControlInfo *ci = check_and_cast<UserControlInfo *>(frame->getControlInfo());
 
-    // get the group Id
+   /* // get the group Id
     int32 groupId = ci->getMulticastGroupId();
     if (groupId < 0)
         throw cRuntimeError("LtePhyBase::sendMulticast - Error. Group ID %d is not valid.", groupId);
-
+*/
     // send the frame to nodes belonging to the multicast group only
-    std::map<int, OmnetId>::const_iterator nodeIt = binder_->getNodeIdListBegin();
+    std::map<MacNodeId,inet::Coord>::iterator  nodeIt = binder_->BroadcastUeInfo.begin();
 
     EV<<"LtePhyBase::sendMulticast"<<endl;
 
-    for (; nodeIt != binder_->getNodeIdListEnd(); ++nodeIt)
+    EV << NOW << " LtePhyBase::sendMulticast - node " << nodeIt->first << " is in the multicast group"<< endl;
+
+    std::vector<inet::Coord> ueCoords;
+    double distance;
+    std::vector<UeInfo*>* ueList = binder_->getUeList();
+    std::vector<UeInfo*>::iterator itue = ueList->begin();
+    int k = 0;
+
+    MacNodeId sourceId = nodeId_;
+    LtePhyBase* phy = check_and_cast<LtePhyBase*>(getSimulation()->getModule(binder_->getOmnetId(sourceId))->getSubmodule("lteNic")->getSubmodule("phy"));
+    inet::Coord sourceCoord = phy->getCoord();
+    EV<<"Number of UEs in simulation: "<<ueList->size()<<endl;
+    EV<<"Source UE Id : "<<sourceId<<" Source UE coordinates : "<<sourceCoord<<endl;
+    if (ueList->size()!=0)
     {
-        if (nodeIt->first != nodeId_ && binder_->isInMulticastGroup(nodeIt->first, groupId))
+        for (; itue != ueList->end(); ++itue)
         {
-            EV << NOW << " LtePhyBase::sendMulticast - node " << nodeIt->first << " is in the multicast group"<< endl;
-
-            // get a pointer to receiving module
-            cModule *receiver = getSimulation()->getModule(nodeIt->second);
-            LtePhyBase * recvPhy;
-            double dist;
-
-            if( enableMulticastD2DRangeCheck_ )
+            MacNodeId UeId = (*itue)->id;
+            LtePhyBase* phy = check_and_cast<LtePhyBase*>(getSimulation()->getModule(binder_->getOmnetId(UeId))->getSubmodule("lteNic")->getSubmodule("phy"));
+            inet::Coord uePos = phy->getCoord();
+            distance = uePos.distance(sourceCoord);
+            //Saving the Info of broadcast neighbours
+            if(UeId!=sourceId)
             {
-                recvPhy =  check_and_cast<LtePhyBase *>(receiver->getSubmodule("lteNic")->getSubmodule("phy"));
-                dist = recvPhy->getRadioPosition().distance(getRadioPosition());
-
-                if( dist > multicastD2DRange_ )
+                if((distance !=0 && distance<=200) && binder_->isNodeRegisteredInSimlation()==true)
                 {
-                    EV << NOW << " LtePhyBase::sendMulticast - node too far (" << dist << " > " << multicastD2DRange_ << ". skipping transmission" << endl;
-                    continue;
+                    EV<<"Distance from ego vehicle: "<<distance<<endl;
+                    binder_->BroadcastUeInfo[UeId]=uePos;
+                    ueCoords.push_back(uePos);
+
+                    //nonIpInfo->setBroadcastUeInfo(UeId,uePos);
+
+                    k=k+1;
+                }
+                else
+                {
+                    EV<<"UEs outside sidelink broadcast range"<<endl;
                 }
             }
-
-            EV << NOW << " LtePhyBase::sendMulticast - sending frame to node " << nodeIt->first << endl;
-
-            sendDirect(frame->dup(), 0, frame->getDuration(), receiver, getReceiverGateIndex(receiver));
         }
+        for(; nodeIt != binder_->BroadcastUeInfo.end(); ++nodeIt)
+        {
+            cModule *receiver = getSimulation()->getModule(binder_->getOmnetId(nodeIt->first));
+            EV << NOW << " LtePhyBase::sendMulticast - sending frame to node " << nodeIt->first << endl;
+            EV<<"receiver module: "<<receiver<<endl;
+           //
+            //throw cRuntimeError("multicast");
+            sendDirect(frame->dup(), 0, frame->getDuration(), receiver, getReceiverGateIndex(receiver));
+            EV<<"Number of neighbours SL broadcast: "<<binder_->BroadcastUeInfo.size()<<endl;
+
+
+        }
+
+            // get a pointer to receiving module
+
+        }
+
+
+
+        // delete the original frame
+        EV<<"Frame: "<<frame<<endl;
+
+        delete frame;
     }
 
-    // delete the original frame
-    delete frame;
-}
+    void LtePhyBase::sendUnicast(LteAirFrame *frame)
+    {
+        UserControlInfo *ci = check_and_cast<UserControlInfo *>(frame->getControlInfo());
+        // dest MacNodeId from control info
+        MacNodeId dest = ci->getDestId();
+        // destination node (UE, RELAY or ENODEB) omnet id
+        try {
+            binder_->getOmnetId(dest);
+        } catch (std::out_of_range& e) {
+            delete frame;
+            return;         // make sure that nodes that left the simulation do not send
+        }
+        OmnetId destOmnetId = binder_->getOmnetId(dest);
+        if (destOmnetId == 0){
+            // destination node has left the simulation
+            delete frame;
+            return;
+        }
+        // get a pointer to receiving module
+        cModule *receiver = getSimulation()->getModule(destOmnetId);
+        // receiver's gate
+        sendDirect(frame, 0, frame->getDuration(), receiver, getReceiverGateIndex(receiver));
 
-void LtePhyBase::sendUnicast(LteAirFrame *frame)
-{
-    UserControlInfo *ci = check_and_cast<UserControlInfo *>(frame->getControlInfo());
-    // dest MacNodeId from control info
-    MacNodeId dest = ci->getDestId();
-    // destination node (UE, RELAY or ENODEB) omnet id
-    try {
-        binder_->getOmnetId(dest);
-    } catch (std::out_of_range& e) {
-        delete frame;
-        return;         // make sure that nodes that left the simulation do not send
-    }
-    OmnetId destOmnetId = binder_->getOmnetId(dest);
-    if (destOmnetId == 0){
-        // destination node has left the simulation
-        delete frame;
         return;
     }
-    // get a pointer to receiving module
-    cModule *receiver = getSimulation()->getModule(destOmnetId);
-    // receiver's gate
-    sendDirect(frame, 0, frame->getDuration(), receiver, getReceiverGateIndex(receiver));
 
-    return;
-}
+    void LtePhyBase::sendUpperPackets(cMessage* msg)
+    {
+        // Send message
+        send(msg,upperGateOut_);
 
-void LtePhyBase::sendUpperPackets(cMessage* msg)
-{
-    // Send message
-    send(msg,upperGateOut_);
-
-}
-
-int LtePhyBase::getReceiverGateIndex(const omnetpp::cModule *receiver) const
-{
-    int gate = receiver->findGate("radioIn");
-
-    if (gate < 0) {
-        gate = receiver->findGate("lteRadioIn");
-        if (gate < 0) {
-            throw cRuntimeError("receiver \"%s\" has no suitable radio input gate",
-                    receiver->getFullPath().c_str());
-        }
     }
-    return gate;
-}
 
-void LtePhyBase::deleteModule(){
-    cancelAndDelete(ttiTick_);
-    cSimpleModule::deleteModule();
-}
+    int LtePhyBase::getReceiverGateIndex(const omnetpp::cModule *receiver) const
+    {
+        int gate = receiver->findGate("radioIn");
+
+        if (gate < 0) {
+            gate = receiver->findGate("lteRadioIn");
+            if (gate < 0) {
+                throw cRuntimeError("receiver \"%s\" has no suitable radio input gate",
+                        receiver->getFullPath().c_str());
+            }
+        }
+        return gate;
+    }
+
+    void LtePhyBase::deleteModule(){
+        cancelAndDelete(ttiTick_);
+        cSimpleModule::deleteModule();
+    }
 
 
 

@@ -12,13 +12,11 @@
 
 UserControlInfo::~UserControlInfo()
 {
-    if (userTxParams != NULL)
+    /*if (userTxParams != NULL)
     {
-        //MLC @tocheck
-        std::cout << "Delete userTxParams" << endl;
-        //delete userTxParams; 
-        //userTxParams = NULL;
-    }
+        delete userTxParams;
+        userTxParams = NULL;
+    }*/
 }
 
 UserControlInfo::UserControlInfo() :
@@ -36,7 +34,7 @@ UserControlInfo& UserControlInfo::operator=(const UserControlInfo& other)
     if (other.userTxParams != NULL)
     {
         const UserTxParams* txParams = check_and_cast<const UserTxParams*>(other.userTxParams);
-        this->userTxParams = txParams->dup();
+        //this->userTxParams = txParams->dup();
     }
     else
     {

@@ -67,6 +67,7 @@ void LteMacUeD2D::initialize(int stage)
     if (stage == inet::INITSTAGE_NETWORK_LAYER_3)
     {
         MacNodeId enbId_ = getAncestorPar("masterId");
+
         LtePhyBase* enb_ = check_and_cast<LtePhyBase*>(
                 getSimulation()->getModule(binder_->getOmnetId(enbId_))->getSubmodule("lteNic")->getSubmodule("phy"));
         inet::Coord enbCoord = enb_->getCoord();
@@ -191,13 +192,15 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
         }
 
         if (userInfo->getFrameType()==DATAPKT)
-             {
-        	EV<<"Sending Lteairframepdu to RLC layer: "<<endl;
+                     {
+                    EV<<"Sending Lteairframepdu to RLC layer: "<<endl;
 
-        	fromPhy(pkt);
-        	//userInfo->setRlcType(UM);
-        	//sendUpperPackets(pkt);
-             }
+                    fromPhy(pkt);
+                    //userInfo->setRlcType(UM);
+                    //sendUpperPackets(pkt);
+                     }
+
+
         //Receiving SCI
 
     }
@@ -232,6 +235,7 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
                     dataArrival->setDuration(lteInfo ->getDuration());
                     dataArrival->setCreationTime(lteInfo ->getCreationTime().dbl());
                     dataArrival->setPriority(lteInfo ->getPriority());
+
                     dataArrival->setDataSize(pkt->getBitLength());
                     uinfo->setFrameType(DATAARRIVAL);
                     uinfo->setIpBased(ipBased);
@@ -492,7 +496,6 @@ void LteMacUeD2D::macPduMake(MacCid cid)
         {
             //Insert PDU in the Harq Tx Buffer
             //txList.first is the acid
-            EV<<"Insert LteMacPdu into HARQ buffer"<<endl;
             txBuf->insertPdu(txList.first,cw, macPkt);
         }
     }
@@ -659,29 +662,28 @@ void LteMacUeD2D::handleSelfMessage()
 
     EV << "----- UE MAIN LOOP -----" << endl;
 
+    SidelinkResourceAllocation* sra = check_and_cast<SidelinkResourceAllocation*>(getParentModule()->getSubmodule("mode4"));
+    sra->initialiseSensingWindow();
+    sra->initialiseCbrWindow();
+
+
+
     // extract pdus from all harqrxbuffers and pass them to unmaker
     HarqRxBuffers::iterator hit = harqRxBuffers_.begin();
-    HarqRxBuffers::iterator het= harqRxBuffers_.end();
+    HarqRxBuffers::iterator het = harqRxBuffers_.end();
     LteMacPdu *pdu = NULL;
-   // LteHarqBufferRxD2D* p;
     std::list<LteMacPdu*> pduList;
-    EV<<"HARQ size: "<<harqRxBuffers_.size()<<endl;
-   for (; hit != het; ++hit)
 
+    for (; hit != het; ++hit)
     {
-
         pduList=hit->second->extractCorrectPdus();
-        //throw cRuntimeError("extractCorrectPDU ");
-        EV<<"PDU List size(): "<<pduList.size()<<endl;
         while (! pduList.empty())
-        {throw cRuntimeError("extractCorrectPDU 1");
+        {
             pdu=pduList.front();
             pduList.pop_front();
             macPduUnmake(pdu);
         }
     }
-
-
 
     EV << NOW << "LteMacVUeMode4::handleSelfMessage " << nodeId_ << " - HARQ process " << (unsigned int)currentHarq_ << endl;
 
@@ -832,6 +834,7 @@ void LteMacUeD2D::handleSelfMessage()
 
             requestSdu = sent;
         }
+
         // Message that triggers flushing of Tx H-ARQ buffers for all users
         // This way, flushing is performed after the (possible) reception of new MAC PDUs
         cMessage* flushHarqMsg = new cMessage("flushHarqMsg");

@@ -237,6 +237,7 @@ void LteHarqBufferTx::sendSelectedDown()
     {
 
         LteMacPdu *pduToSend = (*processes_)[selectedAcid_]->extractPdu(*it);
+
         //cPacket* pkt = check_and_cast<cPacket*> (pduToSend);
         EV<<"pduToSend "<<pduToSend->getByteLength()<<endl;
 

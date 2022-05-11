@@ -53,6 +53,7 @@ simple LteRrcUe extends LteRrcBase{
 simple LteRrcEnb extends LteRrcBase{
     parameters:
         @class("LteRrcEnb");
+        bool enable_mode4 = default(false);
         
 }
 

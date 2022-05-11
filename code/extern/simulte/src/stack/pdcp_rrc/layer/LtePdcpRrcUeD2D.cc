@@ -304,10 +304,9 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
                         if((distance !=0 && distance<=200) && binder_->isNodeRegisteredInSimlation()==true)
                         {
                             EV<<"Distance from ego vehicle: "<<distance<<endl;
-                            //std::cout<<"---- Distance from ego vehicle: "<<distance<<endl;
                             binder_->BroadcastUeInfo[UeId]=uePos;
                             ueCoords.push_back(uePos);
-                            //nonIpInfo->setDestId(UeId);
+                            nonIpInfo->setDestId(UeId);
                             //nonIpInfo->setBroadcastUeInfo(UeId,uePos);
                             k=k+1;
                         }
@@ -315,31 +314,11 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
                         {
                             EV<<"UEs outside sidelink broadcast range"<<endl;
                         }
-                        //binder_->BroadcastUeInfo[UeId]=uePos;
-                        //ueCoords.push_back(uePos);
-                        //k=k+1;
                     }
                 }
             }
 
-            //Select only UEs inside a broadcast range
-            std::map<MacNodeId,inet::Coord>::iterator itf = binder_->BroadcastUeInfo.begin();
-
-            for(; itf != binder_->BroadcastUeInfo.end(); ++itf)
-            {
-                EV<<"Chosen UE recipients: "<<"NodeId: "<<itf->first<<" Coordinates: "<<itf->second<<endl;
-                distance = itf->second.distance(sourceCoord);
-                EV<<"Distance of recipient UE: "<<distance<<endl;
-                if((distance !=0 && distance<=200) && binder_->isNodeRegisteredInSimlation()==true)
-                {
-                    nonIpInfo->setDestId(itf->first);
-                }
-                else if (distance > 200)
-                {
-                    EV<<"UE outside of SL broadcast range: "<<endl;
-                }
-
-            }
+            EV<<"Number of neighbours SL broadcast: "<<binder_->BroadcastUeInfo.size()<<endl;
 
             /*          int k1= ueCoords.size();
 
@@ -387,12 +366,10 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
         }
 
         //(we use the id of the source for statistic purposes at lower levels)
-        else // UL
-            nonIpInfo->setDestId(getDestId(nonIpInfo));
-
-
         // PDCP Packet creation
-        LtePdcpPdu* pdcpPkt = new LtePdcpPdu("LtePdcpPdu");
+        if (binder_->BroadcastUeInfo.size()>0)
+        {LtePdcpPdu* pdcpPkt = new LtePdcpPdu("LtePdcpPdu");
+
         cMessage* dataArrival = new cMessage("Data Arrival");
         pdcpPkt->setByteLength(nonIpInfo->getRlcType() == UM ? PDCP_HEADER_UM : PDCP_HEADER_AM);
         pdcpPkt->encapsulate(pkt);
@@ -409,9 +386,9 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
         send(pdcpPkt, (nonIpInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
         send(dataArrival,control_OUT);
         emit(sentPacketToLowerLayer, pdcpPkt);
+        }
+
     }
-
-
     else
     {
         throw cRuntimeError("invalid message type");
