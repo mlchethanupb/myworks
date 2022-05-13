@@ -123,7 +123,7 @@ void Router::handleMessage(omnetpp::cMessage* msg)
         
         if( packet->hasPayload()){
             //std::cout << "payload is not empty" << std::endl;
-            EV << " payload size: " << packet->getBitLength()  << std::endl;
+            EV << " payload size: " << packet->getBitLength() << " bits"  << std::endl;
 
         }else{
             EV << " payload is empty" << std::endl;

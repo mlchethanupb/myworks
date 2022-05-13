@@ -121,7 +121,7 @@ void CpService::indicate(const vanetza::btp::DataIndication& ind, std::unique_pt
 
 	Enter_Method("indicate");
 
-	EV<< "CPM message received" << endl;
+	//EV<< "CPM message received" << endl;
     //std::cout << "CPM message received" << endl;
 
 	if(mSensorsId.empty()){
@@ -177,7 +177,7 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
     if(mFixedRate){
         //CPM are generated with fixed interval
         if (T_elapsed >= mFixedRateInterval) { 
-            //std::cout << "fixed rate: " << mFixedRateInterval << ", T_elapsed: " << T_elapsed << endl;
+            EV << "fixed rate: " << mFixedRateInterval << ", T_elapsed: " << T_elapsed << endl;
 			sendCpm(T_now);
 		}
     } 
@@ -203,9 +203,8 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
  */
 void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 
-	EV <<"Generating collective perception message for vehicle: " << mVehicleDataProvider->station_id() << ", simetime: "<< T_now << endl;
-
     //std::cout << mVehicleDataProvider->station_id() << " ------ " << T_now << endl;
+    EV <<"Generating CPM for vehicle: " << mVehicleDataProvider->station_id() << ", at simetime: "<< T_now << endl;
 
     /*
     bool en_mode4 = par("enable_mode4");  
@@ -250,6 +249,9 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 	
     // Ref Sec-4.3.4.2; Add objects perceived by the vehicle to the CPM message. 
 	prcvdobjcntr_prsnt = generatePerceivedObjectsCntnr(cpm_msg, T_now);
+
+    EV << "perceived objects present: " << (prcvdobjcntr_prsnt?"true":"false") << endl;
+    EV << "sensor objects present: " << (snsrcntr_prsnt?"true":"false") << endl;
 	
     // Add station and management container and send CPM only if either of perceived objects or sensor container is present. 
 	if(prcvdobjcntr_prsnt || snsrcntr_prsnt ) {
@@ -278,11 +280,14 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
         std::unique_ptr<geonet::DownPacket> payload { new geonet::DownPacket() };
         std::unique_ptr<convertible::byte_buffer> buffer { new CpmByteBuffer(obj.shared_ptr()) };
         payload->layer(OsiLayer::Application) = std::move(buffer);
-        this->request(request, std::move(payload));
 
-        EV <<"Requesting lower layers to send CPM " << endl;
-        //std::cout <<"Requesting lower layers to send CPM " << endl;
-    } 
+        EV <<"CPM generated with size " << payload->size() <<  " bytes, requesting lower layer to transmit" << endl;
+
+        //requesting lower layer to send the CPM
+        this->request(request, std::move(payload));
+    }else{
+        EV << "No percieved or sensor objects present, CPM not generated" << endl;
+    }
 }
 
 /*
@@ -651,8 +656,6 @@ void CpService::generateRSUStnCntnr(vanetza::asn1::Cpm& cpm_msg){
  */
 void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
-	EV <<" CPM message received by "<< mVehicleDataProvider->station_id() <<", retriving information "<< endl;
-
     const CPM_t cpm = (*cpm_msg);
 	const CPM_t* cpm_data = &cpm;
     //Get info of the emitter vehicle
@@ -660,8 +663,7 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
     //Add object to relevance area object list, if the distance between two vehicles is less than the limit specified.
     vanetza::units::Length maxRelArealimit = par("maxRadiusRelArea").doubleValue() * vanetza::units::si::meter;
     
-    //std::cout << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID <<", retriving information "<< endl;
-
+    EV << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID <<", retriving information "<< endl;
 
     omnetpp::SimTime generationTime = mTimer->getTimeFor(
             mTimer->reconstructMilliseconds(cpm_data->cpm.generationDeltaTime));
@@ -693,7 +695,7 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
         }
 
     }else{
-        std::cout << "station data container received is NULL" << endl;
+        EV_WARN << "station data container received is NULL" << endl;
     }
 
     //Get info of the objects received:
