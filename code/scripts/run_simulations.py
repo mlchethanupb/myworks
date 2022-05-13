@@ -1,18 +1,80 @@
 import json
 import glob
 import subprocess
+import re
+import os
+from os.path import exists
 
 path_start_simulation = './start_simulations.sh'
 working_directory = './'
 scenario = 'InTAS'
+config_dir = "../scenarios/InTAS/scenario/config"
+
+CONST_settings_dict={ "config":"[Config ",
+                      "result":"result-dir = ../results/",
+                      "service":"*.node[*].middleware.services = xmldoc(\"configs/services_",
+                      "fixedrate":"*.node[*].middleware.CpService.fixedRate = ",
+                      "fixedinterval":"*.node[*].middleware.CpService.fixedInterval = "}
 
 
 
-#def create_config_file(config):
+def create_config_file(config_name):
+    print("creating config file for: ", config_name)
+    config_name_split = config_name.split('_')
+    #print(config_name_split)
 
+    data_to_write = []
+    
+    config_data = CONST_settings_dict["config"]
+    config_data = config_data + config_name + "]"
+    #print(config_data)
+    data_to_write.append(config_data)
+    
+    result_data = CONST_settings_dict["result"]
+    for item in config_name_split:
+        result_data = result_data + item + "/"
+    #print(result_data)
+    data_to_write.append(result_data)
 
+    service_data = CONST_settings_dict["service"]
+    service_data = service_data + config_name_split[-1] + ".xml\")"
+    #print(service_data)
+    data_to_write.append(service_data)
 
+    fixedrate_data = CONST_settings_dict["fixedrate"]
+    fixedinterval_data = CONST_settings_dict["fixedinterval"]
+    
+    num_data = re.findall("\d+", config_name)
+    periodicity = int(num_data[0])/1000
+    #print(periodicity)
 
+    if(config_name_split[0] == "etsi"):
+        fixedrate_data = fixedrate_data + "false"
+        fixedinterval_data = fixedinterval_data + "0.1s" #dummy value
+    else:
+        fixedrate_data = fixedrate_data + "true"
+        fixedinterval_data = fixedinterval_data + str(periodicity) +"s"
+
+    #print(fixedrate_data)
+    #print(fixedinterval_data)
+    data_to_write.append(fixedrate_data)
+    data_to_write.append(fixedinterval_data)
+
+    #for data in data_to_write:
+    #    print(data)
+
+    file_path = config_dir + "/"+ config_name + ".ini"
+
+    if not exists(config_dir):
+             os.mkdir(config_dir)
+    
+    with open(file_path, "w+") as file_to_write:
+        file_to_write.write("\n".join(data_to_write))
+    
+    if(exists(file_path)):
+        print("file created successfully", file_path)
+    else:
+        print("File creation failed")
 
 
 def launch_runs(simulations_to_run):
@@ -67,6 +129,8 @@ def main():
                 if(data[key][in_key] == True):
                     print("add to run simulations", key)
                     simulaitons_to_run.append(key)
+                    create_config_file(key)
+                    print("-------------------------------------")
 
     print(simulaitons_to_run)
     launch_runs(simulaitons_to_run)
