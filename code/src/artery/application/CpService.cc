@@ -42,6 +42,9 @@ static const simsignal_t scSignalRatioObjectAge = cComponent::registerSignal("ob
 static const simsignal_t scSignalEAR = cComponent::registerSignal("ear");
 static const simsignal_t scSignalnumobjAR = cComponent::registerSignal("numobjAR");
 static const simsignal_t scSignalnumobjCPM = cComponent::registerSignal("numobjCPM");
+static const simsignal_t scSignalMessageSize = cComponent::registerSignal("msgsize");
+static const simsignal_t scSignalPeriodicity = cComponent::registerSignal("periodicity");
+
 
 
 static const auto scSnsrInfoContainerInterval = std::chrono::milliseconds(1000);
@@ -261,6 +264,10 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
         mLastCpmPosition = mVehicleDataProvider->position();
         mLastCpmSpeed = mVehicleDataProvider->speed();
         mLastCpmHeading = mVehicleDataProvider->heading();
+
+        omnetpp::SimTime time_diff = T_now - mLastCpmTimestamp;
+        emit(scSignalPeriodicity, time_diff);
+
         mLastCpmTimestamp = T_now;
 
         using namespace vanetza;
@@ -280,7 +287,8 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
         std::unique_ptr<geonet::DownPacket> payload { new geonet::DownPacket() };
         std::unique_ptr<convertible::byte_buffer> buffer { new CpmByteBuffer(obj.shared_ptr()) };
         payload->layer(OsiLayer::Application) = std::move(buffer);
-
+        
+        emit(scSignalMessageSize, payload->size());
         EV <<"CPM generated with size " << payload->size() <<  " bytes, requesting lower layer to transmit" << endl;
 
         //requesting lower layer to send the CPM

@@ -14,7 +14,8 @@ CONST_settings_dict={ "config":"[Config ",
                       "result":"result-dir = ../results/",
                       "service":"*.node[*].middleware.services = xmldoc(\"configs/services_",
                       "fixedrate":"*.node[*].middleware.CpService.fixedRate = ",
-                      "fixedinterval":"*.node[*].middleware.CpService.fixedInterval = "}
+                      "fixedinterval":"*.node[*].middleware.CpService.fixedInterval = ",
+                      "en_mode4":"*.node[*].lteNic.enable_mode4 = "}
 
 
 
@@ -60,8 +61,16 @@ def create_config_file(config_name):
     data_to_write.append(fixedrate_data)
     data_to_write.append(fixedinterval_data)
 
-    #for data in data_to_write:
-    #    print(data)
+    en_mode4_data = CONST_settings_dict["en_mode4"]
+    if(config_name_split[1]=="mode3"):
+        en_mode4_data = en_mode4_data + "false"
+    else:
+        en_mode4_data = en_mode4_data + "true"
+
+    data_to_write.append(en_mode4_data)
+
+    for data in data_to_write:
+        print(data)
 
     file_path = config_dir + "/"+ config_name + ".ini"
 

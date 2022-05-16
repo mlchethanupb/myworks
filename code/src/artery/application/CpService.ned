@@ -25,6 +25,8 @@ simple CpService like ItsG5Service
         @signal[ear](type=double);
         @signal[numobjAR](type=long);
         @signal[numobjCPM](type=long);
+        @signal[msgsize](type=long);
+        @signal[periodicity](type=simtime_t);
 
         @statistic[receptioncpm](source=CpmReceived;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[transmissioncpm](source=CpmSent;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
@@ -35,7 +37,8 @@ simple CpService like ItsG5Service
         @statistic[numobjAR](source=numobjAR; record=vector);
         @statistic[numobjCPM](source=numobjCPM; record=vector);
         @statistic[objAge](source=objectAge; record=stats,vector);
-
+        @statistic[msgsize](source=msgsize; record=stats,vector);
+        @statistic[periodicity](source=periodicity; record=stats,vector);
 
         // parameter to enable mode 4
         bool enable_mode4 = default(true);

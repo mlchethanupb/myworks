@@ -62,6 +62,7 @@ module LteNicBase like ILteNic
         bool ipBased;
         string LteChannelModelType = default("LteRealisticChannelModel");
         bool d2dCapable;            // inherit the value from the parent module
+        bool enable_mode4;
         
     gates:
         //#
@@ -84,7 +85,7 @@ module LteNicBase like ILteNic
         control: <LteRrcType> like ControlPlane {
                 @display("p=66.304,141.568");
                 nodeType = nodeType;
-                enable_mode4 = true;
+                enable_mode4 = enable_mode4;
         }
         
         
