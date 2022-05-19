@@ -10,7 +10,7 @@
 <configuration>
 	<input>
 		<net-file value="ingolstadt.net.xml"/>
-		<route-files value="red_routes/BusRoutes.flow.xml, red_routes/ped.rou.xml,red_routes/InTAS_001.rou.xml,red_routes/InTAS_002.rou.xml,red_routes/InTAS_003.rou.xml,red_routes/InTAS_004.rou.xml,red_routes/InTAS_005.rou.xml,red_routes/InTAS_006.rou.xml,red_routes/InTAS_007.rou.xml,red_routes/InTAS_008.rou.xml,red_routes/InTAS_009.rou.xml,red_routes/InTAS_010.rou.xml,red_routes/InTAS_011.rou.xml,red_routes/InTAS_012.rou.xml,red_routes/InTAS_013.rou.xml,red_routes/InTAS_014.rou.xml,red_routes/InTAS_015.rou.xml,red_routes/InTAS_016.rou.xml,red_routes/InTAS_017.rou.xml,red_routes/InTAS_018.rou.xml,red_routes/InTAS_019.rou.xml,red_routes/InTAS_020.rou.xml,red_routes/InTAS_021.rou.xml,red_routes/InTAS_022.rou.xml"/>
+		<route-files value="red_routes/BusRoutes.flow.xml, red_routes/InTAS_001.rou.xml,red_routes/InTAS_002.rou.xml,red_routes/InTAS_003.rou.xml,red_routes/InTAS_004.rou.xml,red_routes/InTAS_005.rou.xml,red_routes/InTAS_006.rou.xml,red_routes/InTAS_007.rou.xml,red_routes/InTAS_008.rou.xml,red_routes/InTAS_009.rou.xml,red_routes/InTAS_010.rou.xml,red_routes/InTAS_011.rou.xml,red_routes/InTAS_012.rou.xml,red_routes/InTAS_013.rou.xml,red_routes/InTAS_014.rou.xml,red_routes/InTAS_015.rou.xml,red_routes/InTAS_016.rou.xml,red_routes/InTAS_017.rou.xml,red_routes/InTAS_018.rou.xml,red_routes/InTAS_019.rou.xml,red_routes/InTAS_020.rou.xml,red_routes/InTAS_021.rou.xml,red_routes/InTAS_022.rou.xml"/>
 		<additional-files value="buildings.poly.xml, enodeb_poi.add.xml"/>
 	</input>
 	<output>
