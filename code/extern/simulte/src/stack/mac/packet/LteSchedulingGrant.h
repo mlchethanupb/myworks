@@ -38,9 +38,10 @@ class LteSchedulingGrant : public LteSchedulingGrant_Base
     ~LteSchedulingGrant()
     {
         if (userTxParams != NULL)
-        {
-            delete userTxParams;
-            userTxParams = NULL;
+        {   
+            //MLC
+            //delete userTxParams;
+            //userTxParams = NULL;
         }
     }
 
