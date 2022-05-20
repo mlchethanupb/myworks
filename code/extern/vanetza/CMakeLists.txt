@@ -42,6 +42,7 @@ include(UseVanetza)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Mandatory and optional project dependencies
+set(BOOST_ROOT "/home/thi/delooz/Programs/boost_1_65_1/build/")
 set(Boost_COMPONENTS date_time)
 set(Boost_OPTIONAL_COMPONENTS system program_options)
 find_package(Boost 1.58 REQUIRED COMPONENTS ${Boost_COMPONENTS})
@@ -49,8 +50,14 @@ include(CompatBoostTargets)
 # optional components need to be queried seperately (FindBoost bails out when one is missing)
 find_package(Boost 1.58 QUIET OPTIONAL_COMPONENTS ${Boost_OPTIONAL_COMPONENTS})
 include(CompatBoostTargets)
+
 find_package(CryptoPP 5.6.1 REQUIRED)
-find_package(GeographicLib 1.37 REQUIRED)
+
+
+SET(GeographicLib_INCLUDE_DIR /home/thi/delooz/Programs/GeographicLib-1.49/include)
+SET(GeographicLib_LIBRARY_RELEASE    /home/thi/delooz/Programs/GeographicLib-1.49/bin/lib/libGeographic.so)
+find_package(GeographicLib 1.37 REQUIRED ${GeographicLib_INCLUDE_DIR} ${GeographicLib_LIBRARY_RELEASE})
+
 find_package(Cohda MODULE)
 
 option(VANETZA_WITH_OPENSSL "Enable OpenSSL extensions" OFF)

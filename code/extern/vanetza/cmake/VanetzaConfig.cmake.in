@@ -6,13 +6,18 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 include(CMakeFindDependencyMacro)
 include(MacroFindDependencyComponents)
 
+SET(BOOST_ROOT "/home/thi/delooz/Programs/boost_1_65_1/build/")
 find_dependency_components(Boost VERSION @Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@ COMPONENTS @Boost_COMPONENTS@)
-find_dependency(GeographicLib @GeographicLib_VERSION_STRING@)
+#find_dependency(GeographicLib @GeographicLib_VERSION_STRING@)
 find_dependency(Threads)
 
 if(@CryptoPP_FOUND@)
     find_dependency(CryptoPP @CryptoPP_VERSION_STRING@)
 endif()
+
+set(GeographicLib_INCLUDE_DIR /home/thi/hegde/Programs/GeographicLib-1.49/include)
+set(GeographicLib_LIBRARY_RELEASE    /home/thi/hegde/Programs/GeographicLib-1.49/bin/lib/libGeographic.so)
+find_dependency(GeographicLib @GeographicLib_VERSION_STRING@)
 
 if(@OPENSSL_FOUND@)
     string(REGEX REPLACE "[a-z]+" "" OPENSSL_VERSION_WITHOUT_PATCH @OPENSSL_VERSION@)
