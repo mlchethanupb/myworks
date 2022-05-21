@@ -104,6 +104,9 @@ def launch_runs(simulations_to_run):
             print("Error code", exit_code, "while obtaining number of simulations to run")
             print(errors)
             #return
+
+        print("----------------------------------------------------------------------------------------------------")
+        print(output)
         """
         set_ids_simulations = output.replace('\n', '').split(' ')[1:]
         cnt_simulations = cnt_simulations + len(set_ids_simulations)

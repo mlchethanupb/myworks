@@ -288,7 +288,7 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
         std::unique_ptr<convertible::byte_buffer> buffer { new CpmByteBuffer(obj.shared_ptr()) };
         payload->layer(OsiLayer::Application) = std::move(buffer);
         
-        emit(scSignalMessageSize, payload->size());
+        //emit(scSignalMessageSize, payload->size());
         EV <<"CPM generated with size " << payload->size() <<  " bytes, requesting lower layer to transmit" << endl;
 
         //requesting lower layer to send the CPM
