@@ -71,9 +71,9 @@ public:
     ~LteSidelinkGrant()
     {
     if (userTxParams != NULL)
-            {
-                delete userTxParams;
-                userTxParams = NULL;
+            {   //MLC
+                //delete userTxParams;
+                //userTxParams = NULL;
             }
     }
     LteSidelinkGrant(const LteSidelinkGrant& other) :

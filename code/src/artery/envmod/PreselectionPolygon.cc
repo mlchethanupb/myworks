@@ -20,7 +20,8 @@ std::vector<std::string> PreselectionPolygon::select(const EnvironmentModelObjec
 {
     const auto& sensorCone = createSensorArc(config, ego);
     if (!boost::geometry::is_valid(sensorCone)) {
-        throw omnetpp::cRuntimeError("polygon of sensor cone is invalid");
+        //MLC
+        //throw omnetpp::cRuntimeError("polygon of sensor cone is invalid");
     }
 
     std::vector<std::string> objectsInSensorCone;
