@@ -24,7 +24,8 @@ simple CpService like ItsG5Service
         @signal[objectAge](type=simtime_t);
         @signal[ear](type=double);
         @signal[numobjAR](type=long);
-        @signal[numobjCPM](type=long);
+        @signal[numobjCPMrcvd](type=long);
+        @signal[numobjCPMsent](type=long);
         @signal[msgsize](type=long);
         @signal[periodicity](type=simtime_t);
 
@@ -32,10 +33,11 @@ simple CpService like ItsG5Service
         @statistic[transmissioncpm](source=CpmSent;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[sentcpmpkt](source=count(CpmSent);record=last,vector);
         @statistic[rcvdcpmpkt](source=count(CpmReceived);record=last,vector);
-        @statistic[EteDelay](source=EteDelay; record = stats?,vector);
+        @statistic[EteDelay](source=EteDelay; record = stats,vector);
         @statistic[EAR](source=ear; record = stats?,vector);
         @statistic[numobjAR](source=numobjAR; record=vector);
-        @statistic[numobjCPM](source=numobjCPM; record=vector);
+        @statistic[numobjCPMrcvd](source=numobjCPMrcvd; record=stats,vector);
+        @statistic[numobjCPMsent](source=numobjCPMsent; record=stats,vector);
         @statistic[objAge](source=objectAge; record=stats,vector);
         @statistic[msgsize](source=msgsize; record=stats,vector);
         @statistic[periodicity](source=periodicity; record=stats,vector);

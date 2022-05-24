@@ -41,7 +41,8 @@ static const simsignal_t scSignalEteDelay = cComponent::registerSignal("EteDelay
 static const simsignal_t scSignalRatioObjectAge = cComponent::registerSignal("objectAge");
 static const simsignal_t scSignalEAR = cComponent::registerSignal("ear");
 static const simsignal_t scSignalnumobjAR = cComponent::registerSignal("numobjAR");
-static const simsignal_t scSignalnumobjCPM = cComponent::registerSignal("numobjCPM");
+static const simsignal_t scSignalnumobjCPMrcvd = cComponent::registerSignal("numobjCPMrcvd");
+static const simsignal_t scSignalnumobjCPMsent = cComponent::registerSignal("numobjCPMsent");
 static const simsignal_t scSignalMessageSize = cComponent::registerSignal("msgsize");
 static const simsignal_t scSignalPeriodicity = cComponent::registerSignal("periodicity");
 
@@ -287,8 +288,8 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
         std::unique_ptr<geonet::DownPacket> payload { new geonet::DownPacket() };
         std::unique_ptr<convertible::byte_buffer> buffer { new CpmByteBuffer(obj.shared_ptr()) };
         payload->layer(OsiLayer::Application) = std::move(buffer);
-        
-        //emit(scSignalMessageSize, payload->size());
+        long payload_size = static_cast<long>(payload->size());
+        emit(scSignalMessageSize, payload_size);
         EV <<"CPM generated with size " << payload->size() <<  " bytes, requesting lower layer to transmit" << endl;
 
         //requesting lower layer to send the CPM
@@ -329,7 +330,8 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const
 
 	generateASN1Objects(cpm_msg, T_now, mObjectsToSend);
     checkCPMSize(T_now, mObjectsToSend, cpm_msg);
-
+    long numObjsent = mObjectsToSend.size();
+    emit(scSignalnumobjCPMsent, numObjsent);
     //Add object in the list of previously sent
     updateObjTrackedList(T_now, mObjectsToSend);
 
@@ -844,7 +846,7 @@ void CpService::recordObjectsAge(){
     //std::cout << "ear value " << ear_val << std::endl;
 
     emit(scSignalnumobjAR, numobjAR);
-    emit(scSignalnumobjCPM, numobjCPM);
+    emit(scSignalnumobjCPMrcvd, numobjCPM);
     emit(scSignalEAR, ear_val);
 
 
