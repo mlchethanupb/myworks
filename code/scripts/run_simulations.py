@@ -117,7 +117,7 @@ def launch_runs(simulations_to_run):
         for id_run in set_ids_simulations:
             cmd = path_start_simulation + " " + run_config + " " + id_run
             print("cmd for repeat", cmd)
-            with open(working_directory + 'logs/log_' + scenario + "_" + run_config  + ".log", "w+") as log_file:
+            with open(working_directory + 'logs/log_' + scenario + "_" + run_config + "_" +  id_run  + ".log", "w+") as log_file:
                 process_running.append(subprocess.Popen(cmd, stdout=log_file, stderr=log_file,
                                                         universal_newlines=True,
                                                         shell=True))
