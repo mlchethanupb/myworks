@@ -4,7 +4,6 @@ list(APPEND CMAKE_MODULE_PATH "@PROJECT_SOURCE_DIR@/cmake")
 include(CMakeFindDependencyMacro)
 include(MacroFindDependencyComponents)
 
-#SET(BOOST_ROOT "/home/thi/delooz/Programs/boost_1_65_1/build/")
 find_dependency_components(Boost VERSION @Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@ COMPONENTS @Boost_COMPONENTS@)
 include(CompatBoostTargets)
 
@@ -28,9 +27,6 @@ if(@OPENSSL_FOUND@)
     include(CompatOpenSSLTargets)
 endif()
 
-#set(GeographicLib_INCLUDE_DIR /home/thi/hegde/Programs/GeographicLib-1.49/include)
-#set(GeographicLib_LIBRARY_RELEASE    /home/thi/hegde/Programs/GeographicLib-1.49/bin/lib/libGeographic.so)
-#find_dependency(GeographicLib @GeographicLib_VERSION_STRING@)
 
 # Restore previous module path
 list(REMOVE_AT CMAKE_MODULE_PATH -1)
