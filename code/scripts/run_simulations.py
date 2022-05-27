@@ -4,7 +4,10 @@ import subprocess
 import re
 import os
 from os.path import exists
+import time
 
+
+MAX_PROCESS_COUNT = 24
 get_num_of_runs = './get_number_of_run.sh'
 path_start_simulation = './start_simulations.sh'
 working_directory = './'
@@ -70,8 +73,8 @@ def create_config_file(config_name):
 
     data_to_write.append(en_mode4_data)
 
-    for data in data_to_write:
-        print(data)
+    #for data in data_to_write:
+    #    print(data)
 
     file_path = config_dir + "/"+ config_name + ".ini"
 
@@ -87,11 +90,44 @@ def create_config_file(config_name):
         print("File creation failed")
 
 
+def start_parallel_processing(process_to_start, process_running, track_process_running, process_error):
+    #start the process running and add it to process_running[]
+    print("------------------------------------------------------")
+    attempt = 0
+    for cmd in process_to_start:
+        if len(track_process_running) < MAX_PROCESS_COUNT:
+            if cmd in process_error:
+                attempt =  process_error[cmd]
+            cmd_split = cmd.split(' ')
+            run_config = cmd_split[-2]
+            id_run =  cmd_split[-1]
+            with open(working_directory + 'logs/log_' + scenario + "_" + run_config + "_" +  id_run  + "_a"+ str(attempt) + ".log", "w+") as log_file:
+                    print("Adding process to run: ", cmd, attempt)
+                    track_process_running.append(subprocess.Popen(cmd, stdout=log_file, stderr=log_file,
+                                                            universal_newlines=True,
+                                                            shell=True))
+            process_running.append(cmd)
+    
+    #remove all the process that are running from start list:
+    for p in process_running:
+        if p in process_to_start:
+            process_to_start.remove(p)
+    print("------------------------------------------------------")
+
+
 def launch_runs(simulations_to_run):
     cnt_simulations = 0
+    track_process_running = []
+    process_to_start = []
     process_running = []
+    process_done = []
+    process_error = {}
+    process_failed = []
+
 
     for run_config in simulations_to_run:
+        print("----------------------------------------------------------------------------------------------------")
+
         cmd = get_num_of_runs + " " + run_config
         print("Initial cmd", cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -105,9 +141,6 @@ def launch_runs(simulations_to_run):
             print("Error code", exit_code, "while obtaining number of simulations to run")
             print(errors)
             #return
-
-        print("----------------------------------------------------------------------------------------------------")
-        print(output)
         
         set_ids_simulations = output.replace('\n', '').split(' ')[1:]
         cnt_simulations = cnt_simulations + len(set_ids_simulations)
@@ -115,16 +148,75 @@ def launch_runs(simulations_to_run):
         print("set_ids_simulations",set_ids_simulations)
 
         for id_run in set_ids_simulations:
-            cmd = path_start_simulation + " " + run_config + " " + id_run
-            print("cmd for repeat", cmd)
+            cmd = "time " + path_start_simulation + " " + run_config + " " + id_run
+            process_to_start.append(cmd)
+            """
             with open(working_directory + 'logs/log_' + scenario + "_" + run_config + "_" +  id_run  + ".log", "w+") as log_file:
                 process_running.append(subprocess.Popen(cmd, stdout=log_file, stderr=log_file,
                                                         universal_newlines=True,
                                                         shell=True))
+            """
 
-    print('Number of simulations started:', cnt_simulations)
-    exit_codes = [p.wait() for p in process_running]
-    print(exit_codes)
+    while True:
+
+        #Start the process for execution
+        start_parallel_processing(process_to_start, process_running, track_process_running, process_error)
+
+        for p in track_process_running:
+            proc_cmd = p.args
+            if p.poll() is None:
+                ...
+            elif p.returncode == 0:
+                print("process done:",proc_cmd)
+                process_done.append(proc_cmd)
+
+                if proc_cmd in process_running:
+                    process_running.remove(proc_cmd)
+
+                track_process_running.remove(p)
+                process_error.pop(proc_cmd,None)
+            else:
+                print("process error:",p.returncode, proc_cmd)
+
+                #remove from process running list
+                if proc_cmd in process_running:
+                    process_running.remove(proc_cmd)
+                track_process_running.remove(p)
+                
+                
+                #add to the process error
+                if(None == process_error.get(proc_cmd, None)):
+                    process_error[proc_cmd] = 1
+                else:
+                    process_error[proc_cmd] = process_error[proc_cmd] + 1
+             
+                if process_error[proc_cmd] < 3:
+                    process_to_start.append(proc_cmd)
+                else:
+                    process_failed.append(proc_cmd)
+                    process_error.pop(proc_cmd,None)
+
+        print("------------------------------------------------------")
+        print("process to start", len(process_to_start))
+        print("process_running", len(process_running))
+        print("process_done", len(process_done))
+        print("process_error", len(process_error))
+        print("process_failed", len(process_failed))        
+        print("track_process_running", len(track_process_running))
+        print("------------------------------------------------------")
+        
+        if not process_to_start and not track_process_running:
+            break
+        else:
+            time.sleep(20)
+            
+
+
+    print("process done: ", process_done)
+    print("process failed: ", process_failed)
+    print("process error: ", process_error)    
+    #exit_codes = [p.wait() for p in process_running]
+    #print(exit_codes)
     #print(command)
 
 def main():
@@ -144,8 +236,18 @@ def main():
                     simulaitons_to_run.append(key)
                     create_config_file(key)
                     print("-------------------------------------")
-
+    print("====================================================================================")
     print(simulaitons_to_run)
+    
+    
+    """
+    chunks = [simulaitons_to_run[x:x+2] for x in range(0, len(simulaitons_to_run), 2)]
+    for chunck in chunks:
+        print("====================================================================================")
+        print("executing chunk: ", chunck)
+        launch_runs(chunck)
+        print("====================================================================================")
+    """
     launch_runs(simulaitons_to_run)
 
 if __name__ == "__main__":
