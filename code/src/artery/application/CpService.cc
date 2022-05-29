@@ -839,10 +839,27 @@ void CpService::removeExpobjs(){
 void CpService::recordObjectsAge(){
 
     //record statistic of EAR
-    long numobjAR = boost::size(filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "AbsoluteRadar"));
-    long numobjCPM = mObjsRelevanceArea.size();
-    double ear_val = (numobjAR == 0) ? 0 : (double)numobjCPM/(double)numobjAR  ; 
+    
+    auto absrdr_objs = filterBySensorCategory(mLocalEnvironmentModel->allObjects(), "AbsoluteRadar");
 
+    std::vector<uint32_t> abs_statn_id;
+    for(const auto& obj : absrdr_objs){
+        
+        const auto& vd = obj.first.lock()->getVehicleData();
+        abs_statn_id.push_back(vd.station_id());
+    }
+
+    for (auto obj_rel = mObjsRelevanceArea.cbegin(); obj_rel != mObjsRelevanceArea.cend(); /*increment within loop*/){
+        if(std::find(abs_statn_id.begin(), abs_statn_id.end(), obj_rel->first) == abs_statn_id.end()){
+            mObjsRelevanceArea.erase(obj_rel++);
+        }else{
+            ++obj_rel;
+        }
+    }
+
+    long numobjAR = boost::size(absrdr_objs);
+    long numobjCPM = mObjsRelevanceArea.size();
+    double ear_val = (numobjAR == 0) ? 0 : (double)numobjCPM/(double)numobjAR;
     //std::cout << "ear value " << ear_val << std::endl;
 
     emit(scSignalnumobjAR, numobjAR);
