@@ -9,6 +9,7 @@ build
 
 #compressed backups
 *.zip
+*.tar.*
 
 
 #Don't include the result folder of the scenarios

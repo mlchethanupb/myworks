@@ -112,7 +112,6 @@ def start_parallel_processing(process_to_start, process_running, track_process_r
     for p in process_running:
         if p in process_to_start:
             process_to_start.remove(p)
-    print("------------------------------------------------------")
 
 
 def launch_runs(simulations_to_run):
@@ -124,6 +123,7 @@ def launch_runs(simulations_to_run):
     process_error = {}
     process_failed = []
 
+    start_time = time.time()
 
     for run_config in simulations_to_run:
         print("----------------------------------------------------------------------------------------------------")
@@ -156,11 +156,10 @@ def launch_runs(simulations_to_run):
                                                         universal_newlines=True,
                                                         shell=True))
             """
+    #Start the process for execution
+    start_parallel_processing(process_to_start, process_running, track_process_running, process_error)
 
     while True:
-
-        #Start the process for execution
-        start_parallel_processing(process_to_start, process_running, track_process_running, process_error)
 
         for p in track_process_running:
             proc_cmd = p.args
@@ -197,18 +196,27 @@ def launch_runs(simulations_to_run):
                     process_error.pop(proc_cmd,None)
 
         print("------------------------------------------------------")
-        print("process to start", len(process_to_start))
-        print("process_running", len(process_running))
-        print("process_done", len(process_done))
-        print("process_error", len(process_error))
-        print("process_failed", len(process_failed))        
-        print("track_process_running", len(track_process_running))
-        print("------------------------------------------------------")
-        
+        time_now = time.time()
+        elapsed_time = time_now - start_time
+        hours, rem = divmod(elapsed_time, 3600)
+        minutes, seconds = divmod(rem, 60)
+        print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
+
         if not process_to_start and not track_process_running:
             break
         else:
-            time.sleep(20)
+            #Start the process for execution
+            start_parallel_processing(process_to_start, process_running, track_process_running, process_error)
+            print("------------------------------------------------------")
+            print("process to start", len(process_to_start))
+            print("process_running", len(process_running))
+            print("process_done", len(process_done))
+            print("process_error", len(process_error))
+            print("process_failed", len(process_failed))
+            print("track_process_running", len(track_process_running))
+
+            #sleep for 1 hour
+            time.sleep(3600)
             
 
 
