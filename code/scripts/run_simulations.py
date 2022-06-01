@@ -16,15 +16,16 @@ config_dir = "../scenarios/InTAS/scenario/config"
 
 CONST_settings_dict={ "config":"[Config ",
                       "result":"result-dir = ../results/",
-                      "service":"*.node[*].middleware.services = xmldoc(\"configs/services_",
-                      "fixedrate":"*.node[*].middleware.CpService.fixedRate = ",
-                      "fixedinterval":"*.node[*].middleware.CpService.fixedInterval = ",
-                      "en_mode4":"*.node[*].lteNic.enable_mode4 = "}
+                      "service":"*.node[*].middleware.services = xmldoc(\"services/services_",
+                      "constsize": "*.node[*].middleware.CpService.enable_constsize = ",
+                      "fixedrate": "*.node[*].middleware.CpService.fixedRate = ",
+                      "fixedinterval": "*.node[*].middleware.CpService.fixedInterval = ",
+                      "en_mode4": "*.node[*].lteNic.enable_mode4 = "}
 
 
 
 def create_config_file(config_name):
-    print("creating config file for: ", config_name)
+    #print("creating config file for: ", config_name)
     config_name_split = config_name.split('_')
     #print(config_name_split)
 
@@ -46,6 +47,14 @@ def create_config_file(config_name):
     #print(service_data)
     data_to_write.append(service_data)
 
+    constsize_data = CONST_settings_dict["constsize"]
+    if(config_name_split[1] == "constsize"):
+        constsize_data = constsize_data + "true"
+    else:
+        constsize_data = constsize_data + "false"
+    #print(constsize_data)
+    data_to_write.append(constsize_data)
+    
     fixedrate_data = CONST_settings_dict["fixedrate"]
     fixedinterval_data = CONST_settings_dict["fixedinterval"]
     
@@ -66,7 +75,7 @@ def create_config_file(config_name):
     data_to_write.append(fixedinterval_data)
 
     en_mode4_data = CONST_settings_dict["en_mode4"]
-    if(config_name_split[1]=="mode3"):
+    if(config_name_split[2]=="mode3"):
         en_mode4_data = en_mode4_data + "false"
     else:
         en_mode4_data = en_mode4_data + "true"
@@ -76,11 +85,11 @@ def create_config_file(config_name):
     #for data in data_to_write:
     #    print(data)
 
-    file_path = config_dir + "/"+ config_name + ".ini"
-
     if not exists(config_dir):
              os.mkdir(config_dir)
-    
+
+    file_path = config_dir + "/"+ config_name + ".ini"
+
     with open(file_path, "w+") as file_to_write:
         file_to_write.write("\n".join(data_to_write))
     
@@ -126,10 +135,8 @@ def launch_runs(simulations_to_run):
     start_time = time.time()
 
     for run_config in simulations_to_run:
-        print("----------------------------------------------------------------------------------------------------")
-
         cmd = get_num_of_runs + " " + run_config
-        print("Initial cmd", cmd)
+        #print("Initial cmd", cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              universal_newlines=True,
                              shell=True)
@@ -145,7 +152,7 @@ def launch_runs(simulations_to_run):
         set_ids_simulations = output.replace('\n', '').split(' ')[1:]
         cnt_simulations = cnt_simulations + len(set_ids_simulations)
 
-        print("set_ids_simulations",set_ids_simulations)
+        #print("set_ids_simulations",set_ids_simulations)
 
         for id_run in set_ids_simulations:
             cmd = "time " + path_start_simulation + " " + run_config + " " + id_run
@@ -156,6 +163,8 @@ def launch_runs(simulations_to_run):
                                                         universal_newlines=True,
                                                         shell=True))
             """
+    print("----------------------------------------------------------------------------------------------------")
+    print("Total simulaitons to run: ", len(process_to_start))
     #Start the process for execution
     start_parallel_processing(process_to_start, process_running, track_process_running, process_error)
 
@@ -214,13 +223,13 @@ def launch_runs(simulations_to_run):
             print("process_error", len(process_error))
             print("process_failed", len(process_failed))
             print("track_process_running", len(track_process_running))
-
+            print("------------------------------------------------------")
             #sleep for 1 hour
-            time.sleep(3600)
+            time.sleep(30)
             
 
 
-    print("process done: ", process_done)
+    #print("process done: ", process_done)
     print("process failed: ", process_failed)
     print("process error: ", process_error)    
     #exit_codes = [p.wait() for p in process_running]
@@ -240,22 +249,12 @@ def main():
             #print(key)
             for in_key in data[key]:
                 if(data[key][in_key] == True):
-                    print("add to run simulations", key)
+                    #print("add to run simulations", key)
                     simulaitons_to_run.append(key)
                     create_config_file(key)
-                    print("-------------------------------------")
+
     print("====================================================================================")
-    print(simulaitons_to_run)
-    
-    
-    """
-    chunks = [simulaitons_to_run[x:x+2] for x in range(0, len(simulaitons_to_run), 2)]
-    for chunck in chunks:
-        print("====================================================================================")
-        print("executing chunk: ", chunck)
-        launch_runs(chunck)
-        print("====================================================================================")
-    """
+    #print(simulaitons_to_run)
     launch_runs(simulaitons_to_run)
 
 if __name__ == "__main__":

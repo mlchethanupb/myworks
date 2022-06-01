@@ -1,132 +1,257 @@
 {
-    "etsi_mode3_p25" : {
+    "etsi_constsize_mode3_p25" : {
         "run_sim" : true
     },
 
-    "etsi_mode3_p50" : {
+    "etsi_constsize_mode3_p50" : {
         "run_sim" : true
     },
 
-    "etsi_mode3_p75" : {
+    "etsi_constsize_mode3_p75" : {
         "run_sim" : true
     },
 
-    "etsi_mode3_p100" : {
+    "etsi_constsize_mode3_p100" : {
         "run_sim" : true
     },
 
-    "etsi_mode4_p25" : {
+    "etsi_constsize_mode4_p25" : {
         "run_sim" : true
     },
 
-    "etsi_mode4_p50" : {
+    "etsi_constsize_mode4_p50" : {
         "run_sim" : true
     },
 
-    "etsi_mode4_p75" : {
+    "etsi_constsize_mode4_p75" : {
         "run_sim" : true
     },
 
-    "etsi_mode4_p100" : {
+    "etsi_constsize_mode4_p100" : {
         "run_sim" : true
     },
 
-    "fixed100ms_mode3_p25" : {
+    "etsi_varsize_mode3_p25" : {
         "run_sim" : true
     },
 
-    "fixed100ms_mode3_p50" : {
+    "etsi_varsize_mode3_p50" : {
         "run_sim" : true
     },
 
-    "fixed100ms_mode3_p75" : {
+    "etsi_varsize_mode3_p75" : {
         "run_sim" : true
     },
 
-    "fixed100ms_mode3_p100" : {
+    "etsi_varsize_mode3_p100" : {
         "run_sim" : true
     },
 
-    "fixed100ms_mode4_p25" : {
+    "etsi_varsize_mode4_p25" : {
         "run_sim" : true
     },
 
-    "fixed100ms_mode4_p50" : {
+    "etsi_varsize_mode4_p50" : {
         "run_sim" : true
     },
 
-    "fixed100ms_mode4_p75" : {
+    "etsi_varsize_mode4_p75" : {
         "run_sim" : true
     },
 
-    "fixed100ms_mode4_p100" : {
+    "etsi_varsize_mode4_p100" : {
         "run_sim" : true
     },
 
-    "fixed300ms_mode3_p25" : {
+    "fixed100ms_constsize_mode3_p25" : {
         "run_sim" : true
     },
 
-    "fixed300ms_mode3_p50" : {
+    "fixed100ms_constsize_mode3_p50" : {
         "run_sim" : true
     },
 
-    "fixed300ms_mode3_p75" : {
+    "fixed100ms_constsize_mode3_p75" : {
         "run_sim" : true
     },
 
-    "fixed300ms_mode3_p100" : {
+    "fixed100ms_constsize_mode3_p100" : {
         "run_sim" : true
     },
 
-    "fixed300ms_mode4_p25" : {
+    "fixed100ms_constsize_mode4_p25" : {
         "run_sim" : true
     },
 
-    "fixed300ms_mode4_p50" : {
+    "fixed100ms_constsize_mode4_p50" : {
         "run_sim" : true
     },
 
-    "fixed300ms_mode4_p75" : {
+    "fixed100ms_constsize_mode4_p75" : {
         "run_sim" : true
     },
 
-    "fixed300ms_mode4_p100" : {
+    "fixed100ms_constsize_mode4_p100" : {
         "run_sim" : true
     },
 
-    "fixed500ms_mode3_p25" : {
+    "fixed100ms_varsize_mode3_p25" : {
         "run_sim" : true
     },
 
-    "fixed500ms_mode3_p50" : {
+    "fixed100ms_varsize_mode3_p50" : {
         "run_sim" : true
     },
 
-    "fixed500ms_mode3_p75" : {
+    "fixed100ms_varsize_mode3_p75" : {
         "run_sim" : true
     },
 
-    "fixed500ms_mode3_p100" : {
+    "fixed100ms_varsize_mode3_p100" : {
         "run_sim" : true
     },
 
-    "fixed500ms_mode4_p25" : {
+    "fixed100ms_varsize_mode4_p25" : {
         "run_sim" : true
     },
 
-    "fixed500ms_mode4_p50" : {
+    "fixed100ms_varsize_mode4_p50" : {
         "run_sim" : true
     },
 
-    "fixed500ms_mode4_p75" : {
+    "fixed100ms_varsize_mode4_p75" : {
         "run_sim" : true
     },
 
-    "fixed500ms_mode4_p100" : {
+    "fixed100ms_varsize_mode4_p100" : {
+        "run_sim" : true
+    },
+    
+    "fixed300ms_constsize_mode3_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_constsize_mode3_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_constsize_mode3_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_constsize_mode3_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_constsize_mode4_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_constsize_mode4_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_constsize_mode4_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_constsize_mode4_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_varsize_mode3_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_varsize_mode3_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_varsize_mode3_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_varsize_mode3_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_varsize_mode4_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_varsize_mode4_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_varsize_mode4_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed300ms_varsize_mode4_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_constsize_mode3_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_constsize_mode3_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_constsize_mode3_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_constsize_mode3_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_constsize_mode4_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_constsize_mode4_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_constsize_mode4_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_constsize_mode4_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_varsize_mode3_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_varsize_mode3_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_varsize_mode3_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_varsize_mode3_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_varsize_mode4_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_varsize_mode4_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_varsize_mode4_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_varsize_mode4_p100" : {
         "run_sim" : true
     }
-
-
-
 }

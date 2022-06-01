@@ -210,14 +210,6 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
     //std::cout << mVehicleDataProvider->station_id() << " ------ " << T_now << endl;
     EV <<"Generating CPM for vehicle: " << mVehicleDataProvider->station_id() << ", at simetime: "<< T_now << endl;
 
-    /*
-    bool en_mode4 = par("enable_mode4");  
-    if(en_mode4)
-        std::cout << "********************* CpService Enabling mode 4 ***********************" << endl;
-    else
-        std::cout << "--------------------- CpService Enabling mode 3 -----------------------" << endl;
-    */
-
     //clearing the objects to send list
     mObjectsToSend.clear();
 
@@ -261,6 +253,14 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 	if(prcvdobjcntr_prsnt || snsrcntr_prsnt ) {
 
 		generateStnAndMgmtCntnr(cpm_msg);
+
+        //Final check for size of the CPM
+        checkCPMSize(T_now, mObjectsToSend, cpm_msg);
+
+        long numObjsent = mObjectsToSend.size();
+        emit(scSignalnumobjCPMsent, numObjsent);
+        //Add object in the list of previously sent
+        updateObjTrackedList(T_now, mObjectsToSend);
 	    
         mLastCpmPosition = mVehicleDataProvider->position();
         mLastCpmSpeed = mVehicleDataProvider->speed();
@@ -330,10 +330,6 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const
 
 	generateASN1Objects(cpm_msg, T_now, mObjectsToSend);
     checkCPMSize(T_now, mObjectsToSend, cpm_msg);
-    long numObjsent = mObjectsToSend.size();
-    emit(scSignalnumobjCPMsent, numObjsent);
-    //Add object in the list of previously sent
-    updateObjTrackedList(T_now, mObjectsToSend);
 
 	return true;
 }
@@ -473,7 +469,15 @@ void CpService::updateObjTrackedList(const omnetpp::SimTime& T_now, ObjectInfo::
  */
 void CpService::checkCPMSize(const SimTime& T_now, ObjectInfo::ObjectsPercievedMap& objToSend, vanetza::asn1::Cpm& cpm){
 	bool removedObject = false;
-	while(cpm.size() > MAXCPMSIZE){
+
+    size_t max_size = MAXCPMSIZE;
+
+    bool en_constsize = par("enable_constsize");  
+    if(en_constsize){
+        max_size = 300;
+    }
+
+	while(cpm.size() > max_size){
 		ObjectInfo::ObjectsPercievedMap::iterator item = objToSend.begin();
 		std::advance(item, std::rand() % objToSend.size());
 		objToSend.erase(item);
@@ -481,8 +485,11 @@ void CpService::checkCPMSize(const SimTime& T_now, ObjectInfo::ObjectsPercievedM
 		removedObject = true;
 	}
 
-	//if(removedObject)
-	//	emit(scSignalRemovedObjExcessiveSize, 1);
+
+	if(removedObject){
+        EV << "Objects were removed to fit the max size: " << max_size << endl;
+        //std::cout << "Objects were removed to fit the max size: " << max_size << endl;
+    }
 }
 
 
