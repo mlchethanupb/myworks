@@ -31,6 +31,38 @@
         "run_sim" : true
     },
 
+    "fixed100ms_mode3_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed100ms_mode3_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed100ms_mode3_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed100ms_mode3_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed100ms_mode4_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed100ms_mode4_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed100ms_mode4_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed100ms_mode4_p100" : {
+        "run_sim" : true
+    },
+
     "fixed300ms_mode3_p25" : {
         "run_sim" : true
     },
@@ -61,6 +93,40 @@
 
     "fixed300ms_mode4_p100" : {
         "run_sim" : true
+    },
+
+    "fixed500ms_mode3_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_mode3_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_mode3_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_mode3_p100" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_mode4_p25" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_mode4_p50" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_mode4_p75" : {
+        "run_sim" : true
+    },
+
+    "fixed500ms_mode4_p100" : {
+        "run_sim" : true
     }
+
+
 
 }
