@@ -249,8 +249,9 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
     EV << "perceived objects present: " << (prcvdobjcntr_prsnt?"true":"false") << endl;
     EV << "sensor objects present: " << (snsrcntr_prsnt?"true":"false") << endl;
 	
-    // Add station and management container and send CPM only if either of perceived objects or sensor container is present. 
-	if(prcvdobjcntr_prsnt || snsrcntr_prsnt ) {
+    // Add station and management container and send CPM only if either of perceived objects or sensor container is present.
+    // Or - if fixed interval is enabled 
+	if(prcvdobjcntr_prsnt || snsrcntr_prsnt || mFixedRate ) {
 
 		generateStnAndMgmtCntnr(cpm_msg);
 
