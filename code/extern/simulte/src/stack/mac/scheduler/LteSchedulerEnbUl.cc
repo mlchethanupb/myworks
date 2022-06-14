@@ -29,9 +29,7 @@ LteSchedulerEnbUl::LteSchedulerEnbUl(LteMacEnbD2D * mac)
 
 LteSchedulerEnbUl::~LteSchedulerEnbUl()
 {
-    if(lcgScheduler_){ //MLC
-        //delete lcgScheduler_;
-    }
+    delete lcgScheduler_;
 }
 
 

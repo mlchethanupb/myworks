@@ -37,12 +37,11 @@ class LteSchedulingGrant : public LteSchedulingGrant_Base
 
     ~LteSchedulingGrant()
     {
-        if (userTxParams != NULL)
-        {   
-            //MLC
-            //delete userTxParams;
-            //userTxParams = NULL;
-        }
+        /*if (userTxParams != NULL)
+        {
+            delete userTxParams;
+            userTxParams = NULL;
+        }*/
     }
 
     LteSchedulingGrant(const LteSchedulingGrant& other) :
@@ -53,7 +52,7 @@ class LteSchedulingGrant : public LteSchedulingGrant_Base
 
     LteSchedulingGrant& operator=(const LteSchedulingGrant& other)
     {
-        if (other.userTxParams != NULL)
+/*        if (other.userTxParams != NULL)
         {
             const UserTxParams* txParams = check_and_cast<const UserTxParams*>(other.userTxParams);
             userTxParams = txParams->dup();
@@ -61,7 +60,7 @@ class LteSchedulingGrant : public LteSchedulingGrant_Base
         else
         {
             userTxParams = 0;
-        }
+        }*/
         grantedBlocks = other.grantedBlocks;
         grantedCwBytes = other.grantedCwBytes;
         direction_ = other.direction_;

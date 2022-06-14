@@ -30,9 +30,7 @@ simple SidelinkResourceAllocation
         double rsrpThreshold=default(-95);  //indBm
         double rssiThreshold = default(-80); //in dBm
         double d2dTxPower =default(26);
-        int numberSubcarriersperPRB = default(12);
-        int numberSymbolsPerSlot=default(7);
-        int bitsPerSymbolQPSK=default(2);
+
         string nodeType;
         @signal[numberSubchannels];
 		@statistic[numberSubchannels](title="Number of subchannels"; source="numberSubchannels"; record=sum,vector);

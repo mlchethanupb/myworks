@@ -19,6 +19,7 @@ class LtePhyEnbD2D : public LtePhyEnb
     friend class DasFilter;
 
     bool enableD2DCqiReporting_;
+    MacNodeId connectedUEId;
 
 protected:
     MacNodeId ueId;

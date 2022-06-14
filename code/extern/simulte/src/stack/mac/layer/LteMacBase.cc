@@ -400,7 +400,7 @@ void LteMacBase::handleMessage(cMessage* msg)
     }
 
     cPacket* pkt = check_and_cast<cPacket *>(msg);
-    EV << "LteMacBase : Received packet " << pkt->getName() <<
+    EV << "LteMacBase : allocation request from UE " << pkt->getName() <<
             " from port " << pkt->getArrivalGate()->getName() << endl;
 
     cGate* incoming = pkt->getArrivalGate();
@@ -408,6 +408,7 @@ void LteMacBase::handleMessage(cMessage* msg)
     if (incoming == down_[IN])
     {
         // message from PHY_to_MAC gate (from lower layer)
+
         emit(receivedPacketFromLowerLayer, pkt);
         fromPhy(pkt);
     }

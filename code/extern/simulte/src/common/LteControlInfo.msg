@@ -101,18 +101,19 @@ class FlowControlInfo extends LteControlInfo {
         int headerSize;                                       // IP + Transport header size (used by pdcp ROHC)
         long duration;
         int priority;
+        bool ipBased;
         simtime_t creationTime;
         
 }
-
-class FlowControlInfoNonIp extends LteControlInfo {
-        //# Non-IP control Information
-        int priority;
-        long duration;
-        long srcAddr;  //destination port
-        long dstAddr; //destination port
-        simtime_t creationTime;
-}
+//
+//class FlowControlInfoNonIp extends LteControlInfo {
+//        //# Non-IP control Information
+//        int priority;
+//        long duration;
+//        long srcAddr;  //destination port
+//        long dstAddr; //destination port
+//        simtime_t creationTime;
+//}
 
 
 

@@ -176,7 +176,7 @@ void RadioDriver::handleMessage(cMessage* msg){
 
 void RadioDriver::handleDataIndication(cMessage* packet)
 {
-    auto* lteControlInfo = check_and_cast<FlowControlInfoNonIp*>(packet->removeControlInfo());
+    auto* lteControlInfo = check_and_cast<FlowControlInfo*>(packet->removeControlInfo());
     auto* indication = new GeoNetIndication();
     indication->source = convert(lteControlInfo->getSrcAddr());
     indication->destination = convert(lteControlInfo->getDstAddr());
@@ -193,7 +193,7 @@ void RadioDriver::handleDataRequest(cMessage* packet)
     using vanetza::units::si::seconds;
 
     auto request = check_and_cast<GeoNetRequest*>(packet->removeControlInfo());
-    auto lteControlInfo = new FlowControlInfoNonIp();
+    auto lteControlInfo = new FlowControlInfo();
 
     lteControlInfo->setSrcAddr(convert(request->source_addr));
     lteControlInfo->setDstAddr(convert(request->destination_addr));

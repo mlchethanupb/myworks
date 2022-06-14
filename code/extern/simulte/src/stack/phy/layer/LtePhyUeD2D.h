@@ -16,7 +16,7 @@
 #include "common/LteCommon.h"
 #include "stack/phy/layer/LtePhyEnbD2D.h"
 #include "control/packet/RRCStateChange_m.h"
-
+#include "stack/phy/packet/TxStatus_m.h"
 
 class LtePhyUeD2D : public LtePhyUe
 {
@@ -38,7 +38,11 @@ protected:
     double bestRsrpMean_;
     bool frameSent;
     double rsrpMean;
-        double rssiMean;
+    double rssiMean;
+    int numSubsequentReceptions;
+    int rriFutureReceptions;
+    std::vector<std::tuple<double,int>>reserveSubframesReception;
+
 
     std::vector<std::tuple<double, int, int>> optimalCSRs;
     std::vector<LteAirFrame*> d2dReceivedFrames_;
@@ -47,9 +51,10 @@ protected:
 
     simsignal_t subchannelsUsed;
 
-    void storeAirFrame(LteAirFrame* newFrame);
-    LteAirFrame* extractAirFrame();
+    //void storeAirFrame(LteAirFrame* newFrame);
+    // LteAirFrame* extractAirFrame();
     void decodeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo);
+    void decodeSci(LteAirFrame* frame, UserControlInfo* lteInfo);
     virtual void initialize(int stage);
     virtual void finish();
     virtual void handleAirFrame(cMessage* msg);
@@ -86,13 +91,15 @@ public:
         this->rssiMean = rssiMean;
     }
 
-   LteAirFrame*& getSciframe()  {
+    LteAirFrame*& getSciframe()  {
         return sciframe;
     }
 
     void setSciframe( LteAirFrame *&sciframe) {
         this->sciframe = sciframe;
     }
+
+
 };
 
 #endif  /* _LTE_AIRPHYUED2D_H_ */

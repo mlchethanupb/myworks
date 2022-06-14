@@ -13,21 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-//
-// TODO generated message class
-//
 
-//Sidelink control information format I
+packet TxStatus{
+int numberTransmissions;
 
-packet SidelinkControlInformation {
-    
-    unsigned int priority;
-    unsigned int resourceReservationInterval;
-    unsigned int frequencyResourceLocation;
-    unsigned int timeGapRetrans;
-    unsigned int mcs;
-    unsigned int retransmissionIndex;
-    unsigned int cResel;
-   
-   
 }

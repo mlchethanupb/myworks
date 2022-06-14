@@ -132,7 +132,7 @@ void LteMacEnbD2D::handleMessage(cMessage* msg)
         mode3Grant->setFirstTransmission(true);
         SPSResourcePoolMode3* csr = new SPSResourcePoolMode3("CSRMode3");
         csr->setCSRs(CSRs);
-        csr->setMode3grant(mode3Grant);
+        csr->setMode3grant(pkt->getGrant()); //Updated grant after allocating CSR
         EV<<"UEId: "<<ueId<<endl;
         csr->setDestId(ueId);
         send(csr,down_[OUT]);
@@ -599,6 +599,7 @@ void LteMacEnbD2D::fromPhy(cPacket *pkt)
 
     if (userInfo->getFrameType()==MODE3GRANTREQUEST)
     {
+
         handleSidelinkGrantRequest(pkt);
     }
 
@@ -607,8 +608,11 @@ void LteMacEnbD2D::fromPhy(cPacket *pkt)
         DataArrival * datapkt = check_and_cast<DataArrival*>(pkt);
         SidelinkConfiguration* slConfig = check_and_cast<SidelinkConfiguration*>(getParentModule()->getSubmodule("mode3config"));
         ueId = userInfo->getSourceId();
+        EV<<"Size of DataArrival: "<<datapkt->getDataSize()<<endl;
+
         slConfig->assignGrantToData(datapkt, "RRC_CONN");
-        handleSidelinkGrantRequest(datapkt);
+
+
     }
 
     else
@@ -619,6 +623,7 @@ void LteMacEnbD2D::fromPhy(cPacket *pkt)
 
 void LteMacEnbD2D::handleSidelinkGrantRequest(cPacket* pkt)
 {
+
     // extract pdus from all harqrxbuffers and pass them to unmaker
     unsigned int purged =0;
     HarqRxBuffers::iterator hit = harqRxBuffers_.begin();
@@ -647,7 +652,7 @@ void LteMacEnbD2D::handleSidelinkGrantRequest(cPacket* pkt)
 
     }
 
-    else if (mode3Grant->getPeriodic() && mode3Grant->getStartTime() <= NOW)
+/*    else if (mode3Grant->getPeriodic() && mode3Grant->getStartTime() <= NOW)
     {
 
         // Periodic checks
@@ -656,14 +661,13 @@ void LteMacEnbD2D::handleSidelinkGrantRequest(cPacket* pkt)
         {
             // Gotten to the point of the final tranmission must determine if we reselect or not.
             double randomReReserve = dblrand(1);
-            if (randomReReserve > slConfig->probResourceKeep_)
-            {
+
                 EV<<"Random reserve"<<endl;
                 int expiration = intuniform(5, 15, 3);
                 mode3Grant -> setResourceReselectionCounter(expiration);
                 mode3Grant -> setFirstTransmission(true);
                 expirationCounter_ = expiration * mode3Grant->getPeriod();
-            }
+
         }
         if (--periodCounter_>0 && !mode3Grant->getFirstTransmission())
         {
@@ -677,14 +681,16 @@ void LteMacEnbD2D::handleSidelinkGrantRequest(cPacket* pkt)
         }
         else if (slConfig->expirationCounter_ <= 0)
         {
-            emit(slConfig->grantBreak, 1);
+
             mode3Grant->setExpiration(0);
             slConfig->expiredGrant_ = true;
         }
-    }
+    }*/
 
     bool requestSdu = false;
 
+    EV<<"Mode 3 grant: "<<mode3Grant<<endl;
+    EV<<"Mode 3 grant start time: "<<mode3Grant->getStartTime()<<endl;
     if (mode3Grant!=NULL && mode3Grant->getStartTime() <= NOW) // if a grant is configured
     {
 
@@ -753,14 +759,15 @@ void LteMacEnbD2D::handleSidelinkGrantRequest(cPacket* pkt)
         if(!retx && !availablePdu)
         {
             EV<<"retx available"<<endl;
-            EV<<"Sl Scheduler: "<<LteSchedulerEnbSl_<<endl;
+            EV<<"Sl Scheduler: "<<LteSchedulerEnbSl_<<mode3Grant<<endl;
+
+            throw cRuntimeError("LteMacEnbD2D::handleSidelinkGrantRequest");
 
             scheduleList_= LteSchedulerEnbSl_->schedule(mode3Grant);
 
             macSduRequest();
 
 
-            //throw cRuntimeError("LteMacEnbD2D::handleSidelinkGrantRequest");
 
 
             /* if (!sent)

@@ -38,17 +38,17 @@ protected:
     {
         delete lteInfo;
     }
-    void handleControlInfo(cPacket* upPkt, FlowControlInfoNonIp* lteInfo)
+/*    void handleControlInfo(cPacket* upPkt, FlowControlInfoNonIp* lteInfo)
     {
         delete lteInfo;
-    }
+    }*/
 
     virtual MacNodeId getDestId(FlowControlInfo* lteInfo);
-    MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
+   /* MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
     {
         // UE is subject to handovers: master may change
         return binder_->getNextHop(nodeId_);
-    }
+    }*/
 
     Direction getDirection(MacNodeId destId)
     {

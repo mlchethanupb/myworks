@@ -14,7 +14,7 @@ class SPSResourcePool: public SPSResourcePool_Base
 
     std::vector<std::tuple<double, int, double>> CSRs;
     int allocatedBlocksSCIandDataPrevious;
-
+    LteSidelinkGrant* grant;
   public:
 
     SPSResourcePool(const char *name = NULL, int kind = 0) :
@@ -35,6 +35,7 @@ class SPSResourcePool: public SPSResourcePool_Base
     {
         CSRs = other.CSRs;
         allocatedBlocksSCIandDataPrevious = other.allocatedBlocksSCIandDataPrevious;
+        grant= other.grant;
         SPSResourcePool_Base::operator=(other);
         return *this;
     }
@@ -62,6 +63,14 @@ class SPSResourcePool: public SPSResourcePool_Base
     void setAllocatedBlocksScIandDataPrevious(int allocatedBlocksScIandDataPrevious)
     {
         allocatedBlocksSCIandDataPrevious = allocatedBlocksScIandDataPrevious;
+    }
+
+    LteSidelinkGrant*& getGrant()  {
+        return grant;
+    }
+
+    void setGrant( LteSidelinkGrant *&grant) {
+        this->grant = grant;
     }
 };
 

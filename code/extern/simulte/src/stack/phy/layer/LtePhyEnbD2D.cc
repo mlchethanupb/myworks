@@ -168,10 +168,23 @@ void LtePhyEnbD2D::handleAirFrame(cMessage* msg)
     if (lteInfo->getFrameType() == DATAARRIVAL)
     {
         DataArrival* datapkt = check_and_cast<DataArrival*>(frame->decapsulate());
+        connectedUEId = lteInfo->getSourceId();
         EV<<"Source id: "<<lteInfo->getSourceId()<<endl;
         datapkt->setControlInfo(lteInfo);
         send(datapkt,upperGateOut_);
         return;
+    }
+    if (lteInfo->getFrameType() == TXSTATUS)
+    {
+        EV<<"Received TXSTATUS update from UE ..."<<endl;
+        SidelinkResourceAllocation* sra = check_and_cast<SidelinkResourceAllocation*>(getParentModule()->getSubmodule("mode3"));
+        cResel = sra->getReselectionCounter();
+        cResel = cResel-1;
+        EV<<"Resel TxStatus: "<<sra->getReselectionCounter()<<endl;
+
+        sra->setReselectionCounter(cResel);
+        EV<<"Resel TxStatus update: "<<sra->getReselectionCounter()<<endl;
+        //throw cRuntimeError("TXSTATUS");
     }
 
     // Check if the frame is for us ( MacNodeId matches or - if this is a multicast communication - enrolled in multicast group)
@@ -297,16 +310,20 @@ void LtePhyEnbD2D::handleUpperMessage(cMessage* msg)
         sciframe = sra->createSCIMessage(msg,grant);
         EV<<"LtePhyEnbD2D::handleUpperMessage received sidelink grant"<<grant->getTransmitBlockSize()<<endl;
         sra->handleUpperMessage(grant);
+
         //SCI
         UserControlInfo* uinfo = check_and_cast<UserControlInfo*>(sciframe->removeControlInfo());
 
         uinfo->setSourceId(nodeId_);
-        uinfo->setDestId(connectedNodeId_);
-        EV<<"sender module: "<< connectedNodeId_<<endl;
+        uinfo->setDestId(connectedUEId);
+
+        EV<<"destination module: "<< connectedUEId<<endl;
         sciframe->setControlInfo(uinfo);
         sciframe->setSchedulingPriority(airFramePriority_);
-        OmnetId destOmnetId = binder_->getOmnetId(connectedNodeId_);
+
+        EV<<"eNodeB sending SCI frame to UE: "<<sciframe<<endl;
         sendUnicast(sciframe);
+
         return;
     }
 
@@ -326,6 +343,7 @@ void LtePhyEnbD2D::handleUpperMessage(cMessage* msg)
         frame->setControlInfo(uinfo);
         frame->setSchedulingPriority(airFramePriority_);
         OmnetId destOmnetId = binder_->getOmnetId(csr->getDestId());
+        EV<<"dest id: "<<destOmnetId<<endl;
         sendUnicast(frame);
 
         return;

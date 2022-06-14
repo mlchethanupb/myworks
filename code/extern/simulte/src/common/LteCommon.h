@@ -503,6 +503,7 @@ enum LtePhyFrameType
     DATAARRIVAL,
     SIB21REQUESTPKT,
     SCIPKT,
+    TXSTATUS,
     D2DMODESWITCHPKT,
     UNKNOWN_TYPE
 };
@@ -527,6 +528,7 @@ const LtePhyFrameTable phytypes[] = {
     ELEM(CSR),
     ELEM(CSRPKT),
     ELEM(SCIPKT),
+    ELEM(TXSTATUS),
     ELEM(D2DMODESWITCHPKT),
     ELEM(UNKNOWN_TYPE)
 };

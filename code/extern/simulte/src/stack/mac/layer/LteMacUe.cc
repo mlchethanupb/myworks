@@ -907,7 +907,7 @@ void LteMacUe::updateUserTxParam(cPacket* pkt)
     EV<<"LteMacUe::updateUserTxParam"<<endl;
     if (strcmp(pkt->getName(), "newDataPkt")== 0)
     {
-        FlowControlInfoNonIp* nipInfo = check_and_cast<FlowControlInfoNonIp*>(pkt->getControlInfo());
+        FlowControlInfo* nipInfo = check_and_cast<FlowControlInfo*>(pkt->getControlInfo());
 
         return;
     }

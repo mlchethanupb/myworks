@@ -86,10 +86,8 @@ public:
     int selectionWindowStartingSubframe_;
     int thresholdRSSI_;
     bool transmitting_;
-    int numberSubcarriersperPRB;
-    int numberSymbolsPerSlot;
-    int bitsPerSymbolQPSK;
     int numberPRBTransmitBlock;
+
     int subChRBStart_;
     int numberPRBSCI;
     int sciFlag;
@@ -118,7 +116,8 @@ public:
     double FirstTransmission;
     int pcCountMode4;
     bool packetDrop;
-
+    int grantExpiryCounter;
+    std::vector<double> futureTransmissions;
     //Sensing window parameters
 
     simtime_t subframeTime ;
@@ -226,7 +225,7 @@ public:
 public:
     SidelinkResourceAllocation();
     virtual ~SidelinkResourceAllocation();
-    std::vector<int> getallocationTBIndex(int bitLength,   std::vector<int>);
+    std::vector<int> getallocationTBIndex(int bitLength,   std::vector<int>, int rb);
     int getReselectionCounter() const
     {
         return cResel;
