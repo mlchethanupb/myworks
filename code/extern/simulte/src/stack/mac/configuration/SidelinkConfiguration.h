@@ -97,6 +97,8 @@ protected:
     bool firstTx;
 
     // All of the following should be configurable by the OMNet++ ini file and maybe even taken from higher layers if that's possible.
+    
+    int resourceReservationInterval_;
     double probResourceKeep_;
     int restrictResourceReservationPeriod;
     int minSubchannelNumberPSSCH_;
@@ -253,6 +255,14 @@ public:
      * Purges PDUs from the HARQ buffers for sending to the PHY layer.
      */
     void flushHarqBuffers(HarqTxBuffers harqTxBuffers_, LteSidelinkGrant*);
+    int getResourceReservationInterval()  {
+        return resourceReservationInterval_;
+    }
+
+    void setResourceReservationInterval(int resourceReservationInterval) {
+        resourceReservationInterval_ = resourceReservationInterval;
+    }
+
     void setAllocatedBlocksSCIandData(int totalGrantedBlocks);
     int getAllocatedBlocksSCIandData()
     {

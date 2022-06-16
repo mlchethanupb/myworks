@@ -59,6 +59,8 @@ void SidelinkConfiguration::initialize(int stage)
     if (stage == inet::INITSTAGE_LOCAL)
     {
         EV<<"SidelinkConfiguration::initialize, stage: "<<stage<<endl;
+        resourceReservationInterval_ = par("resourceReservationInterval");
+        EV<<"RRI: "<<        resourceReservationInterval_<<endl;
         parseUeTxConfig(par("txConfig").xmlValue());
         parseCbrTxConfig(par("txConfig").xmlValue());
         parseRriConfig(par("txConfig").xmlValue());
@@ -783,6 +785,7 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
 
     // Priority is the most difficult part to figure out, for the moment I will assign it as a fixed value
     slGrant -> setSpsPriority(priority);
+    slGrant -> setRri(resourceReservationInterval_); //resource reservation interval/Prsvp_TX
     slGrant -> setPeriod(restrictResourceReservationPeriod * 100); //resource reservation interval/Prsvp_TX
     maximumLatency = intuniform(20,100);  //Uniformly varies between 20 ms and 100 ms
     slGrant -> setMaximumLatency(maximumLatency);
@@ -840,7 +843,9 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
 
     slGrant -> setResourceReselectionCounter(resourceReselectionCounter_);
     slGrant -> setExpiration(resourceReselectionCounter_ * restrictResourceReservationPeriod);
+    slGrant -> setExpiryTime(NOW.dbl()+0.1*(resourceReselectionCounter_-1));    
     slGrant->setTransmitBlockSize(tbSize);
+    slGrant->setRri(resourceReservationInterval_);
 
     LteSidelinkGrant* phyGrant = slGrant;
 

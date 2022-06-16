@@ -26,6 +26,7 @@ simple SidelinkConfiguration
         
         //# TODO: Change this to use xmldoc to fill in these params as it's more complex than this.
         xml txConfig;
+        int resourceReservationInterval = 100; // in ms variable RRI allowed for 5G
         int restrictResourceReservationperiod = default(1);
         int maximumLatency = default(100);
         int minSubchannelNumberPSSCH = default(1);

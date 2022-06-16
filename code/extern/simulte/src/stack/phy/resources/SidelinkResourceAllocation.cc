@@ -453,6 +453,7 @@ std::vector<int>  SidelinkResourceAllocation::getallocationSciIndex(int subChRBS
 
 void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeType nodeType_) {
     candidateSubframes.clear();
+    futureTransmissions.clear();
     //Re-allocate subchannels and subframes
     RBIndicesSCI.clear();
     RBIndicesData.clear();
@@ -680,6 +681,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
     EV<<"Start time grant: "<<grant->getStartTime()<<endl;
     EV<<"Next arrival grant: "<<grant->getNextArrival()<<endl;
 
+
 /*
     if ((grant->getStartTime()>grant->getNextArrival())||(grant->getStartTime().dbl() < selStartTime.dbl()))
     {
@@ -695,11 +697,21 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
     }
 */
 
+    for(int j=0;j<cResel;j++)
+    {
+
+        EV<<"Storing future message arrivals: "<<j*grant->getRri()<<endl;
+        futureTransmissions.push_back(round((NOW.dbl()+j*0.1)*1000.0)/1000.0);
+        grant->setGrantSubsequent(futureTransmissions);
+    }
+
+
 
     // Send the packet up to the MAC layer where it will choose the CSR and the retransmission if that is specified
     // Need to generate the message that is to be sent to the upper layers.
     SPSResourcePool* candidateResourcesMessage = new SPSResourcePool("CSRs");
     candidateResourcesMessage->setCSRs(optimalCSRs);
+    candidateResourcesMessage->setGrant(grant);
     LtePhyBase* phy=check_and_cast<LtePhyBase*>(getParentModule()->getSubmodule("phy"));
     phy->sendUpperPackets(candidateResourcesMessage);
 

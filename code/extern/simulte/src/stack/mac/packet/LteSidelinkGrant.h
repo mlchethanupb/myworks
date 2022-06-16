@@ -38,13 +38,16 @@ protected:
     unsigned int mcs;
     unsigned int retransSubchannel; // It is possible the retransmission has different resources assigned to it.
     unsigned int resourceReselectionCounter;
+    int rri;
     int transmitBlockSize;
     unsigned int periodCounter;
     unsigned int expirationCounter;
+    double expiryTime;
     int packetId;
     int CAMId;
     MacNodeId destId;
     double nextArrival;
+    std::vector<double> grantSubsequent;
 
 
 public:
@@ -53,11 +56,13 @@ public:
         LteSchedulingGrant(name, kind)
     {
         numSubchannels = 0;
+        rri = 0;
         spsPriority = 0;
         maximumLatency = 0.0;
         timeGapTransRetrans = 0;
         startingSubchannel = 0;
         mcs = 0;
+        expiryTime = 0.0;
         retransSubchannel = 0;
         resourceReselectionCounter = 0;
         firstTransmission = true;
@@ -65,6 +70,7 @@ public:
         packetId = 0;
         CAMId = 0;
         nextArrival = 0.0;
+        grantSubsequent.clear();
     }
 
 
@@ -94,12 +100,15 @@ public:
         retransSubchannel = other.retransSubchannel;
         resourceReselectionCounter = other.resourceReselectionCounter;
         possibleRRIs = other.possibleRRIs;
+        rri = other.rri;
         destId = other.destId;
         periodCounter = other.periodCounter;
         expirationCounter = other.expirationCounter;
+        expiryTime = other.expiryTime;
         packetId = other.packetId;
         CAMId  = other.CAMId;
         nextArrival = other.nextArrival;
+        grantSubsequent = other.grantSubsequent;
         LteSchedulingGrant::operator=(other);
         return *this;
     }
@@ -264,6 +273,33 @@ public:
     void setNextArrival(double nextArrival) {
         this->nextArrival = nextArrival;
     }
+
+    int getRri()  {
+        return rri;
+    }
+
+    void setRri(int rri) {
+        this->rri = rri;
+    }
+
+    double getExpiryTime()  {
+        return expiryTime;
+    }
+
+    void setExpiryTime(double expiryTime) {
+        this->expiryTime = expiryTime;
+    }
+
+     std::vector<double>& getGrantSubsequent()  {
+        return grantSubsequent;
+    }
+
+    void setGrantSubsequent( std::vector<double> &grantSubsequent) {
+        this->grantSubsequent = grantSubsequent;
+    }
+
+
+
 };
 
 
