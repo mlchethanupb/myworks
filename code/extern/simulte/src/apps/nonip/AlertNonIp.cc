@@ -94,14 +94,14 @@ void AlertNonIp::handleSelfMessage(cMessage* msg)
 
         nextSno_++;
 
-        auto lteControlInfo = new FlowControlInfo();
+        auto lteControlInfo = new FlowControlInfoNonIp();
 
         lteControlInfo->setSrcAddr(nodeId_);
         lteControlInfo->setDirection(D2D_MULTI);
         lteControlInfo->setPriority(priority_);
         lteControlInfo->setDuration(duration_);
         lteControlInfo->setCreationTime(simTime());
-        lteControlInfo->setIpBased(false);
+
         packet->setControlInfo(lteControlInfo);
 
       NonIpBase::sendLowerPackets(packet);

@@ -176,7 +176,7 @@ protected:
      * @param lteInfo Control Info
      */
     virtual void handleControlInfo(cPacket* pkt, FlowControlInfo* lteInfo) = 0;
-    //virtual void handleControlInfo(cPacket* pkt, FlowControlInfoNonIp* lteInfo) = 0;
+    virtual void handleControlInfo(cPacket* pkt, FlowControlInfoNonIp* lteInfo) = 0;
     /**
      * getDestId() retrieves the id of destination node according
      * to the following rules:
@@ -191,7 +191,7 @@ protected:
      * @param lteInfo Control Info
      */
     virtual MacNodeId getDestId(FlowControlInfo* lteInfo) = 0;
-    //virtual MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)=0;
+    virtual MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)=0;
 
     /**
      * getDirection() is used only on UEs and ENODEBs:
@@ -202,7 +202,7 @@ protected:
      */
     virtual Direction getDirection() = 0;
     void setTrafficInformation(cPacket* pkt, FlowControlInfo* lteInfo);
-    //void setTrafficInformation(cPacket* pkt, FlowControlInfoNonIp* nonIpInfo);
+    void setTrafficInformation(cPacket* pkt, FlowControlInfoNonIp* nonIpInfo);
     /*
      * Upper Layer Handlers
      */
@@ -274,20 +274,20 @@ protected:
     {
         delete lteInfo;
     }
-   /* void handleControlInfo(cPacket* upPkt, FlowControlInfoNonIp* lteInfo)
+    void handleControlInfo(cPacket* upPkt, FlowControlInfoNonIp* lteInfo)
     {
         delete lteInfo;
-    }*/
+    }
     MacNodeId getDestId(FlowControlInfo* lteInfo)
     {
         // UE is subject to handovers: master may change
         return binder_->getNextHop(nodeId_);
     }
-  /*  MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
+    MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
     {
         // UE is subject to handovers: master may change
         return binder_->getNextHop(nodeId_);
-    }*/
+    }
     Direction getDirection()
     {
         // Data coming from Dataport on UE are always Uplink
@@ -305,11 +305,11 @@ protected:
     {
         delete lteInfo;
     }
-    /*void handleControlInfo(cPacket* upPkt, FlowControlInfoNonIp* lteInfo)
+    void handleControlInfo(cPacket* upPkt, FlowControlInfoNonIp* lteInfo)
     {
         delete lteInfo;
     }
-*/
+
     MacNodeId getDestId(FlowControlInfo* lteInfo)
     {
         // dest id
@@ -322,11 +322,11 @@ protected:
         } // else ue is directly attached
         return destId;
     }
-   /* MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
+    MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
     {
         // TODO: Not necessary for my current experiments, so not going to implement, but in essence need a means of getting macNodeId from dstAddr
         return 0;
-    }*/
+    }
 
 
     Direction getDirection()
@@ -346,12 +346,10 @@ protected:
         upPkt->setControlInfo(lteInfo);
     }
 
-/*
     void handleControlInfo(cPacket* upPkt, FlowControlInfoNonIp* lteInfo)
     {
         upPkt->setControlInfo(lteInfo);
     }
-*/
 
     MacNodeId getDestId(FlowControlInfo* lteInfo)
     {
@@ -359,11 +357,11 @@ protected:
         return getBinder()->getMacNodeId(IPv4Address(lteInfo->getDstAddr()));
     }
 
-/*    MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
+    MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
     {
         // TODO: Impement this if we need a means of getting macNodeId from nonIp packet dstAddr, realistically we will need this, but currently not an issue.
         return 0;
-    }*/
+    }
 
     // Relay doesn't set Traffic Information
     void setTrafficInformation(FlowControlInfo* lteInfo)
@@ -394,20 +392,20 @@ protected:
     {
         upPkt->setControlInfo(lteInfo);
     }
-/*    void handleControlInfo(cPacket* upPkt, FlowControlInfoNonIp* lteInfo)
+    void handleControlInfo(cPacket* upPkt, FlowControlInfoNonIp* lteInfo)
     {
         upPkt->setControlInfo(lteInfo);
-    }*/
+    }
     MacNodeId getDestId(FlowControlInfo* lteInfo)
     {
         // packet arriving from UE, send to master
         return destId_;
     }
-/*    MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
+    MacNodeId getDestId(FlowControlInfoNonIp* lteInfo)
     {
         // packet arriving from UE, send to master
         return destId_;
-    }*/
+    }
 
 
     // Relay doesn't set Traffic Information

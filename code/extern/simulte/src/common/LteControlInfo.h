@@ -11,7 +11,6 @@
 #define _LTE_LTECONTROLINFO_H_
 
 #include "common/LteControlInfo_m.h"
-#include "common/LteCommon.h"
 #include <vector>
 
 class UserTxParams;
@@ -34,7 +33,6 @@ class UserControlInfo : public UserControlInfo_Base
     //Move senderMovement;
     /** @brief The playground position of the sending host.*/
     inet::Coord senderCoord;
-    LteNodeType nodeType_;
 
   public:
 
@@ -103,14 +101,6 @@ class UserControlInfo : public UserControlInfo_Base
     FeedbackRequest feedbackReq;
     void setCoord(const inet::Coord& coord);
     inet::Coord getCoord() const;
-
-    LteNodeType getNodeType()  {
-        return nodeType_;
-    }
-
-    void setNodeType(LteNodeType nodeType) {
-        nodeType_ = nodeType;
-    }
 };
 
 Register_Class(UserControlInfo);

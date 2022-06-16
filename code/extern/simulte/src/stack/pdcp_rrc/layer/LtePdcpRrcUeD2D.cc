@@ -201,6 +201,9 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
         ipInfo->setPktId(retrievedPktId);
         EV<<"Retrieved packetId: "<<retrievedPktId<<endl;
 
+
+
+
         // set some flow-related info
         ipInfo->setLcid(mylcid);
         ipInfo->setSourceId(nodeId_);
@@ -235,7 +238,7 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
     {
         binder_->BroadcastUeInfo.clear();
         // NonIp flow
-        FlowControlInfo* nonIpInfo = check_and_cast<FlowControlInfo*>(pkt->removeControlInfo());
+        FlowControlInfoNonIp* nonIpInfo = check_and_cast<FlowControlInfoNonIp*>(pkt->removeControlInfo());
 
         setTrafficInformation(pkt, nonIpInfo);
         long dstAddr = nonIpInfo->getDstAddr();
@@ -316,6 +319,49 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
             }
 
             EV<<"Number of neighbours SL broadcast: "<<binder_->BroadcastUeInfo.size()<<endl;
+
+            /*          int k1= ueCoords.size();
+
+            EV<<"Number of UEs in simulation: "<<ueCoords.size()<<endl;
+            std::map<MacNodeId,inet::Coord>::iterator itb = binder_->BroadcastUeInfo.begin();
+            EV<<"BroadcastUeInfo size: "<<binder_->BroadcastUeInfo.size()<<endl;
+            inet::Coord sourceCoord =binder_->BroadcastUeInfo.find(sourceId)->second;
+            EV<<"Source coordinates: "<<sourceCoord<<endl;
+
+            for(; itb != binder_->BroadcastUeInfo.end(); ++itb)
+            {
+                distance = itb->second.distance(sourceCoord);
+
+                EV<<"Distance: "<<distance<<endl;
+                EV<<"Connected: "<<binder_->isNodeRegisteredInSimlation()<<endl;
+
+                if((distance !=0 && distance<=100) && binder_->isNodeRegisteredInSimlation()==true)
+                {
+                    EV<<"Sensing neighbours"<<endl;
+                    MacNodeId ueid = itb->first;
+                    binder_->BroadcastUeInfo[ueid]=itb->second;
+
+                    nonIpInfo->setDestId(ueid);
+                }
+
+                else if (distance ==0 || distance > 100)
+                {
+                    EV<<"EGO vehicle itself"<<endl;
+                    //binder_->BroadcastUeInfo.erase(itb);
+                    nonIpInfo->setDestId(nodeId_);
+
+                }
+                else
+                {
+                    EV<<"distance: "<<distance <<endl;
+                    //throw cRuntimeError("Invalid nodes in the simulation");
+                }
+
+            }*/
+
+            //EV<<"BroadcastUeInfo size final : "<<binder_->BroadcastUeInfo.size()<<endl;
+
+
 
         }
 

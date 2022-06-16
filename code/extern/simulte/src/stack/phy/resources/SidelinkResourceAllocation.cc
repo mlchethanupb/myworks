@@ -58,7 +58,9 @@ void SidelinkResourceAllocation::initialize(int stage)
         subchannelSize_ = par("subchannelSize");
         d2dDecodingTimer_ = NULL;
         transmitting_ = false;
-
+        numberSubcarriersperPRB = par ("numberSubcarriersperPRB");
+        numberSymbolsPerSlot = par("numberSymbolsPerSlot");
+        bitsPerSymbolQPSK = par ("bitsPerSymbolQPSK");
         //int thresholdRSSI = 50;
         subChRBStart_ = par ("subChRBStart");
         //thresholdRSSI_ = (-112 + 2 * thresholdRSSI);
@@ -106,7 +108,6 @@ void SidelinkResourceAllocation::initialize(int stage)
         pcCountMode4 = 0;
         packetDrop = false;
 
-
     }
     else if (stage == inet::INITSTAGE_NETWORK_LAYER_2)
     {
@@ -147,43 +148,89 @@ void SidelinkResourceAllocation::handleUpperMessage(cMessage* msg)
     EV<<"SidelinkResourceAllocation::handleUpperMessage: "<<msg->getName()<<endl;
     UserControlInfo* lteInfo = check_and_cast<UserControlInfo*>(msg->removeControlInfo());
 
-
+    /*    if (msg->isName("LteMode4Grant") )
+    {
+        nodeType_ = UE;}
+    else if ( msg->isName("LteMode3Grant"))
+    {
+        nodeType_ = ENODEB;
+    }*/
 
     if (lteInfo->getFrameType() == SIDELINKGRANT)
     {
         // Generate CSRs or save the grant use when generating SCI information
         LteSidelinkGrant* grant = check_and_cast<LteSidelinkGrant*>(msg);
-        if (grant->isFreshAllocation()==true)
-        {
-            cResel = grant->getResourceReselectionCounter();
-        }
-        else if  (grant->isFreshAllocation()==false)
-        {
-            cResel = getReselectionCounter(); // Decremented by UE/eNodeB
-        }
-        else
-        {
-            cResel =0;
-        }
-
-        sciGrant_ = grant;
+        /*            for (int i=0; i<numSubchannels_; i++)
+            {
+                // Mark all the subchannels as not sensed
+                sensingWindow_[sensingWindowFront_][i]->setSensed(false);
+            }*/
+        cResel = getReselectionCounter();
+        setReselectionCounter(cResel);
+        EV<<"Number of previously granted blocks: "<<getAllocatedBlocksPrevious()<<"previous cResel: "<<cResel<<endl;
 
         EV<<"Node type: "<<nodeType_<<endl;
         //Mode 4
-        if (nodeType_ ==UE)
+        if (nodeType_ ==UE )
         {
-            EV<<"Allocating CSRs in unmanaged mode"<<endl;
+
+            if (getAllocatedBlocksPrevious() > 0 && cResel>0)
+            {
+
+                //Check if data size fits into previously allocated TB size
+                int numberSymbolsPerPRB= numberSubcarriersperPRB*numberSymbolsPerSlot*bitsPerSymbolQPSK;
+                int numberSymbolsTransmitBlock = grant->getTransmitBlockSize()/bitsPerSymbolQPSK;
+                numberPRBTransmitBlock = (numberSymbolsTransmitBlock/numberSymbolsPerPRB)+1;
+                int numberPRBNeeded =   numberPRBTransmitBlock+2; //SCI+TB
+
+                if (numberPRBNeeded<=getAllocatedBlocksPrevious()) //" RBs for SCI
+                {
+                    //Use previous subchannels for the current subframes
+                    RBIndicesData =  getPreviousSubchannelsData();
+                    EV<<"Using previously allocated subchannels for data and SCI"<<  RBIndicesData.size()<<endl;
+                    //determine the subframe
+                    computeCSRs(grant,nodeType_);
+
+                    return;
+                }
+                if (numberPRBNeeded>getAllocatedBlocksPrevious()) //" RBs for SCI
+                {
+                    EV<<"Data size does not fit into previous allocation, need for re-allocation"<<endl;
+
+                    //Reset counter and previous allocations
+                    cResel=0;
+                    //setReselectionCounter(cResel);
+                    setAllocatedBlocksPrevious(0);
+                    computeCSRs(grant,nodeType_);
+                    return;
+                }
+                return;
+
+            }
+            //This if loop should check for cResel - alloctaion for first time and re-allocation based on cResel
+            if (getAllocatedBlocksPrevious() == 0 || cResel==0)
+            {
+                // Generate a vector of CSRs and send it to the MAC layer
+                EV<<"Calling computeSCRs()"<<grant->getTransmitBlockSize()<<endl;
+                computeCSRs(grant,nodeType_);
+                //delete lteInfo;
+                //delete grant;
+                sciGrant_ = grant;
+                lteInfo->setUserTxParams(sciGrant_->getUserTxParams());
+                lteInfo->setGrantedBlocks(sciGrant_->getGrantedBlocks());
+                lteInfo->setDirection(D2D_MULTI);
+                return;
+            }
+        }
+
+        //Mode 3
+        if (nodeType_==ENODEB)
+        {
+            EV<<"Sidelink resource allocation according to mode 3"<<endl;
             computeCSRs(grant,nodeType_);
+            return;
         }
-        else if (nodeType_ == ENODEB)
-        {
-            EV<<"Allocating CSRs in managed mode by eNodeB"<<endl;
-            computeCSRs(grant,nodeType_);
-        }
-        else
-        {
-            throw cRuntimeError("Invalid type of UE in simulation");
-        }
+
 
 
     }
@@ -194,7 +241,7 @@ void SidelinkResourceAllocation::handleUpperMessage(cMessage* msg)
     }
     else
     {
-        throw cRuntimeError("Invalid frame type received");
+        throw cRuntimeError("Invalid grant");
     }
 
 
@@ -210,11 +257,34 @@ LteAirFrame* SidelinkResourceAllocation::createSCIMessage(cMessage* msg, LteSide
 
     SidelinkControlInformation* sci = new SidelinkControlInformation("SCI Message");
 
+    /*
+     * Priority - takes values 0-7. It depends on the nature of the application. It is defined at the upper layers.
 
-    sci->setPriority(grant->getPriority());
+     */
+    //
+    sci->setPriority(grant->getSpsPriority());
 
-    sci->setResourceReservationInterval(grant->getRri()); //100 ms for cResel = [5,15]
-
+    /* Resource reservation interval/Prsvp_TX
+     *
+     * 0 -> 16
+     * 0 = not reserved
+     * 1 = 100ms (1) RRI [Default]
+     * 2 = 200ms (2) RRI
+     * ...
+     * 10 = 1000ms (10) RRI
+     * 11 = 50ms (0.5) RRI
+     * 12 = 20ms (0.2) RRI
+     * 13 - 15 = Reserved
+     *
+     */
+    if (grant->getExpiration() != 0)
+    {
+        sci->setResourceReservationInterval(0.1); //100 ms for cResel = [5,15]
+    }
+    else
+    {
+        sci->setResourceReservationInterval(0);
+    }
 
     /* Frequency Resource Location for initial transmissiona nd re-transmission
      * Based on another parameter RIV
@@ -273,21 +343,12 @@ LteAirFrame* SidelinkResourceAllocation::createSCIMessage(cMessage* msg, LteSide
     {
         sci->setRetransmissionIndex(0);
     }
-    if (grant->isFreshAllocation()==true)
-           {
-               cResel = grant->getResourceReselectionCounter();
-           }
-           else if  (grant->isFreshAllocation()==false)
-           {
-               cResel = getReselectionCounter(); // Decremented by UE/eNodeB
-           }
-           else
-           {
-               cResel =0;
-           }
-    setReselectionCounter(cResel);
+    //cResel = grant->getResourceReselectionCounter();
 
-    sci->setCResel(cResel);
+
+    //sci->setCResel(grant->getResourceReselectionCounter());
+    //cResel = grant->getResourceReselectionCounter();
+    //setReselectionCounter(cResel);
 
     /* Filler up to 32 bits
      * Can just set the length to 32 bits and ignore the issue of adding filler
@@ -295,18 +356,17 @@ LteAirFrame* SidelinkResourceAllocation::createSCIMessage(cMessage* msg, LteSide
     sci->setBitLength(32);
 
     //Print all SCI values
-    EV<<"Priority: "<<grant->getPriority()<<endl;
-    EV<<"Resource Reservation Interval: "<<(grant->getRri())<<endl;
+    EV<<"Priority: "<<grant->getSpsPriority()<<endl;
+    EV<<"Resource Reservation Interval: "<<(grant->getPeriod()/100)<<endl;
     EV<<"Frequency resource location of initial transmission and re-transmission (RIV): "<<riv<<endl;
     EV<<"Subframe gap: "<<grant->getTimeGapTransRetrans()<<endl;
     EV<<"Modulation and Coding Scheme: "<<grant->getMcs()<<endl;
     EV<<"Re-transmission index: "<<sci->getRetransmissionIndex()<<endl;
-    EV<<"Re-selection counter: "<<getReselectionCounter()<<endl;
+    //EV<<"Re-selection counter: "<<getReselectionCounter()<<endl;
 
     UserControlInfo* lteInfo = new UserControlInfo();
-    lteInfo->setGrantStartTime(grant->getMinGrantStartTime());
+    lteInfo->setGrantStartTime(grant->getStartTime());
     LteAirFrame* sciFrame = prepareAirFrame(sci, lteInfo);
-    lteInfo->setFrameType(SCIPKT);
     return sciFrame;
 
 }
@@ -328,25 +388,26 @@ LteAirFrame* SidelinkResourceAllocation::prepareAirFrame(cMessage* msg, UserCont
     lteInfo->setDirection(D2D_MULTI);
     lteInfo->setTxPower(txPower_);
     lteInfo->setD2dTxPower(d2dTxPower_);
-    lteInfo->setNodeType(nodeType_);
     frame->setControlInfo(lteInfo);
     return frame;
 }
 
 
-std::vector<int> SidelinkResourceAllocation::getallocationTBIndex(int bitLength, std::vector<int> subChSCI, int totalGrantedBlocks)
+std::vector<int> SidelinkResourceAllocation::getallocationTBIndex(int bitLength, std::vector<int> subChSCI)
 {
     allocatedPRBTBIndex.clear();
 
-
-    EV<<"Number of allocated resource blocks by the grant: "<<totalGrantedBlocks<<endl;
-    numberPRBTransmitBlock = totalGrantedBlocks;
+    int numberSymbolsPerPRB= numberSubcarriersperPRB*numberSymbolsPerSlot*bitsPerSymbolQPSK;
+    int numberSymbolsTransmitBlock = bitLength/bitsPerSymbolQPSK;
+    numberPRBTransmitBlock = (numberSymbolsTransmitBlock/numberSymbolsPerPRB)+1;
 
     //Allocate PRBs for TB contiguously after SCI
 
     int startSubChTB = subChSCI.at(1)+1;
     int beta = 2;
+    EV<<"startSubChTB"<<subChSCI[0]<<" "<<subChSCI[1]<<endl;
 
+    EV<<" numberPRBTransmitBlock: "<< numberPRBTransmitBlock<<endl;
     for (int j=0; j<numberPRBTransmitBlock; j++)
     {
 
@@ -368,10 +429,18 @@ std::vector<int> SidelinkResourceAllocation::getallocationTBIndex(int bitLength,
 std::vector<int>  SidelinkResourceAllocation::getallocationSciIndex(int subChRBStart_)
 {
     allocatedPRBSciIndex.clear();
+    RbMap sciRbs;
+
+    // Setup so SCI gets 2 RBs from the grantedBlocks.
+    RbMap::iterator it;
+    std::map<Band, unsigned int>::iterator jt;
+
     //for each Remote unit used to transmit the packet
     int allocatedBlocks = 0;
 
-    //Allocate two PRBS for SCI
+
+
+    //Allocate twp PRBS for SCI
     for (int j=0; j<2; j++)
     {
         EV<<"SCI indices: "<<subChRBStart_ + j<<endl;
@@ -384,82 +453,78 @@ std::vector<int>  SidelinkResourceAllocation::getallocationSciIndex(int subChRBS
 
 void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeType nodeType_) {
     candidateSubframes.clear();
-    futureTransmissions.clear();
     //Re-allocate subchannels and subframes
     RBIndicesSCI.clear();
     RBIndicesData.clear();
     resourceAllocationMap.clear();
 
     //Computing subframes
-    int startSubFrame = grant->getMinGrantStartTime();
-    double maxLatency = grant->getMaximumLatency();
+           int startSubFrame = intuniform(0,4);
+           double maxLatency = grant->getMaximumLatency();
+           EV<<"Max latency: "<<maxLatency<<endl;
+           int endSubFrame = startSubFrame+maxLatency;
+           int selectionWindow =  maxLatency - startSubFrame;
+           //int possibleCSRSSelWindow;
+           EV<<"Start subframe: "<<startSubFrame<<endl;
+           EV<<"End subframe: "<<endSubFrame<<endl;
 
-    int endSubFrame = startSubFrame+maxLatency;
-    int selectionWindow =  maxLatency - startSubFrame;
-    //int possibleCSRSSelWindow;
+           //Discarding subframes where sync information appears - PSSS,SSSS,DMRS
+           EV<<"Next SLSS: "<<nextSLSS<<endl;
+           simtime_t selStartTime;
+           simtime_t selEndTime;
+           //Converting to ms
+           selStartTime = (NOW+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
+           selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
 
-    //Discarding subframes where sync information appears - PSSS,SSSS,DMRS
-    EV<<"Next SLSS: "<<nextSLSS<<endl;
-    simtime_t selStartTime;
-    simtime_t selEndTime;
-    //Converting to ms
-    selStartTime = (NOW+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
-    selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
+           if (nodeType_ == ENODEB)
 
-    //Synchronization latencies are different for managed and unamanged modes
-    if (nodeType_ == ENODEB)
+           {
+               selStartTime = (NOW+nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
+               selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
 
-    {
-        selStartTime = (NOW+nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
-        selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
-        tSync = (NOW-(nextSLSS+0.001)).dbl();  //it takes one TTI for SLSS acknowledgement
-        EV<<"Synchronization latency for managed mode: "<<tSync<<endl;
-        emit(syncLatency,tSync);
-
-    }
+           }
 
 
-    if (nodeType_==UE )
+           if (nodeType_==UE )
 
-    {
-        EV<<"packetDropStatus: "<<packetDrop<<endl;
-        if (packetDrop==false)
-        {
-            selStartTime = (nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
-            selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
+           {
+               EV<<"packetDropStatus: "<<packetDrop<<endl;
+               if (packetDrop==false)
+               {
+                   selStartTime = (nextSLSS+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
+                   selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
 
-        }
-        if (packetDrop==true)
-        {
-            selStartTime = (NOW+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
-            selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
-        }
-        tSync = (nextSLSS+0.001-NOW).dbl();  //it takes one TTI for SLSS acknowledgement
-        EV<<"Synchronization latency for unmanaged mode: "<<tSync<<endl;
-        emit(syncLatency,tSync);
+               }
+               if (packetDrop==true)
+               {
+                   selStartTime = (NOW+TTI+startSubFrame/1000.0) .trunc(SIMTIME_MS);
+                   selEndTime =  (selStartTime+(100/1000.0)).trunc(SIMTIME_MS);
+               }
 
-    }
+           }
 
+           tSync = (nextSLSS+0.001-NOW).dbl();  //it takes one TTI for SLSS acknowledgement
+           EV<<"Synchronization latency: "<<tSync<<endl;
+           emit(syncLatency,tSync);
 
+           EV<<"selectionWindow start time:  "<<selStartTime<<endl;
+           EV<<"selectionWindow end time:  "<<selEndTime<<endl;
 
-    EV<<"selectionWindow start time:  "<<selStartTime<<endl;
-    EV<<"selectionWindow end time:  "<<selEndTime<<endl;
+           emit(configurationLatency,0.004);
 
-    emit(configurationLatency,0.004);
+           for (double k = selStartTime.dbl(); k<=selEndTime.dbl(); k=k+TTI)
+           {
+               candidateSubframes.push_back(k);
 
-    for (double k = selStartTime.dbl(); k<=selEndTime.dbl(); k=k+TTI)
-    {
-        candidateSubframes.push_back(k);
+           }
+           EV<<"Number of candidate subframes: "<< candidateSubframes.size()<<endl;
 
-    }
-    EV<<"Number of candidate subframes: "<< candidateSubframes.size()<<endl;
-
-    if (packetDrop==false && (grant->isFreshAllocation()==true)  )
+    if (packetDrop==false && (getAllocatedBlocksPrevious() == 0 || cResel==0)  )
     {
 
         //Fresh allocations
         cResel = grant->getResourceReselectionCounter();
-        setReselectionCounter(cResel);
+
 
         /*EV<<"Retrieve cResel: "<<getReselectionCounter()<<endl;*/
         subChRBStart_ = intuniform(0,std::ceil((numSubchannels_*subchannelSize_)/2)-1);
@@ -467,7 +532,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         EV<<"Start of subchannel: "<<subChRBStart_<<endl;
 
         RBIndicesSCI=getallocationSciIndex(subChRBStart_);
-        RBIndicesData=getallocationTBIndex(grant->getTransmitBlockSize(),  RBIndicesSCI, grant->getTotalGrantedBlocks());
+        RBIndicesData=getallocationTBIndex(grant->getTransmitBlockSize(),  RBIndicesSCI);
 
         grant->setStartingSubchannel(subChRBStart_);
 
@@ -512,7 +577,6 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         double ySensing;
         std::vector<double> zSelection;
         zSelection.clear();
-
         auto itc=sensingWindowSubframes.begin();
         for (;itc != sensingWindowSubframes.end();++itc)
         {
@@ -520,12 +584,11 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
             if((get<2>(*itc)==true)||(get<3>(*itc)==true))
             {
                 ySensing = get<0>(*itc);
-
-
+                // EV<<"Subframes to be checked: "<<ySensing<<endl;
                 for(int j=0;j<cResel-1;j++)
                 {
                     zSelection.push_back(ySensing+j*0.1);
-                    EV<<"Subframes to be removed from selection window: "<<ySensing+j*0.1<<endl;
+                    //EV<<"Subframes to be removed from selection window: "<<ySensing+j*0.1<<endl;
                 }
             }
         }
@@ -533,7 +596,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
 
         for (auto & iter : zSelection)
         {
-
+            EV<<"value to be compared: "<<iter<<endl;
 
             for (auto  &it:candidateSubframes)
             {
@@ -550,16 +613,17 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         }
 
         //Print final selection window
-/*        for  (auto csr:candidateSubframes )
-        {
-            EV<<"Final selection window: "<<csr<<endl;
-        }*/
+        /*    for  (auto csr:candidateSubframes )
+    {
+        EV<<"Final selection window: "<<csr<<endl;
+    }*/
 
         EV<<"Final selection window size: "<<candidateSubframes.size()<<endl;
 
         int randomIndexInitial = rand() % candidateSubframes.size();
         simtime_t startFirstTransmission = candidateSubframes[randomIndexInitial];
 
+        EV<<"First transmission: "<<startFirstTransmission<<endl;
 
         grant->setTotalGrantedBlocks(RBIndicesSCI.size()+RBIndicesData.size());
         setPreviousSubchannelsData(RBIndicesData);
@@ -583,25 +647,17 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         }
     }
 
-    else if (grant->isFreshAllocation()==false){
+    else {
 
-        //Subsequent allocations
-        cResel = getReselectionCounter();
-        EV<<"cResel subsequent: "<<cResel<<endl;
-        double subsequentTransmission = grant->getStartTime().dbl()+ (NOW.dbl()-grant->getCreationTime().dbl());
-        FirstTransmission = subsequentTransmission ;//increment by RRI for subsequent packet transmissions
-        setFirstTransmissionPrevious(FirstTransmission);
-        grant->setTotalGrantedBlocks(getAllocatedBlocksPrevious());
+//Subsequent allocations
+            cResel = getReselectionCounter();
+            FirstTransmission = getFirstTransmissionPrevious()+0.1;//increment by RRI for subsequent packet transmissions
+            setFirstTransmissionPrevious(FirstTransmission);
+            grant->setTotalGrantedBlocks(getAllocatedBlocksPrevious());
+            EV<<"First transmission subsequent: "<< FirstTransmission<<endl;
+            binder_->updatePeriodicCamTransmissions(nodeId_, FirstTransmission);
+            grant->setStartTime( FirstTransmission);
 
-        EV<<"First transmission subsequent: "<< FirstTransmission<<endl;
-
-        binder_->updatePeriodicCamTransmissions(nodeId_, FirstTransmission);
-        grant->setStartTime( FirstTransmission);
-
-    }
-    else
-    {
-        throw cRuntimeError("Invalid allocation conditions");
     }
     //Make sure allocations are within CR limits and only then update in the FreqAllocationMap buffer
     updateFreqAllocationMap(FirstTransmission,grant->getTotalGrantedBlocks());
@@ -609,36 +665,49 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
     EV<<"CRValue: "<<crValue<<endl;
     EV<<"crLimit: "<<crLimit<<endl;
 
-
+/*    if ((crValue-crLimit)>0.0)
+    {
+        updateFreqAllocationMap(FirstTransmission,grant->getTotalGrantedBlocks());
+    }
+    else
+    {
+        EV<<"Congestion detected: "<<endl;
+        //Implement range control approach to control congestion
+    }*/
 
     grant->setNextArrival(NOW.dbl()+0.1);
 
     EV<<"Start time grant: "<<grant->getStartTime()<<endl;
     EV<<"Next arrival grant: "<<grant->getNextArrival()<<endl;
-    for(int j=0;j<cResel;j++)
-                    {
 
-        EV<<"Storing future message arrivals: "<<j*grant->getRri()<<endl;
-        futureTransmissions.push_back(round((NOW.dbl()+j*0.1)*1000.0)/1000.0);
-        grant->setGrantSubsequent(futureTransmissions);
-                    }
+/*
+    if ((grant->getStartTime()>grant->getNextArrival())||(grant->getStartTime().dbl() < selStartTime.dbl()))
+    {
+        EV<<"Activating packet drop"<<endl;
+        packetDrop = true;
+        //setReselectionCounter(0);
+        //setAllocatedBlocksPrevious(0);
 
+    }
+    else
+    {
+        packetDrop = false;
+    }
+*/
 
 
     // Send the packet up to the MAC layer where it will choose the CSR and the retransmission if that is specified
     // Need to generate the message that is to be sent to the upper layers.
     SPSResourcePool* candidateResourcesMessage = new SPSResourcePool("CSRs");
     candidateResourcesMessage->setCSRs(optimalCSRs);
-    candidateResourcesMessage->setGrant(grant);
     LtePhyBase* phy=check_and_cast<LtePhyBase*>(getParentModule()->getSubmodule("phy"));
     phy->sendUpperPackets(candidateResourcesMessage);
 
-    //throw cRuntimeError("Test 1");
 
 }
 
 std::vector<std::tuple<double, int, double>> SidelinkResourceAllocation::selectBestRSSIs(std::vector<double> subframes, LteSidelinkGrant* &grant, double subFrame)
-                                        {
+{
     subch = new Subchannel(numSubchannels_,subFrame);
     EV << NOW << " LtePhyVUeMode4::selectBestRSSIs - Selecting best CSRs from possible CSRs..." << endl;
     int decrease = pStep_;
@@ -685,7 +754,7 @@ std::vector<std::tuple<double, int, double>> SidelinkResourceAllocation::selectB
     orderedCSRs.resize(minSize);
 
     return orderedCSRs;
-                                        }
+}
 
 void SidelinkResourceAllocation::storeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo)
 {
@@ -747,7 +816,7 @@ void  SidelinkResourceAllocation::initialiseSensingWindow()
 
 // Updating sensing window when packet is transmitted or received
 boost::circular_buffer<std::tuple<double, double,double,bool,bool>> SidelinkResourceAllocation::updateSensingWindow(double subframeTime, double rssi, double rsrp, bool txStatus, bool rxStatus)
-                                        {
+{
     EV<<"Updating Sensing window for subframe: "<<subframeTime<< "on transmitting: "<<txStatus<<"on receiving: "<<rxStatus<<endl;
     sensingWindow.set_capacity(1000);  //Limit buffer capacity to 1000
     //Sensing window was initialized with some values. Now we replace with current values when packet is transmitted or received.
@@ -774,11 +843,11 @@ boost::circular_buffer<std::tuple<double, double,double,bool,bool>> SidelinkReso
 
 /*    for (auto [X, Y,Z,A,B]:sensingWindow)
     {
-        EV<<"Sensing window updated parameters: "<<X<<" "<<Y<<" "<<Z<<" "<<A<<" "<<B<<endl;
+        //EV<<"Sensing window updated parameters: "<<X<<" "<<Y<<" "<<Z<<" "<<A<<" "<<B<<endl;
     }*/
     setSensingWindow(sensingWindow); //Used by computeCSRs() method
     return sensingWindow;
-                                        }
+}
 
 simtime_t SidelinkResourceAllocation::sidelinkSynchronization(bool status)
 {
@@ -815,7 +884,7 @@ void SidelinkResourceAllocation::initialiseFreqAllocationMap()
 }
 
 boost::circular_buffer<std::tuple<double, int>> SidelinkResourceAllocation::updateFreqAllocationMap(double subframeTime, int allocatedRB )
-                                        {
+{
     EV<<"SidelinkResourceAllocation::updateFreqAllocationMap"<<endl;
     //auto itf=freqAllocationMap.begin();
     freqAllocationMap.set_capacity(1000);
@@ -841,7 +910,7 @@ boost::circular_buffer<std::tuple<double, int>> SidelinkResourceAllocation::upda
         EV<<"Frequency allocation map for transmissions: "<<X<<" "<<Y<<endl;
     }*/
     return freqAllocationMap;
-                                        }
+}
 
 void  SidelinkResourceAllocation::initialiseCbrWindow()
 {
@@ -872,7 +941,7 @@ void  SidelinkResourceAllocation::initialiseCbrWindow()
 
 boost::circular_buffer<std::tuple<double,double>>  SidelinkResourceAllocation::updateCbrWindow(double subframeTime,double cbr)
 
-                                        {
+{
     cbrWindow.set_capacity(100);  //Limit buffer capacity to 1000
     //Sensing window was initialized with some values. Now we replace with current values when packet is transmitted or received.
 
@@ -902,7 +971,7 @@ boost::circular_buffer<std::tuple<double,double>>  SidelinkResourceAllocation::u
     }*/
     setCbrWindow(cbrWindow);
     return cbrWindow;
-                                        }
+}
 
 
 

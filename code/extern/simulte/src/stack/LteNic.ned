@@ -80,7 +80,6 @@ module LteNicBase like ILteNic
         input radioIn @loose;  // to receive messages sent using sendDirect()
         inout x2[] @loose;     // optional x2 manager
         input control_IN @loose; // sendDirect() on control plane
-       
     submodules:
         // bridge between lte stack and network layer
         control: <LteRrcType> like ControlPlane {
@@ -154,10 +153,6 @@ module LteNicBase like ILteNic
         //#
         mac.MAC_to_PHY --> phy.upperGateIn;
         mac.PHY_to_MAC <-- phy.upperGateOut;
-        
-        
-        //#Access and facilities layer communication
-        
         
         //# external: lower connection
         radioIn --> phy.radioIn;

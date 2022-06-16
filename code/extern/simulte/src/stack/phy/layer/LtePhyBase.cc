@@ -215,15 +215,20 @@ LteAmc *LtePhyBase::getAmcModule(MacNodeId id)
 
 void LtePhyBase::sendMulticast(AirFrame *frame)
 {
-
-    //For the sake of implementation, we have edited this method for sidelink broadcast functionality
-    // --! Do not confuse with definition of multicast
-
+    //throw cRuntimeError("sendMulticast");
     UserControlInfo *ci = check_and_cast<UserControlInfo *>(frame->getControlInfo());
 
-    EV<<"LtePhyBase::sendMulticast frame: "<<frame <<endl;
+   /* // get the group Id
+    int32 groupId = ci->getMulticastGroupId();
+    if (groupId < 0)
+        throw cRuntimeError("LtePhyBase::sendMulticast - Error. Group ID %d is not valid.", groupId);
+*/
+    // send the frame to nodes belonging to the multicast group only
+    std::map<MacNodeId,inet::Coord>::iterator  nodeIt = binder_->BroadcastUeInfo.begin();
 
-    //EV << NOW << " LtePhyBase::sendMulticast - node " << nodeIt->first << " is in the multicast group"<< endl;
+    EV<<"LtePhyBase::sendMulticast"<<endl;
+
+    EV << NOW << " LtePhyBase::sendMulticast - node " << nodeIt->first << " is in the multicast group"<< endl;
 
     std::vector<inet::Coord> ueCoords;
     double distance;
@@ -247,7 +252,7 @@ void LtePhyBase::sendMulticast(AirFrame *frame)
             //Saving the Info of broadcast neighbours
             if(UeId!=sourceId)
             {
-                if((distance !=0 && distance<=500) && binder_->isNodeRegisteredInSimlation()==true)
+                if((distance !=0 && distance<=200) && binder_->isNodeRegisteredInSimlation()==true)
                 {
                     EV<<"Distance from ego vehicle: "<<distance<<endl;
                     binder_->BroadcastUeInfo[UeId]=uePos;
@@ -263,26 +268,22 @@ void LtePhyBase::sendMulticast(AirFrame *frame)
                 }
             }
         }
-    }
-
-        std::map<MacNodeId,inet::Coord>::iterator  nodeIt = binder_->BroadcastUeInfo.begin();
-        EV<<"Sending to broadcast neighbours ..."<<binder_->BroadcastUeInfo.size()<<endl;
         for(; nodeIt != binder_->BroadcastUeInfo.end(); ++nodeIt)
         {
-
             cModule *receiver = getSimulation()->getModule(binder_->getOmnetId(nodeIt->first));
-            EV << NOW << " LtePhyBase::sendMulticast - sending"<< frame <<" to node " << nodeIt->first << endl;
+            EV << NOW << " LtePhyBase::sendMulticast - sending frame to node " << nodeIt->first << endl;
             EV<<"receiver module: "<<receiver<<endl;
-
+           //
+            //throw cRuntimeError("multicast");
             sendDirect(frame->dup(), 0, frame->getDuration(), receiver, getReceiverGateIndex(receiver));
-
+            EV<<"Number of neighbours SL broadcast: "<<binder_->BroadcastUeInfo.size()<<endl;
 
 
         }
 
             // get a pointer to receiving module
 
-
+        }
 
 
 

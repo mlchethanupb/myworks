@@ -84,13 +84,6 @@ void LtePdcpRrcBase::setTrafficInformation(cPacket* pkt,
         lteInfo->setTraffic(STREAMING);
         lteInfo->setRlcType((int) par("streamingRlc"));
     }
-    if ((strcmp(pkt->getName(), "NewDataPkt")) == 0)
-    {
-        lteInfo->setApplication(GEONET);
-        lteInfo->setTraffic(CAM);
-        lteInfo->setRlcType((int) par("backgroundRlc"));
-        lteInfo->setDirection(getDirection());
-    }
     else
     {
         lteInfo->setApplication(CBR);
@@ -101,6 +94,15 @@ void LtePdcpRrcBase::setTrafficInformation(cPacket* pkt,
     lteInfo->setDirection(getDirection());
 }
 
+void LtePdcpRrcBase::setTrafficInformation(cPacket* pkt, FlowControlInfoNonIp* nonIpInfo)
+{
+    EV<<"LtePdcpRrcBase::setTrafficInformation: "<<endl;
+
+    nonIpInfo->setApplication(GEONET);
+    nonIpInfo->setTraffic(CAM);
+    nonIpInfo->setRlcType((int) par("backgroundRlc"));
+    nonIpInfo->setDirection(getDirection());
+}
 
 /*
  * Upper Layer handlers
@@ -159,7 +161,7 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
     EV << "LteRrc : Assigned Node ID: " << nodeId_ << "\n";
     }
     else{
-        FlowControlInfo* nonIpInfo = check_and_cast<FlowControlInfo*>(lteInfo);
+        FlowControlInfoNonIp* nonIpInfo = check_and_cast<FlowControlInfoNonIp*>(lteInfo);
 
         nonIpInfo->setDestId(getDestId(nonIpInfo));
 
@@ -225,8 +227,8 @@ void LtePdcpRrcBase::setDataArrivalStatus(bool dataArrival)
 }
 
 bool LtePdcpRrcBase::getDataArrivalStatus(){
-    return dataArrival;
-}
+       return dataArrival;
+   }
 
 
 void LtePdcpRrcBase::fromEutranRrcSap(cPacket *pkt)
@@ -266,14 +268,14 @@ void LtePdcpRrcBase::toDataPort(cPacket *pkt)
         headerDecompress(upPkt, lteInfo->getHeaderSize()); // Decompress packet header
         handleControlInfo(upPkt, lteInfo);
         EV << "LtePdcp : Sending IP packet " << upPkt->getName()
-                               << " on port DataPort$o\n";
+                       << " on port DataPort$o\n";
         // Send message
         send(upPkt, DataPortIpOut);
         emit(sentPacketToUpperLayer, upPkt);
     }
     else
     {
-        FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(
+        FlowControlInfoNonIp* lteInfo = check_and_cast<FlowControlInfoNonIp*>(
                 pdcpPkt->removeControlInfo());
         EV << "LtePdcp : Received packet with CID " << lteInfo->getLcid() << "\n";
         EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
@@ -282,7 +284,7 @@ void LtePdcpRrcBase::toDataPort(cPacket *pkt)
         delete pdcpPkt;
         upPkt->setControlInfo(lteInfo);
         EV << "LtePdcp : Sending Non IP packet " << upPkt->getName();
-        // << " on port DataPort$o\n";
+                          // << " on port DataPort$o\n";
         // Send message
         send(upPkt, DataPortNonIpOut);
         emit(sentPacketToUpperLayer, upPkt);
@@ -299,7 +301,7 @@ void LtePdcpRrcBase::toEutranRrcSap(cPacket *pkt)
     delete pkt;
 
     EV << "LteRrc : Sending packet " << upPkt->getName()
-                       << " on port EUTRAN_RRC_Sap$o\n";
+               << " on port EUTRAN_RRC_Sap$o\n";
     send(upPkt, eutranRrcSap_[OUT]);
 }
 

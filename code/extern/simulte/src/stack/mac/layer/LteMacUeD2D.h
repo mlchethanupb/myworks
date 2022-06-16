@@ -41,7 +41,6 @@ class LteMacUeD2D : public LteMacUe
     UserTxParams* getPreconfiguredTxParams();  // build and return new user tx params
     LteSchedulerUeSl* lteSchedulerUeSl_;
     ScheduleList* scheduleListSl_;
-    double grantExpirationTime;
     // RAC Handling variables
     bool racD2DMulticastRequested_;
     // Multicast D2D BSR handling
@@ -52,16 +51,6 @@ class LteMacUeD2D : public LteMacUe
     int transmissionCAMId;
     std::string rrcCurrentState;
     simsignal_t rcvdD2DModeSwitchNotification_;
-    bool dataArrivalStatus;
-    int grantWastedCount;
-    std::vector<int> grantsWasted;
-    double grantWastePercentage;
-    std::vector<double> futureArrivals;
-    double messageArrivalTime;
-    int possibleDataSize;
-    simsignal_t grantWastageMode4;
-    simsignal_t numberofFreeBytes;
-
 protected:
 
     /**
@@ -132,14 +121,6 @@ public:
     LteSidelinkGrant* getSchedulingGrant();
     void setSchedulingGrant(LteSidelinkGrant*);
     void finish();
-
-    bool isDataArrivalStatus() {
-        return dataArrivalStatus;
-    }
-
-    void setDataArrivalStatus(bool dataArrivalStatus) {
-        this->dataArrivalStatus = dataArrivalStatus;
-    }
 };
 
 #endif

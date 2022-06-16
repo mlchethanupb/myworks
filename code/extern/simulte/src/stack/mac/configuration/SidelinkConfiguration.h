@@ -57,13 +57,12 @@ protected:
 
     LteCellInfo* deployer_;
     LteBinder* binder_;
-
+    LteSidelinkGrant* mode4Grant;
+    LteSidelinkGrant* mode3Grant;
     LteSidelinkGrant* slGrant;
     LteSchedulerUeUl* lcgScheduler_;
     // configured grant - one each codeword
     LteSchedulingGrant* schedulingGrant_;
-    //FlowControlInfoNonIp* nonIpInfo;
-    FlowControlInfo* lteInfo;
 
     /// List of scheduled connection for this UE
     LteMacScheduleList* scheduleList_;
@@ -98,36 +97,44 @@ protected:
     bool firstTx;
 
     // All of the following should be configurable by the OMNet++ ini file and maybe even taken from higher layers if that's possible.
-
-    int resourceReservationInterval_;
-    int minGrantStartTime_;
-    int maximumAllowedLatency_;
+    double probResourceKeep_;
+    int restrictResourceReservationPeriod;
+    int minSubchannelNumberPSSCH_;
+    int maxSubchannelNumberPSSCH_;
+    double maximumLatency_;
     int subchannelSize_;
     int numSubchannels_;
-    int maximumCapacity_;
     int minMCSPSSCH_;
     int maxMCSPSSCH_;
-    int resourceReselectionCounter_;
+    int maximumCapacity_;
     int allowedRetxNumberPSSCH_;
-    bool usePreconfiguredTxParams_;
-    int numberSubcarriersperPRB;
-        int numberSymbolsPerSlot;
-        int bitsPerSymbolQPSK;
-        int numberPRBTransmitBlock;
-    //Useful for statistics
-    bool expiredGrant_;
-    bool grantNotUtilized_; //Grant allocated but not used
-    double remainingTime_;
-    double receivedTime_;
-    int totalGrantedBlocks;
-    bool foundValidMCS;
-    LteMod mod;
-    Codeword currentCw_;
+    int reselectAfter_;
+    int defaultCbrIndex_;
+    int currentCbrIndex_;
+    double channelOccupancyRatio_;
+    double cbr_;
+    bool useCBR_;
+    bool packetDropping_;
+    int missedTransmissions_;
+    int resourceReselectionCounter_;
     int allocatedBlocksSCIandData;
-
-
+    // perodic grant handling
+    unsigned int periodCounter_;
+    unsigned int expirationCounter_;
+    double remainingTime_;
+    int harqProcesses_;
+    // current H-ARQ process counter
+    unsigned char currentHarq_;
+    Codeword currentCw_;
+    McsTable dlMcsTable_;
+    McsTable ulMcsTable_;
+    McsTable d2dMcsTable_;
+    double mcsScaleDl_;
+    double mcsScaleUl_;
+    double mcsScaleD2D_;
+    bool expiredGrant_;
     // if true, use the preconfigured TX params for transmission, else use that signaled by the eNB
-
+    bool usePreconfiguredTxParams_;
 
     std::map<UnitList, int> pduRecord_;
     std::vector<std::unordered_map<std::string, double>> cbrPSSCHTxConfigList_;
@@ -142,7 +149,30 @@ protected:
      */
     std::map<MacCid, FlowControlInfo> connDescIn_;
 
-
+    simtime_t receivedTime_;
+    simsignal_t grantStartTime;
+    simsignal_t grantBreak;
+    simsignal_t grantBreakTiming;
+    simsignal_t grantBreakSize;
+    simsignal_t droppedTimeout;
+    simsignal_t grantBreakMissedTrans;
+    simsignal_t missedTransmission;
+    simsignal_t selectedMCS;
+    simsignal_t selectedNumSubchannels;
+    simsignal_t selectedSubchannelIndex;
+    simsignal_t maximumCapacity;
+    simsignal_t grantRequest;
+    simsignal_t packetDropDCC;
+    simsignal_t macNodeID;
+    simsignal_t macBufferOverflowDl_;
+    simsignal_t macBufferOverflowUl_;
+    simsignal_t macBufferOverflowD2D_;
+    simsignal_t receivedPacketFromUpperLayer;
+    simsignal_t receivedPacketFromLowerLayer;
+    simsignal_t sentPacketToUpperLayer;
+    simsignal_t sentPacketToLowerLayer;
+    simsignal_t measuredItbs_;
+    simsignal_t dataSize;
 
     virtual int getNumAntennas();
 
@@ -181,11 +211,22 @@ protected:
      * On UE it also adds a BSR control element to the MAC PDU
      * containing the size of its buffer (for that CID)
      */
-    //virtual void macPduMake();
+    virtual void macPduMake();
 
     /**
      * Parse transmission configuration for a Ue
      */
+    void parseUeTxConfig(cXMLElement* xmlConfig);
+
+    /**
+     * Parse transmission configuration for CBR
+     */
+    void parseCbrTxConfig(cXMLElement* xmlConfig);
+
+    /**
+     * Parse transmission configuration for Resource Reservation Intervals
+     */
+    void parseRriConfig(cXMLElement* xmlConfig);
 
 
 
@@ -194,7 +235,7 @@ protected:
 
 public:
     virtual void macHandleSps(std::vector<std::tuple<double, int, double>> , std::string );
-    int calculateResourceBlocks(int tbSize);
+
     SidelinkConfiguration();
     virtual ~SidelinkConfiguration();
 
@@ -204,6 +245,7 @@ public:
     }
     LteSidelinkGrant* getSidelinkGrant()
     {
+
         return slGrant;
     }
     virtual void setSidelinkGrant(LteSidelinkGrant*);
@@ -211,20 +253,12 @@ public:
      * Purges PDUs from the HARQ buffers for sending to the PHY layer.
      */
     void flushHarqBuffers(HarqTxBuffers harqTxBuffers_, LteSidelinkGrant*);
-
-
-    int getResourceReservationInterval()  {
-        return resourceReservationInterval_;
-    }
-
-    void setResourceReservationInterval(int resourceReservationInterval) {
-        resourceReservationInterval_ = resourceReservationInterval;
-    }
     void setAllocatedBlocksSCIandData(int totalGrantedBlocks);
-       int getAllocatedBlocksSCIandData()
-       {
-           return allocatedBlocksSCIandData;
-       }
+    int getAllocatedBlocksSCIandData()
+    {
+        return allocatedBlocksSCIandData;
+    }
+
 };
 
 
