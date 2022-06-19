@@ -43,6 +43,10 @@ simple SidelinkConfiguration
         int resourceReselectionCounter = default(5);
         bool usePreconfiguredTxParams = default(false);
         
+        int numberSubcarriersperPRB_c = default(12);
+        int numberSymbolsPerSlot_c =default(7);
+        int bitsPerSymbolQPSK_c =default(2);
+
         // Signals 
         //
         // Must haves:

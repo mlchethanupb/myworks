@@ -70,6 +70,9 @@ void SidelinkConfiguration::initialize(int stage)
         numSubchannels_ = par("numSubchannels");
         probResourceKeep_ = par("probResourceKeep");
         usePreconfiguredTxParams_ = par("usePreconfiguredTxParams");
+        numberSubcarriersperPRB_c = par ("numberSubcarriersperPRB_c");
+        numberSymbolsPerSlot_c = par("numberSymbolsPerSlot_c");
+        bitsPerSymbolQPSK_c = par ("bitsPerSymbolQPSK_c");
         reselectAfter_ = par("reselectAfter");
         useCBR_ = par("useCBR");
         packetDropping_ = par("packetDropping");
@@ -459,6 +462,9 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
     {
         LteMacBase* mac = dynamic_cast<LteMacBase*>(getParentModule()->getSubmodule("mac"));
 
+        int resourcesRequired = calculateResourceBlocks(pkt->getBitLength());
+        EV<<"RBs needed for current TB: "<<resourcesRequired<<endl;
+        
         if (mac->getIpBased()==false)
         {
             FlowControlInfoNonIp* lteInfo = check_and_cast<FlowControlInfoNonIp*>(pkt->removeControlInfo());
@@ -471,6 +477,7 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             double dur = duration.dbl();
             remainingTime_ = lteInfo->getDuration() - dur;
 
+            /*
             if (schedulingGrant_ != NULL && periodCounter_ > remainingTime_)
             {
                 //emit(grantBreakTiming, 1);
@@ -482,6 +489,12 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             {
                 mode4Grant= macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
 
+            }*/
+
+
+            if (slGrant == NULL ||slGrant->getExpiryTime()<NOW.dbl()||(slGrant->getTotalGrantedBlocks()<resourcesRequired)){
+
+                mode4Grant=   macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
             }
             else
             {
@@ -514,7 +527,7 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             duration = duration - elapsedTime;
             double dur = duration.dbl();
             remainingTime_ = lteInfo->getDuration() - dur;
-
+            /*
             if (schedulingGrant_ != NULL && periodCounter_ > remainingTime_)
             {
                 //emit(grantBreakTiming, 1);
@@ -526,6 +539,11 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             {
                 mode4Grant= macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
 
+            }*/
+
+            if (slGrant == NULL ||slGrant->getExpiryTime()<NOW.dbl()||(slGrant->getTotalGrantedBlocks()<resourcesRequired)){
+
+                mode4Grant=   macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
             }
             else
             {
@@ -611,6 +629,7 @@ void SidelinkConfiguration::assignGrantToData(DataArrival* pkt, std::string rrcS
         EV<<"Priority: "<<pkt->getPriority()<<endl;
         EV<<"bit length: "<<pkt->getDataSize()<<endl;
 
+        /*
         if (schedulingGrant_ != NULL && periodCounter_ > remainingTime_)
         {
 
@@ -624,6 +643,16 @@ void SidelinkConfiguration::assignGrantToData(DataArrival* pkt, std::string rrcS
 
             mode3Grant= macGenerateSchedulingGrant(remainingTime_, pkt->getPriority(), pkt->getDataSize());
 
+        }*/
+
+        int tbSize = pkt->getDataSize();
+
+        int resourcesRequired = calculateResourceBlocks(tbSize);
+
+        EV<<"RBs needed for current TB: "<<resourcesRequired<<endl;
+        if (slGrant == NULL ||slGrant->getExpiryTime()<NOW.dbl()||(slGrant->getTotalGrantedBlocks()<resourcesRequired)){
+            
+            mode3Grant=   macGenerateSchedulingGrant(remainingTime_, pkt->getPriority(), pkt->getDataSize());
         }
         else
         {
@@ -846,6 +875,8 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
     slGrant -> setExpiryTime(NOW.dbl()+0.1*(resourceReselectionCounter_-1));    
     slGrant->setTransmitBlockSize(tbSize);
     slGrant->setRri(resourceReservationInterval_);
+    slGrant->setTotalGrantedBlocks(0); // Initialize (to be allocated by SRA module)
+    slGrant->setTotalGrantedBlocks(calculateResourceBlocks(tbSize));
 
     LteSidelinkGrant* phyGrant = slGrant;
 
@@ -1109,6 +1140,23 @@ void SidelinkConfiguration::flushHarqBuffers(HarqTxBuffers harqTxBuffers_, LteSi
 
 }
 
+
+int SidelinkConfiguration::calculateResourceBlocks(int tbSize)
+{
+    EV<<"Calculating the numer of PRBs needed for Transport block ..."<<endl;
+    int numberSymbolsPerPRB= numberSubcarriersperPRB_c*numberSymbolsPerSlot_c*bitsPerSymbolQPSK_c;
+    int numberSymbolsTransmitBlock = tbSize/bitsPerSymbolQPSK_c;
+
+    EV<<"Data size: "<<tbSize<<endl;
+    EV<<"numberSymbolsPerPRB: "<<numberSymbolsPerPRB<<endl;
+
+    numberPRBTransmitBlock_c = (numberSymbolsTransmitBlock/numberSymbolsPerPRB)+1;
+    EV<<"numberSymbolsTransmitBlock "<<numberSymbolsTransmitBlock <<endl;
+
+    return numberPRBTransmitBlock_c;
+
+}
+
 void SidelinkConfiguration::finish()
 {
 
@@ -1123,3 +1171,4 @@ void SidelinkConfiguration::setAllocatedBlocksSCIandData(int totalGrantedBlocks)
 {
     allocatedBlocksSCIandData = totalGrantedBlocks;
 }
+

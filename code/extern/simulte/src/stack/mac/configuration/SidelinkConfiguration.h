@@ -98,6 +98,11 @@ protected:
 
     // All of the following should be configurable by the OMNet++ ini file and maybe even taken from higher layers if that's possible.
     
+    int numberSubcarriersperPRB_c;
+    int numberSymbolsPerSlot_c;
+    int bitsPerSymbolQPSK_c;
+    int numberPRBTransmitBlock_c;
+
     int resourceReservationInterval_;
     double probResourceKeep_;
     int restrictResourceReservationPeriod;
@@ -237,7 +242,7 @@ protected:
 
 public:
     virtual void macHandleSps(std::vector<std::tuple<double, int, double>> , std::string );
-
+    int calculateResourceBlocks(int tbSize);
     SidelinkConfiguration();
     virtual ~SidelinkConfiguration();
 
