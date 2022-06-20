@@ -453,7 +453,6 @@ std::vector<int>  SidelinkResourceAllocation::getallocationSciIndex(int subChRBS
 
 void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeType nodeType_) {
     candidateSubframes.clear();
-    futureTransmissions.clear();
     //Re-allocate subchannels and subframes
     RBIndicesSCI.clear();
     RBIndicesData.clear();
@@ -697,13 +696,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
     }
 */
 
-    for(int j=0;j<cResel;j++)
-    {
 
-        EV<<"Storing future message arrivals: "<<j*grant->getRri()<<endl;
-        futureTransmissions.push_back(round((NOW.dbl()+j*0.1)*1000.0)/1000.0);
-        grant->setGrantSubsequent(futureTransmissions);
-    }
 
 
 

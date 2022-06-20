@@ -758,6 +758,7 @@ void LteMacUeD2D::handleSelfMessage()
             {
                 EV<<"Test 2"<<endl;
                 int expiration = intuniform(5, 15, 3);
+                std::cout << "***********grant setting Cresel: " << expiration << endl;
                 grant -> setResourceReselectionCounter(expiration);
                 grant -> setFirstTransmission(true);
                 expirationCounter_ = expiration * grant->getPeriod();
@@ -784,9 +785,16 @@ void LteMacUeD2D::handleSelfMessage()
         }
 
     //Grant is configured, not expired but not used because there is no data to be transmitted
-    if (grant!=NULL && grant==mode4Grant)
-
+    //if (grant!=NULL && grant==mode4Grant) //MLC-Q
+    if (grant!=NULL)
     {
+
+        std::cout <<"---------------------------------------------------------------------------------------------" << endl;
+
+        std::cout << "NOW.dbl(): " << NOW.dbl() << endl;
+        std::cout << "messageArrivalTime: " << messageArrivalTime << endl;
+        std::cout <<"Check if data has arrived: "<< NOW.dbl()-messageArrivalTime <<endl;
+
         EV<<"Check if data has arrived: "<<NOW.dbl()-messageArrivalTime<<endl;
 
         if ((NOW.dbl()-messageArrivalTime)<0.001)
@@ -795,37 +803,54 @@ void LteMacUeD2D::handleSelfMessage()
 
             dataArrivalStatus = true;
             setDataArrivalStatus(dataArrivalStatus);
+            int grantusedcount = grant->get_grants_used();
+            grant->set_grants_used(grantusedcount+1);
+            std::cout<<"Sidelink grant used ... count: " << grant->get_grants_used() << endl;
         }
 
         futureArrivals = grant->getGrantSubsequent();
+        std::cout << "futureArrivals.size(): " << futureArrivals.size() << endl;
         for (int i=0; i<futureArrivals.size();i++)
         {
-            EV<<"Transmission: "<<futureArrivals[i]<<" "<<NOW.dbl()<<endl;
-            EV<<"Difference: "<<(fabs(futureArrivals[i]-NOW.dbl()))<<endl;
+            std::cout<<"Transmission: "<<futureArrivals[i]<<" "<< NOW.dbl()<< endl;
+            std::cout<<"Difference: "<<(fabs(futureArrivals[i]-NOW.dbl()))<< endl;
+
             if(fabs(futureArrivals[i]-NOW.dbl())<0.0001 && isDataArrivalStatus()==false)
             {
 
 
-                EV<<"Sidelink grant is configured but not used ..."<<endl;
-                grantWastedCount = grantWastedCount+1;
-                grantsWasted.push_back(grantWastedCount);
-                EV<<"Number of wasted grants: "<<grantWastedCount<<endl;
+                std::cout<<"Sidelink grant is configured but not used ..."<< endl;
+                int grantusedwasted = grant->get_grants_wasted();
+                grant->set_grants_wasted(grantusedwasted+1);              
+                std::cout<<"Number of wasted grants: "<<grant->get_grants_wasted()<<endl;
             }
         }
 
 
     }
-
+    std::cout << "grantExpirationTime: " << grantExpirationTime << endl;
     //Calculate grant wastage percentage at the time of expiry
-    if (fabs (grantExpirationTime-NOW.dbl())<0.001)
+    //if (fabs (grantExpirationTime-NOW.dbl())<0.001) // MLC-Q, why this check?
+    if (grant!=NULL && grantExpirationTime<NOW.dbl()) 
     {
-        EV<<"Grant has expired ... "<<endl;
-        grantWastePercentage = grantWastedCount/10.0;
-        grantWastePercentage =  grantWastePercentage*100.0;
-        EV<<"Grants wasted: "<<grantWastedCount<<endl;
-        EV<<"Grant wastage percentage (GWP) "<<grantWastePercentage<<endl;
-        emit(grantWastageMode4,grantWastePercentage); //Collect statistics on grant wastage
+        std::cout << "==================================================================" << endl;
 
+        futureArrivals = grant->getGrantSubsequent();
+        double total_grants = static_cast<double>(futureArrivals.size());
+        
+        std::cout <<"Grant has expired ... "<<endl;
+        double grantwastepercent = (static_cast<double>(grant->get_grants_wasted()) / total_grants) * 100;
+        double grantusedpercent = (static_cast<double>(grant->get_grants_used()) / total_grants) * 100;
+
+        std::cout << "total_grants: " << total_grants << endl;
+        std::cout <<"Grant wastage percentage (GWP) "<< grantwastepercent <<endl;
+        std::cout <<"Grant Used percentage (GWP) "<< grantusedpercent <<endl;
+        emit(grantWastageMode4,grantwastepercent); //Collect statistics on grant wastage
+        std::cout << "==================================================================" << endl;
+
+        grant->set_grants_used(0);
+        grant->set_grants_wasted(0);
+        
         //Calculate possible data size that could have been sent in those wasted grants
         //possibleDataSize = grantWastedCount*grant->getTotalGrantedBlocks()*(300);
         //emit(numberofFreeBytes, possibleDataSize);
@@ -843,16 +868,20 @@ void LteMacUeD2D::handleSelfMessage()
     //Check expiry of previously configured grant
     else if (grant!=NULL && grantExpirationTime<NOW.dbl())
     {
-        EV<<"Sidelink grant has expired at time: "<<grantExpirationTime<<endl;
+        std::cout << "*******************************************************************" << endl;
+        std::cout <<"Sidelink grant has expired at time: "<<grantExpirationTime<<endl;
         grant=NULL;
         mode3Grant = NULL;
         mode4Grant = NULL;
         grantWastedCount = 0;
         grantWastePercentage=0;
-        EV<<"SL grant: "<<grant<<endl;
+        std::cout <<"SL grant: "<<grant<<endl;
         setSchedulingGrant(NULL);
         SidelinkConfiguration* slConfig = check_and_cast<SidelinkConfiguration*>(getParentModule()->getSubmodule("mode4config"));
         slConfig->setSidelinkGrant(NULL);
+        std::cout << "==================================================================" << endl;
+        std::cout << "==================================================================" << endl;
+
         return;
     }
     else

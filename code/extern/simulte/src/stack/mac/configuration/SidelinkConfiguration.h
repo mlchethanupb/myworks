@@ -150,6 +150,8 @@ protected:
     std::vector<double> validResourceReservationIntervals_;
     std::map<std::string, int> cbrLevelsMap;
     std::map<MacCid, FlowControlInfo> connDesc_;
+    std::vector<double> futureTransmissions;
+
 
     /* Incoming Connection Descriptors:
      * a connection is stored at the first MAC SDU delivered to the RLC

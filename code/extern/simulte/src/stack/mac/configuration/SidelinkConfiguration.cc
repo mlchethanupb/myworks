@@ -493,12 +493,20 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
 
 
             if (slGrant == NULL ||slGrant->getExpiryTime()<NOW.dbl()||(slGrant->getTotalGrantedBlocks()<resourcesRequired)){
-
-                mode4Grant=   macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
+                
+                if(slGrant == NULL){
+                    std::cout << "creating new grant mode4 1" << endl;
+                }else{
+                    std::cout << "grant broken mode4 1: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
+                }
+                
+                mode4Grant = macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
             }
             else
             {
+
                 LteSidelinkGrant* mode4Grant = check_and_cast<LteSidelinkGrant*>(schedulingGrant_);
+                std::cout << " *********** using the old grant, mode 4: 1, grant expiration time: " << mode4Grant->getExpiryTime() << endl;
                 mode4Grant->setSpsPriority(lteInfo->getPriority());
                 // Need to get the creation time for this
                 mode4Grant->setMaximumLatency(remainingTime_);
@@ -543,11 +551,18 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
 
             if (slGrant == NULL ||slGrant->getExpiryTime()<NOW.dbl()||(slGrant->getTotalGrantedBlocks()<resourcesRequired)){
 
+                if(slGrant == NULL){
+                    std::cout << "creating new grant mode4 2" << endl;
+                }else{
+                    std::cout << "grant broken mode4 2: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
+                }
+
                 mode4Grant=   macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
             }
             else
             {
                 LteSidelinkGrant* mode4Grant = check_and_cast<LteSidelinkGrant*>(schedulingGrant_);
+                std::cout << " *********** using the old grant, mode 4: 2, grant expiration time: " << mode4Grant->getExpiryTime() << endl;
                 mode4Grant->setSpsPriority(lteInfo->getPriority());
                 // Need to get the creation time for this
                 mode4Grant->setMaximumLatency(remainingTime_);
@@ -651,13 +666,21 @@ void SidelinkConfiguration::assignGrantToData(DataArrival* pkt, std::string rrcS
 
         EV<<"RBs needed for current TB: "<<resourcesRequired<<endl;
         if (slGrant == NULL ||slGrant->getExpiryTime()<NOW.dbl()||(slGrant->getTotalGrantedBlocks()<resourcesRequired)){
-            
+                
+            if(slGrant == NULL){
+                std::cout << "creating new grant mode 3 1" << endl;
+            }else{
+                std::cout << "grant broken mode4 2: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
+            }
+
             mode3Grant=   macGenerateSchedulingGrant(remainingTime_, pkt->getPriority(), pkt->getDataSize());
         }
         else
         {
 
             LteSidelinkGrant* mode3Grant = check_and_cast<LteSidelinkGrant*>(schedulingGrant_);
+            std::cout << " *********** using the old grant, mode 3: 1, grant expiration time: " << mode3Grant->getExpiryTime() << endl;
+
             mode3Grant->setSpsPriority(pkt->getPriority());
             // Need to get the creation time for this
             mode3Grant->setMaximumLatency(remainingTime_);
@@ -800,6 +823,7 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
      * 6. Send message to PHY layer looking for CSRs
      */
     EV<<"SidelinkConfiguration::macGenerateSchedulingGrant"<<endl;
+    futureTransmissions.clear();
     if(rrcCurrentState=="RRC_CONN" ||rrcCurrentState=="RRC_INACTIVE")
     {
         slGrant = new LteSidelinkGrant("LteMode3Grant");
@@ -877,6 +901,17 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
     slGrant->setRri(resourceReservationInterval_);
     slGrant->setTotalGrantedBlocks(0); // Initialize (to be allocated by SRA module)
     slGrant->setTotalGrantedBlocks(calculateResourceBlocks(tbSize));
+
+    for(int j=0;j< slGrant->getResourceReselectionCounter();j++)
+    {
+
+        std::cout <<"Storing future message arrivals: "<<j*slGrant->getRri() << " " << NOW.dbl() << " " << (round((NOW.dbl()+j*0.1)*1000.0)/1000.0) <<endl;
+        futureTransmissions.push_back(round((NOW.dbl()+j*0.1)*1000.0)/1000.0);
+        slGrant->setGrantSubsequent(futureTransmissions);
+    }
+
+    std::cout << "grant new expiry time: " << slGrant->getExpiryTime() << " ------------resourceReselectionCounter_: " <<resourceReselectionCounter_ << endl;
+    std::cout << "grant new expiry time: " << slGrant->getExpiryTime() << "------------Setting expiry time: " << NOW.dbl()+0.1*(resourceReselectionCounter_-1) << endl;
 
     LteSidelinkGrant* phyGrant = slGrant;
 

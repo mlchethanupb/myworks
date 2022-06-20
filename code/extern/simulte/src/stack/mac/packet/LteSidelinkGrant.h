@@ -48,6 +48,8 @@ protected:
     MacNodeId destId;
     double nextArrival;
     std::vector<double> grantSubsequent;
+    int grants_used;
+    int grants_wasted;
 
 
 public:
@@ -71,6 +73,8 @@ public:
         CAMId = 0;
         nextArrival = 0.0;
         grantSubsequent.clear();
+        grants_used = 0;
+        grants_wasted = 0;
     }
 
 
@@ -109,6 +113,8 @@ public:
         CAMId  = other.CAMId;
         nextArrival = other.nextArrival;
         grantSubsequent = other.grantSubsequent;
+        grants_used = other.grants_used;
+        grants_wasted = other.grants_wasted;
         LteSchedulingGrant::operator=(other);
         return *this;
     }
@@ -298,7 +304,21 @@ public:
         this->grantSubsequent = grantSubsequent;
     }
 
+    void set_grants_used(int r_grants_used){
+        grants_used = r_grants_used;
+    }
 
+    int get_grants_used(){
+        return grants_used;
+    }
+
+    void set_grants_wasted(int r_grants_wasted){
+        grants_wasted = r_grants_wasted;
+    }
+
+    int get_grants_wasted(){
+        return grants_wasted;
+    }
 
 };
 
