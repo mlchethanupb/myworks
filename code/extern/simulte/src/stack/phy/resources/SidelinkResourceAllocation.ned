@@ -48,5 +48,5 @@ simple SidelinkResourceAllocation
         @statistic[halfDuplex](title="Half duplex error"; unit=""; source="halfDuplex"; record=mean,vector,stats);
         @signal[packetCollisionMode4];
         @statistic[packetCollisionMode4](title="packet collision in mode 4"; unit=""; source="packetCollisionMode4"; record=mean,vector,stats);
-        
+       
 }

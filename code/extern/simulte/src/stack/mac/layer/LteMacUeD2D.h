@@ -53,13 +53,10 @@ class LteMacUeD2D : public LteMacUe
     std::string rrcCurrentState;
     simsignal_t rcvdD2DModeSwitchNotification_;
     bool dataArrivalStatus;
-    int grantWastedCount;
-    std::vector<int> grantsWasted;
-    double grantWastePercentage;
     std::vector<double> futureArrivals;
     double messageArrivalTime;
     int possibleDataSize;
-    simsignal_t grantWastageMode4;
+    
     simsignal_t numberofFreeBytes;
 
 protected:

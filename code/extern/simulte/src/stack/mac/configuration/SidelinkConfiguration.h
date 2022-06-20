@@ -182,6 +182,7 @@ protected:
     simsignal_t sentPacketToLowerLayer;
     simsignal_t measuredItbs_;
     simsignal_t dataSize;
+    simsignal_t grantWastageMode4;
 
     virtual int getNumAntennas();
 

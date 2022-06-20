@@ -64,10 +64,7 @@ void LteMacUeD2D::initialize(int stage)
 
         rcvdD2DModeSwitchNotification_ = registerSignal("rcvdD2DModeSwitchNotification");
         dataArrivalStatus = false;
-        grantWastedCount=0;
-        grantsWasted.clear();
         messageArrivalTime = 0.0;
-        grantWastageMode4 = registerSignal("grantWastageMode4");
         numberofFreeBytes = registerSignal("numberofFreeBytes");
     }
     if (stage == inet::INITSTAGE_NETWORK_LAYER_3)
@@ -786,11 +783,16 @@ void LteMacUeD2D::handleSelfMessage()
 
     //Grant is configured, not expired but not used because there is no data to be transmitted
     //if (grant!=NULL && grant==mode4Grant) //MLC-Q
-    if (grant!=NULL)
+    if (grant!=NULL && grant==mode3Grant)
+    //if (grant!=NULL)
     {
 
         std::cout <<"---------------------------------------------------------------------------------------------" << endl;
-
+        if(grant==mode3Grant){
+            std::cout << "Mode 3 grant" << endl;
+        }else{
+            std::cout << "Mode 4 grant" << endl;
+        }
         std::cout << "NOW.dbl(): " << NOW.dbl() << endl;
         std::cout << "messageArrivalTime: " << messageArrivalTime << endl;
         std::cout <<"Check if data has arrived: "<< NOW.dbl()-messageArrivalTime <<endl;
@@ -833,27 +835,7 @@ void LteMacUeD2D::handleSelfMessage()
     //if (fabs (grantExpirationTime-NOW.dbl())<0.001) // MLC-Q, why this check?
     if (grant!=NULL && grantExpirationTime<NOW.dbl()) 
     {
-        std::cout << "==================================================================" << endl;
 
-        futureArrivals = grant->getGrantSubsequent();
-        double total_grants = static_cast<double>(futureArrivals.size());
-        
-        std::cout <<"Grant has expired ... "<<endl;
-        double grantwastepercent = (static_cast<double>(grant->get_grants_wasted()) / total_grants) * 100;
-        double grantusedpercent = (static_cast<double>(grant->get_grants_used()) / total_grants) * 100;
-
-        std::cout << "total_grants: " << total_grants << endl;
-        std::cout <<"Grant wastage percentage (GWP) "<< grantwastepercent <<endl;
-        std::cout <<"Grant Used percentage (GWP) "<< grantusedpercent <<endl;
-        emit(grantWastageMode4,grantwastepercent); //Collect statistics on grant wastage
-        std::cout << "==================================================================" << endl;
-
-        grant->set_grants_used(0);
-        grant->set_grants_wasted(0);
-        
-        //Calculate possible data size that could have been sent in those wasted grants
-        //possibleDataSize = grantWastedCount*grant->getTotalGrantedBlocks()*(300);
-        //emit(numberofFreeBytes, possibleDataSize);
     }
 
 
@@ -873,8 +855,6 @@ void LteMacUeD2D::handleSelfMessage()
         grant=NULL;
         mode3Grant = NULL;
         mode4Grant = NULL;
-        grantWastedCount = 0;
-        grantWastePercentage=0;
         std::cout <<"SL grant: "<<grant<<endl;
         setSchedulingGrant(NULL);
         SidelinkConfiguration* slConfig = check_and_cast<SidelinkConfiguration*>(getParentModule()->getSubmodule("mode4config"));

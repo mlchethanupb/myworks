@@ -87,7 +87,8 @@ simple SidelinkConfiguration
         @statistic[macNodeID](title="Reports Mac NodeID to allow for trans to nodeID"; source="macNodeID"; record=vector);
         @signal[dataPDUSizeTransmitted];
         @statistic[dataPDUSizeTransmitted](title="PDU size ready for transmission across channel"; unit="bytes"; source="dataPDUSizeTransmitted"; record=mean,vector,stats);
-        
+        @signal[grantWastageMode4];
+	    @statistic[grantWastageMode4](title="Grant wastage percentage"; source="grantWastageMode4"; record=vector,stats);
         
         
 }

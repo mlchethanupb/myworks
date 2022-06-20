@@ -118,7 +118,6 @@ public:
     double FirstTransmission;
     int pcCountMode4;
     bool packetDrop;
-    std::vector<double> futureTransmissions;
     //Sensing window parameters
 
     simtime_t subframeTime ;

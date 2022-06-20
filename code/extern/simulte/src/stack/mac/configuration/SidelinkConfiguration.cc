@@ -98,6 +98,7 @@ void SidelinkConfiguration::initialize(int stage)
         packetDropDCC           = registerSignal("packetDropDCC");
         macNodeID               = registerSignal("macNodeID");
         dataSize                = registerSignal("dataPDUSizeTransmitted");
+        grantWastageMode4 = registerSignal("grantWastageMode4");
 
     }
     else if (stage == inet::INITSTAGE_NETWORK_LAYER_3)
@@ -497,7 +498,25 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
                 if(slGrant == NULL){
                     std::cout << "creating new grant mode4 1" << endl;
                 }else{
+
                     std::cout << "grant broken mode4 1: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
+                
+                    std::cout << "==================================================================" << endl;
+
+                    
+                    double total_grants = static_cast<double>((slGrant->getGrantSubsequent()).size());
+                    double grantwastepercent = (static_cast<double>(slGrant->get_grants_wasted()) / total_grants) * 100;
+                    double grantusedpercent = (static_cast<double>(slGrant->get_grants_used()) / total_grants) * 100;
+
+                    std::cout << "total_grants: " << total_grants << endl;
+                    std::cout <<"Grant wastage percentage (GWP) "<< grantwastepercent <<endl;
+                    std::cout <<"Grant Used percentage (GWP) "<< grantusedpercent <<endl;
+                    emit(grantWastageMode4,grantwastepercent); //Collect statistics on grant wastage
+                    std::cout << "==================================================================" << endl;
+
+                    slGrant->set_grants_used(0);
+                    slGrant->set_grants_wasted(0);                
+                
                 }
                 
                 mode4Grant = macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
@@ -555,6 +574,22 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
                     std::cout << "creating new grant mode4 2" << endl;
                 }else{
                     std::cout << "grant broken mode4 2: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
+                
+                    std::cout << "==================================================================" << endl;
+
+                    
+                    double total_grants = static_cast<double>((slGrant->getGrantSubsequent()).size());
+                    double grantwastepercent = (static_cast<double>(slGrant->get_grants_wasted()) / total_grants) * 100;
+                    double grantusedpercent = (static_cast<double>(slGrant->get_grants_used()) / total_grants) * 100;
+
+                    std::cout << "total_grants: " << total_grants << endl;
+                    std::cout <<"Grant wastage percentage (GWP) "<< grantwastepercent <<endl;
+                    std::cout <<"Grant Used percentage (GWP) "<< grantusedpercent <<endl;
+                    emit(grantWastageMode4,grantwastepercent); //Collect statistics on grant wastage
+                    std::cout << "==================================================================" << endl;
+
+                    slGrant->set_grants_used(0);
+                    slGrant->set_grants_wasted(0);  
                 }
 
                 mode4Grant=   macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
@@ -670,7 +705,20 @@ void SidelinkConfiguration::assignGrantToData(DataArrival* pkt, std::string rrcS
             if(slGrant == NULL){
                 std::cout << "creating new grant mode 3 1" << endl;
             }else{
-                std::cout << "grant broken mode4 2: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
+                std::cout << "grant broken mode3 1: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
+                double total_grants = static_cast<double>((slGrant->getGrantSubsequent()).size());
+                double grantwastepercent = (static_cast<double>(slGrant->get_grants_wasted()) / total_grants) * 100;
+                double grantusedpercent = (static_cast<double>(slGrant->get_grants_used()) / total_grants) * 100;
+
+                std::cout << "total_grants: " << total_grants << endl;
+                std::cout <<"Grant wastage percentage (GWP) "<< grantwastepercent <<endl;
+                std::cout <<"Grant Used percentage (GWP) "<< grantusedpercent <<endl;
+                emit(grantWastageMode4,grantwastepercent); //Collect statistics on grant wastage
+                std::cout << "==================================================================" << endl;
+
+                slGrant->set_grants_used(0);
+                slGrant->set_grants_wasted(0);
+            
             }
 
             mode3Grant=   macGenerateSchedulingGrant(remainingTime_, pkt->getPriority(), pkt->getDataSize());

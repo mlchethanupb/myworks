@@ -160,8 +160,7 @@ simple LteMacUeD2D extends LteMacUe {
         
         @signal[rcvdD2DModeSwitchNotification];
         @statistic[rcvdD2DModeSwitchNotification](title="Reception of mode switch notification (tx side)"; unit=""; source="rcvdD2DModeSwitchNotification"; record=count,vector);
-        @signal[grantWastageMode4];
-	@statistic[grantWastageMode4](title="Grant wastage percentage"; source="grantWastageMode4"; record=vector,stats);
+
 		 
 }
 
