@@ -387,6 +387,9 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
         send(dataArrival,control_OUT);
         emit(sentPacketToLowerLayer, pdcpPkt);
         }
+        else{
+            //MLC - packet is not sent, because there are no neighbouring vehicles
+        }
 
     }
     else

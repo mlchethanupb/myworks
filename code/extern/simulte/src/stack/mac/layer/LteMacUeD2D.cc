@@ -782,8 +782,8 @@ void LteMacUeD2D::handleSelfMessage()
         }
 
     //Grant is configured, not expired but not used because there is no data to be transmitted
-    //if (grant!=NULL && grant==mode4Grant) //MLC-Q
-    if (grant!=NULL && grant==mode3Grant)
+    if (grant!=NULL && grant==mode4Grant) //MLC-Q
+    //if (grant!=NULL && grant==mode3Grant)
     //if (grant!=NULL)
     {
 
@@ -799,7 +799,7 @@ void LteMacUeD2D::handleSelfMessage()
 
         EV<<"Check if data has arrived: "<<NOW.dbl()-messageArrivalTime<<endl;
 
-        if ((NOW.dbl()-messageArrivalTime)<0.001)
+        if ((NOW.dbl()-messageArrivalTime)<0.001) //MLC 0.003 for mode 3, mode 4 0.001
         {
 
 

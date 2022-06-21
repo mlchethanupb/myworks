@@ -940,7 +940,7 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
     // Based on restrictResourceReservation interval But will be between 1 and 15
     // Again technically this needs to reconfigurable as well. But all of that needs to come in through ini and such.
 
-    resourceReselectionCounter_ = intuniform(5, 15); // Beacuse RRI = 100ms
+    resourceReselectionCounter_ = 10; //intuniform(5, 15); // Beacuse RRI = 100ms //MLC - fix the value to 10
 
     slGrant -> setResourceReselectionCounter(resourceReselectionCounter_);
     slGrant -> setExpiration(resourceReselectionCounter_ * restrictResourceReservationPeriod);
