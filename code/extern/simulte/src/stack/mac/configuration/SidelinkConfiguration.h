@@ -97,13 +97,6 @@ protected:
     bool firstTx;
 
     // All of the following should be configurable by the OMNet++ ini file and maybe even taken from higher layers if that's possible.
-    
-    int numberSubcarriersperPRB_c;
-    int numberSymbolsPerSlot_c;
-    int bitsPerSymbolQPSK_c;
-    int numberPRBTransmitBlock_c;
-
-    int resourceReservationInterval_;
     double probResourceKeep_;
     int restrictResourceReservationPeriod;
     int minSubchannelNumberPSSCH_;
@@ -150,8 +143,6 @@ protected:
     std::vector<double> validResourceReservationIntervals_;
     std::map<std::string, int> cbrLevelsMap;
     std::map<MacCid, FlowControlInfo> connDesc_;
-    std::vector<double> futureTransmissions;
-
 
     /* Incoming Connection Descriptors:
      * a connection is stored at the first MAC SDU delivered to the RLC
@@ -182,7 +173,6 @@ protected:
     simsignal_t sentPacketToLowerLayer;
     simsignal_t measuredItbs_;
     simsignal_t dataSize;
-    simsignal_t grantWastageMode4;
 
     virtual int getNumAntennas();
 
@@ -245,7 +235,7 @@ protected:
 
 public:
     virtual void macHandleSps(std::vector<std::tuple<double, int, double>> , std::string );
-    int calculateResourceBlocks(int tbSize);
+
     SidelinkConfiguration();
     virtual ~SidelinkConfiguration();
 
@@ -263,14 +253,6 @@ public:
      * Purges PDUs from the HARQ buffers for sending to the PHY layer.
      */
     void flushHarqBuffers(HarqTxBuffers harqTxBuffers_, LteSidelinkGrant*);
-    int getResourceReservationInterval()  {
-        return resourceReservationInterval_;
-    }
-
-    void setResourceReservationInterval(int resourceReservationInterval) {
-        resourceReservationInterval_ = resourceReservationInterval;
-    }
-
     void setAllocatedBlocksSCIandData(int totalGrantedBlocks);
     int getAllocatedBlocksSCIandData()
     {

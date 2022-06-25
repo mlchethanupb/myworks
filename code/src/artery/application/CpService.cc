@@ -231,8 +231,10 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
 	CollectivePerceptionMessage_t& cpm = (*cpm_msg).cpm;
 
     // mVehicleDataProvider->updated() gives the last time sumo updated the information of this station
-	uint16_t genDeltaTime = countTaiMilliseconds(mTimer->getTimeFor(mVehicleDataProvider->updated()));
-	cpm.generationDeltaTime = genDeltaTime * GenerationDeltaTime_oneMilliSec;
+	uint16_t genDeltaTime = countTaiMilliseconds(mTimer->getTimeFor(T_now));
+    cpm.generationDeltaTime = genDeltaTime * GenerationDeltaTime_oneMilliSec;
+
+    //std::cout << "cpm.generationDeltaTime: " <<  cpm.generationDeltaTime << endl;
 
     // Ref Sec-4.3.4.3; Add sensor container to the CPM message, only if time elapased to CPM containing sensor container is more than 1 second.
 	if(T_now - mLastSenrInfoCntnrTimestamp >= SimTime(1, SIMTIME_S)){
@@ -291,7 +293,7 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
         payload->layer(OsiLayer::Application) = std::move(buffer);
         long payload_size = static_cast<long>(payload->size());
         emit(scSignalMessageSize, payload_size);
-        EV <<"CPM generated with size " << payload->size() <<  " bytes, requesting lower layer to transmit" << endl;
+        EV <<"Station: " << mVehicleDataProvider->station_id() <<", generated CPM with size " << payload->size() <<  " bytes, requesting lower layer to transmit at " << T_now << endl;
 
         //requesting lower layer to send the CPM
         this->request(request, std::move(payload));
@@ -681,14 +683,22 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
     //Add object to relevance area object list, if the distance between two vehicles is less than the limit specified.
     vanetza::units::Length maxRelArealimit = par("maxRadiusRelArea").doubleValue() * vanetza::units::si::meter;
     
-    EV << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID <<", retriving information "<< endl;
-
     omnetpp::SimTime generationTime = mTimer->getTimeFor(
             mTimer->reconstructMilliseconds(cpm_data->cpm.generationDeltaTime));
 
-    omnetpp::SimTime ete_delay = simTime() - generationTime; //@todo: mVehicleDataProvider->updated() insted of simtime()??
-    //std::cout << "ete delay: " << ete_delay << endl;
-    emit(scSignalEteDelay, ete_delay);
+    omnetpp::SimTime received_time = simTime();
+    omnetpp::SimTime ete_delay = received_time - generationTime; //@todo: mVehicleDataProvider->updated() insted of simtime()??
+
+    EV << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID << ", received time: " << received_time << ", generationTime: " << generationTime <<", ete delay: " << ete_delay << endl;
+
+   //std::cout << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID << ", received time: " << received_time << ", generationTime: " << generationTime <<", ete delay: " << ete_delay << "\n";
+
+
+
+    if (ete_delay<1.0)
+    {
+        emit(scSignalEteDelay, ete_delay);
+    }
     LocalEnvironmentModel::TrackingTime newTracking(generationTime);
 
     if(cpm_data->cpm.cpmParameters.stationDataContainer){

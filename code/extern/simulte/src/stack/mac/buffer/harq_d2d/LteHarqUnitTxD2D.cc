@@ -169,12 +169,9 @@ LteMacPdu *LteHarqUnitTxD2D::extractPdu()
     lteInfo->setTxNumber(transmissions_);
     lteInfo->setNdi((transmissions_ == 1) ? true : false);
     EV << "LteHarqUnitTxD2D::extractPdu - ndi set to " << ((transmissions_ == 1) ? "true" : "false") << endl;
-    EV<<"Extracted PDU: "<<pdu_<<endl;
 
+    LteMacPdu* extractedPdu = pdu_->dup();
 
-    LteMacPdu* extractedPdu = pdu_;
-   // throw cRuntimeError("LteHarqUnitTxD2D::extractPdu");
-    //macOwner_->takeObj(extractedPdu);
     if (lteInfo->getDirection() == D2D_MULTI)
     {
         // for multicast, there is no feedback to wait, so reset the unit.

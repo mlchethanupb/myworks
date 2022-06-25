@@ -301,7 +301,7 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
                     //Saving the Info of broadcast neighbours
                     if(UeId!=sourceId)
                     {
-                        if((distance !=0 && distance<=200) && binder_->isNodeRegisteredInSimlation()==true)
+                        if((distance !=0 && distance<=500) && binder_->isNodeRegisteredInSimlation()==true)
                         {
                             EV<<"Distance from ego vehicle: "<<distance<<endl;
                             binder_->BroadcastUeInfo[UeId]=uePos;
@@ -319,49 +319,6 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
             }
 
             EV<<"Number of neighbours SL broadcast: "<<binder_->BroadcastUeInfo.size()<<endl;
-
-            /*          int k1= ueCoords.size();
-
-            EV<<"Number of UEs in simulation: "<<ueCoords.size()<<endl;
-            std::map<MacNodeId,inet::Coord>::iterator itb = binder_->BroadcastUeInfo.begin();
-            EV<<"BroadcastUeInfo size: "<<binder_->BroadcastUeInfo.size()<<endl;
-            inet::Coord sourceCoord =binder_->BroadcastUeInfo.find(sourceId)->second;
-            EV<<"Source coordinates: "<<sourceCoord<<endl;
-
-            for(; itb != binder_->BroadcastUeInfo.end(); ++itb)
-            {
-                distance = itb->second.distance(sourceCoord);
-
-                EV<<"Distance: "<<distance<<endl;
-                EV<<"Connected: "<<binder_->isNodeRegisteredInSimlation()<<endl;
-
-                if((distance !=0 && distance<=100) && binder_->isNodeRegisteredInSimlation()==true)
-                {
-                    EV<<"Sensing neighbours"<<endl;
-                    MacNodeId ueid = itb->first;
-                    binder_->BroadcastUeInfo[ueid]=itb->second;
-
-                    nonIpInfo->setDestId(ueid);
-                }
-
-                else if (distance ==0 || distance > 100)
-                {
-                    EV<<"EGO vehicle itself"<<endl;
-                    //binder_->BroadcastUeInfo.erase(itb);
-                    nonIpInfo->setDestId(nodeId_);
-
-                }
-                else
-                {
-                    EV<<"distance: "<<distance <<endl;
-                    //throw cRuntimeError("Invalid nodes in the simulation");
-                }
-
-            }*/
-
-            //EV<<"BroadcastUeInfo size final : "<<binder_->BroadcastUeInfo.size()<<endl;
-
-
 
         }
 
@@ -386,9 +343,6 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
         send(pdcpPkt, (nonIpInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
         send(dataArrival,control_OUT);
         emit(sentPacketToLowerLayer, pdcpPkt);
-        }
-        else{
-            //MLC - packet is not sent, because there are no neighbouring vehicles
         }
 
     }

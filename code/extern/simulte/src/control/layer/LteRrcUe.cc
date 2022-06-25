@@ -52,12 +52,19 @@ void LteRrcUe::initialize(int stage)
             cellFound = false;
             std::cout << "********************* LteRrcUe Enabling mode 4 ***********************" << endl;
         }else{
+            cellFound = true;
             std::cout << "--------------------- LteRrcUe Enabling mode 3 -----------------------" << endl;
         }
-        
+
         modeSelect(cellFound);
     }
 
+    bool en_mode4 = par("enable_mode4");
+    if(en_mode4){
+        std::cout << "********************* LteRrcUe Enabling mode 4 ***********************" << endl;
+    }else{
+        std::cout << "--------------------- LteRrcUe Enabling mode 3 -----------------------" << endl;
+    }
 }
 void LteRrcUe::handleMessage(cMessage *msg)
 {
@@ -119,6 +126,8 @@ void LteRrcUe::handleSelfMessage()
         cellFound = false;
         //std::cout << "********************* LteRrcUe Enabling mode 4 ***********************" << endl;
     }else{
+
+
         //std::cout << "--------------------- LteRrcUe Enabling mode 3 -----------------------" << endl;
     }
 
@@ -130,23 +139,24 @@ bool  LteRrcUe::checkCellCoverage(){
 
     //Obtain positions of UE and eNB
 
-
+    EV<<"LteRrcUe::checkCellCoverage"<<endl;
+    MacNodeId enbId_ = getAncestorPar("masterId");
     LtePhyBase* enb_ = check_and_cast<LtePhyBase*>(
-            getSimulation()->getModule(binder_->getOmnetId(masterId_))->getSubmodule("lteNic")->getSubmodule("phy"));
+            getSimulation()->getModule(binder_->getOmnetId(enbId_))->getSubmodule("lteNic")->getSubmodule("phy"));
+    inet::Coord enbCoord = enb_->getCoord();
+
     enbCoord = enb_->getCoord();
-    EV<<"Coordinates of eNB: "<<enbCoord<<endl;
+    EV<<"Coordinates of eNB associated: "<<endl;
 
     LtePhyBase* ue_ = check_and_cast<LtePhyBase*>(
             getSimulation()->getModule(binder_->getOmnetId(nodeId_))->getSubmodule("lteNic")->getSubmodule("phy"));
     ueCoord = ue_->getCoord();
 
     ueDistanceFromEnb =ue_->getCoord().distance( enbCoord);
-    //std::cout << "ueCoord: " << ueCoord << endl;
-    //std::cout << "enbCoord: " << enbCoord << endl;
-    //std::cout << "ueDistanceFromEnb: " << ueDistanceFromEnb << endl;
 
 
-    if (ueDistanceFromEnb < 5000) //MLC @tocheck 200
+
+    if (ueDistanceFromEnb < 500) //MLC @tocheck 200
     {
         //To set default mode 4, just put cellFound=false always
         cellFound=true;
@@ -205,7 +215,7 @@ LteSidelinkMode LteRrcUe::modeSelect(bool cellfound){
     FSM_Switch(fsm)
     {
 case FSM_Exit(IDLE):
-                                                        {
+                                                            {
     if(cellfound==true)
     {
         FSM_Goto(fsm,CONN);
@@ -213,9 +223,9 @@ case FSM_Exit(IDLE):
     }
 
     break;
-                                                        }
+                                                            }
 case FSM_Enter(CONN):
-                                                    {
+                                                        {
     rrcstate->setState("RRC_CONN");
     mode = MODE3;
     EV<<"Entered CONN state: "<<endl;
@@ -230,10 +240,10 @@ case FSM_Enter(CONN):
     send(rrcstate,MAC_OUT);
     forcedMode3Switch=0;
     break;
-                                                    }
+                                                        }
 
 case FSM_Exit(CONN):
-                                                    {
+                                                        {
     if(cellfound==false)
     {
         mode = MODE4;
@@ -250,10 +260,10 @@ case FSM_Exit(CONN):
     }
 
     break;
-                                                    }
+                                                        }
 
 case FSM_Enter(IDLE):
-                                                    {
+                                                        {
     mode = MODE4;
     rrcstate->setState("RRC_IDLE");
     EV<<"RRC mode: "<<LteSidelinkModeToA(mode)<<"state: "<<fsm.getStateName()<<endl;
@@ -265,10 +275,10 @@ case FSM_Enter(IDLE):
 
 
     break;
-                                                    }
+                                                        }
 
 case FSM_Enter(INACTIVE):
-                {
+                    {
     mode = MODE3;
     rrcstate->setState("RRC_INACTIVE");
     EV<<"RRC mode: "<<LteSidelinkModeToA(mode)<<"state: "<<fsm.getStateName()<<endl;
@@ -277,10 +287,10 @@ case FSM_Enter(INACTIVE):
 
     break;
 
-                }
+                    }
 
 case FSM_Exit(INACTIVE):
-                {
+                    {
     if (cellfound == true && dataArrivalStatus == true)
     {
         mode = MODE3;
@@ -295,7 +305,7 @@ case FSM_Exit(INACTIVE):
         FSM_Goto(fsm, IDLE);
     }
 
-                }
+                    }
 
     }
 
@@ -398,4 +408,3 @@ void LteRrcUe::SIB21PreConfigured()
     send(sib21,PHY_OUT);
 
 }
-

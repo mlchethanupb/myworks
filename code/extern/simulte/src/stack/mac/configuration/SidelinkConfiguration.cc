@@ -59,8 +59,6 @@ void SidelinkConfiguration::initialize(int stage)
     if (stage == inet::INITSTAGE_LOCAL)
     {
         EV<<"SidelinkConfiguration::initialize, stage: "<<stage<<endl;
-        resourceReservationInterval_ = par("resourceReservationInterval");
-        EV<<"RRI: "<<        resourceReservationInterval_<<endl;
         parseUeTxConfig(par("txConfig").xmlValue());
         parseCbrTxConfig(par("txConfig").xmlValue());
         parseRriConfig(par("txConfig").xmlValue());
@@ -70,9 +68,6 @@ void SidelinkConfiguration::initialize(int stage)
         numSubchannels_ = par("numSubchannels");
         probResourceKeep_ = par("probResourceKeep");
         usePreconfiguredTxParams_ = par("usePreconfiguredTxParams");
-        numberSubcarriersperPRB_c = par ("numberSubcarriersperPRB_c");
-        numberSymbolsPerSlot_c = par("numberSymbolsPerSlot_c");
-        bitsPerSymbolQPSK_c = par ("bitsPerSymbolQPSK_c");
         reselectAfter_ = par("reselectAfter");
         useCBR_ = par("useCBR");
         packetDropping_ = par("packetDropping");
@@ -98,7 +93,6 @@ void SidelinkConfiguration::initialize(int stage)
         packetDropDCC           = registerSignal("packetDropDCC");
         macNodeID               = registerSignal("macNodeID");
         dataSize                = registerSignal("dataPDUSizeTransmitted");
-        grantWastageMode4 = registerSignal("grantWastageMode4");
 
     }
     else if (stage == inet::INITSTAGE_NETWORK_LAYER_3)
@@ -463,9 +457,6 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
     {
         LteMacBase* mac = dynamic_cast<LteMacBase*>(getParentModule()->getSubmodule("mac"));
 
-        int resourcesRequired = calculateResourceBlocks(pkt->getBitLength());
-        EV<<"RBs needed for current TB: "<<resourcesRequired<<endl;
-        
         if (mac->getIpBased()==false)
         {
             FlowControlInfoNonIp* lteInfo = check_and_cast<FlowControlInfoNonIp*>(pkt->removeControlInfo());
@@ -478,7 +469,6 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             double dur = duration.dbl();
             remainingTime_ = lteInfo->getDuration() - dur;
 
-            /*
             if (schedulingGrant_ != NULL && periodCounter_ > remainingTime_)
             {
                 //emit(grantBreakTiming, 1);
@@ -490,42 +480,10 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             {
                 mode4Grant= macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
 
-            }*/
-
-
-            if (slGrant == NULL ||slGrant->getExpiryTime()<NOW.dbl()||(slGrant->getTotalGrantedBlocks()<resourcesRequired)){
-                
-                if(slGrant == NULL){
-                    std::cout << "creating new grant mode4 1" << endl;
-                }else{
-
-                    std::cout << "grant broken mode4 1: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
-                
-                    std::cout << "==================================================================" << endl;
-
-                    
-                    double total_grants = static_cast<double>((slGrant->getGrantSubsequent()).size());
-                    double grantwastepercent = (static_cast<double>(slGrant->get_grants_wasted()) / total_grants) * 100;
-                    double grantusedpercent = (static_cast<double>(slGrant->get_grants_used()) / total_grants) * 100;
-
-                    std::cout << "total_grants: " << total_grants << endl;
-                    std::cout <<"Grant wastage percentage (GWP) "<< grantwastepercent <<endl;
-                    std::cout <<"Grant Used percentage (GWP) "<< grantusedpercent <<endl;
-                    emit(grantWastageMode4,grantwastepercent); //Collect statistics on grant wastage
-                    std::cout << "==================================================================" << endl;
-
-                    slGrant->set_grants_used(0);
-                    slGrant->set_grants_wasted(0);                
-                
-                }
-                
-                mode4Grant = macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
             }
             else
             {
-
                 LteSidelinkGrant* mode4Grant = check_and_cast<LteSidelinkGrant*>(schedulingGrant_);
-                std::cout << " *********** using the old grant, mode 4: 1, grant expiration time: " << mode4Grant->getExpiryTime() << endl;
                 mode4Grant->setSpsPriority(lteInfo->getPriority());
                 // Need to get the creation time for this
                 mode4Grant->setMaximumLatency(remainingTime_);
@@ -554,7 +512,7 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             duration = duration - elapsedTime;
             double dur = duration.dbl();
             remainingTime_ = lteInfo->getDuration() - dur;
-            /*
+
             if (schedulingGrant_ != NULL && periodCounter_ > remainingTime_)
             {
                 //emit(grantBreakTiming, 1);
@@ -566,38 +524,10 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
             {
                 mode4Grant= macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
 
-            }*/
-
-            if (slGrant == NULL ||slGrant->getExpiryTime()<NOW.dbl()||(slGrant->getTotalGrantedBlocks()<resourcesRequired)){
-
-                if(slGrant == NULL){
-                    std::cout << "creating new grant mode4 2" << endl;
-                }else{
-                    std::cout << "grant broken mode4 2: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
-                
-                    std::cout << "==================================================================" << endl;
-
-                    
-                    double total_grants = static_cast<double>((slGrant->getGrantSubsequent()).size());
-                    double grantwastepercent = (static_cast<double>(slGrant->get_grants_wasted()) / total_grants) * 100;
-                    double grantusedpercent = (static_cast<double>(slGrant->get_grants_used()) / total_grants) * 100;
-
-                    std::cout << "total_grants: " << total_grants << endl;
-                    std::cout <<"Grant wastage percentage (GWP) "<< grantwastepercent <<endl;
-                    std::cout <<"Grant Used percentage (GWP) "<< grantusedpercent <<endl;
-                    emit(grantWastageMode4,grantwastepercent); //Collect statistics on grant wastage
-                    std::cout << "==================================================================" << endl;
-
-                    slGrant->set_grants_used(0);
-                    slGrant->set_grants_wasted(0);  
-                }
-
-                mode4Grant=   macGenerateSchedulingGrant(remainingTime_, lteInfo->getPriority(), pkt->getBitLength());
             }
             else
             {
                 LteSidelinkGrant* mode4Grant = check_and_cast<LteSidelinkGrant*>(schedulingGrant_);
-                std::cout << " *********** using the old grant, mode 4: 2, grant expiration time: " << mode4Grant->getExpiryTime() << endl;
                 mode4Grant->setSpsPriority(lteInfo->getPriority());
                 // Need to get the creation time for this
                 mode4Grant->setMaximumLatency(remainingTime_);
@@ -679,7 +609,6 @@ void SidelinkConfiguration::assignGrantToData(DataArrival* pkt, std::string rrcS
         EV<<"Priority: "<<pkt->getPriority()<<endl;
         EV<<"bit length: "<<pkt->getDataSize()<<endl;
 
-        /*
         if (schedulingGrant_ != NULL && periodCounter_ > remainingTime_)
         {
 
@@ -693,42 +622,11 @@ void SidelinkConfiguration::assignGrantToData(DataArrival* pkt, std::string rrcS
 
             mode3Grant= macGenerateSchedulingGrant(remainingTime_, pkt->getPriority(), pkt->getDataSize());
 
-        }*/
-
-        int tbSize = pkt->getDataSize();
-
-        int resourcesRequired = calculateResourceBlocks(tbSize);
-
-        EV<<"RBs needed for current TB: "<<resourcesRequired<<endl;
-        if (slGrant == NULL ||slGrant->getExpiryTime()<NOW.dbl()||(slGrant->getTotalGrantedBlocks()<resourcesRequired)){
-                
-            if(slGrant == NULL){
-                std::cout << "creating new grant mode 3 1" << endl;
-            }else{
-                std::cout << "grant broken mode3 1: " << slGrant->getExpiryTime() << " " << (slGrant->getExpiryTime()<NOW.dbl()) << " " << (slGrant->getTotalGrantedBlocks()<resourcesRequired) << endl;
-                double total_grants = static_cast<double>((slGrant->getGrantSubsequent()).size());
-                double grantwastepercent = (static_cast<double>(slGrant->get_grants_wasted()) / total_grants) * 100;
-                double grantusedpercent = (static_cast<double>(slGrant->get_grants_used()) / total_grants) * 100;
-
-                std::cout << "total_grants: " << total_grants << endl;
-                std::cout <<"Grant wastage percentage (GWP) "<< grantwastepercent <<endl;
-                std::cout <<"Grant Used percentage (GWP) "<< grantusedpercent <<endl;
-                emit(grantWastageMode4,grantwastepercent); //Collect statistics on grant wastage
-                std::cout << "==================================================================" << endl;
-
-                slGrant->set_grants_used(0);
-                slGrant->set_grants_wasted(0);
-            
-            }
-
-            mode3Grant=   macGenerateSchedulingGrant(remainingTime_, pkt->getPriority(), pkt->getDataSize());
         }
         else
         {
 
             LteSidelinkGrant* mode3Grant = check_and_cast<LteSidelinkGrant*>(schedulingGrant_);
-            std::cout << " *********** using the old grant, mode 3: 1, grant expiration time: " << mode3Grant->getExpiryTime() << endl;
-
             mode3Grant->setSpsPriority(pkt->getPriority());
             // Need to get the creation time for this
             mode3Grant->setMaximumLatency(remainingTime_);
@@ -776,7 +674,7 @@ void SidelinkConfiguration::macHandleSps(std::vector<std::tuple<double, int, dou
     // Select random element from vector
     int index=0;
 
-    if (CSRs.size()==0)
+   /* if (CSRs.size()==0)
     {
         EV<<"CSRs size: "<<CSRs.size()<<endl;
         throw cRuntimeError("Cannot allocate CSRs");
@@ -794,7 +692,7 @@ void SidelinkConfiguration::macHandleSps(std::vector<std::tuple<double, int, dou
     EV<<"initial subchannel: "<<initialSubchannel<<" "<<"final subchannel: "<<finalSubchannel<<endl;
     // Emit statistic about the use of resources, i.e. the initial subchannel and it's length.
     //emit(selectedSubchannelIndex, initialSubchannel);
-    //emit(selectedNumSubchannels, slGrant->getNumSubchannels());
+    //emit(selectedNumSubchannels, slGrant->getNumSubchannels());*/
 
     // Determine the RBs on which we will send our message
     RbMap grantedBlocks;
@@ -816,7 +714,7 @@ void SidelinkConfiguration::macHandleSps(std::vector<std::tuple<double, int, dou
     slGrant->setTotalGrantedBlocks(totalGrantedBlocks);
     slGrant->setDirection(D2D_MULTI);
     slGrant->setCodewords(1);
-    slGrant->setStartingSubchannel(initialSubchannel);
+    //slGrant->setStartingSubchannel(initialSubchannel);
     slGrant->setMcs(maxMCSPSSCH_);
 
     LteMod mod = _QPSK;
@@ -844,14 +742,13 @@ void SidelinkConfiguration::macHandleSps(std::vector<std::tuple<double, int, dou
     // Simply flips the codeword.
     currentCw_ = MAX_CODEWORDS - currentCw_;
     periodCounter_= slGrant->getPeriod();
-    expirationCounter_= (slGrant->getResourceReselectionCounter() * periodCounter_) + 1;
 
     EV<<"Sidelink Configuration period counter: "<<periodCounter_<<endl;
-    EV<<"Sidelink Configuration expiration counter: "<<expirationCounter_<<endl;
+
     EV<<"Sidelink Configuration Granted CWBytes size: "<<slGrant->getGrantedCwBytesArraySize()<<endl;
     //Implement methods to store expiration counter and period counter
     slGrant->setPeriodCounter(periodCounter_);
-    slGrant->setExpirationCounter(expirationCounter_);
+
     setSidelinkGrant(slGrant);
 
     // TODO: Setup for HARQ retransmission, if it can't be satisfied then selection must occur again.
@@ -871,7 +768,6 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
      * 6. Send message to PHY layer looking for CSRs
      */
     EV<<"SidelinkConfiguration::macGenerateSchedulingGrant"<<endl;
-    futureTransmissions.clear();
     if(rrcCurrentState=="RRC_CONN" ||rrcCurrentState=="RRC_INACTIVE")
     {
         slGrant = new LteSidelinkGrant("LteMode3Grant");
@@ -886,7 +782,6 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
 
     // Priority is the most difficult part to figure out, for the moment I will assign it as a fixed value
     slGrant -> setSpsPriority(priority);
-    slGrant -> setRri(resourceReservationInterval_); //resource reservation interval/Prsvp_TX
     slGrant -> setPeriod(restrictResourceReservationPeriod * 100); //resource reservation interval/Prsvp_TX
     maximumLatency = intuniform(20,100);  //Uniformly varies between 20 ms and 100 ms
     slGrant -> setMaximumLatency(maximumLatency);
@@ -940,26 +835,13 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
     // Based on restrictResourceReservation interval But will be between 1 and 15
     // Again technically this needs to reconfigurable as well. But all of that needs to come in through ini and such.
 
-    resourceReselectionCounter_ = 10; //intuniform(5, 15); // Beacuse RRI = 100ms //MLC - fix the value to 10
+    resourceReselectionCounter_ = 10; // Beacuse RRI = 100ms
 
     slGrant -> setResourceReselectionCounter(resourceReselectionCounter_);
-    slGrant -> setExpiration(resourceReselectionCounter_ * restrictResourceReservationPeriod);
-    slGrant -> setExpiryTime(NOW.dbl()+0.1*(resourceReselectionCounter_-1));    
+    slGrant -> setExpirationCounter(NOW.dbl()+0.1*(resourceReselectionCounter_-1));
+    EV<<"Grant expiry time: "<<slGrant->getExpirationCounter()<<endl;
+    slGrant->setFreshAllocation(true);
     slGrant->setTransmitBlockSize(tbSize);
-    slGrant->setRri(resourceReservationInterval_);
-    slGrant->setTotalGrantedBlocks(0); // Initialize (to be allocated by SRA module)
-    slGrant->setTotalGrantedBlocks(calculateResourceBlocks(tbSize));
-
-    for(int j=0;j< slGrant->getResourceReselectionCounter();j++)
-    {
-
-        std::cout <<"Storing future message arrivals: "<<j*slGrant->getRri() << " " << NOW.dbl() << " " << (round((NOW.dbl()+j*0.1)*1000.0)/1000.0) <<endl;
-        futureTransmissions.push_back(round((NOW.dbl()+j*0.1)*1000.0)/1000.0);
-        slGrant->setGrantSubsequent(futureTransmissions);
-    }
-
-    std::cout << "grant new expiry time: " << slGrant->getExpiryTime() << " ------------resourceReselectionCounter_: " <<resourceReselectionCounter_ << endl;
-    std::cout << "grant new expiry time: " << slGrant->getExpiryTime() << "------------Setting expiry time: " << NOW.dbl()+0.1*(resourceReselectionCounter_-1) << endl;
 
     LteSidelinkGrant* phyGrant = slGrant;
 
@@ -1223,23 +1105,6 @@ void SidelinkConfiguration::flushHarqBuffers(HarqTxBuffers harqTxBuffers_, LteSi
 
 }
 
-
-int SidelinkConfiguration::calculateResourceBlocks(int tbSize)
-{
-    EV<<"Calculating the numer of PRBs needed for Transport block ..."<<endl;
-    int numberSymbolsPerPRB= numberSubcarriersperPRB_c*numberSymbolsPerSlot_c*bitsPerSymbolQPSK_c;
-    int numberSymbolsTransmitBlock = tbSize/bitsPerSymbolQPSK_c;
-
-    EV<<"Data size: "<<tbSize<<endl;
-    EV<<"numberSymbolsPerPRB: "<<numberSymbolsPerPRB<<endl;
-
-    numberPRBTransmitBlock_c = (numberSymbolsTransmitBlock/numberSymbolsPerPRB)+1;
-    EV<<"numberSymbolsTransmitBlock "<<numberSymbolsTransmitBlock <<endl;
-
-    return numberPRBTransmitBlock_c;
-
-}
-
 void SidelinkConfiguration::finish()
 {
 
@@ -1254,4 +1119,3 @@ void SidelinkConfiguration::setAllocatedBlocksSCIandData(int totalGrantedBlocks)
 {
     allocatedBlocksSCIandData = totalGrantedBlocks;
 }
-

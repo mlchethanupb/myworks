@@ -13,6 +13,7 @@
 #include "stack/mac/layer/LteMacUe.h"
 #include "stack/mac/layer/LteMacEnbD2D.h"
 #include "stack/mac/buffer/harq_d2d/LteHarqBufferTxD2D.h"
+#include "stack/mac/buffer/harq_d2d/LteHarqBufferRxD2D.h"
 #include "stack/mac/configuration/SidelinkConfiguration.h"
 #include "stack/mac/packet/LteSidelinkGrant.h"
 #include "control/packet/RRCStateChange_m.h"
@@ -41,7 +42,6 @@ class LteMacUeD2D : public LteMacUe
     UserTxParams* getPreconfiguredTxParams();  // build and return new user tx params
     LteSchedulerUeSl* lteSchedulerUeSl_;
     ScheduleList* scheduleListSl_;
-    double grantExpirationTime;
     // RAC Handling variables
     bool racD2DMulticastRequested_;
     // Multicast D2D BSR handling
@@ -52,13 +52,6 @@ class LteMacUeD2D : public LteMacUe
     int transmissionCAMId;
     std::string rrcCurrentState;
     simsignal_t rcvdD2DModeSwitchNotification_;
-    bool dataArrivalStatus;
-    std::vector<double> futureArrivals;
-    double messageArrivalTime;
-    int possibleDataSize;
-    
-    simsignal_t numberofFreeBytes;
-
 protected:
 
     /**
@@ -129,14 +122,6 @@ public:
     LteSidelinkGrant* getSchedulingGrant();
     void setSchedulingGrant(LteSidelinkGrant*);
     void finish();
-
-    bool isDataArrivalStatus() {
-        return dataArrivalStatus;
-    }
-
-    void setDataArrivalStatus(bool dataArrivalStatus) {
-        this->dataArrivalStatus = dataArrivalStatus;
-    }
 };
 
 #endif

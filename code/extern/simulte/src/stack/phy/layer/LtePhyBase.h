@@ -229,7 +229,7 @@ protected:
      *
      * Frames are sent with zero transmission delay.
      */
-    virtual void sendMulticast(AirFrame *frame);
+    virtual void sendMulticast(LteAirFrame *frame);
 
     /**
      * Sends a frame uniquely to the dest specified in carried control info.

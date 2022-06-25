@@ -38,18 +38,13 @@ protected:
     unsigned int mcs;
     unsigned int retransSubchannel; // It is possible the retransmission has different resources assigned to it.
     unsigned int resourceReselectionCounter;
-    int rri;
     int transmitBlockSize;
     unsigned int periodCounter;
-    unsigned int expirationCounter;
-    double expiryTime;
+    double expirationCounter;
+    bool freshAllocation;
     int packetId;
     int CAMId;
     MacNodeId destId;
-    double nextArrival;
-    std::vector<double> grantSubsequent;
-    int grants_used;
-    int grants_wasted;
 
 
 public:
@@ -58,23 +53,18 @@ public:
         LteSchedulingGrant(name, kind)
     {
         numSubchannels = 0;
-        rri = 0;
         spsPriority = 0;
         maximumLatency = 0.0;
         timeGapTransRetrans = 0;
         startingSubchannel = 0;
         mcs = 0;
-        expiryTime = 0.0;
         retransSubchannel = 0;
         resourceReselectionCounter = 0;
         firstTransmission = true;
         startTime = simTime();
         packetId = 0;
         CAMId = 0;
-        nextArrival = 0.0;
-        grantSubsequent.clear();
-        grants_used = 0;
-        grants_wasted = 0;
+        freshAllocation=false;
     }
 
 
@@ -104,17 +94,12 @@ public:
         retransSubchannel = other.retransSubchannel;
         resourceReselectionCounter = other.resourceReselectionCounter;
         possibleRRIs = other.possibleRRIs;
-        rri = other.rri;
         destId = other.destId;
         periodCounter = other.periodCounter;
         expirationCounter = other.expirationCounter;
-        expiryTime = other.expiryTime;
         packetId = other.packetId;
         CAMId  = other.CAMId;
-        nextArrival = other.nextArrival;
-        grantSubsequent = other.grantSubsequent;
-        grants_used = other.grants_used;
-        grants_wasted = other.grants_wasted;
+        freshAllocation=other.freshAllocation;
         LteSchedulingGrant::operator=(other);
         return *this;
     }
@@ -240,11 +225,11 @@ public:
         this->destId = destId;
     }
 
-    unsigned int getExpirationCounter() {
+    double getExpirationCounter() {
         return expirationCounter;
     }
 
-    void setExpirationCounter(unsigned int expirationCounter) {
+    void setExpirationCounter(double expirationCounter) {
         this->expirationCounter = expirationCounter;
     }
 
@@ -272,54 +257,13 @@ public:
         CAMId = camId;
     }
 
-    double getNextArrival(){
-        return nextArrival;
+    bool isFreshAllocation() {
+        return freshAllocation;
     }
 
-    void setNextArrival(double nextArrival) {
-        this->nextArrival = nextArrival;
+    void setFreshAllocation(bool freshAllocation) {
+        this->freshAllocation = freshAllocation;
     }
-
-    int getRri()  {
-        return rri;
-    }
-
-    void setRri(int rri) {
-        this->rri = rri;
-    }
-
-    double getExpiryTime()  {
-        return expiryTime;
-    }
-
-    void setExpiryTime(double expiryTime) {
-        this->expiryTime = expiryTime;
-    }
-
-     std::vector<double>& getGrantSubsequent()  {
-        return grantSubsequent;
-    }
-
-    void setGrantSubsequent( std::vector<double> &grantSubsequent) {
-        this->grantSubsequent = grantSubsequent;
-    }
-
-    void set_grants_used(int r_grants_used){
-        grants_used = r_grants_used;
-    }
-
-    int get_grants_used(){
-        return grants_used;
-    }
-
-    void set_grants_wasted(int r_grants_wasted){
-        grants_wasted = r_grants_wasted;
-    }
-
-    int get_grants_wasted(){
-        return grants_wasted;
-    }
-
 };
 
 

@@ -22,18 +22,16 @@ simple SidelinkResourceAllocation
 {
         bool adjacencyPSCCHPSSCH = default(true);
         int pStep = default(100); 
-        int numSubchannels = default(10); // {n4, n5, n6, n8, n9, n10, n12, n15, n16, n18, n20, n25, n30, n48, n50, n72, n75, n96, n100}
+        int numSubchannels = default(5); // {n4, n5, n6, n8, n9, n10, n12, n15, n16, n18, n20, n25, n30, n48, n50, n72, n75, n96, n100}
         int subchannelSize = default(5); //{n1, n3, n5, n10, n15, n20}
         int subChRBStart = default(0);
         int selectionWindowStartingSubframe = default(1);
         int shapeFactor = default(6);
-        double rsrpThreshold=default(-95);  //indBm
-        double rssiThreshold = default(-80); //in dBm
+        int thresholdRSSI = default(22);
         double d2dTxPower =default(26);
         int numberSubcarriersperPRB = default(12);
         int numberSymbolsPerSlot=default(7);
         int bitsPerSymbolQPSK=default(2);
-        string nodeType;
         @signal[numberSubchannels];
 		@statistic[numberSubchannels](title="Number of subchannels"; source="numberSubchannels"; record=sum,vector);
 		@signal[totalCSR];
@@ -42,11 +40,16 @@ simple SidelinkResourceAllocation
 		@statistic[syncLatency](title="Synchronization latency"; source="syncLatency"; record=vector,stats);
 		@signal[resourceAllocationLatency];
 		@statistic[resourceAllocationLatency](title="Resourcelatency"; source="resourceAllocationLatency"; record=vector,stats);
+        
+        @signal[E2EDelay];
+		@statistic[E2EDelay](title="End-to-end delay"; source="E2EDelay"; record=mean,vector,stats);
+        
+        
         @signal[configurationLatency];
-		@statistic[configurationLatency](title="Configurationlatency"; source="configurationLatency"; record=vector,stats);
+        @statistic[configurationLatency](title="Configurationlatency"; source="configurationLatency"; record=vector,stats);
         @signal[halfDuplex];
         @statistic[halfDuplex](title="Half duplex error"; unit=""; source="halfDuplex"; record=mean,vector,stats);
         @signal[packetCollisionMode4];
         @statistic[packetCollisionMode4](title="packet collision in mode 4"; unit=""; source="packetCollisionMode4"; record=mean,vector,stats);
-       
+        
 }

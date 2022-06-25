@@ -20,7 +20,7 @@
 #include "stack/mac/packet/SPSResourcePoolMode3.h"
 #include "stack/mac/packet/SPSResourcePoolMode4.h"
 #include "stack/mac/packet/LteSidelinkGrant.h"
-#include <cstdlib>
+
 using namespace omnetpp;
 
 Define_Module(LteMacUeD2D);
@@ -63,14 +63,10 @@ void LteMacUeD2D::initialize(int stage)
             throw cRuntimeError("LteMacUeD2D::initialize - %s module found, must be LtePdcpRrcUeD2D. Aborting", pdcpType.c_str());
 
         rcvdD2DModeSwitchNotification_ = registerSignal("rcvdD2DModeSwitchNotification");
-        dataArrivalStatus = false;
-        messageArrivalTime = 0.0;
-        numberofFreeBytes = registerSignal("numberofFreeBytes");
     }
     if (stage == inet::INITSTAGE_NETWORK_LAYER_3)
     {
         MacNodeId enbId_ = getAncestorPar("masterId");
-
         LtePhyBase* enb_ = check_and_cast<LtePhyBase*>(
                 getSimulation()->getModule(binder_->getOmnetId(enbId_))->getSubmodule("lteNic")->getSubmodule("phy"));
         inet::Coord enbCoord = enb_->getCoord();
@@ -82,7 +78,7 @@ void LteMacUeD2D::initialize(int stage)
 
         double ueDistanceFromEnb =ue_->getCoord().distance(enbCoord);
 
-        if (ueDistanceFromEnb<500)
+        if (ueDistanceFromEnb<200)
         {
             EV<<"Attaching UE stage 8 located at a distance of: "<<ueDistanceFromEnb<<endl;
             // get parameters
@@ -134,14 +130,11 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
         SidelinkConfiguration* slConfig = check_and_cast<SidelinkConfiguration*>(getParentModule()->getSubmodule("mode4config"));
         slConfig->macHandleSps(candidatesPacket->getCSRs(), rrcCurrentState);
         mode4Grant = slConfig->getSidelinkGrant();
-        //mode4Grant = candidatesPacket->getGrant();
-        grantExpirationTime = mode4Grant->getExpiryTime();
+
         //Send message to PHY so that it can keep this and check for next time
         SPSResourcePool* csrsprevious = new  SPSResourcePool("CSRsPrevious");
         csrsprevious->setAllocatedBlocksScIandDataPrevious(slConfig->getAllocatedBlocksSCIandData());
         send(csrsprevious,down_[OUT]);
-        dataArrivalStatus = false;
-        setDataArrivalStatus(dataArrivalStatus);
         return;
     }
 
@@ -194,30 +187,17 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
             SPSResourcePoolMode3* csrpkt = check_and_cast< SPSResourcePoolMode3*>(pkt);
             mode3Grant = csrpkt->getMode3grant();
             EV<<"Transmit block size: "<<mode3Grant->getTransmitBlockSize()<<endl;
-            grantExpirationTime = mode3Grant->getExpiryTime();
-            EV<<"Grant start time: "<<mode3Grant->getStartTime()<<endl;
-            EV<<"Number of sunchannels: "<<mode3Grant->getNumSubchannels()<<endl;
-            EV<<"Grant expiration time: "<<mode3Grant->getExpiryTime()<<endl;
-            dataArrivalStatus = false;
-            setDataArrivalStatus(dataArrivalStatus);
-            return;
-
-
-
-            //throw cRuntimeError("CSR from eNodeB");
 
         }
 
         if (userInfo->getFrameType()==DATAPKT)
-                     {
-                    EV<<"Sending Lteairframepdu to RLC layer: "<<endl;
+             {
+        	EV<<"Sending Lteairframepdu to RLC layer: "<<endl;
 
-                    fromPhy(pkt);
-                    //userInfo->setRlcType(UM);
-                    //sendUpperPackets(pkt);
-                     }
-
-
+        	fromPhy(pkt);
+        	//userInfo->setRlcType(UM);
+        	//sendUpperPackets(pkt);
+             }
         //Receiving SCI
 
     }
@@ -228,18 +208,12 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
         {
 
             EV<<"RRC state: "<<rrcCurrentState<<endl;
-            messageArrivalTime = NOW.dbl();
-            messageArrivalTime = round (messageArrivalTime*1000.0)/1000.0;
-            EV<<"Indicating data arrival: "<<messageArrivalTime<<endl;
-            dataArrivalStatus = true;
-            setDataArrivalStatus(dataArrivalStatus);
             if (rrcCurrentState=="RRC_IDLE")
             {
                 LteMacUe::handleUpperMessage(pkt);
 
                 SidelinkConfiguration* slConfig = check_and_cast<SidelinkConfiguration*>(getParentModule()->getSubmodule("mode4config"));
                 slConfig->handleMessage(msg);
-
                 EV<<"LteMacUeD2D received packet of bit length: "<<pkt->getBitLength()<<endl;
             }
 
@@ -258,7 +232,6 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
                     dataArrival->setDuration(lteInfo ->getDuration());
                     dataArrival->setCreationTime(lteInfo ->getCreationTime().dbl());
                     dataArrival->setPriority(lteInfo ->getPriority());
-
                     dataArrival->setDataSize(pkt->getBitLength());
                     uinfo->setFrameType(DATAARRIVAL);
                     uinfo->setIpBased(ipBased);
@@ -293,12 +266,8 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
 
             //sra->calculateNumberResourceBlocks(pkt->getBitLength());
         }
-        else{
-
-        }
         if(strcmp(pkt->getName(), "lteRlcFragment")== 0)
         {
-            setDataArrivalStatus(false); //current data requests are serviced
             LteMacUe::handleUpperMessage(pkt);
 
             return;
@@ -523,6 +492,7 @@ void LteMacUeD2D::macPduMake(MacCid cid)
         {
             //Insert PDU in the Harq Tx Buffer
             //txList.first is the acid
+            EV<<"Insert LteMacPdu into HARQ buffer"<<endl;
             txBuf->insertPdu(txList.first,cw, macPkt);
         }
     }
@@ -686,32 +656,32 @@ void LteMacUeD2D::macHandleRac(cPacket* pkt)
 
 void LteMacUeD2D::handleSelfMessage()
 {
-    dataArrivalStatus = false    ;
-    setDataArrivalStatus(dataArrivalStatus);
+
     EV << "----- UE MAIN LOOP -----" << endl;
-
-    SidelinkResourceAllocation* sra = check_and_cast<SidelinkResourceAllocation*>(getParentModule()->getSubmodule("mode4"));
-    sra->initialiseSensingWindow();
-    sra->initialiseCbrWindow();
-
-
 
     // extract pdus from all harqrxbuffers and pass them to unmaker
     HarqRxBuffers::iterator hit = harqRxBuffers_.begin();
-    HarqRxBuffers::iterator het = harqRxBuffers_.end();
+    HarqRxBuffers::iterator het= harqRxBuffers_.end();
     LteMacPdu *pdu = NULL;
+   // LteHarqBufferRxD2D* p;
     std::list<LteMacPdu*> pduList;
+    EV<<"HARQ size: "<<harqRxBuffers_.size()<<endl;
+   for (; hit != het; ++hit)
 
-    for (; hit != het; ++hit)
     {
+
         pduList=hit->second->extractCorrectPdus();
+        //throw cRuntimeError("extractCorrectPDU ");
+        EV<<"PDU List size(): "<<pduList.size()<<endl;
         while (! pduList.empty())
-        {
+        {throw cRuntimeError("extractCorrectPDU 1");
             pdu=pduList.front();
             pduList.pop_front();
             macPduUnmake(pdu);
         }
     }
+
+
 
     EV << NOW << "LteMacVUeMode4::handleSelfMessage " << nodeId_ << " - HARQ process " << (unsigned int)currentHarq_ << endl;
 
@@ -755,7 +725,6 @@ void LteMacUeD2D::handleSelfMessage()
             {
                 EV<<"Test 2"<<endl;
                 int expiration = intuniform(5, 15, 3);
-                std::cout << "***********grant setting Cresel: " << expiration << endl;
                 grant -> setResourceReselectionCounter(expiration);
                 grant -> setFirstTransmission(true);
                 expirationCounter_ = expiration * grant->getPeriod();
@@ -780,95 +749,6 @@ void LteMacUeD2D::handleSelfMessage()
             grant->setExpiration(0);
             slConfig->expiredGrant_ = true;
         }
-
-    //Grant is configured, not expired but not used because there is no data to be transmitted
-    if (grant!=NULL && grant==mode4Grant) //MLC-Q
-    //if (grant!=NULL && grant==mode3Grant)
-    //if (grant!=NULL)
-    {
-
-        std::cout <<"---------------------------------------------------------------------------------------------" << endl;
-        if(grant==mode3Grant){
-            std::cout << "Mode 3 grant" << endl;
-        }else{
-            std::cout << "Mode 4 grant" << endl;
-        }
-        std::cout << "NOW.dbl(): " << NOW.dbl() << endl;
-        std::cout << "messageArrivalTime: " << messageArrivalTime << endl;
-        std::cout <<"Check if data has arrived: "<< NOW.dbl()-messageArrivalTime <<endl;
-
-        EV<<"Check if data has arrived: "<<NOW.dbl()-messageArrivalTime<<endl;
-
-        if ((NOW.dbl()-messageArrivalTime)<0.001) //MLC 0.003 for mode 3, mode 4 0.001
-        {
-
-
-            dataArrivalStatus = true;
-            setDataArrivalStatus(dataArrivalStatus);
-            int grantusedcount = grant->get_grants_used();
-            grant->set_grants_used(grantusedcount+1);
-            std::cout<<"Sidelink grant used ... count: " << grant->get_grants_used() << endl;
-        }
-
-        futureArrivals = grant->getGrantSubsequent();
-        std::cout << "futureArrivals.size(): " << futureArrivals.size() << endl;
-        for (int i=0; i<futureArrivals.size();i++)
-        {
-            std::cout<<"Transmission: "<<futureArrivals[i]<<" "<< NOW.dbl()<< endl;
-            std::cout<<"Difference: "<<(fabs(futureArrivals[i]-NOW.dbl()))<< endl;
-
-            if(fabs(futureArrivals[i]-NOW.dbl())<0.0001 && isDataArrivalStatus()==false)
-            {
-
-
-                std::cout<<"Sidelink grant is configured but not used ..."<< endl;
-                int grantusedwasted = grant->get_grants_wasted();
-                grant->set_grants_wasted(grantusedwasted+1);              
-                std::cout<<"Number of wasted grants: "<<grant->get_grants_wasted()<<endl;
-            }
-        }
-
-
-    }
-    std::cout << "grantExpirationTime: " << grantExpirationTime << endl;
-    //Calculate grant wastage percentage at the time of expiry
-    //if (fabs (grantExpirationTime-NOW.dbl())<0.001) // MLC-Q, why this check?
-    if (grant!=NULL && grantExpirationTime<NOW.dbl()) 
-    {
-
-    }
-
-
-    //Checking grant status and expiry
-    if (grant == NULL)
-    {
-        EV << NOW << " LteMacVUeMode4::handleSelfMessage " << nodeId_ << " NO configured grant" << endl;
-
-        // No configured Grant simply continue
-    }
-
-    //Check expiry of previously configured grant
-    else if (grant!=NULL && grantExpirationTime<NOW.dbl())
-    {
-        std::cout << "*******************************************************************" << endl;
-        std::cout <<"Sidelink grant has expired at time: "<<grantExpirationTime<<endl;
-        grant=NULL;
-        mode3Grant = NULL;
-        mode4Grant = NULL;
-        std::cout <<"SL grant: "<<grant<<endl;
-        setSchedulingGrant(NULL);
-        SidelinkConfiguration* slConfig = check_and_cast<SidelinkConfiguration*>(getParentModule()->getSubmodule("mode4config"));
-        slConfig->setSidelinkGrant(NULL);
-        std::cout << "==================================================================" << endl;
-        std::cout << "==================================================================" << endl;
-
-        return;
-    }
-    else
-    {
-        EV<<"Scheduling grant: "<<grant<<endl;
-    }
-
     }
     bool requestSdu = false;
 
@@ -952,7 +832,6 @@ void LteMacUeD2D::handleSelfMessage()
 
             requestSdu = sent;
         }
-
         // Message that triggers flushing of Tx H-ARQ buffers for all users
         // This way, flushing is performed after the (possible) reception of new MAC PDUs
         cMessage* flushHarqMsg = new cMessage("flushHarqMsg");

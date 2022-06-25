@@ -26,7 +26,6 @@ simple SidelinkConfiguration
         
         //# TODO: Change this to use xmldoc to fill in these params as it's more complex than this.
         xml txConfig;
-        int resourceReservationInterval = 100; // in ms variable RRI allowed for 5G
         int restrictResourceReservationperiod = default(1);
         int maximumLatency = default(100);
         int minSubchannelNumberPSSCH = default(1);
@@ -43,10 +42,6 @@ simple SidelinkConfiguration
         int resourceReselectionCounter = default(5);
         bool usePreconfiguredTxParams = default(false);
         
-        int numberSubcarriersperPRB_c = default(12);
-        int numberSymbolsPerSlot_c =default(7);
-        int bitsPerSymbolQPSK_c =default(2);
-
         // Signals 
         //
         // Must haves:
@@ -87,8 +82,7 @@ simple SidelinkConfiguration
         @statistic[macNodeID](title="Reports Mac NodeID to allow for trans to nodeID"; source="macNodeID"; record=vector);
         @signal[dataPDUSizeTransmitted];
         @statistic[dataPDUSizeTransmitted](title="PDU size ready for transmission across channel"; unit="bytes"; source="dataPDUSizeTransmitted"; record=mean,vector,stats);
-        @signal[grantWastageMode4];
-	    @statistic[grantWastageMode4](title="Grant wastage percentage"; source="grantWastageMode4"; record=vector,stats);
+        
         
         
 }
