@@ -341,7 +341,6 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
     {
         EV<<"Check for IPBased: "<<lteInfo->getIpBased()<< "Transmitting packet ID: "<<lteInfo->getPktId()<<endl;
         numAirFrameAlertTransmitted_ = numAirFrameAlertTransmitted_ +1;
-        emit(AlertTrPktId,lteInfo->getPktId());
 
     }
 
