@@ -149,12 +149,6 @@ public:
     cMessage* slsync;
     simtime_t nextSLSS;
     simtime_t lastActive_;
-    simsignal_t numberSubchannels;
-    simsignal_t totalCSR;
-    simsignal_t syncLatency;
-    simsignal_t resourceAllocationLatency;
-    simsignal_t E2EDelay;
-    simsignal_t configurationLatency;
     simsignal_t halfDuplexError;
     simsignal_t pcMode4;
 

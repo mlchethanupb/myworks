@@ -149,7 +149,6 @@ void LtePhyUeD2D::handleAirFrame(cMessage* msg)
         EV<<"Received DATAPKT from: "<<lteInfo->getSourceId()<<endl;
         decodeAirFrame(frame, lteInfo);
         numAirFrameReceived_ = numAirFrameReceived_+1;
-        emit(numberReceivedPackets,numAirFrameReceived_);
         EV<<"Sending received airframepdu to MAC layer"<<endl;
         cPacket* recvdpdu = check_and_cast<cPacket*>(frame->decapsulate());
         recvdpdu->setControlInfo(lteInfo);
@@ -342,7 +341,6 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
     {
         EV<<"Check for IPBased: "<<lteInfo->getIpBased()<< "Transmitting packet ID: "<<lteInfo->getPktId()<<endl;
         numAirFrameAlertTransmitted_ = numAirFrameAlertTransmitted_ +1;
-        emit(numberAlertTransmittedPackets,numAirFrameAlertTransmitted_ );  //Number of packets sent across the radio interface
         emit(AlertTrPktId,lteInfo->getPktId());
 
     }
@@ -457,7 +455,6 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
             sra->setReselectionCounter(cResel);
         }
         numAirFrameTransmitted_ = numAirFrameTransmitted_+1;
-        emit(numberTransmittedPackets,numAirFrameTransmitted_);
         // emit(CAMPktId, lteInfo->getCAMId());//Packet IDs of successfully transmitted CAMs
         // EV<<"Check for CAMs: "<<lteInfo->getIpBased()<< "Transmitting CAM ID: "<<lteInfo->getCAMId()<<endl;
     }

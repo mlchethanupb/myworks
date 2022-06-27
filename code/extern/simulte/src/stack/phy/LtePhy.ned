@@ -68,16 +68,6 @@ simple LtePhyUe extends LtePhyBase {
          @statistic[averageCqiDl](title="Average Cqi reported in DL"; unit="cqi"; source="averageCqiDl"; record=mean,vector);
          @signal[averageCqiUl];
          @statistic[averageCqiUl](title="Average Cqi reported in UL"; unit="cqi"; source="averageCqiUl"; record=mean,vector);
-        @signal[numberReceivedPackets];
-		@statistic[numberReceivedPackets](title="NUmber of CAMs received"; source="numberReceivedPackets"; record=vector,stats);
-		@signal[numberTransmittedPackets];
-		@statistic[numberTransmittedPackets](title="NUmber of CAMs transmitted"; source="numberTransmittedPackets"; record=vector,stats);
-		@signal[numberAlertTransmittedPackets];
-		@statistic[numberAlertTransmittedPackets](title="NUmber of Alert Messages transmitted"; source="numberAlertTransmittedPackets"; record=vector,stats);
-        @signal[AlertTransmittedId];
-		@statistic[AlertTransmittedId](title="Packet Id of successfully transmitted Alert packet"; source="AlertTransmittedId"; record=vector,stats);
-		 @signal[CAMTransmittedId];
-		@statistic[CAMTransmittedId](title="Packet Id of successfully transmitted CAM packet"; source="CAMTransmittedId"; record=vector,stats);
 }
 
 // 

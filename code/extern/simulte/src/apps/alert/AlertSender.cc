@@ -58,7 +58,6 @@ void AlertSender::initialize(int stage)
     socket.setMulticastOutputInterface(ie->getInterfaceId());
     // -------------------- //
 
-    alertSentMsg_ = registerSignal("numberAlertGenerated");
 
     EV << "AlertSender::initialize - binding to port: local:" << localPort_ << " , dest:" << destPort_ << endl;
 
@@ -98,7 +97,6 @@ void AlertSender::sendAlertPacket()
     socket.sendTo(packet, destAddress_, destPort_);
     nextSno_++;
     pktId++;
-    emit(alertSentMsg_, nextSno_);
     emit(transmittedPId,pktId);
     if( simTime()< stopTime_ || stopTime_ == 0 )
         scheduleAt(simTime() + period_, selfSender_);

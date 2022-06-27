@@ -25,7 +25,6 @@ void LteRrcBase::initialize(int stage)
     {
         EV<<"LteRrcBase::initialize"<<nodeType_<<endl;
         nodeTypeToA(nodeType_);
-        detectionLatency = registerSignal("detectionLatency");
 
         binder_ = getBinder();
         if (nodeType_ == ENODEB)

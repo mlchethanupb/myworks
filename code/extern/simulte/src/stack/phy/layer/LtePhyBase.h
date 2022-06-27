@@ -143,7 +143,6 @@ protected:
     simtime_t lastActive_;
 
     //Statistics
-    simsignal_t numberAlertTransmittedPackets;
     simsignal_t averageCqiDl_;
     simsignal_t averageCqiUl_;
     simsignal_t averageCqiD2D_;

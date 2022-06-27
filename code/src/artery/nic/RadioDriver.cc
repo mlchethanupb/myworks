@@ -140,7 +140,6 @@ void RadioDriver::initialize()
     Listener::subscribeTraCI(getSystemModule());
     RadioDriver::getStationaryModulePosition();
     numberCAMs = registerSignal("numberCAMSGenerated");
-    CAMIdSent = registerSignal("transmittedCAMId");
 }
 
 
@@ -224,7 +223,6 @@ void RadioDriver::handleDataRequest(cMessage* packet)
     CAMId = CAMId+1;
     emit(numberCAMs,CAMSGenerated);
     send(packet, mLowerLayerOut);
-    emit(CAMIdSent,CAMId);
     delete request;
 }
 

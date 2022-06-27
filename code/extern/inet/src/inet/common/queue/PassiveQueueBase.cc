@@ -25,7 +25,6 @@ simsignal_t PassiveQueueBase::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t PassiveQueueBase::enqueuePkSignal = registerSignal("enqueuePk");
 simsignal_t PassiveQueueBase::dequeuePkSignal = registerSignal("dequeuePk");
 simsignal_t PassiveQueueBase::dropPkByQueueSignal = registerSignal("dropPkByQueue");
-simsignal_t PassiveQueueBase::queueingTimeSignal = registerSignal("queueingTime");
 
 void PassiveQueueBase::initialize()
 {
@@ -50,7 +49,6 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
         packetRequested--;
         emit(enqueuePkSignal, msg);
         emit(dequeuePkSignal, msg);
-        emit(queueingTimeSignal, SIMTIME_ZERO);
         sendOut(msg);
     }
     else {
@@ -86,7 +84,6 @@ void PassiveQueueBase::requestPacket()
     }
     else {
         emit(dequeuePkSignal, msg);
-        emit(queueingTimeSignal, simTime() - msg->getArrivalTime());
         sendOut(msg);
     }
 }

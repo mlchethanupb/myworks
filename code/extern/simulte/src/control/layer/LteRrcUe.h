@@ -52,7 +52,6 @@ protected:
     simtime_t connRequestSent;
     simtime_t connRequestReceived;
     simtime_t sibReceived;
-    //double detectionLatency;
 
     enum states {
         IDLE = 0,CONN = FSM_Steady(1),INACTIVE = FSM_Steady(2)

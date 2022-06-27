@@ -92,8 +92,6 @@ void SidelinkConfiguration::initialize(int stage)
         grantRequest            = registerSignal("grantRequest");
         packetDropDCC           = registerSignal("packetDropDCC");
         macNodeID               = registerSignal("macNodeID");
-        dataSize                = registerSignal("dataPDUSizeTransmitted");
-
     }
     else if (stage == inet::INITSTAGE_NETWORK_LAYER_3)
     {
@@ -918,7 +916,6 @@ void SidelinkConfiguration::flushHarqBuffers(HarqTxBuffers harqTxBuffers_, LteSi
 
                 int pduLength = selectedProcess->getPduLength(cw);
                 EV<<"PDU length: "<<pduLength<<endl;
-                emit(dataSize,pduLength);
                 //throw cRuntimeError("debug 4");
                 if ( pduLength > 0)
                 {

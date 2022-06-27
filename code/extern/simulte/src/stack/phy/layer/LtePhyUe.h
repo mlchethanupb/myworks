@@ -123,8 +123,6 @@ protected:
     simsignal_t servingCell;
     /** Self message to trigger handover procedure evaluation */
 
-    simsignal_t numberReceivedPackets;
-    simsignal_t numberTransmittedPackets;
 
     virtual void initialize(int stage)override ;
     virtual void handleSelfMessage(cMessage *msg) override;

@@ -80,9 +80,7 @@ simple SidelinkConfiguration
         @statistic[packetDropDCC](title="Packet drop due to DCC mechanism"; source="packetDropDCC"; record=sum,vector);
         @signal[macNodeID];
         @statistic[macNodeID](title="Reports Mac NodeID to allow for trans to nodeID"; source="macNodeID"; record=vector);
-        @signal[dataPDUSizeTransmitted];
-        @statistic[dataPDUSizeTransmitted](title="PDU size ready for transmission across channel"; unit="bytes"; source="dataPDUSizeTransmitted"; record=mean,vector,stats);
-        
+       
         
         
 }

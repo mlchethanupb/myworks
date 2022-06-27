@@ -54,8 +54,7 @@ simple LtePdcpRrcBase like LtePdcpRrc {
         @statistic[sentPacketToUpperLayer](source="sentPacketToUpperLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @signal[sentPacketToLowerLayer];
         @statistic[sentPacketToLowerLayer](source="sentPacketToLowerLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-    	 @signal[numberAlertGenerated];
-		@statistic[numberAlertGenerated](title="Number of Alert messages generated"; source="numberAlertGenerated"; record=vector,stats);
+
     
         gates:
         //#

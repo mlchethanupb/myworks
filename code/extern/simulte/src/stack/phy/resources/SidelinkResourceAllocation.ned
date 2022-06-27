@@ -32,24 +32,5 @@ simple SidelinkResourceAllocation
         int numberSubcarriersperPRB = default(12);
         int numberSymbolsPerSlot=default(7);
         int bitsPerSymbolQPSK=default(2);
-        @signal[numberSubchannels];
-		@statistic[numberSubchannels](title="Number of subchannels"; source="numberSubchannels"; record=sum,vector);
-		@signal[totalCSR];
-		@statistic[totalCSR](title="Number of CSRs"; source="totalCSR"; record=sum,vector);
-		@signal[syncLatency];
-		@statistic[syncLatency](title="Synchronization latency"; source="syncLatency"; record=vector,stats);
-		@signal[resourceAllocationLatency];
-		@statistic[resourceAllocationLatency](title="Resourcelatency"; source="resourceAllocationLatency"; record=vector,stats);
-        
-        @signal[E2EDelay];
-		@statistic[E2EDelay](title="End-to-end delay"; source="E2EDelay"; record=mean,vector,stats);
-        
-        
-        @signal[configurationLatency];
-        @statistic[configurationLatency](title="Configurationlatency"; source="configurationLatency"; record=vector,stats);
-        @signal[halfDuplex];
-        @statistic[halfDuplex](title="Half duplex error"; unit=""; source="halfDuplex"; record=mean,vector,stats);
-        @signal[packetCollisionMode4];
-        @statistic[packetCollisionMode4](title="packet collision in mode 4"; unit=""; source="packetCollisionMode4"; record=mean,vector,stats);
-        
+       
 }

@@ -99,7 +99,6 @@ protected:
     cGate* PDCP_control_IN;
     cGate* PDCP_control_OUT;
     simtime_t propagationDelay;
-    simsignal_t detectionLatency;
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     /**

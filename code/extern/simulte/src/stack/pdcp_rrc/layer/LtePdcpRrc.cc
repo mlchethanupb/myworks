@@ -339,7 +339,6 @@ void LtePdcpRrcBase::initialize(int stage)
         sentPacketToUpperLayer = registerSignal("sentPacketToUpperLayer");
         sentPacketToLowerLayer = registerSignal("sentPacketToLowerLayer");
         three_hundred = 0;
-        alertSentMsg_ = registerSignal("numberAlertGenerated");
 
         // TODO WATCH_MAP(gatemap_);
         WATCH(headerCompressedSize_);

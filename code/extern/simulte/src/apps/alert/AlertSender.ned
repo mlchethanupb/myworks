@@ -25,8 +25,7 @@ simple AlertSender like IUDPApp
         int pktId = default(1000);  
         
         //Statistics collection     
-        @signal[numberAlertGenerated];
-		@statistic[numberAlertGenerated](title="Number of Alert messages generated"; source="numberAlertGenerated"; record=vector,stats);
+
 		@signal[transmittedPacketId];
 		@statistic[transmittedPacketId](title="Number of Alert messages generated"; source="transmittedPacketId"; record=vector,stats);
         @display("i=block/source");

@@ -73,14 +73,6 @@ void SidelinkResourceAllocation::initialize(int stage)
             ThresPSSCHRSRPvector_.push_back(i);
         }
 
-        numberSubchannels = registerSignal("numberSubchannels");
-        totalCSR = registerSignal("totalCSR");
-        syncLatency = registerSignal("syncLatency");
-        resourceAllocationLatency = registerSignal("resourceAllocationLatency");
-        E2EDelay = registerSignal("E2EDelay");
-        configurationLatency = registerSignal("configurationLatency");
-        halfDuplexError = registerSignal("halfDuplex");
-        pcMode4 = registerSignal("packetCollisionMode4");
         sciReceived_ = 0;
         sciDecoded_ = 0;
         sciNotDecoded_ = 0;
@@ -576,7 +568,6 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         selEndTime =  (selStartTime+(maxLatency/1000.0)).trunc(SIMTIME_MS);
         tSync = 0.0;  //it takes one TTI for SLSS acknowledgement
         EV<<"Synchronization latency: "<<tSync<<endl;
-        emit(syncLatency,tSync);
 
     }
 
@@ -586,7 +577,6 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         selEndTime =  (selStartTime+(maxLatency/1000.0)).trunc(SIMTIME_MS);
         tSync = (nextSLSS+0.001-NOW).dbl();  //it takes one TTI for SLSS acknowledgement
         EV<<"Synchronization latency: "<<tSync<<endl;
-        emit(syncLatency,tSync);
 
     }
 
@@ -594,7 +584,6 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
     EV<<"selectionWindow start time:  "<<selStartTime<<endl;
     EV<<"selectionWindow end time:  "<<selEndTime<<endl;
 
-    emit(configurationLatency,0.004);
 
     for (double k = selStartTime.dbl(); k<=selEndTime.dbl(); k=k+TTI)
     {
@@ -697,8 +686,6 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
             if (eraseSubframe[k]==eraseSubframe[k+1])
             {
                 pcCountMode4 = pcCountMode4+1;
-                emit(pcMode4,pcCountMode4);
-
             }
 
         }
@@ -713,7 +700,6 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         binder_->updatePeriodicCamTransmissions(nodeId_,startFirstTransmission.dbl());
 
         EV<<"Resource allocation latency: "<<(startFirstTransmission-selStartTime).dbl()<<endl;
-        emit(resourceAllocationLatency,(startFirstTransmission-selStartTime).dbl());
         optimalCSRs=selectBestRSSIs(eraseSubframe, grant,NOW.dbl());
         if(eraseSubframe.size()>(0.8*candidateSubframeInitial))
 
@@ -751,9 +737,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
 
     //Calculation of end-to-end delay statistics
     EV<<"End-to-end delay: "<<(FirstTransmission+TTI-NOW).dbl()<<endl;
-    double e2edelay=0.0;
-    e2edelay = (FirstTransmission+TTI-NOW).dbl();
-    emit(E2EDelay,e2edelay);
+ 
     // Send the packet up to the MAC layer where it will choose the CSR and the retransmission if that is specified
     // Need to generate the message that is to be sent to the upper layers.
     SPSResourcePool* candidateResourcesMessage = new SPSResourcePool("CSRs");

@@ -52,11 +52,6 @@ void LtePhyUe::initialize(int stage)
         servingCell = registerSignal("servingCell");
         averageCqiDl_ = registerSignal("averageCqiDl");
         averageCqiUl_ = registerSignal("averageCqiUl");
-        numberReceivedPackets = registerSignal("numberReceivedPackets");
-        numberTransmittedPackets = registerSignal("numberTransmittedPackets");
-        numberAlertTransmittedPackets = registerSignal("numberAlertTransmittedPackets");
-        AlertTrPktId = registerSignal("AlertTransmittedId");
-        CAMPktId = registerSignal("CAMTransmittedId");
         numAirFrameAlertTransmitted_ = 0;
         numAirFrameTransmitted_ = 0;
         if (!hasListeners(averageCqiDl_))

@@ -33,9 +33,7 @@ simple RadioDriver like IRadioDriver
         @signal[ChannelLoad](type=double);
         @signal[numberCAMSGenerated];
         @statistic[numberCAMSGenerated](title="Number of CAMS generated"; source="numberCAMSGenerated"; record=vector,stats);
-        @signal[transmittedCAMId];
-        @statistic[transmittedCAMId](title="Number of CAMs successfully transmitted"; source="transmittedCAMId"; record=vector,stats);
-        
+       
     gates:
         inout upperLayer @loose;
         input lowerLayerIn @loose;

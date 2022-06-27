@@ -25,8 +25,7 @@ simple LteRrcBase like ControlPlane
         string nodeType;
 
         //Timers
-        @signal[detectionLatency];
-        @statistic[detectionLatency](title="Detection Latency"; source="detectionLatency"; record=vector,stats);
+
         
         
     gates:

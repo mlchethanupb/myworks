@@ -104,8 +104,6 @@ void LteRrcUe::handleMessage(cMessage *msg)
         sibReceived = NOW;
         EV<<"Received SIB-21 at: "<<sibReceived;
 
-        //detectionLatency = (sibReceived-connRequestSent).dbl();
-        emit(detectionLatency, (sibReceived-connRequestSent).dbl());
         EV<<"Detection latency: "<< (sibReceived-connRequestSent).dbl()<<endl;
         send(pkt,PHY_OUT);
         return;
