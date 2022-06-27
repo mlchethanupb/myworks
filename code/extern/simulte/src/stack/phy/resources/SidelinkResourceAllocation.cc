@@ -636,7 +636,6 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
                                 if ((y+j*Prsvp_TX)==startFirstTransmissionInitial.dbl())
                                 {
                                     countHD=countHD+1;
-                                    emit(halfDuplexError,countHD);
                                 }
                                 eraseSubframe.push_back((y+j*Prsvp_TX));
                             }
