@@ -45,9 +45,11 @@ class CpService : public ItsG5BaseService
 		omnetpp::SimTime mGenCpmMax;
 		omnetpp::SimTime mGenCpm;
 		omnetpp::SimTime mLastCpmTimestamp;
+		omnetpp::SimTime mPerSecCpmStatTimestamp;
 		omnetpp::SimTime mLastSenrInfoCntnrTimestamp;
 		unsigned mGenCpmLowDynamicsCounter;
 		unsigned mGenCpmLowDynamicsLimit;
+		unsigned mNumCpmPerSecCounter;
 
 		Position mLastCpmPosition;
 		vanetza::units::Velocity mLastCpmSpeed;
@@ -99,7 +101,7 @@ class CpService : public ItsG5BaseService
 		void checkCPMSize(const omnetpp::SimTime& T_now, ObjectInfo::ObjectsPercievedMap& objToSendNoFiltering, vanetza::asn1::Cpm& cpm);
 
 		void updateObjlist(ObjectInfo::ObjectsReceivedMap& obj_list, uint32_t stationID, LocalEnvironmentModel::TrackingTime& newTrackingtime, 
-							vanetza::units::Angle &newHeading, Position &newPosition, vanetza::units::Velocity &newSpeed);
+							vanetza::units::Angle &newHeading, Position &newPosition, vanetza::units::Velocity &newSpeed, bool cal_tbu = false);
 
 		bool generatePerceivedObjectsCntnr(vanetza::asn1::Cpm&, const omnetpp::SimTime& T_now);
 		bool objinTrackedlist(const ObjectInfo::ObjectPercieved& obj);

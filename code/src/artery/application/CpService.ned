@@ -22,12 +22,15 @@ simple CpService like ItsG5Service
         @signal[CpmSent](type=CpObject);
         @signal[EteDelay](type=simtime_t);
         @signal[objectAge](type=simtime_t);
+        @signal[timebwupdate](type=simtime_t);
         @signal[ear](type=double);
         @signal[numobjAR](type=long);
         @signal[numobjCPMrcvd](type=long);
         @signal[numobjCPMsent](type=long);
         @signal[msgsize](type=long);
         @signal[periodicity](type=simtime_t);
+        @signal[numCPMPerSec](type=long);
+
 
         @statistic[receptioncpm](source=CpmReceived;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[transmissioncpm](source=CpmSent;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
@@ -38,9 +41,11 @@ simple CpService like ItsG5Service
         @statistic[numobjAR](source=numobjAR; record=vector);
         @statistic[numobjCPMrcvd](source=numobjCPMrcvd; record=stats,vector);
         @statistic[numobjCPMsent](source=numobjCPMsent; record=stats,vector);
-        @statistic[objAge](source=objectAge; record=stats,vector);
+        @statistic[objectAge](source=objectAge; record=stats,vector);
+        @statistic[timebwupdate](source=timebwupdate; record=stats,vector);
         @statistic[msgsize](source=msgsize; record=stats,vector);
         @statistic[periodicity](source=periodicity; record=stats,vector);
+        @statistic[numCPMPerSec](source=numCPMPerSec; record=stats,vector,histogram);
 
         // parameter to enable mode 4
         bool enable_constsize = default(false);

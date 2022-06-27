@@ -38,13 +38,15 @@ using namespace omnetpp;
 static const simsignal_t scSignalCpmReceived = cComponent::registerSignal("CpmReceived");
 static const simsignal_t scSignalCpmSent = cComponent::registerSignal("CpmSent");
 static const simsignal_t scSignalEteDelay = cComponent::registerSignal("EteDelay");
-static const simsignal_t scSignalRatioObjectAge = cComponent::registerSignal("objectAge");
+static const simsignal_t scSignalObjectAge = cComponent::registerSignal("objectAge");
+static const simsignal_t scSignaltimebwupdate = cComponent::registerSignal("timebwupdate");
 static const simsignal_t scSignalEAR = cComponent::registerSignal("ear");
 static const simsignal_t scSignalnumobjAR = cComponent::registerSignal("numobjAR");
 static const simsignal_t scSignalnumobjCPMrcvd = cComponent::registerSignal("numobjCPMrcvd");
 static const simsignal_t scSignalnumobjCPMsent = cComponent::registerSignal("numobjCPMsent");
 static const simsignal_t scSignalMessageSize = cComponent::registerSignal("msgsize");
 static const simsignal_t scSignalPeriodicity = cComponent::registerSignal("periodicity");
+static const simsignal_t scSignalNumCPMPerSec = cComponent::registerSignal("numCPMPerSec");
 
 
 
@@ -75,6 +77,9 @@ void CpService::initialize()
     // first generated CPM shall include the sensor information container
 	mLastCpmTimestamp = simTime();
 	mLastSenrInfoCntnrTimestamp = mLastCpmTimestamp - artery::simtime_cast(scSnsrInfoContainerInterval);
+    
+    mPerSecCpmStatTimestamp = simTime();
+    mNumCpmPerSecCounter = 0;
 
 	// generation rate boundaries
 	mGenCpmMin = par("minInterval");
@@ -291,8 +296,20 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
         std::unique_ptr<geonet::DownPacket> payload { new geonet::DownPacket() };
         std::unique_ptr<convertible::byte_buffer> buffer { new CpmByteBuffer(obj.shared_ptr()) };
         payload->layer(OsiLayer::Application) = std::move(buffer);
+        
+        //stats for CPM size
         long payload_size = static_cast<long>(payload->size());
         emit(scSignalMessageSize, payload_size);
+        
+        mNumCpmPerSecCounter++;
+        if(T_now - mPerSecCpmStatTimestamp >= 1.0){
+
+            emit(scSignalNumCPMPerSec, mNumCpmPerSecCounter);
+            
+            mNumCpmPerSecCounter = 0;
+            mPerSecCpmStatTimestamp = T_now;
+        }
+        
         EV <<"Station: " << mVehicleDataProvider->station_id() <<", generated CPM with size " << payload->size() <<  " bytes, requesting lower layer to transmit at " << T_now << endl;
 
         //requesting lower layer to send the CPM
@@ -693,8 +710,6 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
    //std::cout << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID << ", received time: " << received_time << ", generationTime: " << generationTime <<", ete delay: " << ete_delay << "\n";
 
-
-
     if (ete_delay<1.0)
     {
         emit(scSignalEteDelay, ete_delay);
@@ -716,10 +731,10 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
         vanetza::units::Velocity speedReceived(originVeh.speed.speedValue * config::centimeter_per_second);
 
         //Update the mObjectsReceived with the information of the object received.
-        updateObjlist(mObjectsReceived, stationID, newTracking, headingReceived, posReceivedStation, speedReceived);
+        updateObjlist(mObjectsReceived, stationID, newTracking, headingReceived, posReceivedStation, speedReceived, true);
 
         if(distance(posReceivedStation, mVehicleDataProvider->position()) < maxRelArealimit){
-            updateObjlist(mObjsRelevanceArea, stationID, newTracking, headingReceived, posReceivedStation, speedReceived);
+            updateObjlist(mObjsRelevanceArea, stationID, newTracking, headingReceived, posReceivedStation, speedReceived, false);
         }
 
     }else{
@@ -766,11 +781,11 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
                 vanetza::units::Velocity speedReceived = boost::units::sqrt(boost::units::pow<2>(speedX) + boost::units::pow<2>(speedY));
 
                 //Update the mObjectsReceived with the information of the object received.
-                updateObjlist(mObjectsReceived, objCont->objectID, newTracking,headingReceived,posReceived,speedReceived);
+                updateObjlist(mObjectsReceived, objCont->objectID, newTracking,headingReceived,posReceived,speedReceived, true);
 
                 //Add object to relevance area object list, if the distance between two vehicles is less than the limit specified.
                 if(distance(posReceived, mVehicleDataProvider->position()) < maxRelArealimit){
-                    updateObjlist(mObjsRelevanceArea, objCont->objectID, newTracking,headingReceived,posReceived,speedReceived);
+                    updateObjlist(mObjsRelevanceArea, objCont->objectID, newTracking,headingReceived,posReceived,speedReceived, false);
                 }
             }
         }
@@ -783,7 +798,7 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
 
 void CpService::updateObjlist(ObjectInfo::ObjectsReceivedMap& obj_list,  uint32_t objectID, LocalEnvironmentModel::TrackingTime& newTrackingtime, 
-                    vanetza::units::Angle &newHeading, Position &newPosition, vanetza::units::Velocity &newSpeed){
+                    vanetza::units::Angle &newHeading, Position &newPosition, vanetza::units::Velocity &newSpeed, bool cal_tbu){
 
     //Object not present in the list, add new object.
     if (obj_list.find(objectID) == obj_list.end()) {
@@ -796,8 +811,15 @@ void CpService::updateObjlist(ObjectInfo::ObjectsReceivedMap& obj_list,  uint32_
          * though it was expired it is refreshed with the new data here
          */
 
+
         //Update only if the received information is latest than what is already stored in the list. 
         if(newTrackingtime.last() > obj_list.at(objectID).getLastTrackingTime().last() ){
+
+            if(cal_tbu){
+               omnetpp::SimTime tbu =  newTrackingtime.last() - obj_list.at(objectID).getLastTrackingTime().last();
+               std::cout << "tbu of: " << objectID << " " << tbu << endl;
+                emit(scSignaltimebwupdate, tbu);
+            }
 
             obj_list.at(objectID).setLastTrackingTime(newTrackingtime);
             obj_list.at(objectID).setLastHeading(newHeading);
@@ -877,12 +899,16 @@ void CpService::recordObjectsAge(){
 
     long numobjAR = boost::size(absrdr_objs);
     long numobjCPM = mObjsRelevanceArea.size();
-    double ear_val = (numobjAR == 0) ? 0 : (double)numobjCPM/(double)numobjAR;
-    //std::cout << "ear value " << ear_val << std::endl;
 
-    emit(scSignalnumobjAR, numobjAR);
-    emit(scSignalnumobjCPMrcvd, numobjCPM);
-    emit(scSignalEAR, ear_val);
+    //Calculate EAR only if there are any vehicles present in the surrounding.
+    if(numobjAR != 0){
+
+        double ear_val = (double)numobjCPM/(double)numobjAR;
+        //std::cout << "ear value " << ear_val << std::endl;
+        emit(scSignalnumobjAR, numobjAR);
+        emit(scSignalnumobjCPMrcvd, numobjCPM);
+        emit(scSignalEAR, ear_val);
+    }
 
 
 	for(const LocalEnvironmentModel::TrackedObject& obj : mLocalEnvironmentModel->allObjects()){
@@ -898,6 +924,7 @@ void CpService::recordObjectsAge(){
 			}
 		}
 
+        //Not detected by Radar, but received from CPSensor
 		if(!detectedByRadars){
 			const VehicleDataProvider &vd = obj.first.lock()->getVehicleData();
 
@@ -914,11 +941,12 @@ void CpService::recordObjectsAge(){
 					mCPSensor->getValidityPeriod() < mVehicleDataProvider->updated()) {
 					mObjectsReceived.erase(vd.station_id());
 				} else {
-                    emit(scSignalRatioObjectAge, simTime() - mObjectsReceived.at(vd.station_id()).getLastTrackingTime().last());
+                    emit(scSignalObjectAge, simTime() - mObjectsReceived.at(vd.station_id()).getLastTrackingTime().last());
                 }
 			}
 		}
 	}
+
 }
 /** Print information of a CPM message
  * @param CPM struct from asnc
