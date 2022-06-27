@@ -17,11 +17,11 @@ config_dir = "../scenarios/InTAS/scenario/config"
 CONST_settings_dict={ "config":"[Config ",
                       "result":"result-dir = ../results/",
                       "service":"*.node[*].middleware.services = xmldoc(\"services/services_",
-                      "constsize": "*.node[*].middleware.CpService.enable_constsize = ",
                       "fixedrate": "*.node[*].middleware.CpService.fixedRate = ",
                       "fixedinterval": "*.node[*].middleware.CpService.fixedInterval = ",
                       "en_mode4": "*.node[*].lteNic.enable_mode4 = "}
 
+#                      "constsize": "*.node[*].middleware.CpService.enable_constsize = ",
 
 
 def create_config_file(config_name):
@@ -46,7 +46,7 @@ def create_config_file(config_name):
     service_data = service_data + config_name_split[-1] + ".xml\")"
     #print(service_data)
     data_to_write.append(service_data)
-
+    """
     constsize_data = CONST_settings_dict["constsize"]
     if(config_name_split[1] == "constsize"):
         constsize_data = constsize_data + "true"
@@ -54,7 +54,7 @@ def create_config_file(config_name):
         constsize_data = constsize_data + "false"
     #print(constsize_data)
     data_to_write.append(constsize_data)
-    
+    """    
     fixedrate_data = CONST_settings_dict["fixedrate"]
     fixedinterval_data = CONST_settings_dict["fixedinterval"]
     
@@ -75,7 +75,7 @@ def create_config_file(config_name):
     data_to_write.append(fixedinterval_data)
 
     en_mode4_data = CONST_settings_dict["en_mode4"]
-    if(config_name_split[2]=="mode3"):
+    if(config_name_split[1]=="mode3"):
         en_mode4_data = en_mode4_data + "false"
     else:
         en_mode4_data = en_mode4_data + "true"
