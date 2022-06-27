@@ -49,7 +49,7 @@ class CpService : public ItsG5BaseService
 		omnetpp::SimTime mLastSenrInfoCntnrTimestamp;
 		unsigned mGenCpmLowDynamicsCounter;
 		unsigned mGenCpmLowDynamicsLimit;
-		unsigned mNumCpmPerSecCounter;
+		long mNumCpmPerSecCounter;
 
 		Position mLastCpmPosition;
 		vanetza::units::Velocity mLastCpmSpeed;

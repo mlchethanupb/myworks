@@ -817,7 +817,7 @@ void CpService::updateObjlist(ObjectInfo::ObjectsReceivedMap& obj_list,  uint32_
 
             if(cal_tbu){
                omnetpp::SimTime tbu =  newTrackingtime.last() - obj_list.at(objectID).getLastTrackingTime().last();
-               std::cout << "tbu of: " << objectID << " " << tbu << endl;
+               //std::cout << "tbu of: " << objectID << " " << tbu << endl;
                 emit(scSignaltimebwupdate, tbu);
             }
 
