@@ -37,6 +37,7 @@ using namespace omnetpp;
 
 static const simsignal_t scSignalCpmReceived = cComponent::registerSignal("CpmReceived");
 static const simsignal_t scSignalCpmSent = cComponent::registerSignal("CpmSent");
+static const simsignal_t scSignalCPMSentTime = cComponent::registerSignal("CPMSentTime");
 static const simsignal_t scSignalEteDelay = cComponent::registerSignal("EteDelay");
 static const simsignal_t scSignalObjectAge = cComponent::registerSignal("objectAge");
 static const simsignal_t scSignaltimebwupdate = cComponent::registerSignal("timebwupdate");
@@ -114,9 +115,12 @@ void CpService::trigger()
 	Enter_Method("trigger");
    
     //std::cout << "mVehicleDataProvider->updated(): " << mVehicleDataProvider->updated() << ", simTime(): " << simTime() << std::endl; 
+    
+    //Before generating CPM check and remove stale objects
+    removeExpobjs();
 
     generateCPM(simTime());
-    removeExpobjs();
+
     recordObjectsAge();
 }
 
@@ -300,10 +304,14 @@ void CpService::sendCpm(const omnetpp::SimTime& T_now) {
         //stats for CPM size
         long payload_size = static_cast<long>(payload->size());
         emit(scSignalMessageSize, payload_size);
+
+
+        emit(scSignalCPMSentTime, T_now);
         
         mNumCpmPerSecCounter++;
         if(T_now - mPerSecCpmStatTimestamp >= 1.0){
 
+            //std::cout << "Station: " << mVehicleDataProvider->station_id() << ", time diff: " << (T_now - mPerSecCpmStatTimestamp) << ", Num of CPM generated: " << mNumCpmPerSecCounter << endl;
             emit(scSignalNumCPMPerSec, mNumCpmPerSecCounter);
             
             mNumCpmPerSecCounter = 0;
@@ -708,9 +716,9 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
 
     EV << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID << ", received time: " << received_time << ", generationTime: " << generationTime <<", ete delay: " << ete_delay << endl;
 
-   //std::cout << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID << ", received time: " << received_time << ", generationTime: " << generationTime <<", ete delay: " << ete_delay << "\n";
+    //std::cout << mVehicleDataProvider->station_id() << " received CPM message from "<< stationID << ", received time: " << received_time << ", generationTime: " << generationTime <<", ete delay: " << ete_delay << "\n";
 
-    if (ete_delay<1.0)
+    if (ete_delay < 1.0)
     {
         emit(scSignalEteDelay, ete_delay);
     }
@@ -810,14 +818,14 @@ void CpService::updateObjlist(ObjectInfo::ObjectsReceivedMap& obj_list,  uint32_
          * Note: Object expiry check is not necessary, if the object is present in the mObjectsReceived list, 
          * though it was expired it is refreshed with the new data here
          */
+        omnetpp::SimTime time_diff = newTrackingtime.last() - obj_list.at(objectID).getLastTrackingTime().last();
 
 
         //Update only if the received information is latest than what is already stored in the list. 
-        if(newTrackingtime.last() > obj_list.at(objectID).getLastTrackingTime().last() ){
+        if(newTrackingtime.last() > obj_list.at(objectID).getLastTrackingTime().last() && time_diff < 1.1 ){
 
             if(cal_tbu){
                omnetpp::SimTime tbu =  newTrackingtime.last() - obj_list.at(objectID).getLastTrackingTime().last();
-               //std::cout << "tbu of: " << objectID << " " << tbu << endl;
                 emit(scSignaltimebwupdate, tbu);
             }
 

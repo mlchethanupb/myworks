@@ -20,6 +20,7 @@ simple CpService like ItsG5Service
     parameters:
         @signal[CpmReceived](type=CpObject);
         @signal[CpmSent](type=CpObject);
+        @signal[CPMSentTime](type=simtime_t);
         @signal[EteDelay](type=simtime_t);
         @signal[objectAge](type=simtime_t);
         @signal[timebwupdate](type=simtime_t);
@@ -36,6 +37,7 @@ simple CpService like ItsG5Service
         @statistic[transmissioncpm](source=CpmSent;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
         @statistic[sentcpmpkt](source=count(CpmSent);record=last,vector);
         @statistic[rcvdcpmpkt](source=count(CpmReceived);record=last,vector);
+        @statistic[CPMSentTime](source=CPMSentTime; record = vector);
         @statistic[EteDelay](source=EteDelay; record = stats,vector);
         @statistic[EAR](source=ear; record = stats?,vector);
         @statistic[numobjAR](source=numobjAR; record=vector);
