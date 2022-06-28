@@ -105,7 +105,6 @@ class LteSchedulerEnb
     /// Statistics
     simsignal_t cellBlocksUtilizationDl_;
     simsignal_t cellBlocksUtilizationUl_;
-    simsignal_t lteAvgServedBlocksDl_;
 
     // pre-made BandLimit structure used when the no band limit is given to the scheduler
     std::vector<BandLimit> emptyBandLim_;

@@ -450,7 +450,6 @@ void SCTPAssociation::sendEstabIndicationToApp()
     char vectorName[128];
     for (uint16 i = 0; i < inboundStreams; i++) {
         snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
-        streamThroughputVectors[i] = new cOutVector(vectorName);
     }
 }
 
@@ -1532,8 +1531,6 @@ SCTPSackChunk *SCTPAssociation::createSack()
     if (state->messageAcceptLimit > 0) {
         advMsgRwnd->record(msgRwnd);
     }
-    statisticsQueuedReceivedBytes->record(state->queuedReceivedBytes);
-    advRwnd->record(arwnd);
 
     // ====== Create SACK chunk ==============================================
     SCTPSackChunk *sackChunk = new SCTPSackChunk("SACK");
@@ -1579,11 +1576,6 @@ SCTPSackChunk *SCTPAssociation::createSack()
     const uint32 totalGaps = state->gapList.getNumGaps(SCTPGapList::GT_Any);
     bool compression = false;
 
-    // ====== Record statistics ==============================================
-    statisticsNumTotalGapBlocksStored->record(totalGaps);
-    statisticsNumRevokableGapBlocksStored->record(numRevokableGaps);
-    statisticsNumNonRevokableGapBlocksStored->record(numNonRevokableGaps);
-    statisticsNumDuplicatesStored->record(numDups);
 
     // ====== Optimization ===================================================
     const int optR = (int)numRevokableGaps - (int)totalGaps;
@@ -1741,12 +1733,6 @@ SCTPSackChunk *SCTPAssociation::createSack()
         state->dupList.clear();
     }
 
-    // ====== Record statistics ==============================================
-    statisticsSACKLengthSent->record(sackLength);
-    statisticsNumRevokableGapBlocksSent->record(numRevokableGaps);
-    statisticsNumNonRevokableGapBlocksSent->record(numNonRevokableGaps);
-    statisticsNumDuplicatesSent->record(numDups);
-
     // ====== Print information ==============================================
     EV_DEBUG << "createSack:"
              << " bufferedMessages=" << state->bufferedMessages
@@ -1899,7 +1885,6 @@ void SCTPAssociation::pushUlp()
         restrict = true;
     }
 
-    statisticsQueuedReceivedBytes->record(state->queuedReceivedBytes);
 
     EV_DETAIL << simTime() << " Calling pushUlp(" << state->queuedReceivedBytes
               << " bytes queued) ..." << endl
@@ -1934,7 +1919,6 @@ void SCTPAssociation::pushUlp()
             state->bufferedMessages--;
             EV_INFO << "buffered Messages now " << state->bufferedMessages << endl;
             if (state->swsAvoidanceInvoked) {
-                statisticsQueuedReceivedBytes->record(state->queuedReceivedBytes);
                 /* now check, if user has read enough so that window opens up more than one MTU */
                 if ((state->messageAcceptLimit > 0 &&
                      (int32)state->localMsgRwnd - state->bufferedMessages >= 3 &&
@@ -1975,7 +1959,6 @@ void SCTPAssociation::pushUlp()
             cmd->setCumTsn(state->lastTsnAck);
             msg->setControlInfo(cmd);
             state->numMsgsReq[count]--;
-            EndToEndDelay->record(simTime() - chunk->firstSendTime);
             auto iter = sctpMain->assocStatMap.find(assocId);
             if (iter->second.numEndToEndMessages >= iter->second.startEndToEndDelay &&
                 (iter->second.numEndToEndMessages < iter->second.stopEndToEndDelay || !iter->second.stopEndToEndDelay))
@@ -2518,7 +2501,6 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
             ((int32)((SCTPDataMsg *)streamQ->front())->getBooksize() <= availableCwnd))
         {
             datMsg = (SCTPDataMsg *)streamQ->pop();
-            sendQueue->record(streamQ->getLength());
 
             if (!datMsg->getFragment()) {
                 datMsg->setBBit(true);
@@ -2713,7 +2695,6 @@ void SCTPAssociation::pmStartPathManagement()
             startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
             startTimer(path->HeartbeatIntervalTimer, path->heartbeatIntervalTimeout);
         }
-        path->statisticsPathRTO->record(path->pathRto);
         i++;
     }
 }
@@ -2781,7 +2762,6 @@ void SCTPAssociation::pmRttMeasurement(SCTPPathVariables *path,
             // RFC 2960, sect. 6.3.1: new RTT measurements SHOULD be made no more
             //                                than once per round-trip.
             path->rttUpdateTime = simTime() + path->srtt;
-            path->statisticsPathRTO->record(path->pathRto);
             path->statisticsPathRTT->record(rttEstimation);
         }
     }

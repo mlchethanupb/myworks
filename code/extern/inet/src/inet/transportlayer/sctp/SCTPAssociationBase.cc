@@ -163,22 +163,9 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     AsconfTimer->setControlInfo(pinfo->dup());
     BlockingTimer->setControlInfo(pinfo->dup());
 
-    snprintf(str, sizeof(str), "RTO %d:%s", assoc->assocId, addr.str().c_str());
-    statisticsPathRTO = new cOutVector(str);
     snprintf(str, sizeof(str), "RTT %d:%s", assoc->assocId, addr.str().c_str());
     statisticsPathRTT = new cOutVector(str);
 
-    snprintf(str, sizeof(str), "Slow Start Threshold %d:%s", assoc->assocId, addr.str().c_str());
-    statisticsPathSSthresh = new cOutVector(str);
-    snprintf(str, sizeof(str), "Congestion Window %d:%s", assoc->assocId, addr.str().c_str());
-    statisticsPathCwnd = new cOutVector(str);
-    snprintf(str, sizeof(str), "Bandwidth %d:%s", assoc->assocId, addr.str().c_str());
-    statisticsPathBandwidth = new cOutVector(str);
-
-    snprintf(str, sizeof(str), "TSN Sent %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathSentTSN = new cOutVector(str);
-    snprintf(str, sizeof(str), "TSN Received %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathReceivedTSN = new cOutVector(str);
 
     snprintf(str, sizeof(str), "HB Sent %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathHb = new cOutVector(str);
@@ -189,23 +176,10 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     snprintf(str, sizeof(str), "HB ACK Received %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathRcvdHbAck = new cOutVector(str);
 
-    snprintf(str, sizeof(str), "Queued Sent Bytes %d:%s", assoc->assocId, addr.str().c_str());
-    statisticsPathQueuedSentBytes = new cOutVector(str);
-    snprintf(str, sizeof(str), "Outstanding Bytes %d:%s", assoc->assocId, addr.str().c_str());
-    statisticsPathOutstandingBytes = new cOutVector(str);
     snprintf(str, sizeof(str), "Sender Blocking Fraction %d:%s", assoc->assocId, addr.str().c_str());
     statisticsPathSenderBlockingFraction = new cOutVector(str);
     snprintf(str, sizeof(str), "Receiver Blocking Fraction %d:%s", assoc->assocId, addr.str().c_str());
     statisticsPathReceiverBlockingFraction = new cOutVector(str);
-    snprintf(str, sizeof(str), "Number of Gap Acked Chunks in Last SACK %d:%s", assoc->assocId, addr.str().c_str());
-    statisticsPathGapAckedChunksInLastSACK = new cOutVector(str);
-    snprintf(str, sizeof(str), "Number of Non-Revokable Gap Acked Chunks in Last SACK %d:%s", assoc->assocId, addr.str().c_str());
-    statisticsPathGapNRAckedChunksInLastSACK = new cOutVector(str);
-    snprintf(str, sizeof(str), "Number of Gap Missed Chunks in Last SACK %d:%s", assoc->assocId, addr.str().c_str());
-    statisticsPathGapUnackedChunksInLastSACK = new cOutVector(str);
-
-    snprintf(str, sizeof(str), "Partial Bytes Acked %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathPbAcked = new cOutVector(str);
 
     snprintf(str, sizeof(str), "Fast Recovery State %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathFastRecoveryState = new cOutVector(str);
@@ -215,52 +189,32 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     vectorPathTSNFastRTX = new cOutVector(str);
     snprintf(str, sizeof(str), "TSN Sent Timer-Based RTX %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathTSNTimerBased = new cOutVector(str);
-    snprintf(str, sizeof(str), "TSN Acked CumAck %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathAckedTSNCumAck = new cOutVector(str);
+
     snprintf(str, sizeof(str), "TSN Acked GapAck %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathAckedTSNGapAck = new cOutVector(str);
 
-    snprintf(str, sizeof(str), "TSN PseudoCumAck %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathPseudoCumAck = new cOutVector(str);
-    snprintf(str, sizeof(str), "TSN RTXPseudoCumAck %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathRTXPseudoCumAck = new cOutVector(str);
     snprintf(str, sizeof(str), "Blocking TSNs Moved %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathBlockingTSNsMoved = new cOutVector(str);
 }
 
 SCTPPathVariables::~SCTPPathVariables()
 {
-    delete statisticsPathSSthresh;
-    delete statisticsPathCwnd;
-    delete statisticsPathBandwidth;
-    delete statisticsPathRTO;
     delete statisticsPathRTT;
 
-    delete vectorPathSentTSN;
-    delete vectorPathReceivedTSN;
     delete vectorPathHb;
     delete vectorPathRcvdHb;
     delete vectorPathHbAck;
     delete vectorPathRcvdHbAck;
 
-    delete statisticsPathQueuedSentBytes;
-    delete statisticsPathOutstandingBytes;
-    delete statisticsPathGapAckedChunksInLastSACK;
-    delete statisticsPathGapNRAckedChunksInLastSACK;
-    delete statisticsPathGapUnackedChunksInLastSACK;
     delete statisticsPathSenderBlockingFraction;
     delete statisticsPathReceiverBlockingFraction;
 
-    delete vectorPathPbAcked;
     delete vectorPathFastRecoveryState;
 
     delete vectorPathTSNFastRTX;
     delete vectorPathTSNTimerBased;
-    delete vectorPathAckedTSNCumAck;
     delete vectorPathAckedTSNGapAck;
 
-    delete vectorPathPseudoCumAck;
-    delete vectorPathRTXPseudoCumAck;
     delete vectorPathBlockingTSNsMoved;
 }
 
@@ -593,8 +547,6 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     sackPeriod = SACK_DELAY;
 
     cumTsnAck = nullptr;
-    sendQueue = nullptr;
-    numGapBlocks = nullptr;
 
     qCounter.roomSumSendStreams = 0;
     qCounter.bookedSumSendStreams = 0;
@@ -667,8 +619,6 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
 
     // ====== Output vectors =================================================
     char vectorName[128];
-    snprintf(vectorName, sizeof(vectorName), "Advertised Receiver Window %d", assocId);
-    advRwnd = new cOutVector(vectorName);
 
     snprintf(vectorName, sizeof(vectorName), "Slow Start Threshold %d:Total", assocId);
     statisticsTotalSSthresh = new cOutVector(vectorName);
@@ -676,40 +626,6 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     statisticsTotalCwnd = new cOutVector(vectorName);
     snprintf(vectorName, sizeof(vectorName), "Bandwidth %d:Total", assocId);
     statisticsTotalBandwidth = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Queued Received Bytes %d:Total", assocId);
-    statisticsQueuedReceivedBytes = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Queued Sent Bytes %d:Total", assocId);
-    statisticsQueuedSentBytes = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Outstanding Bytes %d:Total", assocId);
-    statisticsOutstandingBytes = new cOutVector(vectorName);
-
-    snprintf(vectorName, sizeof(vectorName), "Number of Revokable Gap Blocks in SACK %d", assocId);
-    statisticsRevokableGapBlocksInLastSACK = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Number of Non-Revokable Gap Blocks in SACK %d", assocId);
-    statisticsNonRevokableGapBlocksInLastSACK = new cOutVector(vectorName);
-
-    snprintf(vectorName, sizeof(vectorName), "Number of Total Gap Blocks Stored %d", assocId);
-    statisticsNumTotalGapBlocksStored = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Number of Revokable Gap Blocks Stored %d", assocId);
-    statisticsNumRevokableGapBlocksStored = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Number of Non-Revokable Gap Blocks Stored %d", assocId);
-    statisticsNumNonRevokableGapBlocksStored = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Number of Duplicate TSNs Stored %d", assocId);
-    statisticsNumDuplicatesStored = new cOutVector(vectorName);
-
-    snprintf(vectorName, sizeof(vectorName), "Number of Revokable Gap Blocks Sent %d", assocId);
-    statisticsNumRevokableGapBlocksSent = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Number of Non-Revokable Gap Blocks Sent %d", assocId);
-    statisticsNumNonRevokableGapBlocksSent = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Number of Duplicate TSNs Sent %d", assocId);
-    statisticsNumDuplicatesSent = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Length of SACK Sent %d", assocId);
-    statisticsSACKLengthSent = new cOutVector(vectorName);
-
-    snprintf(vectorName, sizeof(vectorName), "Arwnd in Last SACK %d", assocId);
-    statisticsArwndInLastSACK = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "Peer Rwnd %d", assocId);
-    statisticsPeerRwnd = new cOutVector(vectorName);
 
     // ====== Extensions =====================================================
     StartAddIP = new cMessage("addIP");
@@ -723,13 +639,8 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     FairStopTimer->setControlInfo(pinfo->dup());
     snprintf(vectorName, sizeof(vectorName), "Advertised Message Receiver Window of Association %d", assocId);
     advMsgRwnd = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "End to End Delay of Association %d", assocId);
-    EndToEndDelay = new cOutVector(vectorName);
 
-    // ====== Assoc throughput ===============================================
-    snprintf(vectorName, sizeof(vectorName), "Throughput of Association %d", assocId);
-    assocThroughputVector = new cOutVector(vectorName);
-    assocThroughputVector->record(0.0);
+
 
     // ====== CMT Delayed Ack ================================================
     dacPacketsRcvd = 0;
@@ -837,42 +748,15 @@ SCTPAssociation::~SCTPAssociation()
     delete T5_ShutdownGuardTimer;
     delete SackTimer;
 
-    delete advRwnd;
     delete cumTsnAck;
-    delete numGapBlocks;
-    delete sendQueue;
 
-    delete statisticsOutstandingBytes;
-    delete statisticsQueuedReceivedBytes;
-    delete statisticsQueuedSentBytes;
     delete statisticsTotalSSthresh;
     delete statisticsTotalCwnd;
     delete statisticsTotalBandwidth;
 
-    delete statisticsRevokableGapBlocksInLastSACK;
-    delete statisticsNonRevokableGapBlocksInLastSACK;
-    delete statisticsNumTotalGapBlocksStored;
-    delete statisticsNumRevokableGapBlocksStored;
-    delete statisticsNumNonRevokableGapBlocksStored;
-    delete statisticsNumDuplicatesStored;
-    delete statisticsNumRevokableGapBlocksSent;
-    delete statisticsNumNonRevokableGapBlocksSent;
-    delete statisticsNumDuplicatesSent;
-    delete statisticsSACKLengthSent;
-
-    delete statisticsArwndInLastSACK;
-    delete statisticsPeerRwnd;
-
     delete StartAddIP;
     delete advMsgRwnd;
-    delete EndToEndDelay;
 
-    int i = 0;
-    while (streamThroughputVectors[i] != nullptr) {
-        delete streamThroughputVectors[i++];
-    }
-    if (assocThroughputVector != nullptr)
-        delete assocThroughputVector;
     if (FairStartTimer)
         delete cancelEvent(FairStartTimer);
     if (FairStopTimer)
@@ -1746,10 +1630,7 @@ void SCTPAssociation::stateEntered(int32 status)
             char str[128];
             snprintf(str, sizeof(str), "Cumulated TSN Ack of Association %d", assocId);
             cumTsnAck = new cOutVector(str);
-            snprintf(str, sizeof(str), "Number of Gap Blocks in Last SACK of Association %d", assocId);
-            numGapBlocks = new cOutVector(str);
-            snprintf(str, sizeof(str), "SendQueue of Association %d", assocId);
-            sendQueue = new cOutVector(str);
+
             state->sendQueueLimit = (uint32)sctpMain->par("sendQueueLimit");
             SCTP::VTagPair vtagPair;
             vtagPair.peerVTag = peerVTag;

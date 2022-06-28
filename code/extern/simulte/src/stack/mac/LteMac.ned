@@ -406,9 +406,6 @@ simple LteMacEnb extends LteMacBase {
         @statistic[cellBlocksUtilizationDl](title="LTE Cell Blocks Utilization Dl"; unit="blocks"; source="cellBlocksUtilizationDl"; record=mean);
         @signal[cellBlocksUtilizationUl];
         @statistic[cellBlocksUtilizationUl](title="LTE Cell Blocks Utilization Ul"; unit="blocks"; source="cellBlocksUtilizationUl"; record=mean);
-        @signal[avgServedBlocksDl];
-        @statistic[avgServedBlocksDl](title="LTE Avg Served Blocks Dl"; unit="blocks"; source="avgServedBlocksDl"; record=mean,vector);
-
 }    
 
 //

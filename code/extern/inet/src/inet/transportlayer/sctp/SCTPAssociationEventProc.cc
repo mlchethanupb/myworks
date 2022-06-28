@@ -266,7 +266,6 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
         datMsg->setOrdered(true);
         stream->getStreamQ()->insert(datMsg);
 
-        sendQueue->record(stream->getStreamQ()->getLength());
     }
 
     // ------ Send buffer full? -------------------------------------------

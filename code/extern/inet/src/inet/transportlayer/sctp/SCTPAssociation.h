@@ -391,32 +391,17 @@ class INET_API SCTPPathVariables : public cObject
 
     // ====== Output Vectors ==============================================
     cOutVector *vectorPathFastRecoveryState;
-    cOutVector *vectorPathPbAcked;
     cOutVector *vectorPathTSNFastRTX;
     cOutVector *vectorPathTSNTimerBased;
-    cOutVector *vectorPathAckedTSNCumAck;
     cOutVector *vectorPathAckedTSNGapAck;
-    cOutVector *vectorPathPseudoCumAck;
-    cOutVector *vectorPathRTXPseudoCumAck;
     cOutVector *vectorPathBlockingTSNsMoved;
-    cOutVector *vectorPathSentTSN;
-    cOutVector *vectorPathReceivedTSN;
     cOutVector *vectorPathHb;
     cOutVector *vectorPathRcvdHb;
     cOutVector *vectorPathHbAck;
     cOutVector *vectorPathRcvdHbAck;
-    cOutVector *statisticsPathRTO;
     cOutVector *statisticsPathRTT;
-    cOutVector *statisticsPathSSthresh;
-    cOutVector *statisticsPathCwnd;
-    cOutVector *statisticsPathOutstandingBytes;
-    cOutVector *statisticsPathQueuedSentBytes;
     cOutVector *statisticsPathSenderBlockingFraction;
     cOutVector *statisticsPathReceiverBlockingFraction;
-    cOutVector *statisticsPathGapAckedChunksInLastSACK;
-    cOutVector *statisticsPathGapNRAckedChunksInLastSACK;
-    cOutVector *statisticsPathGapUnackedChunksInLastSACK;
-    cOutVector *statisticsPathBandwidth;
 };
 
 class INET_API SCTPDataVariables : public cObject
@@ -923,10 +908,7 @@ class INET_API SCTPAssociation : public cObject
     cMessage *StartTesting;
     cMessage *StartAddIP;
     cOutVector *advMsgRwnd;
-    cOutVector *EndToEndDelay;
     bool fairTimer;
-    std::map<uint16, cOutVector *> streamThroughputVectors;
-    cOutVector *assocThroughputVector;
     cMessage *FairStartTimer;
     cMessage *FairStopTimer;
     // ------ CMT Delayed Ack (DAC) ---------------------
@@ -951,10 +933,7 @@ class INET_API SCTPAssociation : public cObject
     CCFunctions ccFunctions;
     uint16 ccModule;
 
-    cOutVector *advRwnd;
     cOutVector *cumTsnAck;
-    cOutVector *sendQueue;
-    cOutVector *numGapBlocks;
 
     // Variables associated with the state of this association
     SCTPStateVariables *state;
@@ -970,26 +949,9 @@ class INET_API SCTPAssociation : public cObject
     SCTPAlgorithm *sctpAlgorithm;
 
     // ------ Transmission Statistics -------------------------------------
-    cOutVector *statisticsOutstandingBytes;
-    cOutVector *statisticsQueuedReceivedBytes;
-    cOutVector *statisticsQueuedSentBytes;
     cOutVector *statisticsTotalSSthresh;
     cOutVector *statisticsTotalCwnd;
     cOutVector *statisticsTotalBandwidth;
-    // ------ Received SACK Statistics ------------------------------------
-    cOutVector *statisticsRevokableGapBlocksInLastSACK;    // Revokable GapAck blocks in last received SACK
-    cOutVector *statisticsNonRevokableGapBlocksInLastSACK;    // Non-Revokable GapAck blocks in last received SACK
-    cOutVector *statisticsArwndInLastSACK;
-    cOutVector *statisticsPeerRwnd;
-    // ------ Sent SACK Statistics ----------------------------------------
-    cOutVector *statisticsNumTotalGapBlocksStored;    // Number of GapAck blocks stored (NOTE: R + NR!)
-    cOutVector *statisticsNumRevokableGapBlocksStored;    // Number of Revokable GapAck blocks stored
-    cOutVector *statisticsNumNonRevokableGapBlocksStored;    // Number of Non-Revokable GapAck blocks stored
-    cOutVector *statisticsNumDuplicatesStored;    // Number of duplicate TSNs stored
-    cOutVector *statisticsNumRevokableGapBlocksSent;    // Number of Revokable GapAck blocks sent in last SACK
-    cOutVector *statisticsNumNonRevokableGapBlocksSent;    // Number of Non-Revokable GapAck blocks sent in last SACK
-    cOutVector *statisticsNumDuplicatesSent;    // Number of duplicate TSNs sent in last SACK
-    cOutVector *statisticsSACKLengthSent;    // Length of last sent SACK
 
   public:
     /**

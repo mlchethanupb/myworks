@@ -370,9 +370,6 @@ void SCTPAssociation::recordCwndUpdate(SCTPPathVariables* path)
         statisticsTotalBandwidth->record(totalBandwidth);
     }
     else {
-        path->statisticsPathSSthresh->record(path->ssthresh);
-        path->statisticsPathCwnd->record(path->cwnd);
-        path->statisticsPathBandwidth->record(path->cwnd / GET_SRTT(path->srtt.dbl()));
     }
 }
 
@@ -523,7 +520,6 @@ void SCTPAssociation::cwndUpdateAfterSack()
                 EV_INFO << "\t=>\tsst=" << path->ssthresh << " cwnd=" << path->cwnd << endl;
                 recordCwndUpdate(path);
                 path->partialBytesAcked = 0;
-                path->vectorPathPbAcked->record(path->partialBytesAcked);
                 if (state->highSpeedCC == true) {
                     updateHighSpeedCCThresholdIdx(path);
                 }
@@ -689,7 +685,6 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables *path,
                         throw cRuntimeError("Implementation for this cmtCCVariant is missing!");
                     }
                 }
-                path->vectorPathPbAcked->record(path->partialBytesAcked);
                 EV << "\t=>\tsst=" << path->ssthresh
                    << "\tcwnd=" << path->cwnd << endl;
 
@@ -820,7 +815,6 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables *path,
         if (path->outstandingBytes == 0) {
             path->partialBytesAcked = 0;
         }
-        path->vectorPathPbAcked->record(path->partialBytesAcked);
     }
     else {
         EV_INFO << assocId << ": " << simTime() << ":\tCC "
@@ -908,7 +902,6 @@ void SCTPAssociation::cwndUpdateAfterRtxTimeout(SCTPPathVariables *path)
     }
     path->highSpeedCCThresholdIdx = 0;
     path->partialBytesAcked = 0;
-    path->vectorPathPbAcked->record(path->partialBytesAcked);
     EV_INFO << "\t=>\tsst=" << path->ssthresh
             << "\tcwnd=" << path->cwnd << endl;
     recordCwndUpdate(path);

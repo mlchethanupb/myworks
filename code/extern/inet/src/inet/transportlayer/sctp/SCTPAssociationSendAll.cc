@@ -32,7 +32,6 @@ void SCTPAssociation::increaseOutstandingBytes(SCTPDataVariables *chunk,
         SCTPPathVariables *path)
 {
     path->outstandingBytes += chunk->booksize;
-    path->statisticsPathOutstandingBytes->record(path->outstandingBytes);
     state->outstandingBytes += chunk->booksize;
     SCTPSendStream *stream = nullptr;
     auto associter = sendStreams.find(chunk->sid);
@@ -42,7 +41,6 @@ void SCTPAssociation::increaseOutstandingBytes(SCTPDataVariables *chunk,
         throw cRuntimeError("Stream with id %d not found", chunk->sid);
     }
     stream->setBytesInFlight(stream->getBytesInFlight() + chunk->booksize);
-    statisticsOutstandingBytes->record(state->outstandingBytes);
 
     auto iterator = qCounter.roomRetransQ.find(path->remoteAddress);
     state->outstandingMessages++;
@@ -1237,7 +1235,6 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                         EV_DETAIL << "sendAll: set TSN=" << datVar->tsn
                                   << " sid=" << datVar->sid << ", ssn=" << datVar->ssn << "\n";
                         state->nextTSN++;
-                        path->vectorPathSentTSN->record(datVar->tsn);
                     }
                     else {
                         if (datVar->hasBeenFastRetransmitted) {
@@ -1279,10 +1276,8 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                             increaseOutstandingBytes(datVar, path);
                             datVar->queuedOnPath = path;
                             datVar->queuedOnPath->queuedBytes += datVar->booksize;
-                            datVar->queuedOnPath->statisticsPathQueuedSentBytes->record(path->queuedBytes);
 
                             state->queuedSentBytes += datVar->booksize;
-                            statisticsQueuedSentBytes->record(state->queuedSentBytes);
                         }
                     }
 

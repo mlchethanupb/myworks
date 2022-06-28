@@ -73,7 +73,6 @@ void SCTPAssociation::addInStreams(uint32 inStreams)
         rcvStream->setStreamId(i);
         this->state->numMsgsReq[i] = 0;
         snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
-        streamThroughputVectors[i] = new cOutVector(vectorName);
     }
 }
 
