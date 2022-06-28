@@ -31,8 +31,6 @@ namespace inet {
 
 Define_Module(PPP);
 
-simsignal_t PPP::txStateSignal = registerSignal("txState");
-simsignal_t PPP::rxPkOkSignal = registerSignal("rxPkOk");
 simsignal_t PPP::dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
 simsignal_t PPP::dropPkBitErrorSignal = registerSignal("dropPkBitError");
 simsignal_t PPP::packetSentToLowerSignal = registerSignal("packetSentToLower");
@@ -63,8 +61,6 @@ void PPP::initialize(int stage)
         WATCH(numDroppedIfaceDown);
 
         subscribe(POST_MODEL_CHANGE, this);
-
-        emit(txStateSignal, 0L);
 
         // find queueModule
         queueModule = nullptr;
@@ -214,7 +210,6 @@ void PPP::startTransmitting(cPacket *msg)
 
     // send
     EV_INFO << "Transmission of " << pppFrame << " started.\n";
-    emit(txStateSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
     send(pppFrame, physOutGate);
 
@@ -236,7 +231,6 @@ void PPP::handleMessage(cMessage *msg)
     if (msg == endTransmissionEvent) {
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
-        emit(txStateSignal, 0L);
 
         // fire notification
         notifDetails.setPacket(nullptr);
@@ -271,7 +265,6 @@ void PPP::handleMessage(cMessage *msg)
         else {
             // pass up payload
             PPPFrame *pppFrame = check_and_cast<PPPFrame *>(msg);
-            emit(rxPkOkSignal, pppFrame);
             cPacket *payload = decapsulate(pppFrame);
             numRcvdOK++;
             emit(packetSentToUpperSignal, payload);

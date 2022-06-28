@@ -78,7 +78,6 @@ void SidelinkConfiguration::initialize(int stage)
         expiredGrant_ = false;
 
         // Register the necessary signals for this simulation
-        grantStartTime          = registerSignal("grantStartTime");
         grantBreak              = registerSignal("grantBreak");
         grantBreakTiming        = registerSignal("grantBreakTiming");
         grantBreakSize          = registerSignal("grantBreakSize");
@@ -443,7 +442,6 @@ void SidelinkConfiguration::handleMessage(cMessage *msg)
         channelOccupancyRatio_ = subchannelsUsed /(numSubchannels_ * 1000.0);
         EV<<"channelOccupancyRatio_: "<<channelOccupancyRatio_<<endl;
         // message from PHY_to_MAC gate (from lower layer)
-        //emit(receivedPacketFromLowerLayer, pkt);
         throw cRuntimeError("SLConfig CBR");
         LteMacBase* mac = dynamic_cast<LteMacBase*>(getParentModule()->getSubmodule("mac"));
         mac->sendUpperPackets(cbrPkt);
@@ -856,7 +854,6 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
     mac->sendLowerPackets( phyGrant);
     schedulingGrant_ = slGrant;
     //emit(grantRequest, 1);
-    emit(grantStartTime,80);
     setSidelinkGrant(slGrant);
     return slGrant;
 

@@ -159,7 +159,6 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
                     " from port " << pkt->getArrivalGate()->getName() << endl;
 
             // message from PHY_to_MAC gate (from lower layer)
-            emit(receivedPacketFromLowerLayer, pkt);
 
             // call handler
             macHandleD2DModeSwitch(pkt);

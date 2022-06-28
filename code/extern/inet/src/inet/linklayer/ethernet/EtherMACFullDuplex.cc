@@ -273,7 +273,6 @@ void EtherMACFullDuplex::handleEndTxPeriod()
         unsigned long curBytes = curTxFrame->getByteLength();
         numFramesSent++;
         numBytesSent += curBytes;
-        emit(txPkSignal, curTxFrame);
     }
 
     EV_INFO << "Transmission of " << curTxFrame << " successfully completed.\n";
@@ -323,7 +322,6 @@ void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
     unsigned long curBytes = frame->getByteLength();
     numFramesReceivedOK++;
     numBytesReceivedOK += curBytes;
-    emit(rxPkOkSignal, frame);
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, frame);

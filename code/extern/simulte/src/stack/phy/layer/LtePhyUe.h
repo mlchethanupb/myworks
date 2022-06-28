@@ -120,7 +120,6 @@ protected:
     simtime_t lastFeedback_;
 
     /** Statistic for serving cell */
-    simsignal_t servingCell;
     /** Self message to trigger handover procedure evaluation */
 
 

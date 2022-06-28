@@ -43,7 +43,6 @@ public:
     bool cellFound;
     bool dataArrivalStatus;
     /** Statistic for serving cell */
-    simsignal_t servingCell_;
 protected:
 
     LteSidelinkMode mode;

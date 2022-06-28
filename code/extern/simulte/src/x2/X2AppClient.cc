@@ -52,7 +52,6 @@ void X2AppClient::socketDataArrived(int32_t, void *, cPacket *msg, bool)
     packetsRcvd++;
 
     EV << "X2AppClient::socketDataArrived - Client received packet Nr " << packetsRcvd << " from SCTP\n";
-    emit(rcvdPkSignal, msg);
     bytesRcvd += msg->getByteLength();
 
     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg);

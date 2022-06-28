@@ -116,8 +116,6 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
     }
 };
 
-simsignal_t EtherMACBase::txPkSignal = registerSignal("txPk");
-simsignal_t EtherMACBase::rxPkOkSignal = registerSignal("rxPkOk");
 simsignal_t EtherMACBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
 simsignal_t EtherMACBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
 simsignal_t EtherMACBase::rxPkFromHLSignal = registerSignal("rxPkFromHL");

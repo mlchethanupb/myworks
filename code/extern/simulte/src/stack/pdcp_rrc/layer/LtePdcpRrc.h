@@ -115,10 +115,6 @@ protected:
 
     simsignal_t alertSentMsg_;
     // statistics
-    simsignal_t receivedPacketFromUpperLayer;
-    simsignal_t receivedPacketFromLowerLayer;
-    simsignal_t sentPacketToUpperLayer;
-    simsignal_t sentPacketToLowerLayer;
     /**
      * Initialize class structures
      * gates, delay, compression

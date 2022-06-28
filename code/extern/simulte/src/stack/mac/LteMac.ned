@@ -93,14 +93,6 @@ simple LteMacBase like LteMac {
         @statistic[harqErrorRate_4th_Ul](title="Harq Error Rate Ul"; unit=""; source="harqErrorRate_4th_Ul"; record=mean,vector);
         @signal[harqErrorRate_4th_Dl];
         @statistic[harqErrorRate_4th_Dl](title="Harq Error Rate Dl"; unit=""; source="harqErrorRate_4th_Dl"; record=mean,vector);
-        @signal[receivedPacketFromUpperLayer];
-        @statistic[receivedPacketFromUpperLayer](source="receivedPacketFromUpperLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @signal[receivedPacketFromLowerLayer];
-        @statistic[receivedPacketFromLowerLayer](source="receivedPacketFromLowerLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @signal[sentPacketToUpperLayer];
-        @statistic[sentPacketToUpperLayer](source="sentPacketToUpperLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @signal[sentPacketToLowerLayer];
-        @statistic[sentPacketToLowerLayer](source="sentPacketToLowerLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @signal[measuredItbs];
         @statistic[measuredItbs](title="TBS index"; unit=""; source="measuredItbs"; record=mean,vector);
         
@@ -416,8 +408,7 @@ simple LteMacEnb extends LteMacBase {
         @statistic[cellBlocksUtilizationUl](title="LTE Cell Blocks Utilization Ul"; unit="blocks"; source="cellBlocksUtilizationUl"; record=mean);
         @signal[avgServedBlocksDl];
         @statistic[avgServedBlocksDl](title="LTE Avg Served Blocks Dl"; unit="blocks"; source="avgServedBlocksDl"; record=mean,vector);
-        @signal[avgServedBlocksUl];
-        @statistic[avgServedBlocksUl](title="LTE Avg Served Blocks Ul"; unit="blocks"; source="avgServedBlocksUl"; record=mean,vector);
+
 }    
 
 //

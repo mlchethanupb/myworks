@@ -49,7 +49,6 @@ void LtePhyUe::initialize(int stage)
         dasRssiThreshold_ = 1.0e-5;
         das_ = new DasFilter(this, binder_, NULL, dasRssiThreshold_);
 
-        servingCell = registerSignal("servingCell");
         averageCqiDl_ = registerSignal("averageCqiDl");
         averageCqiUl_ = registerSignal("averageCqiUl");
         numAirFrameAlertTransmitted_ = 0;
@@ -144,7 +143,6 @@ void LtePhyUe::initialize(int stage)
 
             // set serving cell
             masterId_ = candidateMasterId_;
-            emit(servingCell,(long)masterId_);
             getAncestorPar("masterId").setIntValue(masterId_);
             currentMasterRssi_ = candidateMasterRssi_;
             updateHysteresisTh(candidateMasterRssi_);

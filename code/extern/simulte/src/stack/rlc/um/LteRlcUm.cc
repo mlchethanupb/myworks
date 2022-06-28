@@ -107,7 +107,6 @@ void LteRlcUm::sendDefragmented(cPacket *pkt)
     EV << "LteRlcUm ::sendDefragmented Sending packet " << pkt->getName() << " to port UM_Sap_up$o\n";
     send(pkt, up_[OUT]);
 
-    emit(sentPacketToUpperLayer, pkt);
 }
 
 void LteRlcUm::sendToLowerLayer(cPacket *pkt)
@@ -117,7 +116,6 @@ void LteRlcUm::sendToLowerLayer(cPacket *pkt)
     EV << "LteRlcUm :sendToLowerLayer  Sending packet " << pkt->getName() << " to port UM_Sap_down$o\n";
     send(pkt, down_[OUT]);
 
-    emit(sentPacketToLowerLayer, pkt);
 }
 
 void LteRlcUm::handleUpperMessage(cPacket *pkt)
@@ -163,7 +161,6 @@ void LteRlcUm::handleUpperMessage(cPacket *pkt)
 
     }
 
-    emit(receivedPacketFromUpperLayer, pkt);
 
 
 
@@ -194,7 +191,6 @@ void LteRlcUm::handleLowerMessage(cPacket *pkt)
     }
     else
     {
-        emit(receivedPacketFromLowerLayer, pkt);
 
         // Extract informations from fragment
         UmRxEntity* rxbuf = getRxBuffer(lteInfo);
@@ -260,11 +256,6 @@ void LteRlcUm::initialize()
 
 
     // statistics
-    receivedPacketFromUpperLayer = registerSignal("receivedPacketFromUpperLayer");
-    receivedPacketFromLowerLayer = registerSignal("receivedPacketFromLowerLayer");
-    sentPacketToUpperLayer = registerSignal("sentPacketToUpperLayer");
-    sentPacketToLowerLayer = registerSignal("sentPacketToLowerLayer");
-
     WATCH_MAP(txEntities_);
     WATCH_MAP(rxEntities_);
 }

@@ -37,7 +37,6 @@ void LteRrcUe::initialize(int stage)
     if (stage == inet::INITSTAGE_LOCAL)
     {
         //Feedback from PHY layer about the candidate eNodeB
-        servingCell_ = registerSignal("servingCell");
 
     }
     //initialize resource allocation mode

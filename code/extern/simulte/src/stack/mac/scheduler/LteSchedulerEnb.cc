@@ -77,7 +77,6 @@ void LteSchedulerEnb::initialize(Direction dir, LteMacEnb* mac)
     cellBlocksUtilizationDl_ = mac_->registerSignal("cellBlocksUtilizationDl");
     cellBlocksUtilizationUl_ = mac_->registerSignal("cellBlocksUtilizationUl");
     lteAvgServedBlocksDl_ = mac_->registerSignal("avgServedBlocksDl");
-    lteAvgServedBlocksUl_ = mac_->registerSignal("avgServedBlocksUl");
 }
 
 LteMacScheduleList* LteSchedulerEnb::schedule()
@@ -642,7 +641,6 @@ void LteSchedulerEnb::resourceBlockStatistics(bool sleep)
     else if (direction_ == UL)
     {
         mac_->emit(cellBlocksUtilizationUl_, utilization);
-        mac_->emit(lteAvgServedBlocksUl_, allocatedBlocks);
     }
     else
     {

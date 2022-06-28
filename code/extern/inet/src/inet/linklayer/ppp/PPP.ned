@@ -52,8 +52,6 @@ simple PPP
         int mtu @unit("B") = default(4470B);
         @display("i=block/rxtx");
 
-        @signal[txState](type=long);    // 1:transmit, 0:idle
-        @signal[rxPkOk](type=inet::PPPFrame);
         @signal[dropPkIfaceDown](type=cPacket);  //TODO currently both upper and lower; todo separate them
         @signal[dropPkBitError](type=cPacket);
         @signal[packetSentToLower](type=inet::PPPFrame);
@@ -63,12 +61,8 @@ simple PPP
         @signal[NF_PP_TX_BEGIN](type=inet::TxNotifDetails);
         @signal[NF_PP_TX_END](type=inet::TxNotifDetails);
         @signal[NF_PP_RX_END](type=inet::TxNotifDetails);
-        @statistic[txState](title="tx state"; record=timeavg,vector; interpolationmode=sample-hold);
-        @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[droppedPkBitError](title="packets dropped/bit error"; source=dropPkBitError; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[droppedPkIfaceDown](title="packets dropped/interface down"; source=dropPkIfaceDown; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:

@@ -135,10 +135,6 @@ public:
     simsignal_t macBufferOverflowDl_;
     simsignal_t macBufferOverflowUl_;
     simsignal_t macBufferOverflowD2D_;
-    simsignal_t receivedPacketFromUpperLayer;
-    simsignal_t receivedPacketFromLowerLayer;
-    simsignal_t sentPacketToUpperLayer;
-    simsignal_t sentPacketToLowerLayer;
     simsignal_t measuredItbs_;
 
 public:

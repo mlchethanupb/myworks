@@ -18,7 +18,6 @@ Define_Module(LtePdcpRrcEnbD2D);
  */
 void LtePdcpRrcEnbD2D::fromDataPort(cPacket *pkt)
 {
-    emit(receivedPacketFromUpperLayer, pkt);
 
     // Control Informations
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->removeControlInfo());
@@ -110,7 +109,6 @@ void LtePdcpRrcEnbD2D::fromDataPort(cPacket *pkt)
 
     // Send message
     send(pdcpPkt, (lteInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
-    emit(sentPacketToLowerLayer, pdcpPkt);
 }
 
 void LtePdcpRrcEnbD2D::initialize(int stage)

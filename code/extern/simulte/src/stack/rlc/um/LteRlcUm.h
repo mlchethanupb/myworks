@@ -105,11 +105,6 @@ class LteRlcUm : public cSimpleModule
     cGate* down_[2];
     cMessage* ttiTick_;
 
-    // statistics
-    simsignal_t receivedPacketFromUpperLayer;
-    simsignal_t receivedPacketFromLowerLayer;
-    simsignal_t sentPacketToUpperLayer;
-    simsignal_t sentPacketToLowerLayer;
 
     /**
      * getTxBuffer() is used by the sender to gather the TXBuffer

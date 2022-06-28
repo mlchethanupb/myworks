@@ -60,7 +60,6 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
 {
     EV<<"LtePdcpRrcUeD2D::fromDataPort: "<<pkt->getName()<<endl;
 
-    emit(receivedPacketFromUpperLayer, pkt);
     LogicalCid mylcid;
     // get the PDCP entity for this LCID
     LtePdcpEntity* entity;
@@ -231,7 +230,6 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
         setDataArrivalStatus(true);
         // Send message
         send(pdcpPkt, (ipInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
-        emit(sentPacketToLowerLayer, pdcpPkt);
     }
 
     else if(ipBased_==false)
@@ -342,7 +340,6 @@ void LtePdcpRrcUeD2D::fromDataPort(cPacket *pkt)
         setDataArrivalStatus(true);
         send(pdcpPkt, (nonIpInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
         send(dataArrival,control_OUT);
-        emit(sentPacketToLowerLayer, pdcpPkt);
         }
 
     }
@@ -377,7 +374,6 @@ void LtePdcpRrcUeD2D::handleMessage(cMessage* msg)
         // Send message
         //send(pkt, DataPortNonIpOut);
         delete pkt;
-        emit(sentPacketToUpperLayer, pkt);
     }
     else
     {

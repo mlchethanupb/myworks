@@ -544,7 +544,6 @@ void EtherMAC::handleEndTxPeriod()
         unsigned long curBytes = curTxFrame->getByteLength();
         numFramesSent++;
         numBytesSent += curBytes;
-        emit(txPkSignal, curTxFrame);
     }
 
     EV_INFO << "Transmission of " << curTxFrame << " successfully completed.\n";
@@ -788,7 +787,6 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     unsigned long curBytes = frame->getByteLength();
     numFramesReceivedOK++;
     numBytesReceivedOK += curBytes;
-    emit(rxPkOkSignal, frame);
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, frame);

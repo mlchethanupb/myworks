@@ -163,15 +163,7 @@ simple LteRlcUm like ILteRlcUm {
         @signal[rlcPduPacketLossDl];
         @statistic[rlcPduPacketLossDl](title="rlc Packet Loss"; unit=""; source="rlcPduPacketLossDl"; record=mean);
         
-        @signal[receivedPacketFromUpperLayer];
-        @statistic[receivedPacketFromUpperLayer](source="receivedPacketFromUpperLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @signal[receivedPacketFromLowerLayer];
-        @statistic[receivedPacketFromLowerLayer](source="receivedPacketFromLowerLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @signal[sentPacketToUpperLayer];
-        @statistic[sentPacketToUpperLayer](source="sentPacketToUpperLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @signal[sentPacketToLowerLayer];
-        @statistic[sentPacketToLowerLayer](source="sentPacketToLowerLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        
+       
     gates:
         //# 
         //# Gates connecting RLC and UM

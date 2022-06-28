@@ -54,7 +54,6 @@ void LteMacBase::sendUpperPackets(cPacket* pkt)
     EV << "LteMacBase : Sending packet " << pkt->getName() << " on port MAC_to_RLC\n";
     // Send message
     send(pkt,up_[OUT]);
-    emit(sentPacketToUpperLayer, pkt);
 }
 
 void LteMacBase::sendLowerPackets(cPacket* pkt)
@@ -68,7 +67,6 @@ void LteMacBase::sendLowerPackets(cPacket* pkt)
 
     send(pkt,down_[OUT]);
 
-    emit(sentPacketToLowerLayer, pkt);
 }
 
 void LteMacBase::sendPDULower(LteMacPdu* pdu)
@@ -373,10 +371,6 @@ void LteMacBase::initialize(int stage)
         macBufferOverflowUl_ = registerSignal("macBufferOverFlowUl");
         if (isD2DCapable())
             macBufferOverflowD2D_ = registerSignal("macBufferOverFlowD2D");
-        receivedPacketFromUpperLayer = registerSignal("receivedPacketFromUpperLayer");
-        receivedPacketFromLowerLayer = registerSignal("receivedPacketFromLowerLayer");
-        sentPacketToUpperLayer = registerSignal("sentPacketToUpperLayer");
-        sentPacketToLowerLayer = registerSignal("sentPacketToLowerLayer");
 
         measuredItbs_ = registerSignal("measuredItbs");
         WATCH(queueSize_);
@@ -408,13 +402,11 @@ void LteMacBase::handleMessage(cMessage* msg)
     if (incoming == down_[IN])
     {
         // message from PHY_to_MAC gate (from lower layer)
-        emit(receivedPacketFromLowerLayer, pkt);
         fromPhy(pkt);
     }
     else
     {
         // message from RLC_to_MAC gate (from upper layer)
-        emit(receivedPacketFromUpperLayer, pkt);
         fromRlc(pkt);
     }
     return;

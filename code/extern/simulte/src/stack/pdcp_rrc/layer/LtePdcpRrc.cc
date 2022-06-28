@@ -111,7 +111,6 @@ void LtePdcpRrcBase::setTrafficInformation(cPacket* pkt, FlowControlInfoNonIp* n
 void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
 {
     EV<<"LtePdcpRrcBase::fromDataPort"<<ipBased_<<endl;
-    emit(receivedPacketFromUpperLayer, pkt);
 
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->removeControlInfo());
     LogicalCid mylcid;
@@ -217,7 +216,6 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
     // Send message
     setDataArrivalStatus(true);
     send(pdcpPkt, (lteInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
-    emit(sentPacketToLowerLayer, pdcpPkt);
 }
 
 
@@ -250,7 +248,6 @@ void LtePdcpRrcBase::fromEutranRrcSap(cPacket *pkt)
 void LtePdcpRrcBase::toDataPort(cPacket *pkt)
 {
 
-    emit(receivedPacketFromLowerLayer, pkt);
     LtePdcpPdu* pdcpPkt = check_and_cast<LtePdcpPdu*>(pkt);
     cPacket* upPkt;
 
@@ -271,7 +268,6 @@ void LtePdcpRrcBase::toDataPort(cPacket *pkt)
                        << " on port DataPort$o\n";
         // Send message
         send(upPkt, DataPortIpOut);
-        emit(sentPacketToUpperLayer, upPkt);
     }
     else
     {
@@ -287,7 +283,6 @@ void LtePdcpRrcBase::toDataPort(cPacket *pkt)
                           // << " on port DataPort$o\n";
         // Send message
         send(upPkt, DataPortNonIpOut);
-        emit(sentPacketToUpperLayer, upPkt);
     }
 
 
@@ -334,10 +329,6 @@ void LtePdcpRrcBase::initialize(int stage)
         nodeId_ = getAncestorPar("macNodeId");
 
         // statistics
-        receivedPacketFromUpperLayer = registerSignal("receivedPacketFromUpperLayer");
-        receivedPacketFromLowerLayer = registerSignal("receivedPacketFromLowerLayer");
-        sentPacketToUpperLayer = registerSignal("sentPacketToUpperLayer");
-        sentPacketToLowerLayer = registerSignal("sentPacketToLowerLayer");
         three_hundred = 0;
 
         // TODO WATCH_MAP(gatemap_);

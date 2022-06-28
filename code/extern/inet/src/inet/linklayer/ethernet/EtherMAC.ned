@@ -123,8 +123,6 @@ simple EtherMAC like IEtherMAC
         int mtu @unit("B") = default(1500B);
         @display("i=block/rxtx");
 
-        @signal[txPk](type=inet::EtherFrame);
-        @signal[rxPkOk](type=inet::EtherFrame);
         @signal[txPausePkUnits](type=inet::long);
         @signal[rxPausePkUnits](type=inet::long);
         @signal[rxPkFromHL](type=inet::EtherFrame);
@@ -141,8 +139,6 @@ simple EtherMAC like IEtherMAC
         @signal[transmitState](type=long); // enum=MACTransmitState
         @signal[receiveState](type=long); // enum=MACReceiveState
 
-        @statistic[txPk](title="packets transmitted"; source=txPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[txPausePkUnits](title="pause units sent"; record=count,sum,vector; interpolationmode=none);
         @statistic[rxPausePkUnits](title="pause units received"; record=count,sum,vector; interpolationmode=none);
