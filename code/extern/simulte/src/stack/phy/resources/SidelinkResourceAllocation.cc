@@ -17,6 +17,8 @@
 
 Define_Module(SidelinkResourceAllocation);
 
+static const simsignal_t scSignalslctnwndwOverlap = cComponent::registerSignal("slctnwndwOverlap");
+
 SidelinkResourceAllocation::SidelinkResourceAllocation()
 {
     handoverStarter_ = NULL;
@@ -656,6 +658,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
 
         if (eraseSubframe.size() >= candidateSubframes.size()){
             free_resources_avail = false;
+            emit(scSignalslctnwndwOverlap, 1);
         }
 
         //Find the subframes to be discarded

@@ -33,4 +33,7 @@ simple SidelinkResourceAllocation
         int numberSymbolsPerSlot=default(7);
         int bitsPerSymbolQPSK=default(2);
        
+        @signal[slctnwndwOverlap](type=long);
+        @statistic[slctnwndwOverlap](source=slctnwndwOverlap; record=stats,count);
+
 }
