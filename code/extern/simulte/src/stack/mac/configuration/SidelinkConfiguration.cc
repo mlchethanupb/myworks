@@ -779,7 +779,7 @@ LteSidelinkGrant* SidelinkConfiguration::macGenerateSchedulingGrant(double maxim
     // Priority is the most difficult part to figure out, for the moment I will assign it as a fixed value
     slGrant -> setSpsPriority(priority);
     slGrant -> setPeriod(restrictResourceReservationPeriod * 100); //resource reservation interval/Prsvp_TX
-    maximumLatency = 100;  //MLC
+    maximumLatency = 100;  //intuniform(20,100);           //MLC
     slGrant -> setMaximumLatency(maximumLatency);
     slGrant -> setPossibleRRIs(validResourceReservationIntervals_);
     slGrant->setStartingSubchannel(0);

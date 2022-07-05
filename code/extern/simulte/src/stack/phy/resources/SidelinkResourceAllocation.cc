@@ -590,7 +590,8 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
         candidateSubframes.push_back(k);
 
     }
-    EV<<"Number of candidate subframes: "<< candidateSubframes.size()<<endl;
+    EV << "--------------------------------------------------------------" << endl;
+    EV <<"Number of candidate subframes: "<< candidateSubframes.size()<<endl;
     int candidateSubframeInitial = 0;
     candidateSubframeInitial =candidateSubframes.size();
 
@@ -647,6 +648,15 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
             }
         }
 
+        bool free_resources_avail = true;
+        unsigned int cs_size = candidateSubframes.size();
+        simtime_t default_startFirstTransmission = candidateSubframes[cs_size-1];
+
+        EV << "erasesubframes size: " << eraseSubframe.size() << ", cs_size: " << cs_size << endl;
+
+        if (eraseSubframe.size() >= candidateSubframes.size()){
+            free_resources_avail = false;
+        }
 
         //Find the subframes to be discarded
         for (auto iter : eraseSubframe)
@@ -658,17 +668,27 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
             {
                 candidateSubframes.erase(it);
             }
-            else
+            else if(candidateSubframes.size() != 0)
             {
                 candidateSubframes.pop_back();
             }
+            else{
+                EV << "Candidate subframe size is zero === " << candidateSubframes.size() << endl;
+            }
         }
 
-        int randomIndex = rand() % candidateSubframes.size();
+        EV << "new candidatesubframes size: " << candidateSubframes.size() << endl;
 
+        simtime_t startFirstTransmission = default_startFirstTransmission; //default value as the last candidate subframe 
+        if(free_resources_avail){
+            int randomIndex = rand() % candidateSubframes.size();
+            startFirstTransmission = candidateSubframes[randomIndex];
+        }else{
+            EV << "No free resource available, using default value: " << default_startFirstTransmission << endl;
+        }
+        
         //Select best RSRP & RSSI -
-        simtime_t startFirstTransmission = candidateSubframes[randomIndex];
-
+        EV << "startFirstTransmission: " << startFirstTransmission << endl;
         //Print all candidate subframes
 
         for (int k=0;k<candidateSubframes.size();k++)
@@ -744,6 +764,7 @@ void SidelinkResourceAllocation::computeCSRs(LteSidelinkGrant* grant, LteNodeTyp
     LtePhyBase* phy=check_and_cast<LtePhyBase*>(getParentModule()->getSubmodule("phy"));
     phy->sendUpperPackets(candidateResourcesMessage);
 
+    EV << "------------------------------------------------------------------------------------" << endl;
 }
 
 std::vector<std::tuple<double, int, double>> SidelinkResourceAllocation::selectBestRSSIs(std::vector<double> subframes, LteSidelinkGrant* &grant, double subFrame)
