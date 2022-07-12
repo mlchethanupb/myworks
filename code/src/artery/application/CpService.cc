@@ -48,6 +48,7 @@ static const simsignal_t scSignalnumobjCPMsent = cComponent::registerSignal("num
 static const simsignal_t scSignalMessageSize = cComponent::registerSignal("msgsize");
 static const simsignal_t scSignalPeriodicity = cComponent::registerSignal("periodicity");
 static const simsignal_t scSignalNumCPMPerSec = cComponent::registerSignal("numCPMPerSec");
+static const simsignal_t scSignalnumDelayedCPM = cComponent::registerSignal("numDelayedCPM");
 
 
 
@@ -721,87 +722,88 @@ void CpService::retrieveCPMmessage(const vanetza::asn1::Cpm& cpm_msg){
     if (ete_delay < 1.0)
     {
         emit(scSignalEteDelay, ete_delay);
-    }
-    LocalEnvironmentModel::TrackingTime newTracking(generationTime);
 
-    if(cpm_data->cpm.cpmParameters.stationDataContainer){
-        OriginatingVehicleContainer_t originVeh = cpm_data->cpm.cpmParameters.stationDataContainer->choice.originatingVehicleContainer;
+        LocalEnvironmentModel::TrackingTime newTracking(generationTime);
+
+        if(cpm_data->cpm.cpmParameters.stationDataContainer){
+            OriginatingVehicleContainer_t originVeh = cpm_data->cpm.cpmParameters.stationDataContainer->choice.originatingVehicleContainer;
 
 
-        //Retrieve heading, position and velocity
-        vanetza::units::Angle headingReceived(originVeh.heading.headingValue * config::decidegree);
+            //Retrieve heading, position and velocity
+            vanetza::units::Angle headingReceived(originVeh.heading.headingValue * config::decidegree);
 
-            /** @note For simplicity, in management container, the position (x,y) is given instead of (longitude, latitude) */
-        Position posReceivedStation(
-                    (double) cpm_data->cpm.cpmParameters.managementContainer.referencePosition.longitude,
-                    (double) cpm_data->cpm.cpmParameters.managementContainer.referencePosition.latitude);
+                /** @note For simplicity, in management container, the position (x,y) is given instead of (longitude, latitude) */
+            Position posReceivedStation(
+                        (double) cpm_data->cpm.cpmParameters.managementContainer.referencePosition.longitude,
+                        (double) cpm_data->cpm.cpmParameters.managementContainer.referencePosition.latitude);
 
-        vanetza::units::Velocity speedReceived(originVeh.speed.speedValue * config::centimeter_per_second);
+            vanetza::units::Velocity speedReceived(originVeh.speed.speedValue * config::centimeter_per_second);
 
-        //Update the mObjectsReceived with the information of the object received.
-        updateObjlist(mObjectsReceived, stationID, newTracking, headingReceived, posReceivedStation, speedReceived, true);
+            //Update the mObjectsReceived with the information of the object received.
+            updateObjlist(mObjectsReceived, stationID, newTracking, headingReceived, posReceivedStation, speedReceived, true);
 
-        if(distance(posReceivedStation, mVehicleDataProvider->position()) < maxRelArealimit){
-            updateObjlist(mObjsRelevanceArea, stationID, newTracking, headingReceived, posReceivedStation, speedReceived, false);
-        }
-
-    }else{
-        EV_WARN << "station data container received is NULL" << endl;
-    }
-
-    //Get info of the objects received:
-    if(cpm_data->cpm.cpmParameters.perceivedObjectContainer){
-
-        PerceivedObjectContainer_t *objectsContainer = cpm_data->cpm.cpmParameters.perceivedObjectContainer;
-        for (int i = 0; objectsContainer != nullptr && i < objectsContainer->list.count; i++) {
-
-            PerceivedObject_t *objCont = objectsContainer->list.array[i];
-
-            /** @note Skip message received about myself */
-            if (objCont->objectID == mVehicleDataProvider->station_id()) {
-                continue;
+            if(distance(posReceivedStation, mVehicleDataProvider->position()) < maxRelArealimit){
+                updateObjlist(mObjsRelevanceArea, stationID, newTracking, headingReceived, posReceivedStation, speedReceived, false);
             }
 
-            omnetpp::SimTime objectPerceptTime = mTimer->getTimeFor(mTimer->reconstructMilliseconds(
-                    cpm_data->cpm.generationDeltaTime - objCont->timeOfMeasurement));
+        }else{
+            EV_WARN << "station data container received is NULL" << endl;
+        }
 
-            if (mObjectsReceived.find(objCont->objectID) == mObjectsReceived.end() || //First time object perceived
-                mObjectsReceived.at(objCont->objectID).getLastTrackingTime().last() + mCPSensor->getValidityPeriod() <= simTime() || //Object is expired
-                objectPerceptTime > mObjectsReceived.at(
-                        objCont->objectID).getLastTrackingTime().last()) { // the CPM received is more recent
+        //Get info of the objects received:
+        if(cpm_data->cpm.cpmParameters.perceivedObjectContainer){
 
-                LocalEnvironmentModel::TrackingTime newTracking(objectPerceptTime);
+            PerceivedObjectContainer_t *objectsContainer = cpm_data->cpm.cpmParameters.perceivedObjectContainer;
+            for (int i = 0; objectsContainer != nullptr && i < objectsContainer->list.count; i++) {
 
-                vanetza::units::Velocity speedX(objCont->xSpeed.value * config::centimeter_per_second);
-                vanetza::units::Velocity speedY(objCont->ySpeed.value * config::centimeter_per_second);
+                PerceivedObject_t *objCont = objectsContainer->list.array[i];
 
-                vanetza::units::Angle headingReceived = VehicleDataProvider::computeHeading(speedX, speedY);
+                /** @note Skip message received about myself */
+                if (objCont->objectID == mVehicleDataProvider->station_id()) {
+                    continue;
+                }
 
-                bool headingAvalaible = headingReceived != -1 * vanetza::units::si::radian;
+                omnetpp::SimTime objectPerceptTime = mTimer->getTimeFor(mTimer->reconstructMilliseconds(
+                        cpm_data->cpm.generationDeltaTime - objCont->timeOfMeasurement));
 
-                /** @note Change the axis to point to the south (OMNeT++ frame) */
-                ReferencePosition_t refPosSender = cpm_data->cpm.cpmParameters.managementContainer.referencePosition;
+                if (mObjectsReceived.find(objCont->objectID) == mObjectsReceived.end() || //First time object perceived
+                    mObjectsReceived.at(objCont->objectID).getLastTrackingTime().last() + mCPSensor->getValidityPeriod() <= simTime() || //Object is expired
+                    objectPerceptTime > mObjectsReceived.at(
+                            objCont->objectID).getLastTrackingTime().last()) { // the CPM received is more recent
 
-                Position posReceived(
-                        ((double) objCont->xDistance.value + refPosSender.longitude),
-                        ((double) objCont->yDistance.value + refPosSender.latitude));
+                    LocalEnvironmentModel::TrackingTime newTracking(objectPerceptTime);
 
-                vanetza::units::Velocity speedReceived = boost::units::sqrt(boost::units::pow<2>(speedX) + boost::units::pow<2>(speedY));
+                    vanetza::units::Velocity speedX(objCont->xSpeed.value * config::centimeter_per_second);
+                    vanetza::units::Velocity speedY(objCont->ySpeed.value * config::centimeter_per_second);
 
-                //Update the mObjectsReceived with the information of the object received.
-                updateObjlist(mObjectsReceived, objCont->objectID, newTracking,headingReceived,posReceived,speedReceived, true);
+                    vanetza::units::Angle headingReceived = VehicleDataProvider::computeHeading(speedX, speedY);
 
-                //Add object to relevance area object list, if the distance between two vehicles is less than the limit specified.
-                if(distance(posReceived, mVehicleDataProvider->position()) < maxRelArealimit){
-                    updateObjlist(mObjsRelevanceArea, objCont->objectID, newTracking,headingReceived,posReceived,speedReceived, false);
+                    bool headingAvalaible = headingReceived != -1 * vanetza::units::si::radian;
+
+                    /** @note Change the axis to point to the south (OMNeT++ frame) */
+                    ReferencePosition_t refPosSender = cpm_data->cpm.cpmParameters.managementContainer.referencePosition;
+
+                    Position posReceived(
+                            ((double) objCont->xDistance.value + refPosSender.longitude),
+                            ((double) objCont->yDistance.value + refPosSender.latitude));
+
+                    vanetza::units::Velocity speedReceived = boost::units::sqrt(boost::units::pow<2>(speedX) + boost::units::pow<2>(speedY));
+
+                    //Update the mObjectsReceived with the information of the object received.
+                    updateObjlist(mObjectsReceived, objCont->objectID, newTracking,headingReceived,posReceived,speedReceived, true);
+
+                    //Add object to relevance area object list, if the distance between two vehicles is less than the limit specified.
+                    if(distance(posReceived, mVehicleDataProvider->position()) < maxRelArealimit){
+                        updateObjlist(mObjsRelevanceArea, objCont->objectID, newTracking,headingReceived,posReceived,speedReceived, false);
+                    }
                 }
             }
         }
+    }else{
+        //Collect statistics for messages received after one second. 
+        emit(scSignalnumDelayedCPM, 1);
     }
-    else{
-        
-    }
-}
+}   
 
 
 

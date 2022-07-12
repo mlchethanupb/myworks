@@ -31,6 +31,7 @@ simple CpService like ItsG5Service
         @signal[msgsize](type=long);
         @signal[periodicity](type=simtime_t);
         @signal[numCPMPerSec](type=long);
+        @signal[numDelayedCPM](type=long);
 
 
         @statistic[receptioncpm](source=CpmReceived;record=vector(cpmStationId)?,vector(cpmGenerationDeltaTime)?);
@@ -48,6 +49,7 @@ simple CpService like ItsG5Service
         @statistic[msgsize](source=msgsize; record=stats,vector);
         @statistic[periodicity](source=periodicity; record=stats,vector);
         @statistic[numCPMPerSec](source=numCPMPerSec; record=stats,vector,histogram);
+        @statistic[numDelayedCPM](source=numDelayedCPM; record=count,stats);
 
         // parameter to enable mode 4
         bool enable_constsize = default(false);
