@@ -79,7 +79,8 @@ void Middleware::initialize(int stage)
         initializeServices(InitStages::Self);
 
         // start update cycle with random jitter to avoid unrealistic node synchronization
-        const auto jitter = uniform(SimTime(0, SIMTIME_MS), mUpdateInterval);
+        //MLC: instead of mUpdateInterval - jitter is calculated between 0 and 100ms, as the update interval is reduced to 25ms which might be too small.
+        const auto jitter = uniform(SimTime(0, SIMTIME_MS), 0.1);
         scheduleAt(simTime() + jitter + mUpdateInterval, mUpdateMessage);
     } else if (stage == InitStages::Propagate) {
         emit(artery::IdentityRegistry::updateSignal, &mIdentity);
