@@ -10,18 +10,16 @@ import seaborn as sns
 
 path = 'results'
 
-ETSI = 1
+ETSI = 0
 F_100 = 0
 F_300 = 0
 F_500 = 0
 
-# Python program to get average of a list
-def Average(lst):
-    return sum(lst) / len(lst)
+MIN_SAMPLE = 900
+MAX_SAMPLE = 1400
 
 
-
-def plot_ecdf(stat_name):
+def plot_linegraph(stat_name):
 
 
     print("=======================================================================================")
@@ -37,6 +35,8 @@ def plot_ecdf(stat_name):
         files_sca_csv = glob.glob(path + '/fixed300ms/**/p100/*.vec.csv', recursive=True)
     elif F_500:
         files_sca_csv = glob.glob(path + '/fixed500ms/**/p100/*.vec.csv', recursive=True)
+    else:
+        files_sca_csv = glob.glob(path + '/**/p100/*.vec.csv', recursive=True)
     
     #files_sca_csv = glob.glob(path + '/**/p100/*.vec.csv', recursive=True)
     #print(files_sca_csv)
@@ -110,42 +110,67 @@ def plot_ecdf(stat_name):
     print("len new list", len(new_list))
     print("Plotting graph")
 
-    #"""
+
+
+    x1_len = len(new_list[0])
+    x1 = list(range(x1_len))    
+    y1 = new_list[0]
+    sns.lineplot(x1[MIN_SAMPLE:MAX_SAMPLE],y1[MIN_SAMPLE:MAX_SAMPLE])
+
+    x2_len = len(new_list[2])
+    x2 = list(range(x2_len))
+    y2 = new_list[2]
+    sns.lineplot(x2[MIN_SAMPLE:MAX_SAMPLE],y2[MIN_SAMPLE:MAX_SAMPLE])
+    
+    
+    x3_len = len(new_list[4])
+    x3 = list(range(x3_len))
+    y3 = new_list[4]
+    sns.lineplot(x3[MIN_SAMPLE:MAX_SAMPLE],y3[MIN_SAMPLE:MAX_SAMPLE])
+
+    x4_len = len(new_list[6])
+    x4 = list(range(x4_len))
+    y4 = new_list[6]
+    ax = sns.lineplot(x4[MIN_SAMPLE:MAX_SAMPLE],y4[MIN_SAMPLE:MAX_SAMPLE])
+    plt.legend(labels=["ETSI","Fixed_100ms","Fixed_300ms","Fixed_500ms"])
+
+    """
     #define figure size
     sns.set(rc={"figure.figsize":(15, 8)})
     ax = sns.ecdfplot(data=new_list)
     ax.legend(labels=['unmanaged', 'managed'])
-    plt.plot(figsize=(15, 8), rot=0)
+    
     #"""
-
-    #ax.set_xlabel("Environmental Awareness Ratio")
-    #ax.set_ylabel("EAR")
-    fig_name = 'plots/' + stat_name + '_ecdf.pdf'
+    sns.set(rc={"figure.figsize":(15, 8)})
+    ax.set_xlabel("CPM Samples")
+    if(stat_name == 'periodicity'):
+        ax.set_ylabel("Periodicity of CPM message")
+    elif(stat_name == 'msgsize'):
+        ax.set_ylabel("Message size of CPM message")
+    plt.plot(figsize=(15, 8), rot=0)
    
     if ETSI:
-        ax.set_title("ETSI")
+        #ax.set_title("ETSI")
         #ax.set_ylabel("EAR")
-        fig_name = 'plots/' + stat_name + '_ETSI_ecdf.pdf'
+        fig_name = 'plots/' + stat_name + '_ETSI_line.pdf'
     elif F_100:
-        ax.set_title("Fixed 100ms")
-        fig_name = 'plots/' + stat_name + '_F_100_ecdf.pdf'
+        #ax.set_title("Fixed 100ms")
+        fig_name = 'plots/' + stat_name + '_F_100_line.pdf'
     elif F_300:
-        ax.set_title("Fixed 300ms")
-        fig_name = 'plots/' + stat_name + '_F_300_ecdf.pdf'
+        #ax.set_title("Fixed 300ms")
+        fig_name = 'plots/' + stat_name + '_F_300_line.pdf'
     elif F_500:
-        ax.set_title("Fixed 500ms")
-        fig_name = 'plots/' + stat_name + '_F_500_ecdf.pdf'
+        #ax.set_title("Fixed 500ms")
+        fig_name = 'plots/' + stat_name + '_F_500_line.pdf'
+    else:
+        fig_name= 'plots/' + stat_name + '_line.pdf'
 
     plt.savefig(fig_name) 
 
 def main():
     print("main")
-    #plot_ecdf("EAR")
-    plot_ecdf("EteDelay")
-    #plot_ecdf("objectAge")
-    #plot_ecdf("timebwupdate")
-    #plot_ecdf("msgsize")
-    #plot_ecdf("numCPMPerSec")
+    #plot_linegraph("periodicity")
+    plot_linegraph("msgsize")
 
 
 if __name__ == "__main__":

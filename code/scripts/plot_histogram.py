@@ -15,13 +15,10 @@ F_100 = 0
 F_300 = 0
 F_500 = 0
 
-# Python program to get average of a list
-def Average(lst):
-    return sum(lst) / len(lst)
 
 
 
-def plot_ecdf(stat_name):
+def plot_linegraph(stat_name):
 
 
     print("=======================================================================================")
@@ -37,6 +34,8 @@ def plot_ecdf(stat_name):
         files_sca_csv = glob.glob(path + '/fixed300ms/**/p100/*.vec.csv', recursive=True)
     elif F_500:
         files_sca_csv = glob.glob(path + '/fixed500ms/**/p100/*.vec.csv', recursive=True)
+    else:
+        files_sca_csv = glob.glob(path + '/**/p100/*.vec.csv', recursive=True)
     
     #files_sca_csv = glob.glob(path + '/**/p100/*.vec.csv', recursive=True)
     #print(files_sca_csv)
@@ -110,43 +109,66 @@ def plot_ecdf(stat_name):
     print("len new list", len(new_list))
     print("Plotting graph")
 
-    #"""
+
+
+    """
     #define figure size
     sns.set(rc={"figure.figsize":(15, 8)})
     ax = sns.ecdfplot(data=new_list)
     ax.legend(labels=['unmanaged', 'managed'])
-    plt.plot(figsize=(15, 8), rot=0)
+    
     #"""
+    lst_to_plot = new_list[1]
+    if not stat_name == "numCPMPerSec":
+        q25, q75 = np.percentile(lst_to_plot, [25, 75])
+        bin_width = 2 * (q75 - q25) * len(lst_to_plot) ** (-1/3)
+        total_bins = int(round((max(lst_to_plot) - min(lst_to_plot)) / bin_width))
+        print("Freedman–Diaconis number of bins:", total_bins)
 
-    #ax.set_xlabel("Environmental Awareness Ratio")
-    #ax.set_ylabel("EAR")
-    fig_name = 'plots/' + stat_name + '_ecdf.pdf'
+
+    sns.set(rc={"figure.figsize":(15, 8)})
+    
    
-    if ETSI:
-        ax.set_title("ETSI")
-        #ax.set_ylabel("EAR")
-        fig_name = 'plots/' + stat_name + '_ETSI_ecdf.pdf'
-    elif F_100:
-        ax.set_title("Fixed 100ms")
-        fig_name = 'plots/' + stat_name + '_F_100_ecdf.pdf'
-    elif F_300:
-        ax.set_title("Fixed 300ms")
-        fig_name = 'plots/' + stat_name + '_F_300_ecdf.pdf'
-    elif F_500:
-        ax.set_title("Fixed 500ms")
-        fig_name = 'plots/' + stat_name + '_F_500_ecdf.pdf'
+    #ax.set_xlabel("CPM Samples")
+    if(stat_name == 'periodicity'):
+        ax = sns.histplot(data=lst_to_plot, stat="percent", bins = total_bins)
+        ax.set_title("Periodicity of CPM messages")
+    elif(stat_name == 'msgsize'):
+        ax = sns.histplot(data=lst_to_plot, stat="percent", bins = total_bins)
+        ax.set_title("Message size of CPM message")
+    elif(stat_name == 'numCPMPerSec'):
+        ax = sns.histplot(data=lst_to_plot, stat="frequency", bins = 10)
+        ax.set_title("Number of CPM messages generater Per second")
 
-    plt.savefig(fig_name) 
+
+    if ETSI:
+        #ax.set_title("ETSI")
+        #ax.set_ylabel("EAR")
+        
+        fig_name = 'plots/' + stat_name + '_ETSI_histogram.pdf'
+    elif F_100:
+        #ax.set_title("Fixed 100ms")
+        fig_name = 'plots/' + stat_name + '_F_100_histogram.pdf'
+    elif F_300:
+        #ax.set_title("Fixed 300ms")
+        fig_name = 'plots/' + stat_name + '_F_300_histogram.pdf'
+    elif F_500:
+        #ax.set_title("Fixed 500ms")
+        fig_name = 'plots/' + stat_name + '_F_500_histogram.pdf'
+    else:
+        print("Default use case of ETSI")
+        fig_name= 'plots/' + stat_name + 'etsi_default_histogram.pdf'
+
+
+
+    plt.plot(figsize=(15, 8), rot=0)
+    plt.savefig(fig_name)
 
 def main():
     print("main")
-    #plot_ecdf("EAR")
-    plot_ecdf("EteDelay")
-    #plot_ecdf("objectAge")
-    #plot_ecdf("timebwupdate")
-    #plot_ecdf("msgsize")
-    #plot_ecdf("numCPMPerSec")
-
+    #plot_linegraph("periodicity")
+    #plot_linegraph("msgsize")
+    plot_linegraph("numCPMPerSec")
 
 if __name__ == "__main__":
     main()
