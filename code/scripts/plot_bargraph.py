@@ -55,7 +55,7 @@ def plot_bargraph(stat_name):
     stat_id = stat_name + ':stats'
     print("Plotting bar graph for: ", stat_id)
 
-    files_sca_csv = glob.glob(path + '/**/*.sca.csv', recursive=True)
+    files_sca_csv = glob.glob(path + '/**/p100/*.sca.csv', recursive=True)
 
     df_rows = []
     df_cols = []
@@ -149,7 +149,11 @@ def plot_bargraph(stat_name):
             add_values(lst_mean, values_mean)
             add_values(lst_count, values_count)
             add_values(lst_stddev, values_stddev)
-    
+
+        if(file ==  files_sca_csv[-1]):
+            df_avg.at[prev_row_name,prev_col_name] = Average(lst_mean,lst_count)
+            df_ci.at[prev_row_name,prev_col_name] = calculate_ci(avg_stddev(lst_stddev, lst_count), sum(lst_count))
+
 
     
     print(df_avg)
@@ -161,8 +165,27 @@ def plot_bargraph(stat_name):
     df3 = df_avg[['etsi_mode3', 'etsi_mode4', 'fixed100ms_mode3', 'fixed100ms_mode4', 'fixed300ms_mode3', 'fixed300ms_mode4', 'fixed500ms_mode3', 'fixed500ms_mode4']]
     print(df3)
 
-    df3.plot(kind="bar",yerr = df_ci, grid=False, legend = True, figsize=(15, 8), rot=0)#fontsize = 28
+    data = [{"M":df3.iloc[0]['etsi_mode3'],"U":df3.iloc[0]['etsi_mode4']},
+            {"M":df3.iloc[0]['fixed100ms_mode3'],"U":df3.iloc[0]['fixed100ms_mode4']},
+            {"M":df3.iloc[0]['fixed300ms_mode3'],"U":df3.iloc[0]['fixed300ms_mode4']},
+            {"M":df3.iloc[0]['fixed500ms_mode3'],"U":df3.iloc[0]['fixed500ms_mode4']}]
 
+    print(data)
+    patterns = [ "//" , "oo"]
+    df4 = pd.DataFrame(data,index=["etsi", "fixed 100ms", "fixed 300ms","fixed 500ms"])
+    print(df4)
+    bars = df4.plot(kind="bar", grid=False, legend = True, figsize=(15, 10), rot=0, facecolor='none', edgecolor='black')
+    #df3.plot(kind="bar",yerr = df_ci, grid=False, legend = True, figsize=(15, 8), rot=0)#fontsize = 28
+    
+    print(len(bars.patches))
+
+    for index, patch in enumerate(bars.patches):
+        if(index < 4):
+            patch.set_hatch(patterns[0])
+        else:
+            patch.set_hatch(patterns[1])
+
+       
     if stat_name == 'EAR':
         plt.ylabel("Environmental Awareness Ratio")
     elif stat_name == 'EteDelay':
@@ -175,8 +198,8 @@ def plot_bargraph(stat_name):
         plt.ylabel(stat_name)
 
     #plt.ylabel(stat_name)
-    plt.xlabel("Vehicle Penetration rate")
-    plt.legend(['etsi_managed', 'etsi_unmanaged', 'fixed100ms_managed', 'fixed100ms_unmanaged', 'fixed300ms_managed', 'fixed300ms_unmanaged', 'fixed500ms_managed', 'fixed500ms_managed'])
+    plt.xlabel("Message generation models")
+    plt.legend(["Managed", "Unmanaged"],fontsize = 20)
     #ax.set_ylabel("EAR")
     fig_name = 'plots/' + stat_name + '_bargraph.pdf'
     plt.savefig(fig_name) 
