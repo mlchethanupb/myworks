@@ -15,8 +15,8 @@ F_100 = 0
 F_300 = 0
 F_500 = 0
 
-MIN_SAMPLE = 900
-MAX_SAMPLE = 1400
+MIN_SAMPLE = 0
+MAX_SAMPLE = 10
 
 
 def plot_linegraph(stat_name):
@@ -61,11 +61,14 @@ def plot_linegraph(stat_name):
 
         list__ = list(splitted.apply(lambda x: x))
         #print(list__)
-        final_list = []
+        final_list = [int(x) for x in list__[9]]
+        """
         for item_list in list__:
             for item in item_list:
                 final_list.append(float(item))
-
+            break
+        """
+        print(final_list)
         if(None == list_dict.get(f_split[0], None)):
             list_dict[f_split[0]] = final_list
             print("-----------------------------------------------------------------------------")
@@ -115,25 +118,26 @@ def plot_linegraph(stat_name):
     x1_len = len(new_list[0])
     x1 = list(range(x1_len))    
     y1 = new_list[0]
-    sns.lineplot(x1[MIN_SAMPLE:MAX_SAMPLE],y1[MIN_SAMPLE:MAX_SAMPLE])
+    ax = plt.plot(x1[MIN_SAMPLE:MAX_SAMPLE],y1[MIN_SAMPLE:MAX_SAMPLE], "o-")
 
+    #"""
     x2_len = len(new_list[2])
     x2 = list(range(x2_len))
     y2 = new_list[2]
-    sns.lineplot(x2[MIN_SAMPLE:MAX_SAMPLE],y2[MIN_SAMPLE:MAX_SAMPLE])
+    plt.plot(x2[MIN_SAMPLE:MAX_SAMPLE],y2[MIN_SAMPLE:MAX_SAMPLE],  "x--")
     
     
     x3_len = len(new_list[4])
     x3 = list(range(x3_len))
     y3 = new_list[4]
-    sns.lineplot(x3[MIN_SAMPLE:MAX_SAMPLE],y3[MIN_SAMPLE:MAX_SAMPLE])
+    plt.plot(x3[MIN_SAMPLE:MAX_SAMPLE],y3[MIN_SAMPLE:MAX_SAMPLE],  "^-.")
 
     x4_len = len(new_list[6])
     x4 = list(range(x4_len))
     y4 = new_list[6]
-    ax = sns.lineplot(x4[MIN_SAMPLE:MAX_SAMPLE],y4[MIN_SAMPLE:MAX_SAMPLE])
+    ax = plt.plot(x4[MIN_SAMPLE:MAX_SAMPLE],y4[MIN_SAMPLE:MAX_SAMPLE],  "*:")
     plt.legend(labels=["ETSI","Fixed_100ms","Fixed_300ms","Fixed_500ms"])
-
+    #"""
     """
     #define figure size
     sns.set(rc={"figure.figsize":(15, 8)})
@@ -141,12 +145,14 @@ def plot_linegraph(stat_name):
     ax.legend(labels=['unmanaged', 'managed'])
     
     #"""
+    """
     sns.set(rc={"figure.figsize":(15, 8)})
     ax.set_xlabel("CPM Samples")
     if(stat_name == 'periodicity'):
         ax.set_ylabel("Periodicity of CPM message")
     elif(stat_name == 'msgsize'):
         ax.set_ylabel("Message size of CPM message")
+    """
     plt.plot(figsize=(15, 8), rot=0)
    
     if ETSI:
