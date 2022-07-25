@@ -175,8 +175,8 @@ def plot_linegraph(stat_name):
 
 def main():
     print("main")
-    #plot_linegraph("periodicity")
-    plot_linegraph("msgsize")
+    plot_linegraph("periodicity")
+    #plot_linegraph("msgsize")
 
 
 if __name__ == "__main__":

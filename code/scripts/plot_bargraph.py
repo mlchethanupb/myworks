@@ -22,7 +22,7 @@ def Average(lst_avg, lst_count):
     if len(lst_avg) == len(lst_count):
         for a_val, cnt_val in zip(lst_avg,lst_count):
             if(pd.isna(a_val) or pd.isna(cnt_val)):
-                ...#print("values is nan, skipping")
+                ...#print("values is nan, skipping: ", a_val, cnt_val )
             else:
                 avg_value = avg_value + ((a_val*cnt_val)/total_count)
     else:
@@ -33,7 +33,6 @@ def Average(lst_avg, lst_count):
 def avg_stddev(lst_stddev, lst_count):
     total_groups = len(lst_count)
     avg_sd_val = 0.0
-
     if len(lst_stddev) == len(lst_count):
         sum_sq_sd = sum(i*i for i in lst_stddev if (pd.isna(i) == False))
         avg_sd_val = math.sqrt(sum_sq_sd/total_groups)
@@ -43,7 +42,7 @@ def avg_stddev(lst_stddev, lst_count):
     return avg_sd_val
 
 def calculate_ci(avg_sd, total_count):
-    return (1.96 * avg_sd/math.sqrt(total_count))
+    return (2.58 * avg_sd/math.sqrt(total_count))
 
 def add_values(lstvalues, value):
     for v in value:
@@ -155,14 +154,16 @@ def plot_bargraph(stat_name):
             df_ci.at[prev_row_name,prev_col_name] = calculate_ci(avg_stddev(lst_stddev, lst_count), sum(lst_count))
 
 
-    
+    print("-----------------Average values-------------------") 
     print(df_avg)
+    print("-----------------Confidence Interval-------------------")
     print(df_ci)
     print("Calculaton done, plotting graph")
 
 
 
     df3 = df_avg[['etsi_mode3', 'etsi_mode4', 'fixed100ms_mode3', 'fixed100ms_mode4', 'fixed300ms_mode3', 'fixed300ms_mode4', 'fixed500ms_mode3', 'fixed500ms_mode4']]
+    df3 = df3.drop("75")
     print(df3)
 
     data = [{"M":df3.iloc[0]['etsi_mode3'],"U":df3.iloc[0]['etsi_mode4']},
@@ -187,11 +188,11 @@ def plot_bargraph(stat_name):
 
        
     if stat_name == 'EAR':
-        plt.ylabel("Environmental Awareness Ratio")
+        plt.ylabel("Environmental Awareness Ratio",fontsize = 28)
     elif stat_name == 'EteDelay':
-        plt.ylabel("End to End Delay")
+        plt.ylabel("End to end delay",fontsize = 28)
     elif stat_name == 'objectAge':
-        plt.ylabel("Age of Information")
+        plt.ylabel("Age of information")
     elif stat_name == 'timebwupdate':
         plt.ylabel("Time Between Update")
     else:
@@ -208,9 +209,9 @@ def plot_bargraph(stat_name):
 def main():
     print("main")
     plot_bargraph('EteDelay')
-    plot_bargraph('EAR')
-    plot_bargraph('objectAge')
-    plot_bargraph('timebwupdate')
+    #plot_bargraph('EAR')
+    #plot_bargraph('objectAge')
+    #plot_bargraph('timebwupdate')
 
 
 

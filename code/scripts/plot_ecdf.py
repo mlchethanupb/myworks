@@ -125,26 +125,26 @@ def plot_ecdf(stat_name):
     if ETSI:
         ax.set_title("ETSI")
         #ax.set_ylabel("EAR")
-        fig_name = 'plots/' + stat_name + '_ETSI_ecdf.pdf'
+        fig_name = 'plots/ecdf/' + stat_name + '_ETSI_ecdf.pdf'
     elif F_100:
         ax.set_title("Fixed 100ms")
-        fig_name = 'plots/' + stat_name + '_F_100_ecdf.pdf'
+        fig_name = 'plots/ecdf/' + stat_name + '_F_100_ecdf.pdf'
     elif F_300:
         ax.set_title("Fixed 300ms")
-        fig_name = 'plots/' + stat_name + '_F_300_ecdf.pdf'
+        fig_name = 'plots/ecdf/' + stat_name + '_F_300_ecdf.pdf'
     elif F_500:
         ax.set_title("Fixed 500ms")
-        fig_name = 'plots/' + stat_name + '_F_500_ecdf.pdf'
+        fig_name = 'plots/ecdf/' + stat_name + '_F_500_ecdf.pdf'
 
     plt.savefig(fig_name) 
 
 def main():
     print("main")
     #plot_ecdf("EAR")
-    plot_ecdf("EteDelay")
+    #plot_ecdf("EteDelay")
     #plot_ecdf("objectAge")
     #plot_ecdf("timebwupdate")
-    #plot_ecdf("msgsize")
+    plot_ecdf("msgsize")
     #plot_ecdf("numCPMPerSec")
 
 

@@ -10,8 +10,8 @@ import seaborn as sns
 
 path = 'results'
 
-ETSI = 1
-F_100 = 0
+ETSI = 0
+F_100 = 1
 F_300 = 0
 F_500 = 0
 
@@ -104,24 +104,20 @@ def plot_linegraph(stat_name):
     print("len dict", len(list_dict))
     files_sca_csv.clear()
 
-
+    """
     import statistics
     print("len new list", len(new_list))
     print("Plotting graph")
-
-
-
-    """
-    #define figure size
     sns.set(rc={"figure.figsize":(15, 8)})
     ax = sns.ecdfplot(data=new_list)
     ax.legend(labels=['unmanaged', 'managed'])
     
     #"""
-    lst_to_plot = new_list[1]
+    lst_to_plot = new_list[0]
     if not stat_name == "numCPMPerSec":
         q25, q75 = np.percentile(lst_to_plot, [25, 75])
         bin_width = 2 * (q75 - q25) * len(lst_to_plot) ** (-1/3)
+        print(max(lst_to_plot),min(lst_to_plot))
         total_bins = int(round((max(lst_to_plot) - min(lst_to_plot)) / bin_width))
         print("Freedman–Diaconis number of bins:", total_bins)
 
@@ -167,8 +163,8 @@ def plot_linegraph(stat_name):
 def main():
     print("main")
     #plot_linegraph("periodicity")
-    #plot_linegraph("msgsize")
-    plot_linegraph("numCPMPerSec")
+    plot_linegraph("msgsize")
+    #plot_linegraph("numCPMPerSec")
 
 if __name__ == "__main__":
     main()
