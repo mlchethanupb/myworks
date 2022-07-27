@@ -43,6 +43,7 @@ static const simsignal_t scSignalObjectAge = cComponent::registerSignal("objectA
 static const simsignal_t scSignaltimebwupdate = cComponent::registerSignal("timebwupdate");
 static const simsignal_t scSignalEAR = cComponent::registerSignal("ear");
 static const simsignal_t scSignalnumobjAR = cComponent::registerSignal("numobjAR");
+static const simsignal_t scSignalnumobjRADARdetect = cComponent::registerSignal("numobjRADARdetect");
 static const simsignal_t scSignalnumobjCPMrcvd = cComponent::registerSignal("numobjCPMrcvd");
 static const simsignal_t scSignalnumobjCPMsent = cComponent::registerSignal("numobjCPMsent");
 static const simsignal_t scSignalMessageSize = cComponent::registerSignal("msgsize");
@@ -196,20 +197,9 @@ void CpService::generateCPM(const omnetpp::SimTime& T_now) {
 		}
     } 
     else if (T_elapsed >= T_GenCpmMin) { //@todo: If congestion control time is available add that.
-        
-        if (checkHeadingDelta() || checkPositionDelta() || checkSpeedDelta()) {
             //std::cout << "Dynamics" << endl;
             sendCpm(T_now);
-			T_GenCpm = std::min(T_elapsed, T_GenCpmMax); /*< if middleware update interval is too long */
-			mGenCpmLowDynamicsCounter = 0;
-		} else if (T_elapsed >= T_GenCpm) {
-            //std::cout << "T_elapsed >= T_GenCpm" << endl;
-            sendCpm(T_now);
-			if (++mGenCpmLowDynamicsCounter >= mGenCpmLowDynamicsLimit) {
-				T_GenCpm = T_GenCpmMax;
-			}
-		}
-	}
+    }
 }
 
 /*
@@ -339,7 +329,10 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const
 	//No objects percieved by the sensors
 	if(prcvd_objs.empty()){
 		return false;
-	}
+	}else{
+        long numObjRadardetect = prcvd_objs.size();
+        emit(scSignalnumobjRADARdetect, numObjRadardetect);
+    }
 		
 	for(const ObjectInfo::ObjectPercieved& p_obj : prcvd_objs){
 
@@ -359,6 +352,10 @@ bool CpService::generatePerceivedObjectsCntnr(vanetza::asn1::Cpm& cpm_msg, const
 
 	generateASN1Objects(cpm_msg, T_now, mObjectsToSend);
     checkCPMSize(T_now, mObjectsToSend, cpm_msg);
+
+    if(mObjectsToSend.empty()){
+        return false;
+    }
 
 	return true;
 }

@@ -26,6 +26,7 @@ simple CpService like ItsG5Service
         @signal[timebwupdate](type=simtime_t);
         @signal[ear](type=double);
         @signal[numobjAR](type=long);
+        @signal[numobjRADARdetect](type=long);
         @signal[numobjCPMrcvd](type=long);
         @signal[numobjCPMsent](type=long);
         @signal[msgsize](type=long);
@@ -42,6 +43,7 @@ simple CpService like ItsG5Service
         @statistic[EteDelay](source=EteDelay; record = stats,vector);
         @statistic[EAR](source=ear; record = stats?,vector);
         @statistic[numobjAR](source=numobjAR; record=vector);
+        @statistic[numobjRADARdetect](source=numobjRADARdetect; record=stats,vector);
         @statistic[numobjCPMrcvd](source=numobjCPMrcvd; record=stats,vector);
         @statistic[numobjCPMsent](source=numobjCPMsent; record=stats,vector);
         @statistic[objectAge](source=objectAge; record=stats,vector);
