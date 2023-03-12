@@ -1,7 +1,0 @@
-[
-    {
-        "name": "learning_rate",
-        "type": "range",
-        "bounds": [0.5,0.9]
-    }
-]
