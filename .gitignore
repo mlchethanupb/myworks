@@ -13,12 +13,12 @@ build
 
 
 #Don't include the result folder of the scenarios
-code/scenarios/**/results*/
-code/scenarios/**/*.simu*
+master_thesis/code/scenarios/**/results*/
+master_thesis/code/scenarios/**/*.simu*
 
 #documentation
-code/doc
+master_thesis/code/doc
 
 #Other folders
-code/scenarios/InTAS/scenario/config
-code/scripts/logs/
+master_thesis/code/scenarios/InTAS/scenario/config
+master_thesis/code/scripts/logs/
