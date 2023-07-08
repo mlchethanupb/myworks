@@ -1,0 +1,21 @@
+obj_sky/netstack.o: \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/net/netstack.c \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/netstack.h \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/platform/sky/./contiki-conf.h \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/platform/sky/./platform-conf.h \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/cpu/msp430/./msp430def.h \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/llsec/llsec.h \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/mac/mac.h \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./dev/radio.h \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/mac/rdc.h \
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/mac/framer.h
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/net/netstack.c :
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/netstack.h :
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/platform/sky/./contiki-conf.h :
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/platform/sky/./platform-conf.h :
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/cpu/msp430/./msp430def.h :
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/llsec/llsec.h :
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/mac/mac.h :
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./dev/radio.h :
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/mac/rdc.h :
+ /upb/groups/fg-ccs/public/share/nes/2018w/contiki/core/./net/mac/framer.h :
