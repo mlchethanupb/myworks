@@ -1,4 +1,4 @@
-# Collective-Perception in Artery-C framework for large scale simulations
+# Collective-Perception Service in Artery-C framework for large scale simulations
 
 In my master thesis work, I performed simulation research study for comparing managed mode and unmanged mode of Cellular-V2X for [Collective Perception Service](https://www.etsi.org/deliver/etsi_tr/103500_103599/103562/02.01.01_60/tr_103562v020101p.pdf) of vehicular communication. This work includes extending the [Artery-C](https://github.com/anupama1990/Artery-C) simulation framework with Collective Perception Service in the facilities layer and integrating it with [InTAS](https://github.com/silaslobo/InTAS) sumo scenario and performing simulation experiments and comparing results. The detailed report of work done is in my thesis report - [Simulation-based Performance Evaluation of Collective Perception Service with Cellular-V2X](https://github.com/mlchethanupb/myworks/blob/master/master_thesis/Master_Thesis_Report_09082022.pdf)
 
